@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-labelledby="title description">
+  <title id="title">Darktrace MCP — Unofficial MCP.</title>
+  <desc id="description">Original abstract network artwork. Independent third-party project, unaffiliated with Darktrace and without authorization from Darktrace.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#030d11"/><stop offset="1" stop-color="#030d11"/></linearGradient>
+    <linearGradient id="accent" x2="1"><stop stop-color="#ff6b00"/><stop offset="1" stop-color="#ffa52f"/></linearGradient>
+    <filter id="trace-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+    <path id="trace-a" d="M810 88 H914 L960 42 H1130 V100 L1190 160 H1250"/>
+    <path id="trace-b" d="M834 232 H914 L974 172 H1094 L1158 236 H1248"/>
+    <path id="trace-c" d="M1010 294 V264 L1078 196 H1236"/>
+  </defs>
+  <rect width="1280" height="460" rx="20" fill="url(#background)"/>
+  <rect x="1" y="1" width="1278" height="458" rx="19" fill="none" stroke="#2c2d33"/>
+  <g fill="none" stroke="url(#accent)" stroke-width="8" opacity="0.2" filter="url(#trace-glow)">
+    <use href="#trace-a"/><use href="#trace-b"/><use href="#trace-c"/>
+  </g>
+  <g fill="none" stroke="url(#accent)" stroke-width="1.75" opacity="0.65">
+    <use href="#trace-a"/><use href="#trace-b"/><use href="#trace-c"/>
+  </g>
+  <g fill="#ff6b00">
+    <rect x="1247" y="157" width="6" height="6"/>
+    <rect x="1245" y="233" width="6" height="6"/>
+    <rect x="1233" y="193" width="6" height="6"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="48" y="49" width="34" height="4" rx="2" fill="url(#accent)"/>
+    <text x="96" y="58" fill="#ffa52f" font-size="19" font-weight="700" letter-spacing="2">INDEPENDENT INTEGRATION</text>
+    <text x="48" y="143" fill="#ffffff" font-size="72" font-weight="700" letter-spacing="-2">Darktrace <tspan fill="#ff6b00">MCP</tspan></text>
+    <text x="50" y="192" fill="#ececf0" font-size="25">Bounded investigations. Operator-controlled access.</text>
+    <text x="50" y="245" fill="#b6b6b6" font-size="20">PRIVATE ALPHA  /  NODE.JS 22+  /  STDIO</text>
+    <rect x="32" y="315" width="1216" height="119" rx="12" fill="#1c1512" stroke="#754329"/>
+    <rect x="32" y="332" width="4" height="84" rx="2" fill="#ff6b00"/>
+    <text x="52" y="350" fill="#ffa52f" font-size="24" font-weight="700">Unofficial MCP.</text>
+    <text x="52" y="386" fill="#ffffff" font-size="23">Developed by an independent third party,</text>
+    <text x="52" y="417" fill="#ffffff" font-size="23">unaffiliated with Darktrace and without authorization from Darktrace.</text>
+  </g>
+</svg>

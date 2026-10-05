@@ -1,12 +1,18 @@
 <div align="center">
 
+**English** · [Español](README.es.md)
+
+![Darktrace MCP — Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.](docs/assets/readme-banner-en.svg)
+
 # Darktrace MCP
+
+**Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.**
 
 **Bring bounded Darktrace investigation tools into your MCP workspace.**
 
 Private GitHub prereleases · Node.js 22+ · stdio · Apache-2.0
 
-[Start in five minutes](docs/getting-started.md) · [Client setup](docs/clients.md) · [Configuration](docs/configuration.md) · [Español](docs/es/getting-started.md)
+[Start in five minutes](docs/getting-started.md) · [Client setup](docs/clients.md) · [Configuration](docs/configuration.md) · [Inicio rápido en español](docs/es/getting-started.md)
 
 </div>
 
@@ -40,7 +46,7 @@ flowchart LR
 
 ## Install a versioned private prerelease
 
-Use [versioned GitHub Releases](docs/releases.md) to download the reviewed `.tgz` and `SHA256SUMS`, verify checksums, and install with `npm install --ignore-scripts --omit=dev`. The release includes a verifiable runtime SBOM; appliance 7.1, provider eligibility and Docker remain separate pending gates.
+Download the published [v0.1.0-alpha.0 private prerelease](https://github.com/nuoframework/darktrace-mcp/releases/tag/v0.1.0-alpha.0). Use [versioned GitHub Releases](docs/releases.md) to download the reviewed `.tgz` and `SHA256SUMS`, verify checksums, and install with `npm install --ignore-scripts --omit=dev`. The release includes a verifiable runtime SBOM; appliance 7.1, provider eligibility and Docker remain separate pending gates.
 
 ## Five-minute source install
 
@@ -102,3 +108,5 @@ Licensed under [Apache-2.0](LICENSE). This project is not affiliated with or end
 Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Advanced Search omits `@message` and `@fields` content. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
 
 The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. Actual private-network pinning and appliance behavior remain unvalidated.
+
+Visual reference: [Darktrace Brand Hub](https://brandhub.darktrace.com/visual-identity/colors) ([linear traces](https://brandhub.darktrace.com/visual-identity/trace), [Arial system fallback](https://brandhub.darktrace.com/visual-identity/typography)). The banners are original independent artwork, not official brand assets or a claim of brand approval.
