@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(max-width: 600px)" srcset="docs/assets/readme-banner-en-mobile.svg">
-  <img src="docs/assets/readme-banner-en.svg" width="1280" alt="Darktrace MCP — Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.">
+  <img src="docs/assets/readme-banner-en.svg" width="1280" alt="Darktrace MCP — Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace. The footer shows the official Darktrace logo, labeled as an independent third-party project; logo use does not imply authorization or official status.">
 </picture>
 
 # Darktrace MCP
@@ -108,4 +108,8 @@ Runtime output uses code-owned conservative views, with up to eight selected pri
 
 The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. Actual private-network pinning and appliance behavior remain unvalidated.
 
-Visual design: [references and independent artwork](docs/visual-identity.md).
+## Trademarks, logo and contact
+
+**Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.** The Darktrace name and logo belong to Darktrace. The cover shows the [unmodified official wordmark](docs/assets/brand/darktrace/Darktrace-white.svg) from the public [Brand Hub logo pack](https://brandhub.darktrace.com/visual-identity/logo), stored locally with [recorded provenance](docs/assets/brand/darktrace/README.md) and placed following the published single-color, clear-space and minimum-size rules. It identifies the product this independent project integrates with. **Logo use does not imply authorization or official status.** Visual design references and comparison: [visual identity](docs/visual-identity.md).
+
+Complaints, trademark or branding claims, including requests from the trademark owner to remove the logo: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). This address is for such claims only; it is not the vulnerability-reporting channel described in the [security policy](SECURITY.md). This project never sends mail on its own.

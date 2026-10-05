@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(max-width: 600px)" srcset="docs/assets/readme-banner-es-mobile.svg">
-  <img src="docs/assets/readme-banner-es.svg" width="1280" alt="Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.">
+  <img src="docs/assets/readme-banner-es.svg" width="1280" alt="Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
 </picture>
 
 # Darktrace MCP
@@ -110,4 +110,8 @@ La salida de runtime usa vistas conservadoras definidas en código, con hasta oc
 
 El conector HTTPS fija una instantánea DNS de arranque aprobada. Las direcciones de los rangos NAT64 estándar (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) y Teredo (`2001::/32`) siempre se bloquean, incluidas traducciones que aparentan apuntar a IPv4 pública. Una respuesta DNS prohibida provoca un fallo terminal del conector hasta que se reinicie el proceso del servidor; corregir DNS no reactiva el conector en ejecución. Los prefijos NAT64 propios del operador no pueden detectarse genéricamente; siguen siendo necesarias allowlists exactas de destino y revisión de la red de despliegue. Este comportamiento de cierre ante fallo puede exigir cambiar el diseño DNS/red del despliegue. El pinning en una red privada real y el comportamiento del appliance siguen sin validar.
 
-Diseño visual: [referencias y arte independiente](docs/visual-identity.md).
+## Marcas, logotipo y contacto
+
+**MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.** El nombre y el logotipo de Darktrace pertenecen a Darktrace. La portada muestra el [logotipo oficial sin modificar](docs/assets/brand/darktrace/Darktrace-white.svg) del [paquete público de logotipos del Brand Hub](https://brandhub.darktrace.com/visual-identity/logo), almacenado localmente con [procedencia registrada](docs/assets/brand/darktrace/README.md) y colocado según las reglas publicadas de color único, espacio de protección y tamaño mínimo. Identifica el producto con el que se integra este proyecto independiente. **El uso del logotipo no implica autorización ni carácter oficial.** Referencias de diseño y comparación: [identidad visual](docs/visual-identity.md) (en inglés).
+
+Reclamaciones, quejas y reivindicaciones sobre marcas o uso de la imagen corporativa, incluidas solicitudes del titular de la marca para retirar el logotipo: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). Esta dirección es solo para esas reclamaciones; no es el canal de comunicación de vulnerabilidades descrito en la [política de seguridad](SECURITY.md). Este proyecto nunca envía correo por sí mismo.
