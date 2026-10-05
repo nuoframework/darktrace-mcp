@@ -1,0 +1,454 @@
+{
+  "delete_tags_entities": [
+    "response"
+  ],
+  "delete_tags_tid": [
+    "response"
+  ],
+  "delete_tags_tid_entities_teid": [
+    "response"
+  ],
+  "get_advancedsearch_api_analyze_field_analysis_query": [
+    "took",
+    "timed_out",
+    "_shards",
+    "hits",
+    "aggregations",
+    "darktraceChildError",
+    "kibana"
+  ],
+  "get_advancedsearch_api_graph_graphmode_interval_query": [
+    "took",
+    "timed_out",
+    "_shards",
+    "hits",
+    "aggregations",
+    "darktraceChildError",
+    "kibana"
+  ],
+  "get_advancedsearch_api_search_query": [
+    "took",
+    "timed_out",
+    "_shards",
+    "hits",
+    "darktraceChildError",
+    "kibana"
+  ],
+  "get_agemail_api_ep_api_v1_0_admin_decode_link": [],
+  "get_agemail_api_ep_api_v1_0_dash_action_summary": [],
+  "get_agemail_api_ep_api_v1_0_dash_dash_stats": [],
+  "get_agemail_api_ep_api_v1_0_dash_data_loss": [],
+  "get_agemail_api_ep_api_v1_0_dash_user_anomaly": [],
+  "get_agemail_api_ep_api_v1_0_emails_uuid": [],
+  "get_agemail_api_ep_api_v1_0_emails_uuid_download": [],
+  "get_agemail_api_ep_api_v1_0_resources_actions": [],
+  "get_agemail_api_ep_api_v1_0_resources_filters": [],
+  "get_agemail_api_ep_api_v1_0_resources_tags": [],
+  "get_agemail_api_ep_api_v1_0_system_audit_eventTypes": [],
+  "get_agemail_api_ep_api_v1_0_system_audit_events": [],
+  "get_aianalyst_groups": [
+    "id",
+    "active",
+    "acknowledged",
+    "pinned",
+    "userTriggered",
+    "externalTriggered",
+    "previousIds",
+    "incidentEvents"
+  ],
+  "get_aianalyst_incident_comments": [
+    "comments"
+  ],
+  "get_aianalyst_incidentevents": [
+    "summariser",
+    "mitreTactics",
+    "acknowledged",
+    "pinned",
+    "createdAt",
+    "attackPhases",
+    "title",
+    "id"
+  ],
+  "get_aianalyst_incidents": [
+    "aiaScore",
+    "children",
+    "createdAt",
+    "category",
+    "currentGroup",
+    "summary",
+    "id",
+    "pinned"
+  ],
+  "get_aianalyst_investigations": [
+    "investigationId",
+    "time",
+    "investigationTime",
+    "did",
+    "version",
+    "status",
+    "createdBy",
+    "noticeUid"
+  ],
+  "get_aianalyst_stats": [
+    "equivalentHumanTime",
+    "positiveInvestigations",
+    "negativeInvestigations",
+    "graphData",
+    "attackPhases",
+    "groupStats",
+    "metadata"
+  ],
+  "get_antigena": [
+    "codeid",
+    "did",
+    "ip",
+    "action",
+    "manual",
+    "triggerer",
+    "label",
+    "detail"
+  ],
+  "get_antigena_summary": [
+    "pendingCount",
+    "activeCount",
+    "pendingActionDevices",
+    "activeActionDevices"
+  ],
+  "get_components": [
+    "cid",
+    "chid",
+    "mlid",
+    "threshold",
+    "interval",
+    "logic",
+    "filters",
+    "active"
+  ],
+  "get_components_cid": [
+    "cid",
+    "chid",
+    "mlid",
+    "threshold",
+    "interval",
+    "logic",
+    "filters",
+    "active"
+  ],
+  "get_cves": [
+    "results"
+  ],
+  "get_details": [
+    "time",
+    "timems",
+    "action",
+    "eventType",
+    "uid",
+    "status",
+    "proxyPort",
+    "sdid"
+  ],
+  "get_deviceinfo": [
+    "deviceInfo"
+  ],
+  "get_devices": [
+    "id",
+    "macaddress",
+    "vendor",
+    "ip",
+    "ips",
+    "did",
+    "sid",
+    "hostname"
+  ],
+  "get_devicesearch": [
+    "totalCount",
+    "devices"
+  ],
+  "get_devicesummary": [
+    "data"
+  ],
+  "get_endpointdetails": [
+    "ip",
+    "firsttime",
+    "country",
+    "asn",
+    "city",
+    "region",
+    "name",
+    "longitude"
+  ],
+  "get_enums": [
+    "Country",
+    "Matching metrics",
+    "DNS response code",
+    "Proxied connection",
+    "Trusted hostname",
+    "Day of the week",
+    "System message",
+    "Internal source device type"
+  ],
+  "get_filtertypes": [
+    "filtertype",
+    "valuetype",
+    "graphable",
+    "comparators"
+  ],
+  "get_intelfeed": [
+    "name",
+    "description",
+    "expiry",
+    "strength",
+    "iagn"
+  ],
+  "get_mbcomments": [
+    "time",
+    "pbid",
+    "username",
+    "message",
+    "pid",
+    "name"
+  ],
+  "get_metricdata": [
+    "metric",
+    "data"
+  ],
+  "get_metrics": [
+    "mlid",
+    "name",
+    "label",
+    "units",
+    "filtertypes",
+    "unitsinterval",
+    "lengthscale"
+  ],
+  "get_metrics_mlid": [
+    "mlid",
+    "name",
+    "label",
+    "units",
+    "filtertypes",
+    "unitsinterval",
+    "lengthscale"
+  ],
+  "get_modelbreaches": [
+    "creationTime",
+    "commentCount",
+    "pbid",
+    "time",
+    "model",
+    "triggeredComponents",
+    "score",
+    "percentscore"
+  ],
+  "get_modelbreaches_pbid": [
+    "creationTime",
+    "commentCount",
+    "pbid",
+    "time",
+    "model",
+    "triggeredComponents",
+    "score",
+    "percentscore"
+  ],
+  "get_modelbreaches_pbid_comments": [
+    "message",
+    "username",
+    "time",
+    "pid"
+  ],
+  "get_models": [
+    "name",
+    "pid",
+    "phid",
+    "uuid",
+    "logic",
+    "throttle",
+    "sharedEndpoints",
+    "actions"
+  ],
+  "get_models_pid": [
+    "name",
+    "pid",
+    "phid",
+    "uuid",
+    "logic",
+    "throttle",
+    "sharedEndpoints",
+    "actions"
+  ],
+  "get_network": [
+    "statistics",
+    "subnets",
+    "devices",
+    "metric",
+    "connections"
+  ],
+  "get_pcaps": [
+    "tmqid",
+    "startTime",
+    "endTime",
+    "filename",
+    "index",
+    "l3proto",
+    "ip1",
+    "port1"
+  ],
+  "get_pcaps_filename": [],
+  "get_similardevices": [
+    "did",
+    "score",
+    "ip",
+    "ips",
+    "sid",
+    "hostname",
+    "firstSeen",
+    "lastSeen"
+  ],
+  "get_status": [
+    "version",
+    "time",
+    "hostname",
+    "label",
+    "ipAddress",
+    "installed",
+    "excessTraffic",
+    "cpu"
+  ],
+  "get_subnets": [
+    "sid",
+    "auto",
+    "dhcp",
+    "firstSeen",
+    "label",
+    "lastSeen",
+    "latitude",
+    "longitude"
+  ],
+  "get_summarystatistics": [
+    "subnets",
+    "patterns",
+    "bandwidth",
+    "antigenaDevices",
+    "antigenaActions",
+    "devicecount"
+  ],
+  "get_tags": [
+    "tid",
+    "expiry",
+    "thid",
+    "name",
+    "restricted",
+    "data",
+    "isReferenced"
+  ],
+  "get_tags_entities": [
+    "teid",
+    "tehid",
+    "tid",
+    "entityType",
+    "entityValue",
+    "valid",
+    "expiry",
+    "thid"
+  ],
+  "get_tags_tid": [
+    "tid",
+    "expiry",
+    "thid",
+    "name",
+    "restricted",
+    "data",
+    "isReferenced"
+  ],
+  "get_tags_tid_entities": [
+    "teid",
+    "tehid",
+    "tid",
+    "entityType",
+    "entityValue",
+    "valid",
+    "expiry",
+    "thid"
+  ],
+  "post_advancedsearch_api_search": [
+    "took",
+    "timed_out",
+    "hits"
+  ],
+  "post_agemail_api_ep_api_v1_0_emails_search": [],
+  "post_agemail_api_ep_api_v1_0_emails_uuid_action": [],
+  "post_aianalyst_acknowledge": [
+    "response"
+  ],
+  "post_aianalyst_incident_comments": [
+    "response"
+  ],
+  "post_aianalyst_investigations": [
+    "investigationId"
+  ],
+  "post_aianalyst_pin": [
+    "response"
+  ],
+  "post_aianalyst_unacknowledge": [
+    "response"
+  ],
+  "post_aianalyst_unpin": [
+    "response"
+  ],
+  "post_antigena": [
+    "response"
+  ],
+  "post_antigena_manual": [
+    "codeid"
+  ],
+  "post_devices": [
+    "response",
+    "device"
+  ],
+  "post_intelfeed": [
+    "response"
+  ],
+  "post_modelbreaches_pbid_acknowledge": [
+    "response"
+  ],
+  "post_modelbreaches_pbid_comments": [
+    "response"
+  ],
+  "post_modelbreaches_pbid_unacknowledge": [
+    "response"
+  ],
+  "post_pcaps": [
+    "tmqid",
+    "startTime",
+    "endTime",
+    "filename",
+    "index",
+    "l3proto",
+    "ip1",
+    "port1"
+  ],
+  "post_subnets": [
+    "response"
+  ],
+  "post_tags": [
+    "tid",
+    "expiry",
+    "thid",
+    "name",
+    "restricted",
+    "data",
+    "isReferenced"
+  ],
+  "post_tags_entities": [
+    "response"
+  ],
+  "post_tags_tid_entities": [
+    "teid",
+    "tehid",
+    "tid",
+    "entityType",
+    "entityValue",
+    "valid",
+    "expiry"
+  ]
+}

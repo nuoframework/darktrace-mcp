@@ -1,0 +1,21 @@
+{
+  "instance": {
+    "baseUrl": "https://darktrace.example.internal",
+    "timeoutMs": 30000
+  },
+  "auth": {
+    "publicTokenFile": "/absolute/private/darktrace/public-token",
+    "privateTokenFile": "/absolute/private/darktrace/private-token",
+    "dateFormat": "compact",
+    "querySignatureEncoding": "unencoded"
+  },
+  "profiles": {
+    "read": true,
+    "write": false,
+    "sensitiveRead": false,
+    "writeCritical": false
+  },
+  "transport": {
+    "kind": "stdio"
+  }
+}

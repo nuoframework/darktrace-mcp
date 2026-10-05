@@ -1,0 +1,50 @@
+{
+  "name": "darktrace-mcp",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "darktrace-mcp": "dist/src/index.js"
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.json",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "npm-shrinkwrap.json"
+  ],
+  "scripts": {
+    "generate": "tsc -p tsconfig.generate.json && node dist/scripts/generate-catalogue.js",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test dist/test/**/*.test.js",
+    "start": "node dist/src/index.js",
+    "test:security": "node test/security/run-isolated.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "release:verify": "node scripts/verify-release.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.0",
+    "zod": "4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.0",
+    "@types/node": "24.0.0",
+    "typescript": "5.9.3",
+    "yaml": "2.9.1"
+  },
+  "description": "Private stdio MCP integration for the Darktrace Threat Visualizer API",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nuoframework/darktrace-mcp.git"
+  },
+  "homepage": "https://github.com/nuoframework/darktrace-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/nuoframework/darktrace-mcp/issues"
+  }
+}

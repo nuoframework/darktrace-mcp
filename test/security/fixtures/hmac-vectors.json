@@ -1,0 +1,437 @@
+{
+  "provenance": "Python stdlib hmac/hashlib, manually specified canonical/wire strings; not appliance acceptance; DELETE primitive is tested only algorithmically and blocked in client",
+  "vectors": [
+    {
+      "id": "get-empty-unencoded-20261005T110000",
+      "method": "GET",
+      "path": "/status",
+      "query": [],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/status",
+      "canonical": "/status\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "8ad2105c62768389d352512122641778ec9543e1"
+    },
+    {
+      "id": "get-special-unencoded-20261005T110000",
+      "method": "GET",
+      "path": "/devicesearch",
+      "query": [
+        [
+          "q",
+          "a b\"雪%+"
+        ],
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "two"
+        ]
+      ],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two",
+      "canonical": "/devicesearch?q=a b\"雪%+&empty=&q=two\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "d94bd5dcb4a1e2108630f3fc8e780e5c3f6f1a69"
+    },
+    {
+      "id": "post-json-ba-unencoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"b\":2,\"a\":\"雪\"}"
+      },
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"b\":2,\"a\":\"雪\"}\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "1ede0ce363fa1c0820012d842ebd3367457a9e34"
+    },
+    {
+      "id": "post-json-ab-unencoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"a\":\"雪\",\"b\":2}"
+      },
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"a\":\"雪\",\"b\":2}\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "50c4e991917f68f5b1f59438332ef80baf896e95"
+    },
+    {
+      "id": "post-form-unencoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "form",
+        "pairs": [
+          [
+            "q",
+            "a b"
+          ],
+          [
+            "q",
+            "+%"
+          ]
+        ]
+      },
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?q=a+b&q=%2B%25\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "430a0c3f244af6f87ea1b724d435dc43857cea22"
+    },
+    {
+      "id": "delete-primitive-unencoded-20261005T110000",
+      "method": "DELETE",
+      "path": "/synthetic",
+      "query": [
+        [
+          "id",
+          "1"
+        ]
+      ],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": false,
+      "wire": "/synthetic?id=1",
+      "canonical": "/synthetic?id=1\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "681881eb6fc90c6358abc4fa38f3f310ff45ec7e"
+    },
+    {
+      "id": "get-empty-encoded-20261005T110000",
+      "method": "GET",
+      "path": "/status",
+      "query": [],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/status",
+      "canonical": "/status\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "8ad2105c62768389d352512122641778ec9543e1"
+    },
+    {
+      "id": "get-special-encoded-20261005T110000",
+      "method": "GET",
+      "path": "/devicesearch",
+      "query": [
+        [
+          "q",
+          "a b\"雪%+"
+        ],
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "two"
+        ]
+      ],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two",
+      "canonical": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "d1c46bbb0341c74e5c0a488f05cf04430821cb50"
+    },
+    {
+      "id": "post-json-ba-encoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"b\":2,\"a\":\"雪\"}"
+      },
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"b\":2,\"a\":\"雪\"}\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "1ede0ce363fa1c0820012d842ebd3367457a9e34"
+    },
+    {
+      "id": "post-json-ab-encoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"a\":\"雪\",\"b\":2}"
+      },
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"a\":\"雪\",\"b\":2}\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "50c4e991917f68f5b1f59438332ef80baf896e95"
+    },
+    {
+      "id": "post-form-encoded-20261005T110000",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "form",
+        "pairs": [
+          [
+            "q",
+            "a b"
+          ],
+          [
+            "q",
+            "+%"
+          ]
+        ]
+      },
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?q=a+b&q=%2B%25\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "430a0c3f244af6f87ea1b724d435dc43857cea22"
+    },
+    {
+      "id": "delete-primitive-encoded-20261005T110000",
+      "method": "DELETE",
+      "path": "/synthetic",
+      "query": [
+        [
+          "id",
+          "1"
+        ]
+      ],
+      "body": null,
+      "date": "20261005T110000",
+      "mode": true,
+      "wire": "/synthetic?id=1",
+      "canonical": "/synthetic?id=1\nSYNTH_PUBLIC_CANARY_6ef9\n20261005T110000",
+      "digest": "681881eb6fc90c6358abc4fa38f3f310ff45ec7e"
+    },
+    {
+      "id": "get-empty-unencoded-2026-10-05 11:00:00",
+      "method": "GET",
+      "path": "/status",
+      "query": [],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/status",
+      "canonical": "/status\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "feea35e28190b87c002ca1ba8a96b6c437bd448e"
+    },
+    {
+      "id": "get-special-unencoded-2026-10-05 11:00:00",
+      "method": "GET",
+      "path": "/devicesearch",
+      "query": [
+        [
+          "q",
+          "a b\"雪%+"
+        ],
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "two"
+        ]
+      ],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two",
+      "canonical": "/devicesearch?q=a b\"雪%+&empty=&q=two\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "28164022115ffea7939c4a547275b1d925a6cfd9"
+    },
+    {
+      "id": "post-json-ba-unencoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"b\":2,\"a\":\"雪\"}"
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"b\":2,\"a\":\"雪\"}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "4afc84d9bd8c7d2a51ee95c84ca5e43c0eb0eb08"
+    },
+    {
+      "id": "post-json-ab-unencoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"a\":\"雪\",\"b\":2}"
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"a\":\"雪\",\"b\":2}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "8eca50e8f37a41c244da9c9c83863eb21fb47c57"
+    },
+    {
+      "id": "post-form-unencoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "form",
+        "pairs": [
+          [
+            "q",
+            "a b"
+          ],
+          [
+            "q",
+            "+%"
+          ]
+        ]
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?q=a+b&q=%2B%25\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "149d3413cd0ba1aba46510544affd660bb1dcc77"
+    },
+    {
+      "id": "delete-primitive-unencoded-2026-10-05 11:00:00",
+      "method": "DELETE",
+      "path": "/synthetic",
+      "query": [
+        [
+          "id",
+          "1"
+        ]
+      ],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": false,
+      "wire": "/synthetic?id=1",
+      "canonical": "/synthetic?id=1\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "377bc34e193e08e7fbe854717be633296693080d"
+    },
+    {
+      "id": "get-empty-encoded-2026-10-05 11:00:00",
+      "method": "GET",
+      "path": "/status",
+      "query": [],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/status",
+      "canonical": "/status\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "feea35e28190b87c002ca1ba8a96b6c437bd448e"
+    },
+    {
+      "id": "get-special-encoded-2026-10-05 11:00:00",
+      "method": "GET",
+      "path": "/devicesearch",
+      "query": [
+        [
+          "q",
+          "a b\"雪%+"
+        ],
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "two"
+        ]
+      ],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two",
+      "canonical": "/devicesearch?q=a%20b%22%E9%9B%AA%25%2B&empty=&q=two\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "f9aee56bb91c1fae89c93b2d5e95faf847c383a6"
+    },
+    {
+      "id": "post-json-ba-encoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"b\":2,\"a\":\"雪\"}"
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"b\":2,\"a\":\"雪\"}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "4afc84d9bd8c7d2a51ee95c84ca5e43c0eb0eb08"
+    },
+    {
+      "id": "post-json-ab-encoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "json",
+        "text": "{\"a\":\"雪\",\"b\":2}"
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?{\"a\":\"雪\",\"b\":2}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "8eca50e8f37a41c244da9c9c83863eb21fb47c57"
+    },
+    {
+      "id": "post-form-encoded-2026-10-05 11:00:00",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [],
+      "body": {
+        "kind": "form",
+        "pairs": [
+          [
+            "q",
+            "a b"
+          ],
+          [
+            "q",
+            "+%"
+          ]
+        ]
+      },
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/synthetic",
+      "canonical": "/synthetic?q=a+b&q=%2B%25\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "149d3413cd0ba1aba46510544affd660bb1dcc77"
+    },
+    {
+      "id": "delete-primitive-encoded-2026-10-05 11:00:00",
+      "method": "DELETE",
+      "path": "/synthetic",
+      "query": [
+        [
+          "id",
+          "1"
+        ]
+      ],
+      "body": null,
+      "date": "2026-10-05 11:00:00",
+      "mode": true,
+      "wire": "/synthetic?id=1",
+      "canonical": "/synthetic?id=1\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-05 11:00:00",
+      "digest": "377bc34e193e08e7fbe854717be633296693080d"
+    }
+  ]
+}

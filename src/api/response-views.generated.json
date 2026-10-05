@@ -1,0 +1,4436 @@
+{
+  "source": "local OpenAPI 6.1 and code-owned response-fields.json",
+  "labValidated": false,
+  "views": {
+    "get_advancedsearch_api_search_query": {
+      "kind": "object",
+      "fields": {
+        "took": {
+          "kind": "number"
+        },
+        "timed_out": {
+          "kind": "boolean"
+        },
+        "_shards": {
+          "kind": "object",
+          "fields": {
+            "total": {
+              "kind": "number"
+            },
+            "successful": {
+              "kind": "number"
+            },
+            "skipped": {
+              "kind": "number"
+            },
+            "failed": {
+              "kind": "number"
+            }
+          }
+        },
+        "hits": {
+          "kind": "object",
+          "fields": {
+            "total": {
+              "kind": "number"
+            },
+            "max_score": {
+              "kind": "summary"
+            },
+            "hits": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "_index": {
+                    "kind": "string"
+                  },
+                  "_type": {
+                    "kind": "string"
+                  },
+                  "_id": {
+                    "kind": "string"
+                  },
+                  "_score": {
+                    "kind": "summary"
+                  },
+                  "_source": {
+                    "kind": "object",
+                    "fields": {
+                      "@fields": {
+                        "kind": "summary"
+                      },
+                      "@type": {
+                        "kind": "string"
+                      },
+                      "@timestamp": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "sort": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "darktraceChildError": {
+          "kind": "string"
+        },
+        "kibana": {
+          "kind": "object",
+          "fields": {
+            "index": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "per_page": {
+              "kind": "number"
+            },
+            "time": {
+              "kind": "object",
+              "fields": {
+                "from": {
+                  "kind": "string"
+                },
+                "to": {
+                  "kind": "string"
+                }
+              }
+            },
+            "default_fields": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "post_advancedsearch_api_search": {
+      "kind": "object",
+      "fields": {
+        "took": {
+          "kind": "number"
+        },
+        "timed_out": {
+          "kind": "boolean"
+        },
+        "hits": {
+          "kind": "object",
+          "fields": {
+            "total": {
+              "kind": "number"
+            },
+            "max_score": {
+              "kind": "summary"
+            },
+            "hits": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "_index": {
+                    "kind": "string"
+                  },
+                  "_type": {
+                    "kind": "string"
+                  },
+                  "_id": {
+                    "kind": "string"
+                  },
+                  "_score": {
+                    "kind": "summary"
+                  },
+                  "_source": {
+                    "kind": "object",
+                    "fields": {
+                      "@fields": {
+                        "kind": "summary"
+                      },
+                      "@type": {
+                        "kind": "string"
+                      },
+                      "@timestamp": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "sort": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_advancedsearch_api_analyze_field_analysis_query": {
+      "kind": "union",
+      "variants": [
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "number"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                }
+              }
+            },
+            "aggregations": {
+              "kind": "object",
+              "fields": {
+                "stats": {
+                  "kind": "object",
+                  "fields": {
+                    "count": {
+                      "kind": "number"
+                    },
+                    "min": {
+                      "kind": "number"
+                    },
+                    "max": {
+                      "kind": "number"
+                    },
+                    "avg": {
+                      "kind": "number"
+                    },
+                    "sum": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "string"
+                },
+                "per_page": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "object",
+                  "fields": {
+                    "from": {
+                      "kind": "string"
+                    },
+                    "to": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "number"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                }
+              }
+            },
+            "aggregations": {
+              "kind": "object",
+              "fields": {
+                "terms": {
+                  "kind": "object",
+                  "fields": {
+                    "doc_count_error_upper_bound": {
+                      "kind": "number"
+                    },
+                    "sum_other_doc_count": {
+                      "kind": "number"
+                    },
+                    "buckets": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "key": {
+                            "kind": "string"
+                          },
+                          "doc_count": {
+                            "kind": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "string"
+                },
+                "per_page": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "object",
+                  "fields": {
+                    "from": {
+                      "kind": "string"
+                    },
+                    "to": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "summary"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "id": {
+                        "kind": "string"
+                      },
+                      "count": {
+                        "kind": "number"
+                      },
+                      "start": {
+                        "kind": "number"
+                      },
+                      "trend": {
+                        "kind": "number"
+                      }
+                    }
+                  }
+                },
+                "count": {
+                  "kind": "number"
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "per_page": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "object",
+                  "fields": {
+                    "from": {
+                      "kind": "string"
+                    },
+                    "to": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "summary"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "id": {
+                        "kind": "string"
+                      },
+                      "count": {
+                        "kind": "number"
+                      }
+                    }
+                  }
+                },
+                "count": {
+                  "kind": "number"
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "per_page": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "object",
+                  "fields": {
+                    "from": {
+                      "kind": "string"
+                    },
+                    "to": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_advancedsearch_api_graph_graphmode_interval_query": {
+      "kind": "union",
+      "variants": [
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "number"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                }
+              }
+            },
+            "aggregations": {
+              "kind": "object",
+              "fields": {
+                "mean": {
+                  "kind": "object",
+                  "fields": {
+                    "buckets": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "key_as_string": {
+                            "kind": "string"
+                          },
+                          "key": {
+                            "kind": "number"
+                          },
+                          "doc_count": {
+                            "kind": "number"
+                          },
+                          "mean_stats": {
+                            "kind": "object",
+                            "fields": {
+                              "count": {
+                                "kind": "number"
+                              },
+                              "min": {
+                                "kind": "number"
+                              },
+                              "max": {
+                                "kind": "number"
+                              },
+                              "avg": {
+                                "kind": "number"
+                              },
+                              "sum": {
+                                "kind": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "per_page": {
+                  "kind": "number"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "took": {
+              "kind": "number"
+            },
+            "timed_out": {
+              "kind": "boolean"
+            },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "hits": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "max_score": {
+                  "kind": "number"
+                },
+                "hits": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                }
+              }
+            },
+            "aggregations": {
+              "kind": "object",
+              "fields": {
+                "count": {
+                  "kind": "object",
+                  "fields": {
+                    "buckets": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "key": {
+                            "kind": "number"
+                          },
+                          "doc_count": {
+                            "kind": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "per_page": {
+                  "kind": "number"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "get_aianalyst_groups": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "id": {
+            "kind": "string"
+          },
+          "active": {
+            "kind": "boolean"
+          },
+          "acknowledged": {
+            "kind": "boolean"
+          },
+          "pinned": {
+            "kind": "boolean"
+          },
+          "userTriggered": {
+            "kind": "boolean"
+          },
+          "externalTriggered": {
+            "kind": "boolean"
+          },
+          "previousIds": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          },
+          "incidentEvents": {
+            "kind": "array",
+            "items": {
+              "kind": "object",
+              "fields": {
+                "uuid": {
+                  "kind": "string"
+                },
+                "start": {
+                  "kind": "number"
+                },
+                "title": {
+                  "kind": "string"
+                },
+                "triggerDid": {
+                  "kind": "number"
+                },
+                "sender": {
+                  "kind": "string"
+                },
+                "visible": {
+                  "kind": "boolean"
+                },
+                "acknowledged": {
+                  "kind": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_aianalyst_incidentevents": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "summariser": {
+            "kind": "string"
+          },
+          "mitreTactics": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          },
+          "acknowledged": {
+            "kind": "boolean"
+          },
+          "pinned": {
+            "kind": "boolean"
+          },
+          "createdAt": {
+            "kind": "number"
+          },
+          "attackPhases": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          },
+          "title": {
+            "kind": "string"
+          },
+          "id": {
+            "kind": "string"
+          }
+        }
+      }
+    },
+    "post_aianalyst_acknowledge": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_aianalyst_unacknowledge": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_aianalyst_pin": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_aianalyst_unpin": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_aianalyst_incident_comments": {
+      "kind": "object",
+      "fields": {
+        "comments": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "username": {
+                "kind": "string"
+              },
+              "time": {
+                "kind": "number"
+              },
+              "incident_id": {
+                "kind": "string"
+              },
+              "message": {
+                "kind": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "post_aianalyst_incident_comments": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_aianalyst_stats": {
+      "kind": "object",
+      "fields": {
+        "equivalentHumanTime": {
+          "kind": "number"
+        },
+        "positiveInvestigations": {
+          "kind": "number"
+        },
+        "negativeInvestigations": {
+          "kind": "number"
+        },
+        "graphData": {
+          "kind": "object",
+          "fields": {
+            "breachTime": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "endTime": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "equivalentHumanTime": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "isPositive": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "aiaScore": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            }
+          }
+        },
+        "attackPhases": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "phases": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "count": {
+                "kind": "number"
+              }
+            }
+          }
+        },
+        "groupStats": {
+          "kind": "object",
+          "fields": {
+            "total": {
+              "kind": "number"
+            },
+            "compliance": {
+              "kind": "number"
+            },
+            "suspicious": {
+              "kind": "number"
+            },
+            "critical": {
+              "kind": "number"
+            },
+            "mitreTactics": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "object",
+                  "fields": {
+                    "discovery": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "compliance": {
+                  "kind": "object",
+                  "fields": {
+                    "discovery": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "suspicious": {
+                  "kind": "object",
+                  "fields": {
+                    "discovery": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "critical": {
+                  "kind": "object",
+                  "fields": {
+                    "exfiltration": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "kind": "object",
+          "fields": {
+            "estimatedQueries": {
+              "kind": "number"
+            },
+            "estimatedQueryMs": {
+              "kind": "number"
+            },
+            "ratioEstimated": {
+              "kind": "number"
+            }
+          }
+        }
+      }
+    },
+    "get_aianalyst_investigations": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "investigationId": {
+            "kind": "string"
+          },
+          "time": {
+            "kind": "number"
+          },
+          "investigationTime": {
+            "kind": "number"
+          },
+          "did": {
+            "kind": "number"
+          },
+          "version": {
+            "kind": "number"
+          },
+          "status": {
+            "kind": "string"
+          },
+          "createdBy": {
+            "kind": "string"
+          },
+          "noticeUid": {
+            "kind": "string"
+          }
+        }
+      }
+    },
+    "post_aianalyst_investigations": {
+      "kind": "object",
+      "fields": {
+        "investigationId": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_aianalyst_incidents": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "aiaScore": {
+            "kind": "number"
+          },
+          "children": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          },
+          "createdAt": {
+            "kind": "number"
+          },
+          "category": {
+            "kind": "string"
+          },
+          "currentGroup": {
+            "kind": "string"
+          },
+          "summary": {
+            "kind": "string"
+          },
+          "id": {
+            "kind": "string"
+          },
+          "pinned": {
+            "kind": "boolean"
+          }
+        }
+      }
+    },
+    "get_antigena": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "codeid": {
+            "kind": "number"
+          },
+          "did": {
+            "kind": "number"
+          },
+          "ip": {
+            "kind": "string"
+          },
+          "action": {
+            "kind": "string"
+          },
+          "manual": {
+            "kind": "boolean"
+          },
+          "triggerer": {
+            "kind": "object",
+            "fields": {
+              "username": {
+                "kind": "string"
+              },
+              "reason": {
+                "kind": "string"
+              }
+            }
+          },
+          "label": {
+            "kind": "string"
+          },
+          "detail": {
+            "kind": "string"
+          }
+        }
+      }
+    },
+    "post_antigena": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_antigena_manual": {
+      "kind": "object",
+      "fields": {
+        "codeid": {
+          "kind": "number"
+        }
+      }
+    },
+    "get_antigena_summary": {
+      "kind": "object",
+      "fields": {
+        "pendingCount": {
+          "kind": "number"
+        },
+        "activeCount": {
+          "kind": "number"
+        },
+        "pendingActionDevices": {
+          "kind": "array",
+          "items": {
+            "kind": "summary"
+          }
+        },
+        "activeActionDevices": {
+          "kind": "array",
+          "items": {
+            "kind": "summary"
+          }
+        }
+      }
+    },
+    "get_components": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "cid": {
+            "kind": "number"
+          },
+          "chid": {
+            "kind": "number"
+          },
+          "mlid": {
+            "kind": "number"
+          },
+          "threshold": {
+            "kind": "number"
+          },
+          "interval": {
+            "kind": "number"
+          },
+          "logic": {
+            "kind": "object",
+            "fields": {
+              "data": {
+                "kind": "object",
+                "fields": {
+                  "left": {
+                    "kind": "summary"
+                  },
+                  "operator": {
+                    "kind": "string"
+                  },
+                  "right": {
+                    "kind": "summary"
+                  }
+                }
+              },
+              "version": {
+                "kind": "string"
+              }
+            }
+          },
+          "filters": {
+            "kind": "array",
+            "items": {
+              "kind": "object",
+              "fields": {
+                "id": {
+                  "kind": "string"
+                },
+                "cfid": {
+                  "kind": "number"
+                },
+                "cfhid": {
+                  "kind": "number"
+                },
+                "filtertype": {
+                  "kind": "string"
+                },
+                "comparator": {
+                  "kind": "string"
+                },
+                "arguments": {
+                  "kind": "object",
+                  "fields": {
+                    "value": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "active": {
+            "kind": "boolean"
+          }
+        }
+      }
+    },
+    "get_components_cid": {
+      "kind": "object",
+      "fields": {
+        "cid": {
+          "kind": "number"
+        },
+        "chid": {
+          "kind": "number"
+        },
+        "mlid": {
+          "kind": "number"
+        },
+        "threshold": {
+          "kind": "number"
+        },
+        "interval": {
+          "kind": "number"
+        },
+        "logic": {
+          "kind": "object",
+          "fields": {
+            "data": {
+              "kind": "object",
+              "fields": {
+                "left": {
+                  "kind": "summary"
+                },
+                "operator": {
+                  "kind": "string"
+                },
+                "right": {
+                  "kind": "summary"
+                }
+              }
+            },
+            "version": {
+              "kind": "string"
+            }
+          }
+        },
+        "filters": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "id": {
+                "kind": "string"
+              },
+              "cfid": {
+                "kind": "number"
+              },
+              "cfhid": {
+                "kind": "number"
+              },
+              "filtertype": {
+                "kind": "string"
+              },
+              "comparator": {
+                "kind": "string"
+              },
+              "arguments": {
+                "kind": "object",
+                "fields": {
+                  "value": {
+                    "kind": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "active": {
+          "kind": "boolean"
+        }
+      }
+    },
+    "get_cves": {
+      "kind": "object",
+      "fields": {
+        "results": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "did": {
+                "kind": "number"
+              },
+              "platform mappings (CPEs)": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "vendor": {
+                      "kind": "string"
+                    },
+                    "product": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "string"
+                    },
+                    "patch": {
+                      "kind": "string"
+                    },
+                    "cves": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "LAST_MODIFIED_DATE": {
+                            "kind": "string"
+                          },
+                          "CVE_ID": {
+                            "kind": "string"
+                          },
+                          "BASE_SEVERITY": {
+                            "kind": "string"
+                          },
+                          "DESCRIPTION": {
+                            "kind": "string"
+                          }
+                        }
+                      }
+                    },
+                    "applies to": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    }
+                  }
+                }
+              },
+              "cves": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "LAST_MODIFIED_DATE": {
+                      "kind": "string"
+                    },
+                    "CVE_ID": {
+                      "kind": "string"
+                    },
+                    "BASE_SEVERITY": {
+                      "kind": "string"
+                    },
+                    "DESCRIPTION": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_details": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "time": {
+            "kind": "string"
+          },
+          "timems": {
+            "kind": "number"
+          },
+          "action": {
+            "kind": "string"
+          },
+          "eventType": {
+            "kind": "string"
+          },
+          "uid": {
+            "kind": "string"
+          },
+          "status": {
+            "kind": "string"
+          },
+          "proxyPort": {
+            "kind": "number"
+          },
+          "sdid": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "get_deviceinfo": {
+      "kind": "object",
+      "fields": {
+        "deviceInfo": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "did": {
+                "kind": "number"
+              },
+              "similarityScore": {
+                "kind": "number"
+              },
+              "graphData": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "time": {
+                      "kind": "number"
+                    },
+                    "count": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "info": {
+                "kind": "object",
+                "fields": {
+                  "totalUsed": {
+                    "kind": "number"
+                  },
+                  "totalServed": {
+                    "kind": "number"
+                  },
+                  "totalDevicesAndPorts": {
+                    "kind": "number"
+                  },
+                  "devicesAndPorts": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "deviceAndPort": {
+                          "kind": "object",
+                          "fields": {
+                            "direction": {
+                              "kind": "string"
+                            },
+                            "device": {
+                              "kind": "number"
+                            },
+                            "port": {
+                              "kind": "number"
+                            }
+                          }
+                        },
+                        "size": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  },
+                  "portsUsed": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "port": {
+                          "kind": "number"
+                        },
+                        "size": {
+                          "kind": "number"
+                        },
+                        "firstTime": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  },
+                  "portsServed": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "port": {
+                          "kind": "number"
+                        },
+                        "size": {
+                          "kind": "number"
+                        },
+                        "firstTime": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  },
+                  "devicesUsed": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "did": {
+                          "kind": "number"
+                        },
+                        "size": {
+                          "kind": "number"
+                        },
+                        "firstTime": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  },
+                  "devicesServed": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "did": {
+                          "kind": "number"
+                        },
+                        "size": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_devices": {
+      "kind": "union",
+      "variants": [
+        {
+          "kind": "object",
+          "fields": {
+            "id": {
+              "kind": "number"
+            },
+            "macaddress": {
+              "kind": "string"
+            },
+            "vendor": {
+              "kind": "string"
+            },
+            "ip": {
+              "kind": "string"
+            },
+            "ips": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "ip": {
+                    "kind": "string"
+                  },
+                  "timems": {
+                    "kind": "number"
+                  },
+                  "time": {
+                    "kind": "string"
+                  },
+                  "sid": {
+                    "kind": "number"
+                  }
+                }
+              }
+            },
+            "did": {
+              "kind": "number"
+            },
+            "sid": {
+              "kind": "number"
+            },
+            "hostname": {
+              "kind": "string"
+            }
+          }
+        },
+        {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "id": {
+                "kind": "number"
+              },
+              "macaddress": {
+                "kind": "string"
+              },
+              "vendor": {
+                "kind": "string"
+              },
+              "ip": {
+                "kind": "string"
+              },
+              "ips": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "ip": {
+                      "kind": "string"
+                    },
+                    "timems": {
+                      "kind": "number"
+                    },
+                    "time": {
+                      "kind": "string"
+                    },
+                    "sid": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "did": {
+                "kind": "number"
+              },
+              "sid": {
+                "kind": "number"
+              },
+              "hostname": {
+                "kind": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "post_devices": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        },
+        "device": {
+          "kind": "summary"
+        }
+      }
+    },
+    "get_devicesearch": {
+      "kind": "object",
+      "fields": {
+        "totalCount": {
+          "kind": "number"
+        },
+        "devices": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "did": {
+                "kind": "number"
+              },
+              "macaddress": {
+                "kind": "string"
+              },
+              "vendor": {
+                "kind": "string"
+              },
+              "ip": {
+                "kind": "string"
+              },
+              "ips": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "ip": {
+                      "kind": "string"
+                    },
+                    "timems": {
+                      "kind": "number"
+                    },
+                    "time": {
+                      "kind": "string"
+                    },
+                    "sid": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "sid": {
+                "kind": "number"
+              },
+              "hostname": {
+                "kind": "string"
+              },
+              "firstSeen": {
+                "kind": "number"
+              },
+              "lastSeen": {
+                "kind": "number"
+              },
+              "os": {
+                "kind": "string"
+              },
+              "devicelabel": {
+                "kind": "string"
+              },
+              "typename": {
+                "kind": "string"
+              },
+              "typelabel": {
+                "kind": "string"
+              },
+              "tags": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "tid": {
+                      "kind": "number"
+                    },
+                    "expiry": {
+                      "kind": "number"
+                    },
+                    "thid": {
+                      "kind": "number"
+                    },
+                    "name": {
+                      "kind": "string"
+                    },
+                    "restricted": {
+                      "kind": "boolean"
+                    },
+                    "data": {
+                      "kind": "object",
+                      "fields": {
+                        "auto": {
+                          "kind": "boolean"
+                        },
+                        "color": {
+                          "kind": "number"
+                        },
+                        "description": {
+                          "kind": "string"
+                        },
+                        "visibility": {
+                          "kind": "string"
+                        }
+                      }
+                    },
+                    "isReferenced": {
+                      "kind": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_devicesummary": {
+      "kind": "object",
+      "fields": {
+        "data": {
+          "kind": "object",
+          "fields": {
+            "devices": {
+              "kind": "summary"
+            },
+            "similardevices": {
+              "kind": "summary"
+            },
+            "details": {
+              "kind": "summary"
+            },
+            "deviceinfo": {
+              "kind": "summary"
+            },
+            "modelbreaches": {
+              "kind": "summary"
+            }
+          }
+        }
+      }
+    },
+    "get_endpointdetails": {
+      "kind": "union",
+      "variants": [
+        {
+          "kind": "object",
+          "fields": {
+            "ip": {
+              "kind": "string"
+            },
+            "firsttime": {
+              "kind": "number"
+            },
+            "country": {
+              "kind": "string"
+            },
+            "asn": {
+              "kind": "string"
+            },
+            "city": {
+              "kind": "string"
+            },
+            "region": {
+              "kind": "string"
+            },
+            "name": {
+              "kind": "string"
+            },
+            "longitude": {
+              "kind": "number"
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "ip": {
+              "kind": "string"
+            },
+            "firsttime": {
+              "kind": "number"
+            },
+            "country": {
+              "kind": "string"
+            },
+            "asn": {
+              "kind": "string"
+            },
+            "city": {
+              "kind": "string"
+            },
+            "region": {
+              "kind": "string"
+            },
+            "name": {
+              "kind": "string"
+            },
+            "longitude": {
+              "kind": "number"
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "firsttime": {
+              "kind": "number"
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "firsttime": {
+              "kind": "number"
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "country": {
+              "kind": "string"
+            },
+            "city": {
+              "kind": "string"
+            },
+            "region": {
+              "kind": "string"
+            },
+            "name": {
+              "kind": "string"
+            },
+            "longitude": {
+              "kind": "number"
+            }
+          }
+        },
+        {
+          "kind": "object",
+          "fields": {
+            "country": {
+              "kind": "string"
+            },
+            "city": {
+              "kind": "string"
+            },
+            "region": {
+              "kind": "string"
+            },
+            "name": {
+              "kind": "string"
+            },
+            "longitude": {
+              "kind": "number"
+            }
+          }
+        }
+      ]
+    },
+    "get_enums": {
+      "kind": "object",
+      "fields": {
+        "Country": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "Matching metrics": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "DNS response code": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "Proxied connection": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "Trusted hostname": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "Day of the week": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "System message": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "Internal source device type": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "code": {
+                "kind": "string"
+              },
+              "name": {
+                "kind": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_filtertypes": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "filtertype": {
+            "kind": "string"
+          },
+          "valuetype": {
+            "kind": "string"
+          },
+          "graphable": {
+            "kind": "boolean"
+          },
+          "comparators": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          }
+        }
+      }
+    },
+    "get_intelfeed": {
+      "kind": "union",
+      "variants": [
+        {
+          "kind": "array",
+          "items": {
+            "kind": "string"
+          }
+        },
+        {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "name": {
+                "kind": "string"
+              },
+              "description": {
+                "kind": "string"
+              },
+              "expiry": {
+                "kind": "string"
+              },
+              "strength": {
+                "kind": "number"
+              },
+              "iagn": {
+                "kind": "boolean"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "post_intelfeed": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_mbcomments": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "time": {
+            "kind": "number"
+          },
+          "pbid": {
+            "kind": "number"
+          },
+          "username": {
+            "kind": "string"
+          },
+          "message": {
+            "kind": "string"
+          },
+          "pid": {
+            "kind": "number"
+          },
+          "name": {
+            "kind": "string"
+          }
+        }
+      }
+    },
+    "get_metricdata": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "metric": {
+            "kind": "string"
+          },
+          "data": {
+            "kind": "array",
+            "items": {
+              "kind": "object",
+              "fields": {
+                "time": {
+                  "kind": "string"
+                },
+                "timems": {
+                  "kind": "number"
+                },
+                "size": {
+                  "kind": "number"
+                },
+                "in": {
+                  "kind": "number"
+                },
+                "out": {
+                  "kind": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_metrics": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "mlid": {
+            "kind": "number"
+          },
+          "name": {
+            "kind": "string"
+          },
+          "label": {
+            "kind": "string"
+          },
+          "units": {
+            "kind": "string"
+          },
+          "filtertypes": {
+            "kind": "array",
+            "items": {
+              "kind": "summary"
+            }
+          },
+          "unitsinterval": {
+            "kind": "number"
+          },
+          "lengthscale": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "get_metrics_mlid": {
+      "kind": "object",
+      "fields": {
+        "mlid": {
+          "kind": "number"
+        },
+        "name": {
+          "kind": "string"
+        },
+        "label": {
+          "kind": "string"
+        },
+        "units": {
+          "kind": "string"
+        },
+        "filtertypes": {
+          "kind": "array",
+          "items": {
+            "kind": "summary"
+          }
+        },
+        "unitsinterval": {
+          "kind": "number"
+        },
+        "lengthscale": {
+          "kind": "number"
+        }
+      }
+    },
+    "get_models": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "name": {
+            "kind": "string"
+          },
+          "pid": {
+            "kind": "number"
+          },
+          "phid": {
+            "kind": "number"
+          },
+          "uuid": {
+            "kind": "string"
+          },
+          "logic": {
+            "kind": "object",
+            "fields": {
+              "data": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "type": {
+                "kind": "string"
+              },
+              "version": {
+                "kind": "number"
+              }
+            }
+          },
+          "throttle": {
+            "kind": "number"
+          },
+          "sharedEndpoints": {
+            "kind": "boolean"
+          },
+          "actions": {
+            "kind": "object",
+            "fields": {
+              "alert": {
+                "kind": "boolean"
+              },
+              "antigena": {
+                "kind": "summary"
+              },
+              "breach": {
+                "kind": "boolean"
+              },
+              "model": {
+                "kind": "boolean"
+              },
+              "setPriority": {
+                "kind": "boolean"
+              },
+              "setTag": {
+                "kind": "boolean"
+              },
+              "setType": {
+                "kind": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_models_pid": {
+      "kind": "object",
+      "fields": {
+        "name": {
+          "kind": "string"
+        },
+        "pid": {
+          "kind": "number"
+        },
+        "phid": {
+          "kind": "number"
+        },
+        "uuid": {
+          "kind": "string"
+        },
+        "logic": {
+          "kind": "object",
+          "fields": {
+            "data": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "type": {
+              "kind": "string"
+            },
+            "version": {
+              "kind": "number"
+            }
+          }
+        },
+        "throttle": {
+          "kind": "number"
+        },
+        "sharedEndpoints": {
+          "kind": "boolean"
+        },
+        "actions": {
+          "kind": "object",
+          "fields": {
+            "alert": {
+              "kind": "boolean"
+            },
+            "antigena": {
+              "kind": "summary"
+            },
+            "breach": {
+              "kind": "boolean"
+            },
+            "model": {
+              "kind": "boolean"
+            },
+            "setPriority": {
+              "kind": "boolean"
+            },
+            "setTag": {
+              "kind": "boolean"
+            },
+            "setType": {
+              "kind": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "get_modelbreaches": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "creationTime": {
+            "kind": "number"
+          },
+          "commentCount": {
+            "kind": "number"
+          },
+          "pbid": {
+            "kind": "number"
+          },
+          "time": {
+            "kind": "number"
+          },
+          "model": {
+            "kind": "object",
+            "fields": {
+              "then": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "pid": {
+                    "kind": "number"
+                  },
+                  "phid": {
+                    "kind": "number"
+                  },
+                  "uuid": {
+                    "kind": "string"
+                  },
+                  "mitre": {
+                    "kind": "object",
+                    "fields": {
+                      "tactics": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      },
+                      "techniques": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      }
+                    }
+                  },
+                  "logic": {
+                    "kind": "object",
+                    "fields": {
+                      "data": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      },
+                      "type": {
+                        "kind": "string"
+                      },
+                      "version": {
+                        "kind": "number"
+                      }
+                    }
+                  },
+                  "throttle": {
+                    "kind": "number"
+                  },
+                  "sharedEndpoints": {
+                    "kind": "boolean"
+                  },
+                  "actions": {
+                    "kind": "object",
+                    "fields": {
+                      "alert": {
+                        "kind": "boolean"
+                      },
+                      "antigena": {
+                        "kind": "summary"
+                      },
+                      "breach": {
+                        "kind": "boolean"
+                      },
+                      "model": {
+                        "kind": "boolean"
+                      },
+                      "setPriority": {
+                        "kind": "boolean"
+                      },
+                      "setTag": {
+                        "kind": "boolean"
+                      },
+                      "setType": {
+                        "kind": "boolean"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  },
+                  "interval": {
+                    "kind": "number"
+                  },
+                  "delay": {
+                    "kind": "number"
+                  },
+                  "sequenced": {
+                    "kind": "boolean"
+                  },
+                  "active": {
+                    "kind": "boolean"
+                  },
+                  "modified": {
+                    "kind": "string"
+                  },
+                  "activeTimes": {
+                    "kind": "object",
+                    "fields": {
+                      "devices": {
+                        "kind": "summary"
+                      },
+                      "tags": {
+                        "kind": "summary"
+                      },
+                      "type": {
+                        "kind": "string"
+                      },
+                      "version": {
+                        "kind": "number"
+                      }
+                    }
+                  },
+                  "priority": {
+                    "kind": "number"
+                  },
+                  "category": {
+                    "kind": "string"
+                  },
+                  "compliance": {
+                    "kind": "boolean"
+                  },
+                  "autoUpdatable": {
+                    "kind": "boolean"
+                  },
+                  "autoUpdate": {
+                    "kind": "boolean"
+                  },
+                  "autoSuppress": {
+                    "kind": "boolean"
+                  },
+                  "description": {
+                    "kind": "string"
+                  },
+                  "behaviour": {
+                    "kind": "string"
+                  },
+                  "defeats": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "arguments": {
+                          "kind": "object",
+                          "fields": {
+                            "value": {
+                              "kind": "string"
+                            }
+                          }
+                        },
+                        "comparator": {
+                          "kind": "string"
+                        },
+                        "defeatID": {
+                          "kind": "number"
+                        },
+                        "filtertype": {
+                          "kind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "created": {
+                    "kind": "object",
+                    "fields": {
+                      "by": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "edited": {
+                    "kind": "object",
+                    "fields": {
+                      "by": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "version": {
+                    "kind": "number"
+                  }
+                }
+              },
+              "now": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "pid": {
+                    "kind": "number"
+                  },
+                  "phid": {
+                    "kind": "number"
+                  },
+                  "uuid": {
+                    "kind": "string"
+                  },
+                  "mitre": {
+                    "kind": "object",
+                    "fields": {
+                      "tactics": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      },
+                      "techniques": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      }
+                    }
+                  },
+                  "logic": {
+                    "kind": "object",
+                    "fields": {
+                      "data": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "summary"
+                        }
+                      },
+                      "type": {
+                        "kind": "string"
+                      },
+                      "version": {
+                        "kind": "number"
+                      }
+                    }
+                  },
+                  "throttle": {
+                    "kind": "number"
+                  },
+                  "sharedEndpoints": {
+                    "kind": "boolean"
+                  },
+                  "actions": {
+                    "kind": "object",
+                    "fields": {
+                      "alert": {
+                        "kind": "boolean"
+                      },
+                      "antigena": {
+                        "kind": "summary"
+                      },
+                      "breach": {
+                        "kind": "boolean"
+                      },
+                      "model": {
+                        "kind": "boolean"
+                      },
+                      "setPriority": {
+                        "kind": "boolean"
+                      },
+                      "setTag": {
+                        "kind": "boolean"
+                      },
+                      "setType": {
+                        "kind": "boolean"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  },
+                  "interval": {
+                    "kind": "number"
+                  },
+                  "delay": {
+                    "kind": "number"
+                  },
+                  "sequenced": {
+                    "kind": "boolean"
+                  },
+                  "active": {
+                    "kind": "boolean"
+                  },
+                  "modified": {
+                    "kind": "string"
+                  },
+                  "activeTimes": {
+                    "kind": "object",
+                    "fields": {
+                      "devices": {
+                        "kind": "summary"
+                      },
+                      "tags": {
+                        "kind": "summary"
+                      },
+                      "type": {
+                        "kind": "string"
+                      },
+                      "version": {
+                        "kind": "number"
+                      }
+                    }
+                  },
+                  "priority": {
+                    "kind": "number"
+                  },
+                  "category": {
+                    "kind": "string"
+                  },
+                  "compliance": {
+                    "kind": "boolean"
+                  },
+                  "autoUpdatable": {
+                    "kind": "boolean"
+                  },
+                  "autoUpdate": {
+                    "kind": "boolean"
+                  },
+                  "autoSuppress": {
+                    "kind": "boolean"
+                  },
+                  "description": {
+                    "kind": "string"
+                  },
+                  "behaviour": {
+                    "kind": "string"
+                  },
+                  "defeats": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "arguments": {
+                          "kind": "object",
+                          "fields": {
+                            "value": {
+                              "kind": "string"
+                            }
+                          }
+                        },
+                        "comparator": {
+                          "kind": "string"
+                        },
+                        "defeatID": {
+                          "kind": "number"
+                        },
+                        "filtertype": {
+                          "kind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "created": {
+                    "kind": "object",
+                    "fields": {
+                      "by": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "edited": {
+                    "kind": "object",
+                    "fields": {
+                      "by": {
+                        "kind": "string"
+                      },
+                      "userID": {
+                        "kind": "number"
+                      }
+                    }
+                  },
+                  "message": {
+                    "kind": "string"
+                  },
+                  "version": {
+                    "kind": "number"
+                  }
+                }
+              }
+            }
+          },
+          "triggeredComponents": {
+            "kind": "array",
+            "items": {
+              "kind": "object",
+              "fields": {
+                "time": {
+                  "kind": "number"
+                },
+                "cbid": {
+                  "kind": "number"
+                },
+                "cid": {
+                  "kind": "number"
+                },
+                "chid": {
+                  "kind": "number"
+                },
+                "size": {
+                  "kind": "number"
+                },
+                "threshold": {
+                  "kind": "number"
+                },
+                "interval": {
+                  "kind": "number"
+                },
+                "logic": {
+                  "kind": "object",
+                  "fields": {
+                    "data": {
+                      "kind": "object",
+                      "fields": {
+                        "left": {
+                          "kind": "string"
+                        },
+                        "operator": {
+                          "kind": "string"
+                        },
+                        "right": {
+                          "kind": "summary"
+                        }
+                      }
+                    },
+                    "version": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "metric": {
+                  "kind": "object",
+                  "fields": {
+                    "mlid": {
+                      "kind": "number"
+                    },
+                    "name": {
+                      "kind": "string"
+                    },
+                    "label": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "triggeredFilters": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "cfid": {
+                        "kind": "number"
+                      },
+                      "id": {
+                        "kind": "string"
+                      },
+                      "filterType": {
+                        "kind": "string"
+                      },
+                      "arguments": {
+                        "kind": "object",
+                        "fields": {
+                          "value": {
+                            "kind": "number"
+                          }
+                        }
+                      },
+                      "comparatorType": {
+                        "kind": "string"
+                      },
+                      "trigger": {
+                        "kind": "object",
+                        "fields": {
+                          "value": {
+                            "kind": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "score": {
+            "kind": "number"
+          },
+          "percentscore": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "get_modelbreaches_pbid": {
+      "kind": "object",
+      "fields": {
+        "creationTime": {
+          "kind": "number"
+        },
+        "commentCount": {
+          "kind": "number"
+        },
+        "pbid": {
+          "kind": "number"
+        },
+        "time": {
+          "kind": "number"
+        },
+        "model": {
+          "kind": "object",
+          "fields": {
+            "then": {
+              "kind": "object",
+              "fields": {
+                "name": {
+                  "kind": "string"
+                },
+                "pid": {
+                  "kind": "number"
+                },
+                "phid": {
+                  "kind": "number"
+                },
+                "uuid": {
+                  "kind": "string"
+                },
+                "mitre": {
+                  "kind": "object",
+                  "fields": {
+                    "tactics": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "techniques": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    }
+                  }
+                },
+                "logic": {
+                  "kind": "object",
+                  "fields": {
+                    "data": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "type": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "throttle": {
+                  "kind": "number"
+                },
+                "sharedEndpoints": {
+                  "kind": "boolean"
+                },
+                "actions": {
+                  "kind": "object",
+                  "fields": {
+                    "alert": {
+                      "kind": "boolean"
+                    },
+                    "antigena": {
+                      "kind": "summary"
+                    },
+                    "breach": {
+                      "kind": "boolean"
+                    },
+                    "model": {
+                      "kind": "boolean"
+                    },
+                    "setPriority": {
+                      "kind": "boolean"
+                    },
+                    "setTag": {
+                      "kind": "boolean"
+                    },
+                    "setType": {
+                      "kind": "boolean"
+                    }
+                  }
+                },
+                "tags": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "interval": {
+                  "kind": "number"
+                },
+                "delay": {
+                  "kind": "number"
+                },
+                "sequenced": {
+                  "kind": "boolean"
+                },
+                "active": {
+                  "kind": "boolean"
+                },
+                "modified": {
+                  "kind": "string"
+                },
+                "activeTimes": {
+                  "kind": "object",
+                  "fields": {
+                    "devices": {
+                      "kind": "summary"
+                    },
+                    "tags": {
+                      "kind": "summary"
+                    },
+                    "type": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "priority": {
+                  "kind": "number"
+                },
+                "category": {
+                  "kind": "string"
+                },
+                "compliance": {
+                  "kind": "boolean"
+                },
+                "autoUpdatable": {
+                  "kind": "boolean"
+                },
+                "autoUpdate": {
+                  "kind": "boolean"
+                },
+                "autoSuppress": {
+                  "kind": "boolean"
+                },
+                "description": {
+                  "kind": "string"
+                },
+                "behaviour": {
+                  "kind": "string"
+                },
+                "defeats": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "arguments": {
+                        "kind": "object",
+                        "fields": {
+                          "value": {
+                            "kind": "string"
+                          }
+                        }
+                      },
+                      "comparator": {
+                        "kind": "string"
+                      },
+                      "defeatID": {
+                        "kind": "number"
+                      },
+                      "filtertype": {
+                        "kind": "string"
+                      }
+                    }
+                  }
+                },
+                "created": {
+                  "kind": "object",
+                  "fields": {
+                    "by": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "edited": {
+                  "kind": "object",
+                  "fields": {
+                    "by": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "version": {
+                  "kind": "number"
+                }
+              }
+            },
+            "now": {
+              "kind": "object",
+              "fields": {
+                "name": {
+                  "kind": "string"
+                },
+                "pid": {
+                  "kind": "number"
+                },
+                "phid": {
+                  "kind": "number"
+                },
+                "uuid": {
+                  "kind": "string"
+                },
+                "mitre": {
+                  "kind": "object",
+                  "fields": {
+                    "tactics": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "techniques": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    }
+                  }
+                },
+                "logic": {
+                  "kind": "object",
+                  "fields": {
+                    "data": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "type": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "throttle": {
+                  "kind": "number"
+                },
+                "sharedEndpoints": {
+                  "kind": "boolean"
+                },
+                "actions": {
+                  "kind": "object",
+                  "fields": {
+                    "alert": {
+                      "kind": "boolean"
+                    },
+                    "antigena": {
+                      "kind": "summary"
+                    },
+                    "breach": {
+                      "kind": "boolean"
+                    },
+                    "model": {
+                      "kind": "boolean"
+                    },
+                    "setPriority": {
+                      "kind": "boolean"
+                    },
+                    "setTag": {
+                      "kind": "boolean"
+                    },
+                    "setType": {
+                      "kind": "boolean"
+                    }
+                  }
+                },
+                "tags": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "interval": {
+                  "kind": "number"
+                },
+                "delay": {
+                  "kind": "number"
+                },
+                "sequenced": {
+                  "kind": "boolean"
+                },
+                "active": {
+                  "kind": "boolean"
+                },
+                "modified": {
+                  "kind": "string"
+                },
+                "activeTimes": {
+                  "kind": "object",
+                  "fields": {
+                    "devices": {
+                      "kind": "summary"
+                    },
+                    "tags": {
+                      "kind": "summary"
+                    },
+                    "type": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "priority": {
+                  "kind": "number"
+                },
+                "category": {
+                  "kind": "string"
+                },
+                "compliance": {
+                  "kind": "boolean"
+                },
+                "autoUpdatable": {
+                  "kind": "boolean"
+                },
+                "autoUpdate": {
+                  "kind": "boolean"
+                },
+                "autoSuppress": {
+                  "kind": "boolean"
+                },
+                "description": {
+                  "kind": "string"
+                },
+                "behaviour": {
+                  "kind": "string"
+                },
+                "defeats": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "arguments": {
+                        "kind": "object",
+                        "fields": {
+                          "value": {
+                            "kind": "string"
+                          }
+                        }
+                      },
+                      "comparator": {
+                        "kind": "string"
+                      },
+                      "defeatID": {
+                        "kind": "number"
+                      },
+                      "filtertype": {
+                        "kind": "string"
+                      }
+                    }
+                  }
+                },
+                "created": {
+                  "kind": "object",
+                  "fields": {
+                    "by": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "edited": {
+                  "kind": "object",
+                  "fields": {
+                    "by": {
+                      "kind": "string"
+                    },
+                    "userID": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "message": {
+                  "kind": "string"
+                },
+                "version": {
+                  "kind": "number"
+                }
+              }
+            }
+          }
+        },
+        "triggeredComponents": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "time": {
+                "kind": "number"
+              },
+              "cbid": {
+                "kind": "number"
+              },
+              "cid": {
+                "kind": "number"
+              },
+              "chid": {
+                "kind": "number"
+              },
+              "size": {
+                "kind": "number"
+              },
+              "threshold": {
+                "kind": "number"
+              },
+              "interval": {
+                "kind": "number"
+              },
+              "logic": {
+                "kind": "object",
+                "fields": {
+                  "data": {
+                    "kind": "object",
+                    "fields": {
+                      "left": {
+                        "kind": "string"
+                      },
+                      "operator": {
+                        "kind": "string"
+                      },
+                      "right": {
+                        "kind": "summary"
+                      }
+                    }
+                  },
+                  "version": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "metric": {
+                "kind": "object",
+                "fields": {
+                  "mlid": {
+                    "kind": "number"
+                  },
+                  "name": {
+                    "kind": "string"
+                  },
+                  "label": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "triggeredFilters": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "cfid": {
+                      "kind": "number"
+                    },
+                    "id": {
+                      "kind": "string"
+                    },
+                    "filterType": {
+                      "kind": "string"
+                    },
+                    "arguments": {
+                      "kind": "object",
+                      "fields": {
+                        "value": {
+                          "kind": "number"
+                        }
+                      }
+                    },
+                    "comparatorType": {
+                      "kind": "string"
+                    },
+                    "trigger": {
+                      "kind": "object",
+                      "fields": {
+                        "value": {
+                          "kind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "score": {
+          "kind": "number"
+        },
+        "percentscore": {
+          "kind": "number"
+        }
+      }
+    },
+    "get_modelbreaches_pbid_comments": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "message": {
+            "kind": "string"
+          },
+          "username": {
+            "kind": "string"
+          },
+          "time": {
+            "kind": "number"
+          },
+          "pid": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "post_modelbreaches_pbid_comments": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_modelbreaches_pbid_acknowledge": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "post_modelbreaches_pbid_unacknowledge": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_network": {
+      "kind": "object",
+      "fields": {
+        "statistics": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "Views": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "View": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "boolean"
+                    },
+                    "out": {
+                      "kind": "boolean"
+                    }
+                  }
+                }
+              },
+              "Connection Status": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "Connections": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "Remote Ports": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "rport": {
+                      "kind": "number"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "Local Ports": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "lport": {
+                      "kind": "number"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "devices": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "device": {
+                      "kind": "string"
+                    },
+                    "ip": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "Subnets": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "intext": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "intext": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "protocols": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "protocol": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "applicationprotocols": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "applicationprotocol": {
+                      "kind": "string"
+                    },
+                    "in": {
+                      "kind": "number"
+                    },
+                    "out": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "subnets": {
+          "kind": "array",
+          "items": {
+            "kind": "summary"
+          }
+        },
+        "devices": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "did": {
+                "kind": "number"
+              },
+              "size": {
+                "kind": "number"
+              },
+              "timems": {
+                "kind": "number"
+              },
+              "ips": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "sid": {
+                "kind": "number"
+              },
+              "ip": {
+                "kind": "string"
+              },
+              "network": {
+                "kind": "string"
+              }
+            }
+          }
+        },
+        "metric": {
+          "kind": "object",
+          "fields": {
+            "mlid": {
+              "kind": "number"
+            },
+            "name": {
+              "kind": "string"
+            },
+            "label": {
+              "kind": "string"
+            },
+            "units": {
+              "kind": "string"
+            },
+            "filtertypes": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "unitsinterval": {
+              "kind": "number"
+            },
+            "lengthscale": {
+              "kind": "number"
+            }
+          }
+        },
+        "connections": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "source": {
+                "kind": "object",
+                "fields": {
+                  "id": {
+                    "kind": "number"
+                  },
+                  "ip": {
+                    "kind": "string"
+                  },
+                  "type": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "target": {
+                "kind": "object",
+                "fields": {
+                  "id": {
+                    "kind": "number"
+                  },
+                  "ip": {
+                    "kind": "string"
+                  },
+                  "type": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "timems": {
+                "kind": "number"
+              },
+              "size": {
+                "kind": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "get_pcaps": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "tmqid": {
+            "kind": "number"
+          },
+          "startTime": {
+            "kind": "number"
+          },
+          "endTime": {
+            "kind": "number"
+          },
+          "filename": {
+            "kind": "string"
+          },
+          "index": {
+            "kind": "string"
+          },
+          "l3proto": {
+            "kind": "string"
+          },
+          "ip1": {
+            "kind": "string"
+          },
+          "port1": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "post_pcaps": {
+      "kind": "object",
+      "fields": {
+        "tmqid": {
+          "kind": "number"
+        },
+        "startTime": {
+          "kind": "number"
+        },
+        "endTime": {
+          "kind": "number"
+        },
+        "filename": {
+          "kind": "string"
+        },
+        "index": {
+          "kind": "string"
+        },
+        "l3proto": {
+          "kind": "string"
+        },
+        "ip1": {
+          "kind": "string"
+        },
+        "port1": {
+          "kind": "number"
+        }
+      }
+    },
+    "get_pcaps_filename": {
+      "kind": "summary"
+    },
+    "get_similardevices": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "did": {
+            "kind": "number"
+          },
+          "score": {
+            "kind": "number"
+          },
+          "ip": {
+            "kind": "string"
+          },
+          "ips": {
+            "kind": "array",
+            "items": {
+              "kind": "object",
+              "fields": {
+                "ip": {
+                  "kind": "string"
+                },
+                "timems": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "string"
+                },
+                "sid": {
+                  "kind": "number"
+                }
+              }
+            }
+          },
+          "sid": {
+            "kind": "number"
+          },
+          "hostname": {
+            "kind": "string"
+          },
+          "firstSeen": {
+            "kind": "number"
+          },
+          "lastSeen": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "get_status": {
+      "kind": "object",
+      "fields": {
+        "excessTraffic": {
+          "kind": "boolean"
+        },
+        "time": {
+          "kind": "string"
+        },
+        "installed": {
+          "kind": "string"
+        },
+        "version": {
+          "kind": "string"
+        },
+        "ipAddress": {
+          "kind": "string"
+        },
+        "label": {
+          "kind": "string"
+        },
+        "hostname": {
+          "kind": "string"
+        },
+        "cpu": {
+          "kind": "number"
+        }
+      }
+    },
+    "get_subnets": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "sid": {
+            "kind": "number"
+          },
+          "auto": {
+            "kind": "boolean"
+          },
+          "dhcp": {
+            "kind": "boolean"
+          },
+          "firstSeen": {
+            "kind": "number"
+          },
+          "label": {
+            "kind": "string"
+          },
+          "lastSeen": {
+            "kind": "number"
+          },
+          "latitude": {
+            "kind": "number"
+          },
+          "longitude": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "post_subnets": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_summarystatistics": {
+      "kind": "object",
+      "fields": {
+        "subnets": {
+          "kind": "number"
+        },
+        "patterns": {
+          "kind": "number"
+        },
+        "bandwidth": {
+          "kind": "array",
+          "items": {
+            "kind": "object",
+            "fields": {
+              "timems": {
+                "kind": "number"
+              },
+              "time": {
+                "kind": "string"
+              },
+              "kb": {
+                "kind": "number"
+              }
+            }
+          }
+        },
+        "antigenaDevices": {
+          "kind": "number"
+        },
+        "antigenaActions": {
+          "kind": "number"
+        },
+        "devicecount": {
+          "kind": "object",
+          "fields": {
+            "unknown": {
+              "kind": "number"
+            },
+            "laptop": {
+              "kind": "number"
+            },
+            "mobile": {
+              "kind": "number"
+            },
+            "tablet": {
+              "kind": "number"
+            },
+            "desktop": {
+              "kind": "number"
+            },
+            "server": {
+              "kind": "number"
+            },
+            "router": {
+              "kind": "number"
+            },
+            "keyasset": {
+              "kind": "number"
+            },
+            "dnsserver": {
+              "kind": "number"
+            },
+            "proxyserver": {
+              "kind": "number"
+            },
+            "logserver": {
+              "kind": "number"
+            },
+            "tv": {
+              "kind": "number"
+            },
+            "camera": {
+              "kind": "number"
+            },
+            "fileserver": {
+              "kind": "number"
+            },
+            "ipphone": {
+              "kind": "number"
+            },
+            "iot": {
+              "kind": "number"
+            },
+            "saas": {
+              "kind": "object",
+              "fields": {
+                "Amazon": {
+                  "kind": "number"
+                },
+                "AzureActiveDirectory": {
+                  "kind": "number"
+                },
+                "total": {
+                  "kind": "number"
+                }
+              }
+            },
+            "licenseIPCount": {
+              "kind": "number"
+            },
+            "licenseCloudIPCount": {
+              "kind": "number"
+            },
+            "totalClient": {
+              "kind": "number"
+            },
+            "totalServer": {
+              "kind": "number"
+            },
+            "totalOther": {
+              "kind": "number"
+            },
+            "total": {
+              "kind": "number"
+            }
+          }
+        }
+      }
+    },
+    "get_tags": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "tid": {
+            "kind": "number"
+          },
+          "expiry": {
+            "kind": "number"
+          },
+          "thid": {
+            "kind": "number"
+          },
+          "name": {
+            "kind": "string"
+          },
+          "restricted": {
+            "kind": "boolean"
+          },
+          "data": {
+            "kind": "object",
+            "fields": {
+              "auto": {
+                "kind": "boolean"
+              },
+              "color": {
+                "kind": "number"
+              },
+              "description": {
+                "kind": "string"
+              },
+              "visibility": {
+                "kind": "string"
+              }
+            }
+          },
+          "isReferenced": {
+            "kind": "boolean"
+          }
+        }
+      }
+    },
+    "post_tags": {
+      "kind": "object",
+      "fields": {
+        "tid": {
+          "kind": "number"
+        },
+        "expiry": {
+          "kind": "number"
+        },
+        "thid": {
+          "kind": "number"
+        },
+        "name": {
+          "kind": "string"
+        },
+        "restricted": {
+          "kind": "boolean"
+        },
+        "data": {
+          "kind": "object",
+          "fields": {
+            "auto": {
+              "kind": "boolean"
+            },
+            "color": {
+              "kind": "number"
+            },
+            "description": {
+              "kind": "string"
+            },
+            "visibility": {
+              "kind": "string"
+            }
+          }
+        },
+        "isReferenced": {
+          "kind": "boolean"
+        }
+      }
+    },
+    "get_tags_tid": {
+      "kind": "object",
+      "fields": {
+        "tid": {
+          "kind": "number"
+        },
+        "expiry": {
+          "kind": "number"
+        },
+        "thid": {
+          "kind": "number"
+        },
+        "name": {
+          "kind": "string"
+        },
+        "restricted": {
+          "kind": "boolean"
+        },
+        "data": {
+          "kind": "object",
+          "fields": {
+            "auto": {
+              "kind": "boolean"
+            },
+            "color": {
+              "kind": "number"
+            },
+            "description": {
+              "kind": "string"
+            },
+            "visibility": {
+              "kind": "string"
+            }
+          }
+        },
+        "isReferenced": {
+          "kind": "boolean"
+        }
+      }
+    },
+    "delete_tags_tid": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_tags_entities": {
+      "kind": "array",
+      "items": {
+        "kind": "union",
+        "variants": [
+          {
+            "kind": "object",
+            "fields": {
+              "teid": {
+                "kind": "number"
+              },
+              "tehid": {
+                "kind": "number"
+              },
+              "tid": {
+                "kind": "number"
+              },
+              "entityType": {
+                "kind": "string"
+              },
+              "entityValue": {
+                "kind": "string"
+              },
+              "valid": {
+                "kind": "boolean"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          },
+          {
+            "kind": "object",
+            "fields": {
+              "tid": {
+                "kind": "number"
+              },
+              "thid": {
+                "kind": "number"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          },
+          {
+            "kind": "object",
+            "fields": {
+              "teid": {
+                "kind": "number"
+              },
+              "tehid": {
+                "kind": "number"
+              },
+              "tid": {
+                "kind": "number"
+              },
+              "entityType": {
+                "kind": "string"
+              },
+              "entityValue": {
+                "kind": "string"
+              },
+              "valid": {
+                "kind": "boolean"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "post_tags_entities": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "delete_tags_entities": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_tags_tid_entities": {
+      "kind": "array",
+      "items": {
+        "kind": "union",
+        "variants": [
+          {
+            "kind": "object",
+            "fields": {
+              "teid": {
+                "kind": "number"
+              },
+              "tehid": {
+                "kind": "number"
+              },
+              "tid": {
+                "kind": "number"
+              },
+              "entityType": {
+                "kind": "string"
+              },
+              "entityValue": {
+                "kind": "string"
+              },
+              "valid": {
+                "kind": "boolean"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          },
+          {
+            "kind": "object",
+            "fields": {
+              "tid": {
+                "kind": "number"
+              },
+              "thid": {
+                "kind": "number"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          },
+          {
+            "kind": "object",
+            "fields": {
+              "teid": {
+                "kind": "number"
+              },
+              "tehid": {
+                "kind": "number"
+              },
+              "tid": {
+                "kind": "number"
+              },
+              "entityType": {
+                "kind": "string"
+              },
+              "entityValue": {
+                "kind": "string"
+              },
+              "valid": {
+                "kind": "boolean"
+              },
+              "expiry": {
+                "kind": "number"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "post_tags_tid_entities": {
+      "kind": "array",
+      "items": {
+        "kind": "object",
+        "fields": {
+          "teid": {
+            "kind": "number"
+          },
+          "tehid": {
+            "kind": "number"
+          },
+          "tid": {
+            "kind": "number"
+          },
+          "entityType": {
+            "kind": "string"
+          },
+          "entityValue": {
+            "kind": "string"
+          },
+          "valid": {
+            "kind": "boolean"
+          },
+          "expiry": {
+            "kind": "number"
+          }
+        }
+      }
+    },
+    "delete_tags_tid_entities_teid": {
+      "kind": "object",
+      "fields": {
+        "response": {
+          "kind": "string"
+        }
+      }
+    },
+    "get_agemail_api_ep_api_v1_0_admin_decode_link": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_dash_action_summary": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_dash_dash_stats": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_dash_data_loss": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_dash_user_anomaly": {
+      "kind": "summary"
+    },
+    "post_agemail_api_ep_api_v1_0_emails_uuid_action": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_emails_uuid": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_emails_uuid_download": {
+      "kind": "summary"
+    },
+    "post_agemail_api_ep_api_v1_0_emails_search": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_resources_tags": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_resources_actions": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_resources_filters": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_system_audit_eventTypes": {
+      "kind": "summary"
+    },
+    "get_agemail_api_ep_api_v1_0_system_audit_events": {
+      "kind": "summary"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "receipt": "test/security/evidence/2026-10-05T12-59-46-877Z.json",
+  "sourceTreeSha256": "c8585b8f90ee50103197c788569aaad29eb1c3cd0d22a698539ce8dcf92d0419",
+  "suiteSha256": "800a754514a10831a9a2744ec14c7105a0b2ce1d07d584b15539baaf5a9176a2",
+  "hashes": {
+    "assertion-counter.mjs": "a0ced898211643436ce27436ce4a81860c66de1550937df998ca4946140d8afc",
+    "config.test.mjs": "224ae98614311f588f7d88acd386eb11bb41bafb935e499127be7453c5afec7a",
+    "diagnostic-guard.mjs": "f6533aa8b7f7dcdec0c92377b641b863a6f6fd66af1e7657e84dd5d0681f638c",
+    "generate-fixtures.py": "c4aa0408fda9d826f41a0f1037f21338a766fd6a21eca8606901540a02d8fd56",
+    "helpers.mjs": "f5e36cfd1be9c558e1dcfa01129be2f72fa11c3a5ef7a1ab53ce426503148a99",
+    "limits-retries.test.mjs": "37cc3b18978ab820c9871e46c8d68167d275b77cccacad788a98156a50646c55",
+    "network.test.mjs": "c31f72f6fc8422c85d636957abec9146be1a33e6fe5e7025df72ca5bd46ab91b",
+    "policy-sinks.test.mjs": "909ffb96f8f1210fb8515ec43be351a4f95a7b3e6dbf8647c373014d593d8914",
+    "run-isolated.mjs": "41b5b0c6a97ccbfb5d809e6b32aa2b44065aebcdf1dfc69d4d69d4cdfd13bc7f",
+    "signer-client.test.mjs": "3bae9731305a716ebe3aec53d9e87d5c2accaaf9e9fb84766515101fd75d5624",
+    "stdio.test.mjs": "9513c31280f0fe59e85804ea6065dc56065122a7b9fe37064f88f1cdd411c7da"
+  },
+  "matchToExecutedSnapshot": true
+}

@@ -1,0 +1,35 @@
+name: Prepare private prerelease (no publication)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: private-release-preparation
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Require tag to match package version exactly
+        run: node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json')); if(process.env.GITHUB_REF!=='refs/tags/v'+p.version) throw Error('Release tag/version mismatch');"
+      - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
+      - name: Retain reviewed candidate assets; owner publishes manually
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: darktrace-mcp-private-release-candidate
+          path: |
+            ${{ runner.temp }}/darktrace-mcp-release/*.tgz
+            ${{ runner.temp }}/darktrace-mcp-release/SHA256SUMS
+            ${{ runner.temp }}/darktrace-mcp-release/*.json
+            ${{ runner.temp }}/darktrace-mcp-release/*.log
+            ${{ runner.temp }}/darktrace-mcp-release/release-notes.md
+          if-no-files-found: error
+          retention-days: 7

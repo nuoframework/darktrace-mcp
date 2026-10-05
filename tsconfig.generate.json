@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","include":["scripts/generate-catalogue.ts"],"exclude":["node_modules","dist"]}

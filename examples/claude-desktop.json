@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": [
+        "/absolute/path/to/darktrace-mcp/dist/src/index.js"
+      ],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read",
+        "DARKTRACE_SENSITIVE_READ": "false"
+      }
+    }
+  }
+}
