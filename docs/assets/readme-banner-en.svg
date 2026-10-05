@@ -1,37 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-labelledby="title description">
-  <title id="title">Darktrace MCP — Unofficial MCP.</title>
-  <desc id="description">Original abstract network artwork. Independent third-party project, unaffiliated with Darktrace and without authorization from Darktrace.</desc>
-  <defs>
-    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#030d11"/><stop offset="1" stop-color="#030d11"/></linearGradient>
-    <linearGradient id="accent" x2="1"><stop stop-color="#ff6b00"/><stop offset="1" stop-color="#ffa52f"/></linearGradient>
-    <filter id="trace-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
-    <path id="trace-a" d="M810 88 H914 L960 42 H1130 V100 L1190 160 H1250"/>
-    <path id="trace-b" d="M834 232 H914 L974 172 H1094 L1158 236 H1248"/>
-    <path id="trace-c" d="M1010 294 V264 L1078 196 H1236"/>
-  </defs>
-  <rect width="1280" height="460" rx="20" fill="url(#background)"/>
-  <rect x="1" y="1" width="1278" height="458" rx="19" fill="none" stroke="#2c2d33"/>
-  <g fill="none" stroke="url(#accent)" stroke-width="8" opacity="0.2" filter="url(#trace-glow)">
-    <use href="#trace-a"/><use href="#trace-b"/><use href="#trace-c"/>
-  </g>
-  <g fill="none" stroke="url(#accent)" stroke-width="1.75" opacity="0.65">
-    <use href="#trace-a"/><use href="#trace-b"/><use href="#trace-c"/>
-  </g>
-  <g fill="#ff6b00">
-    <rect x="1247" y="157" width="6" height="6"/>
-    <rect x="1245" y="233" width="6" height="6"/>
-    <rect x="1233" y="193" width="6" height="6"/>
-  </g>
-  <g font-family="Arial, Helvetica, sans-serif">
-    <rect x="48" y="49" width="34" height="4" rx="2" fill="url(#accent)"/>
-    <text x="96" y="58" fill="#ffa52f" font-size="19" font-weight="700" letter-spacing="2">INDEPENDENT INTEGRATION</text>
-    <text x="48" y="143" fill="#ffffff" font-size="72" font-weight="700" letter-spacing="-2">Darktrace <tspan fill="#ff6b00">MCP</tspan></text>
-    <text x="50" y="192" fill="#ececf0" font-size="25">Bounded investigations. Operator-controlled access.</text>
-    <text x="50" y="245" fill="#b6b6b6" font-size="20">PRIVATE ALPHA  /  NODE.JS 22+  /  STDIO</text>
-    <rect x="32" y="315" width="1216" height="119" rx="12" fill="#1c1512" stroke="#754329"/>
-    <rect x="32" y="332" width="4" height="84" rx="2" fill="#ff6b00"/>
-    <text x="52" y="350" fill="#ffa52f" font-size="24" font-weight="700">Unofficial MCP.</text>
-    <text x="52" y="386" fill="#ffffff" font-size="23">Developed by an independent third party,</text>
-    <text x="52" y="417" fill="#ffffff" font-size="23">unaffiliated with Darktrace and without authorization from Darktrace.</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="600" viewBox="0 0 1280 600" role="img" aria-labelledby="title description">
+ <title id="title">Darktrace MCP — Unofficial MCP.</title>
+ <desc id="description">Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace. Original independent artwork: a white editorial title panel and flowing orange, pink and violet traces on a dark field.</desc>
+ <defs>
+  <linearGradient id="trace0" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffa52f"/><stop offset=".35" stop-color="#ff6b00"/><stop offset=".65" stop-color="#ff00d9"/><stop offset="1" stop-color="#4b00d7"/></linearGradient>
+  <linearGradient id="trace1" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#ff6b00"/><stop offset=".5" stop-color="#6f0067"/><stop offset="1" stop-color="#ffa52f"/></linearGradient>
+  <linearGradient id="trace2" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#4b00d7"/><stop offset=".5" stop-color="#ff6b00"/><stop offset="1" stop-color="#ffa52f"/></linearGradient>
+  <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff6b00" stop-opacity="0"/><stop offset=".35" stop-color="#ff6b00"/><stop offset=".57" stop-color="#ff00d9"/><stop offset=".8" stop-color="#4b00d7"/><stop offset="1" stop-color="#4b00d7" stop-opacity="0"/></linearGradient>
+  <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+  <clipPath id="canvas"><rect width="1280" height="600"/></clipPath>
+ </defs>
+ <g clip-path="url(#canvas)">
+ <rect width="1280" height="600" fill="#030d11"/>
+ <g transform="translate(640 0)"><defs><path id="t0" d="M 120 -24 L 205 80 Q 130 205 235 290 L 420 335 Q 540 387 728 240"/><path id="t1" d="M 144 -24 L 213 85 Q 139 208 243 292 L 430 353 Q 544 405 728 259"/><path id="t2" d="M 168 -24 L 221 90 Q 148 211 251 294 L 440 371 Q 548 423 728 278"/><path id="t3" d="M 229 95 Q 157 214 259 296 L 450 389 Q 552 441 728 297"/><path id="t4" d="M 216 -24 L 237 100 Q 166 217 267 298 L 460 407 Q 556 459 728 316"/><path id="t5" d="M 240 -24 L 245 105 Q 175 220 275 300 L 470 425 Q 560 477 728 335"/><path id="t6" d="M 264 -24 L 253 110 Q 184 223 283 302 L 480 443 Q 564 495 728 354"/><path id="t7" d="M 288 -24 L 261 115 Q 193 226 291 304 L 490 461 Q 568 513 728 373"/><path id="t8" d="M 312 -24 L 269 120 Q 202 229 299 306 L 500 479 Q 572 531 728 392"/><path id="t9" d="M 277 125 Q 211 232 307 308 L 510 497 Q 576 549 728 411"/><path id="t10" d="M 360 -24 L 285 130 Q 220 235 315 310 L 520 515 Q 580 567 728 430"/><path id="t11" d="M 384 -24 L 293 135 Q 229 238 323 312 L 530 533 Q 584 585 728 449"/><path id="t12" d="M 408 -24 L 301 140 Q 238 241 331 314 L 540 551 Q 588 603 728 468"/><path id="t13" d="M 432 -24 L 309 145 Q 247 244 339 316 L 550 569 Q 592 621 728 487"/><path id="t14" d="M 317 150 Q 256 247 347 318 L 560 587 Q 596 639 728 506"/><path id="t15" d="M 480 -24 L 325 155 Q 265 250 355 320 L 570 605 Q 600 657 728 525"/><path id="t16" d="M 504 -24 L 333 160 Q 274 253 363 322 L 580 623 Q 604 675 728 544"/></defs><g fill="none" stroke-width="6" opacity=".34" filter="url(#soft)"><use href="#t0" stroke="url(#trace0)"/><use href="#t1" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="31"/><use href="#t2" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="62"/><use href="#t3" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="93"/><use href="#t4" stroke="url(#trace1)"/><use href="#t5" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="155"/><use href="#t6" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="186"/><use href="#t7" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="217"/><use href="#t8" stroke="url(#trace2)"/><use href="#t9" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="279"/><use href="#t10" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="310"/><use href="#t11" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="341"/><use href="#t12" stroke="url(#trace0)"/><use href="#t13" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="403"/><use href="#t14" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="434"/><use href="#t15" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="465"/><use href="#t16" stroke="url(#trace1)"/></g>
+ <path d="M 276 -24 L 252 105 Q 212 226 305 310 L 490 456 Q 604 508 728 373 L 728 451 Q 580 535 450 460 L 257 307 Q 165 225 226 106 Z" fill="url(#ribbon)" opacity=".38"/>
+ <path d="M 444 -24 L 308 140 Q 264 247 365 326 L 558 539 Q 640 575 728 506 L 728 565 Q 620 588 515 528 L 335 326 Q 239 240 278 130 Z" fill="url(#ribbon)" opacity=".26"/>
+ <g fill="none" stroke-width="1.5"><use href="#t0" stroke="url(#trace0)"/><use href="#t1" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="31"/><use href="#t2" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="62"/><use href="#t3" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="93"/><use href="#t4" stroke="url(#trace1)"/><use href="#t5" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="155"/><use href="#t6" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="186"/><use href="#t7" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="217"/><use href="#t8" stroke="url(#trace2)"/><use href="#t9" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="279"/><use href="#t10" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="310"/><use href="#t11" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="341"/><use href="#t12" stroke="url(#trace0)"/><use href="#t13" stroke="url(#trace1)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="403"/><use href="#t14" stroke="url(#trace2)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="434"/><use href="#t15" stroke="url(#trace0)" stroke-dasharray="220 12 130 9 600" stroke-dashoffset="465"/><use href="#t16" stroke="url(#trace1)"/></g>
+ <g fill="#ffffff"><rect x="227" y="93" width="4" height="4"/><rect x="275" y="123" width="4" height="4"/><rect x="315" y="148" width="4" height="4"/></g></g>
+ <rect width="640" height="600" fill="#ffffff"/>
+ <g font-family="Arial, Helvetica, sans-serif" fill="#030d11" font-weight="400">
+  <path d="M48 42 h544" stroke="#b6b6b6"/>
+  <rect x="48" y="59" width="8" height="8" fill="#ff6b00"/>
+  <text x="68" y="70" font-size="22">Unofficial MCP.</text>
+  <text x="45" y="205" font-size="90" letter-spacing="-4">Darktrace</text>
+  <text x="45" y="304" font-size="116" letter-spacing="-5">MCP<tspan fill="#ff6b00">.</tspan></text>
+  <text x="48" y="378" font-size="29" letter-spacing="-.7">Bounded investigations.</text>
+  <text x="48" y="412" font-size="29" letter-spacing="-.7">Access under your control.</text>
+  <path d="M48 519 h544" stroke="#b6b6b6"/>
+  <text x="48" y="545" font-size="19">PRIVATE ALPHA / NODE.JS 22+ / STDIO</text>
+ </g>
+<rect x="640" y="507" width="640" height="93" fill="#030d11" fill-opacity=".92"/>
+ <g font-family="Arial, Helvetica, sans-serif" fill="#ffffff" font-size="18" letter-spacing="1">
+  <path d="M680 519 H1240" stroke="#ffffff" stroke-opacity=".3"/>
+  <text x="680" y="546" font-size="18">INDEPENDENT INTEGRATION</text>
+ </g>
+ </g>
 </svg>

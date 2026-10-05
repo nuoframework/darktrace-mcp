@@ -1,8 +1,9 @@
-<div align="center">
-
 [English](README.md) · **Español**
 
-![Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.](docs/assets/readme-banner-es.svg)
+<picture>
+  <source media="(max-width: 600px)" srcset="docs/assets/readme-banner-es-mobile.svg">
+  <img src="docs/assets/readme-banner-es.svg" width="1280" alt="Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.">
+</picture>
 
 # Darktrace MCP
 
@@ -14,9 +15,7 @@ Prereleases privadas de GitHub · Node.js 22+ · stdio · Apache-2.0
 
 [Empieza en cinco minutos](docs/es/getting-started.md) · [Configuración de clientes](docs/clients.md) · [Configuración](docs/configuration.md) · [Inicio rápido en inglés](docs/getting-started.md)
 
-</div>
-
----
+## Investigación con límites
 
 Investiga dispositivos, infracciones de modelos e incidentes de analistas desde un cliente MCP, con un inventario fijo de operaciones, perfiles controlados por el operador y salida acotada. Esta es una **alpha privada con validación offline** para `nuoframework/darktrace-mcp`. No hay publicación npm, imagen pública ni despliegue de producción verificado.
 
@@ -111,4 +110,4 @@ La salida de runtime usa vistas conservadoras definidas en código, con hasta oc
 
 El conector HTTPS fija una instantánea DNS de arranque aprobada. Las direcciones de los rangos NAT64 estándar (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) y Teredo (`2001::/32`) siempre se bloquean, incluidas traducciones que aparentan apuntar a IPv4 pública. Una respuesta DNS prohibida provoca un fallo terminal del conector hasta que se reinicie el proceso del servidor; corregir DNS no reactiva el conector en ejecución. Los prefijos NAT64 propios del operador no pueden detectarse genéricamente; siguen siendo necesarias allowlists exactas de destino y revisión de la red de despliegue. Este comportamiento de cierre ante fallo puede exigir cambiar el diseño DNS/red del despliegue. El pinning en una red privada real y el comportamiento del appliance siguen sin validar.
 
-Referencia visual: [Darktrace Brand Hub](https://brandhub.darktrace.com/visual-identity/colors) ([trazos lineales](https://brandhub.darktrace.com/visual-identity/trace), [Arial como alternativa del sistema](https://brandhub.darktrace.com/visual-identity/typography)). Los banners son composiciones originales independientes, no recursos oficiales de marca ni una declaración de aprobación de marca.
+Diseño visual: [referencias y arte independiente](docs/visual-identity.md).
