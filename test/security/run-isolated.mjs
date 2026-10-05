@@ -7,8 +7,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const snapshot=mkdtempSync(join(tmpdir(),'darktrace-adversarial-'));
-for(const name of ['src','test','scripts','openapi','docs']) cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')});
-for(const name of ['package.json','tsconfig.json','tsconfig.generate.json','README.md']) cpSync(join(root,name),join(snapshot,name));
+for(const name of ['src','test','scripts','openapi','docs','examples']) cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')});
+for(const name of ['package.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md']) cpSync(join(root,name),join(snapshot,name));
 symlinkSync(join(root,'node_modules'),join(snapshot,'node_modules'),'dir');
 function hashes(dir,prefix='') {
   const out={};for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))) {
@@ -21,12 +21,15 @@ const sourceHashes=hashes(join(snapshot,'src'));
 const childEnv={PATH:process.env.PATH,NODE_EXTRA_CA_CERTS:join(snapshot,'test/security/fixtures/ca.pem')};
 const build=spawnSync(process.execPath,['scripts/build.mjs'],{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:120000});
 const suites=readdirSync(join(snapshot,'test/security')).filter(n=>n.endsWith('.test.mjs')).sort();
-const command=[process.execPath,'--import','./test/security/assertion-counter.mjs','--test','--test-reporter=spec','--test-concurrency=1',...suites.map(n=>'test/security/'+n)];
+const command=[process.execPath,'--import','./dist/test/security/test-runtime-argv.js','--import','./test/security/assertion-counter.mjs','--test','--test-reporter=spec','--test-concurrency=1',...suites.map(n=>'test/security/'+n)];
 const run=build.status===0?spawnSync(command[0],command.slice(1),{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024}):null;
 const evidence=join(root,'test/security/evidence');mkdirSync(evidence,{recursive:true});
 const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+const git=spawnSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
+const revision=typeof git.stdout==='string'?git.stdout.trim():'';
 const report={date:new Date().toISOString(),snapshot,node:process.version,platform:process.platform,arch:process.arch,
-  commit:spawnSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).stdout.trim(),
+  commit:git.status===0&&/^[a-f0-9]{40}$/.test(revision)?revision:null,
+  commitMetadata:{status:git.status??null,signal:git.signal??null,errorCode:git.error?.code??null},
   commands:{build:[process.execPath,'scripts/build.mjs'],test:command},sourceHashes,
   runtimeHashes:build.status===0?hashes(join(snapshot,'dist/src')):{},builtSourceHashes:hashes(join(snapshot,'src')),
   fixtureHashes:hashes(join(snapshot,'test/security/fixtures')),

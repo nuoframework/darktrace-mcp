@@ -44,3 +44,61 @@ Both language variants were rasterized at **896 px** (desktop) and **343 px** (m
 These are local renders, not screenshots of a published GitHub README; live GitHub sanitation still requires the publishing review. A renderer that ignores `picture` sources receives the desktop `img` fallback.
 
 Documentation checks confirm unchanged technical body text, commands and counts, preserved language/navigation links, valid local targets and matching bilingual structure. No runtime, package, workflow, release or validation-status changes are part of this pass; the 7.1 lab target remains NOT VALIDATED.
+
+## Diagrams and badges
+
+This section sets rules for technical diagrams and README badges. It reuses the approved palette and does not add official artwork: diagrams and badges never contain the Darktrace logo, the Trace or illustrations.
+
+### Palette roles
+
+| Token | Value | Role in diagrams and badges | Contrast checked (WCAG) |
+|---|---|---|---|
+| DT Dark | `#030D11` | Server/process nodes, badge labels, outlines of neutral nodes | White text 19.6:1 |
+| White | `#FFFFFF` | Text on DT Dark; fill of host and external nodes | Text DT Dark 19.6:1 |
+| DT Orange | `#FF6B00` | Outline of server nodes; value side of fact badges | DT Dark text on orange 6.9:1; against GitHub dark background 6.6:1 |
+| Blurple | `#4B00D7` | Allowed paths and external systems; value side of the evidence badge | White text 9.2:1 |
+| Hard Pink | `#FF00D9` | Denied, preview-only and rejected paths (always dashed) | Against white 3.4:1, against GitHub dark 5.6:1 |
+| Sun | `#FFA52F` | Status badge (private alpha) | DT Dark text 10.0:1 |
+| DT M Gray | `#B6B6B6` | Badge border, so badges keep an edge on light and dark pages | Against GitHub dark 9.3:1 |
+
+Jewel (`#6F0067`) stays in the cover illustration only.
+
+### Diagram rules
+
+- **Mermaid in Markdown, no exported images.** Diagrams stay text, diffable and in step with the source. Each one has `accTitle` and `accDescr`, so screen readers get a sentence instead of a shape list.
+- **Color is never the only signal.** Every node and edge states its meaning in words. Denied and preview-only nodes are also dashed.
+- **Compact.** At most about ten nodes and two-line labels per diagram. Use `flowchart TB` for chains and `flowchart LR` for decision fans, so branches stack vertically. Both stay readable in a narrow GitHub column and on phones. A diagram that grows past that is split.
+- **Same classes everywhere:** `core` (DT Dark fill, orange outline, white text), `host` (white fill, DT Dark outline), `ext`/`allow` (white fill, blurple outline), `deny` (white fill, dashed pink outline). The class lines are copied verbatim from [architecture §3](architecture.md#3-system-overview).
+- **Facts only.** Labels describe behavior that the source implements and that a dated evidence document records. A future or blocked feature appears only as "rejected" or "not available".
+
+### Badges
+
+Local SVG files in [`docs/assets/badges/`](assets/badges/), in English (`*-en.svg`) and Spanish (`*-es.svg`). They are generated locally: no badge service, script, external font or tracking request. Text uses a monospace stack, matching the secondary typeface role for code-related text. Each file has `role="img"`, `aria-label` and `<title>`.
+
+| Badge (EN / ES) | Link target (real evidence) | Why it is accurate |
+|---|---|---|
+| transport: stdio only / transporte: solo stdio | [architecture §9.1](architecture.md#91-baseline-stdio) | No HTTP listener or configuration; ST-16 checks the refusal |
+| runtime: Node.js 22+ / entorno: Node.js 22+ | [`package.json`](../package.json) (`engines.node >=22`) | CI matrix runs Node 22 and 24 |
+| license: Apache-2.0 / licencia: Apache-2.0 | [`LICENSE`](../LICENSE) | Package manifest and image label agree |
+| docker: local build · pinned ID / docker: build local · ID fijado | [Docker guide](docker.md) | Local image only, run by inspected image ID with `--pull=never` |
+| security tests: offline · 2026-10-05 / pruebas seguridad: offline · 2026-10-05 | [Corrections acceptance](security/mcp-corrections-acceptance.md) | Synthetic offline suite on source `eadfe117…`: Linux Node 22 324/324, macOS Node 24 321 passed + 3 platform-blocked, 0 failed; standard suite 106/106 |
+| status: private alpha / estado: alfa privada | [Stable readiness](stable-readiness.md) | Version `0.1.0-alpha.0`; stable gates still open |
+
+**Not proposed, on purpose:** OpenSSF Scorecard or Best Practices, "OWASP certified", "0 CVE" or "scan passed", Docker Hardened Images, npm version, downloads or coverage percentages. None is true or measured for this project today. The Docker badge must not say "scanned" until the base-image remediation is accepted and its scan is recorded in the Docker guide.
+
+The security badge carries a date because the evidence is tied to one source snapshot. When the source changes, update the date and the linked evidence, or remove the badge.
+
+Suggested README markup (to be integrated by the README owner; the unofficial notice and contact address stay above the badges, unchanged):
+
+```html
+<p>
+  <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-en.svg" alt="transport: stdio only"></a>
+  <a href="package.json"><img src="docs/assets/badges/node-22-en.svg" alt="runtime: Node.js 22+"></a>
+  <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-en.svg" alt="license: Apache-2.0"></a>
+  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: local build, pinned ID"></a>
+  <a href="docs/security/mcp-corrections-acceptance.md"><img src="docs/assets/badges/security-tests-en.svg" alt="security tests: offline, 2026-10-05"></a>
+  <a href="docs/stable-readiness.md"><img src="docs/assets/badges/private-alpha-en.svg" alt="status: private alpha"></a>
+</p>
+```
+
+The Spanish README uses the `*-es.svg` files with Spanish `alt` text. Six badges wrap to two or three lines at a 343 px phone width; that is acceptable. Do not shrink them below 22 px high.

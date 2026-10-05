@@ -1,8 +1,10 @@
+import { RELEASE_CAPABILITY, releaseAllowsOperation } from '../policy/release-capability.js';
 import { z } from 'zod';
 import { operations } from '../api/operations.js';
 import catalogue from '../api/catalogue.generated.json' with {type:'json'};
 import responseViews from '../api/response-views.generated.json' with {type:'json'};
-import { schemaFromOpenApi, inputUnit, blockedInputReason, SearchSchema, validationRules, SEARCH_HASH_RULE } from '../api/validation.js';
+import { schemaFromOpenApi, inputUnit, blockedInputReason, SearchSchema, validationRules, SEARCH_HASH_RULE, summaryAnchorParameter, SUMMARY_HOURLY_RULE } from '../api/validation.js';
+import { operationResponseVariants } from '../api/response-view.js';
 type Schema=Record<string,any>;
 export function generateCoverage() {
   const rows=Object.values(operations).map(op=>{
@@ -12,7 +14,8 @@ export function generateCoverage() {
       const s=raw.$ref?(catalogue.schemas as Record<string,Schema>)[raw.$ref.slice('#/components/schemas/'.length)]:raw;
       const leaf=name.split('.').at(-1)?.replace(/\[\].*$/,'')??'';
       const partner:Record<string,string>={starttime:'endtime',endtime:'starttime',from:'to',to:'from',start:'end',end:'start'};
-      const unpaired=location==='query'&&partner[leaf]&&!op.parameters.some(p=>p.in==='query'&&p.name===partner[leaf]);
+      const summaryAnchor=location==='query'&&summaryAnchorParameter(op.operationId,leaf);
+      const unpaired=location==='query'&&partner[leaf]&&!summaryAnchor&&!op.parameters.some(p=>p.in==='query'&&p.name===partner[leaf]);
       const reason=op.status==='implemented'?(blockedInputReason(s,leaf)??(unpaired?'Standalone time endpoint has no paired endpoint in this operation schema; form rejected':null)):op.reason;
       const validator=schemaFromOpenApi(s,leaf);
       const rules=[...validationRules(validator),...(leaf==='hash'?[SEARCH_HASH_RULE]:[])];
@@ -25,7 +28,8 @@ export function generateCoverage() {
         units:inputUnit(s,leaf),bounds:schema,default:defaultValue,
         provenance:['local OpenAPI 6.1 parameter/schema','src/api/validation.ts schemaFromOpenApi','src/api/operations.ts validateOperation'],
         enforcement:reason?(op.status==='implemented'?(unpaired?'paired range validation rejection':'schema rejection'):'runtime operation policy rejection'):'strict schema validation before request building',
-        ...( /^(starttime|endtime|from|to|start|end)$/.test(leaf)?{rangeRule:'paired endpoints, ordered, at most seven days; explicit descriptor units'}:{}),
+        ...(summaryAnchor?{conditionalRules:[SUMMARY_HOURLY_RULE]}:{}),
+        ...( /^(starttime|endtime|from|to|start|end)$/.test(leaf)?{rangeRule:summaryAnchor?SUMMARY_HOURLY_RULE.description:'paired endpoints, ordered, at most seven days; explicit descriptor units'}:{}),
         ...(rules.length?{additionalRules:rules,additionalRule:rules.map(r=>r.description).join('; ')}:{})});
       for(const [key,child] of Object.entries(s.properties??{})) walk(child as Schema,name?`${name}.${key}`:key,location,(s.required??[]).includes(key),contentType,depth+1);
       if(s.items) walk(s.items,`${name}[]`,location,true,contentType,depth+1);
@@ -53,11 +57,12 @@ export function generateCoverage() {
     }
     const mandatoryBlocked=parameters.some(p=>p.status==='blocked'&&p.required);
     return {operationId:op.operationId,method:op.method,pathTemplate:op.pathTemplate,tool:op.tool,tier:op.tier,
-      status:op.status,reason:op.reason,discovery:op.status==='implemented'?'profile dependent':'unavailable',
-      execution:op.status!=='implemented'?'blocked':mandatoryBlocked?'blocked input form':op.tier==='critical'?'preview-only':'operator profile dependent',
+      status:op.status,reason:op.reason,discovery:releaseAllowsOperation(op)?'profile dependent':'unavailable',
+      releaseEligible:releaseAllowsOperation(op),releaseCapability:RELEASE_CAPABILITY,
+      execution:op.status!=='implemented'?'blocked':!releaseAllowsOperation(op)?'release capability denied':mandatoryBlocked?'blocked input form':op.tier==='critical'?'preview-only':'operator profile dependent',
       documentedIn:op.documentedIn,validatedOn:op.validatedOn,
       outputView:{source:'local 6.1 response schema and code-owned response-fields.json',
-        fields:(responseViews.views as Record<string,unknown>)[op.operationId],unknownFields:'omitted',unmodeledStructures:'fixed safe summary',labValidated:false},parameters};
+        fields:(responseViews.views as Record<string,unknown>)[op.operationId],...(operationResponseVariants(op.operationId).length?{requestVariants:operationResponseVariants(op.operationId)}:{}),unknownFields:'omitted',unmodeledStructures:'fixed safe summary',labValidated:false},parameters};
   });
   return {specVersion:'6.1',labValidated:false,total:rows.length,
     counts:Object.fromEntries(['implemented','blocked','excluded'].map(status=>[status,rows.filter(r=>r.status===status).length])),

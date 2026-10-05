@@ -9,7 +9,7 @@ import { parseConfig, ConfigValidationError } from '../../src/config/schema.js';
 import { startupVariable } from '../../src/observability/log.js';
 import { runStdio } from '../../src/server/stdio.js';
 import { createServer } from '../../src/server/createServer.js';
-const cfg=parseConfig({instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'PUBLIC_CANARY',privateToken:'PRIVATE_CANARY'},profiles:{write:true,writeCritical:true}});
+const cfg=parseConfig({instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'PUBLIC_CANARY',privateToken:'PRIVATE_CANARY'},profiles:{write:false,writeCritical:false}});
 test('SA-01 startup/doctor/check-config emit only whitelisted variable names without canary values',()=>{
   for(const mode of [[],['doctor'],['--check-config']]) for(const [variable,value] of [['HTTPS_PROXY','http://user:CANARY_SECRET@proxy.example/path'],['DARKTRACE_PROFILES','read,email,CANARY_SECRET']]) {
     const result=spawnSync(process.execPath,['dist/src/index.js',...mode],{encoding:'utf8',env:{DARKTRACE_URL:cfg.instance.baseUrl,DARKTRACE_PUBLIC_TOKEN:'PUBLIC_CANARY',DARKTRACE_PRIVATE_TOKEN:'PRIVATE_CANARY',[variable]:value}});
@@ -41,8 +41,8 @@ test('SA-04/06 SDK advertises input defaults as optional and static tools listCh
   const client=new Client({name:'correction-test',version:'1'});const [a,b]=InMemoryTransport.createLinkedPair();
   try {
     await server.connect(b);await client.connect(a);assert.equal(client.getServerCapabilities()?.tools?.listChanged,false);
-    const list=await client.listTools();const tool=list.tools.find(t=>t.name==='darktrace_update_device')!;
-    assert.ok(tool);assert.equal(tool.inputSchema.required?.includes('operation'),false);assert.equal(tool.inputSchema.required?.includes('dryRun'),false);
-    const result=await client.callTool({name:tool.name,arguments:{body:{did:1,label:'x'}}});assert.equal((result.structuredContent as any).dryRun,true);
+    const list=await client.listTools();const tool=list.tools.find((t: {name:string})=>t.name==='darktrace_get_status')!;
+    assert.ok(tool);assert.equal(Boolean(tool.inputSchema.required?.includes('operation')),false);assert.equal(Object.hasOwn(tool.inputSchema.properties??{},'dryRun'),false);
+    assert.equal(list.tools.some((t: {name:string})=>t.name==='darktrace_update_device'),false);const result=await client.callTool({name:'darktrace_update_device',arguments:{body:{did:1,label:'x'}}});assert.equal(result.isError,true);
   } finally {await client.close();await server.close();}
 });

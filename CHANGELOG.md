@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Reviewed lab harness now requires schema-2 source/runtime and complete installed host SDK/Zod tree binding before SDK import; bounded deterministic hashing rejects symlinks and special files. Docker preflight/session use init, PID and memory limits. This is offline readiness, not final lab or image approval.
+
+These changes are candidate preparation only. Package version remains `0.1.0-alpha.0`; they do not replace the immutable published alpha assets or approve a stable release.
+
+- Added a private local Docker build recipe and hardened stdio setup with explicit nonroot identity, read-only token mounts, disabled daemon logging, no ports/TTY, restricted privileges/resources and immutable image selection for operator use. Final candidate image, appliance and provider gates remain separate.
+- Corrected object-first response unions so device arrays keep their reviewed projection; unmodeled fields still use bounded safe output. Output projection and text neutralization are not universal compatibility or sensitive-data-removal guarantees.
+- Bound MR-04's four complete MCP `tools/list` contracts (descriptions, input schemas, annotations and order) to reviewed fixture/profile hashes in candidate build evidence and checksums. Preparation compares generated listings with the versioned oracle and never recaptures it automatically.
+- Added release evidence verification for missing/altered contracts, metadata and checksums, full generator inputs including operation inventory, and source-only Docker/Spanish README/vector inputs. Runtime package allowlist and locked three-library runtime dependency/SRI remain unchanged.
+- Extended offline JSON/TOML and documentation launch checks to absolute installed executables, user-scoped setup, project-config trust warnings and reviewed immutable Docker templates; negative warnings are not executable advice.
+- Made isolated security receipts report a nullable revision with factual Git probe metadata when Git or a checkout is unavailable; test completeness and security assertions remain required.
+
+No new CI, lab or image success is asserted by this section. Per-operation live compatibility is partial; unresolved compatibility/security, final independent artifact review and deployment/provider approval prevent stable publication.
+
 ## 0.1.0-alpha.0 — prepared 2026-10-05
 
 Private alpha; no npm release or container publication.

@@ -1,10 +1,11 @@
+import { releaseAllowsOperation } from './release-capability.js';
 import type { Config } from '../config/schema.js';
 import type { Operation, OperationArgs } from '../api/operations.js';
 
 export class PolicyError extends Error { constructor() { super('Operation unavailable under the configured policy.'); } }
 /** Reused at tool publication and immediately before dispatch. Model args never grant authority. */
 export function isEligible(op:Operation,cfg:Config):boolean {
-  if (op.status!=='implemented') return false;
+  if (!releaseAllowsOperation(op)) return false;
   if (op.pathTemplate.startsWith('/advancedsearch/') && !(cfg.profiles as {sensitiveRead?:boolean}).sensitiveRead) return false;
   if (op.tier==='read') return cfg.profiles.read;
   if (!cfg.profiles.write) return false;

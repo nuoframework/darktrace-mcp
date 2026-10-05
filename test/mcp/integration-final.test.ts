@@ -9,7 +9,7 @@ import { parseConfig } from '../../src/config/schema.js';
 import { checkInput } from '../../src/api/validation.js';
 import { createAudit } from '../../src/observability/audit.js';
 import { callTool } from '../../src/tools/index.js';
-const cfg=parseConfig({instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'TEST_PUBLIC',privateToken:'TEST_PRIVATE'},profiles:{write:true}});
+const cfg=parseConfig({instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'TEST_PUBLIC',privateToken:'TEST_PRIVATE'},profiles:{write:false}});
 async function decoded(args:unknown,limits:Parameters<typeof boundedInput>[0]) {
   const stream=boundedInput(limits);let text='';stream.on('data',chunk=>{text+=String(chunk);});
   stream.end(JSON.stringify({method:'tools/call',params:{arguments:args}})+'\n');await once(stream,'end');return JSON.parse(text).params.arguments;
@@ -42,18 +42,13 @@ test('audit exact allowlist generates a correlation ID and awaits sink failure',
   await assert.rejects(audit.record('post_caller_chosen','start'));
   await assert.rejects(audit.record('get_status','ok',''));
 });
-test('executing write uses shared audit ID; failed pre-audit prevents request; post failure is completed',async()=>{
-  const records:Array<[string,string,string|undefined]>=[];let requests=0;
-  const client={async request(){requests++;return {json:{ok:true}};}};
-  const args={body:{did:1,label:'test'},dryRun:false};
-  const audit={async record(op:string,outcome:any,id?:string){records.push([op,outcome,id]);}};
-  assert.equal((await callTool('darktrace_update_device',args,{cfg,client,audit})).isError,undefined);
-  assert.equal(requests,1);assert.equal(records.length,2);assert.equal(records[0][1],'start');assert.equal(records[1][1],'ok');assert.equal(records[0][2],records[1][2]);
-  const denied=await callTool('darktrace_update_device',args,{cfg,client,audit:{async record(){throw new Error('fail');}}});
-  assert.equal(denied.isError,true);assert.equal(requests,1);
-  const completed=await callTool('darktrace_update_device',args,{cfg,client,audit:{async record(_op,outcome){if(outcome==='ok')throw new Error('fail');}}});
-  assert.equal(completed.structuredContent?.outcome,'completed');assert.equal(requests,2);
+test('release write denial occurs before every audit sink and client regardless of forged profile',async()=>{
+ let requests=0,audits=0;const client={async request(){requests++;return {};}};
+ const forged={...cfg,profiles:{...cfg.profiles,write:true,writeCritical:true}};
+ for(const dryRun of [undefined,true,false]){const result=await callTool('darktrace_update_device',{body:{did:1,label:'test'},...(dryRun===undefined?{}:{dryRun})},{cfg:forged,client,audit:{async record(){audits++;throw new Error('fail');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.outcome,undefined);assert.equal(result.structuredContent?.dryRun,undefined);}
+ assert.equal(requests,0);assert.equal(audits,0);
 });
+
 test('EOF, both signals, transport output error, input error and explicit close release client exactly once',async()=>{
   for(const trigger of ['EOF','SIGINT','SIGTERM','output error','input error','close']) {
     const stdin=new PassThrough(),stdout=new PassThrough(),signals=new EventEmitter();let closed=0;

@@ -5,7 +5,7 @@ import { createHttpClient } from '../../src/client/httpClient.js';
 import { operationDescriptors } from '../../src/api/operations.js';
 import { callTool } from '../../src/tools/index.js';
 import statusFixture from './fixtures/status.json' with {type:'json'};
-const cfg=()=>parseConfig({instance:{baseUrl:'https://192.0.2.10'},auth:{publicToken:'PUBLIC_SECRET',privateToken:'PRIVATE_SECRET'},profiles:{write:true,writeCritical:true}});
+const cfg=()=>parseConfig({instance:{baseUrl:'https://192.0.2.10'},auth:{publicToken:'PUBLIC_SECRET',privateToken:'PRIVATE_SECRET'},profiles:{write:false,writeCritical:false}});
 test('operation-to-HTTP integration uses fixture fetch, signing and fixed route',async()=>{
  const calls:Array<{url:string;init?:RequestInit}>=[];
  const client=createHttpClient(cfg(),{testOnly:true,operations:operationDescriptors,fetch:async(input,init)=>{
@@ -19,16 +19,9 @@ test('operation-to-HTTP integration uses fixture fetch, signing and fixed route'
  assert.equal((result.structuredContent?.data as any).version,'7.1-fixture');
  assert.equal(JSON.stringify(result).includes('SECRET'),false);
 });
-test('form-only writes preserve content type; critical preview makes zero fetch calls',async()=>{
- const calls:RequestInit[]=[];
- const client=createHttpClient(cfg(),{testOnly:true,operations:operationDescriptors,fetch:async(_url,init)=>{
-  calls.push(init!);return new Response('{"response":"SUCCESS"}',{headers:{'Content-Type':'application/json'}});
- }});
- const ctx={cfg:cfg(),client,audit:{async record(){}}};
- const ack=await callTool('darktrace_acknowledge_ai_analyst_incident',{operation:'post_aianalyst_acknowledge',body:{uuid:'fixture-uuid'},dryRun:false},ctx);
- assert.equal(ack.isError,undefined);assert.equal(calls.length,1);
- assert.equal(new Headers(calls[0].headers).get('Content-Type'),'application/x-www-form-urlencoded');
- assert.equal(Buffer.from(calls[0].body as Uint8Array).toString(),'uuid=fixture-uuid');
- const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:5},dryRun:false},ctx);
- assert.equal(preview.structuredContent?.dryRun,true);assert.equal(calls.length,1);
+test('production MCP denies form writes and critical actions before HTTP effects',async()=>{
+ let calls=0;const client=createHttpClient(cfg(),{testOnly:true,operations:operationDescriptors,fetch:async()=>{calls++;return new Response('{}');}});
+ const ctx={cfg:{...cfg(),profiles:{...cfg().profiles,write:true,writeCritical:true}},client,audit:{async record(){throw new Error('audit must not run');}}};
+ for(const name of ['darktrace_acknowledge_ai_analyst_incident','darktrace_antigena_manual_action'])for(const dryRun of [true,false]){const result=await callTool(name,{body:{did:1,uuid:'fixture-uuid'},dryRun},ctx);assert.equal(result.isError,true);assert.equal(result.structuredContent?.dryRun,undefined);}
+ assert.equal(calls,0);
 });

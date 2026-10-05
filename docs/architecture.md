@@ -1,6 +1,6 @@
 # Darktrace MCP server: design baseline
 
-**Status: implementation IN PROGRESS; not security validated.** Date: 2026-10-05. This document specifies required behavior, not evidence that the source implements it. No lab, security-test or release success is claimed here.
+**Status: private alpha `0.1.0-alpha.0`; stable release conditional.** Date: 2026-10-05. This document began as the design baseline; catalogue and deferred-write sections below are historical design material, not active first-stable capabilities. [§1.1](#11-current-implementation-snapshot) records the current release surface. Security evidence is dated, synthetic and offline (see §3); it is not a certification. Lab 7.1.0 passed the 19 permitted bounded recipes on native MCP and Docker; full API compatibility is not established.
 
 Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK comparison](../openapi/DIFF-sdk-vs-docs.md), [API contract](api-contract.md), [79-operation inventory](operation-inventory.json), and the unchanged [independent review](security/design-review.md). The target lab is **7.1**, not the documented **6.1**. [Design decisions and closure matrix](security/design-decisions.md) resolve B1–B8/F1–F15; their evidence is documentary. The repo is private; there is no npm publication. Raw `docs-src/` material must not be committed or packaged.
 
@@ -9,14 +9,40 @@ Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK compari
 | Area | Baseline decision |
 |---|---|
 | Deployment | One HTTPS origin and credential pair per process; **stdio only**, no HTTP listener/configuration. |
-| Policy | Inventory-backed operation allowlist; read by default; medium/high write off by default and unsigned dry-run by default. |
-| Critical | All six critical operations have no execution path in the baseline; eligible non-email tools may expose preview only. |
-| Sensitive read | POST Advanced Search requires operator `sensitiveRead` opt-in, default false, and model-provider eligibility notice. |
+| Policy | Immutable first-stable gate allows only the exact 19 validated GET selectors; non-read operations are denied before registration and signing. |
+| Changes and critical operations | No write execution or dry-run previews are available; medium/high and critical operations are deferred to a later release and need new review. |
+| Sensitive read | Cannot expand the 19-selector / 15-tool ceiling; Advanced Search is excluded even with opt-in. |
 | Blocked | Email, export, deprecated operation, S4 query+JSON, S5 DELETE+query and S6 GET/base64 paths. |
 | Canonicalization | Explicit startup `encoded` or `unencoded` query-signature mode; default `unencoded` per local SDK comparison, lab-unverified; no fallback. |
 | Network | Dedicated `node:https` connector, pinned initial DNS, preserved SNI and hostname verification, explicit `rejectUnauthorized:true`. |
 | Budgets | §5.3 hard ceilings; configuration can only lower them. |
-| Delivery | Private local build/reviewed tarball and digest-pinned Docker plan; actual artifact validation remains pending. |
+| Delivery | Private local build and inspected image ID; current image/lab checks passed, final candidate packaging remains pending. |
+
+### 1.1 Current implementation snapshot
+
+The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both read profiles expose the same complete contract; sensitive read cannot expand the ceiling. All excluded selectors, including writes, are refused before preview, audit or network access.
+
+The [79-operation coverage catalogue](../src/coverage/report.generated.json) is design accounting; §6 preserves conceptual deferred tools, not release eligibility. The active oracle is [the first-stable full fixture](../test/security/fixtures/mcp-tool-contracts-first-stable.json).
+
+| MCP tool | Permitted GET selectors |
+|---|---|
+| `darktrace_get_status` | `get_status` |
+| `darktrace_get_devices` | `get_devices` |
+| `darktrace_list_subnets` | `get_subnets` |
+| `darktrace_get_ai_analyst_stats` | `get_aianalyst_stats` |
+| `darktrace_get_intel_feed` | `get_intelfeed` |
+| `darktrace_list_model_breaches` | `get_modelbreaches` |
+| `darktrace_search_devices` | `get_devicesearch` |
+| `darktrace_get_similar_devices` | `get_similardevices` |
+| `darktrace_list_ai_analyst_incidents` | `get_aianalyst_groups`, `get_aianalyst_incidentevents` |
+| `darktrace_list_ai_analyst_investigations` | `get_aianalyst_investigations` |
+| `darktrace_get_model_breach_comments` | `get_mbcomments` |
+| `darktrace_get_connection_details` | `get_details` |
+| `darktrace_list_tags` | `get_tags_entities`, `get_tags_tid`, `get_tags_tid_entities` |
+| `darktrace_get_endpoint_details` | `get_endpointdetails` |
+| `darktrace_list_antigena_actions` | `get_antigena`, `get_antigena_summary` |
+
+Both profiles advertise these exact 15 tools with unchanged read-only, idempotent, non-destructive annotations. `write` and `writeCritical` cannot be enabled; no write preview exists. [Bounded native/Docker lab 19/19 evidence](security/validated-consultations-lab-checkpoint.md) is separate from final suites and stable publication.
 
 ## 2. Runtime and dependency baseline
 
@@ -26,14 +52,100 @@ The implementation target follows the local [package manifest](../package.json):
 
 ## 3. System overview
 
+Three compact views follow, plus the internal execution order. They describe the design the source implements; security evidence for source `eadfe117…` is dated 2026-10-05 and summarized in [corrections acceptance](security/mcp-corrections-acceptance.md). That evidence is synthetic and offline. It is not a certification, an appliance validation or a promise about every host or model. Diagram colors follow [visual identity §Diagrams](visual-identity.md#diagrams-and-badges); every meaning is also written in the labels.
+
+### 3.1 Request and return path
+
+```mermaid
+flowchart TB
+    accTitle: Request and return path
+    accDescr: An MCP host sends a tool call over stdio. The local server bounds the input, applies profile policy, signs eligible requests with HMAC and sends them over verified HTTPS to one Darktrace origin. The response is treated as untrusted data and returned bounded, minimized and escaped. Returned results enter the model provider's context.
+    subgraph HOST["MCP host and model · untrusted arguments"]
+        M["MCP client<br/>results enter model provider context"]
+    end
+    subgraph PROC["darktrace-mcp process · operator configuration only"]
+        I["Bounded stdio input<br/>strict JSON frames"]
+        G["Profile and runtime policy<br/>deny before signing"]
+        C["HMAC signer<br/>pinned node:https"]
+        R["Response handling<br/>size cap · code-owned views<br/>redaction · invisible-char escape"]
+    end
+    subgraph DT["Darktrace appliance · one configured origin"]
+        A["Threat Visualizer API"]
+    end
+    M -->|"tools/call over stdio"| I --> G
+    G -->|"eligible request only"| C
+    C -->|"HTTPS + HMAC headers<br/>TLS verified"| A
+    A -->|"untrusted response"| R
+    R -->|"bounded result<br/>data, not instructions"| M
+    classDef host fill:#FFFFFF,stroke:#030D11,color:#030D11
+    classDef core fill:#030D11,stroke:#FF6B00,stroke-width:2px,color:#FFFFFF
+    classDef ext fill:#FFFFFF,stroke:#4B00D7,stroke-width:2px,color:#030D11
+    class M host
+    class I,G,C,R core
+    class A ext
+```
+
+The server never asks the model for credentials, origins or policy. Returned results can leave the organization through the host's model provider; assess that egress before any deployment (§8.3). Default ceilings are 2 MiB per upstream response and 60,000 characters per tool result; configuration can only lower them (§5.3). Escaping invisible characters is a presentation defense: it does not stop a host from following text it chooses to trust.
+
+### 3.2 Profiles and trust boundaries
+
 ```mermaid
 flowchart LR
+    accTitle: Profile decisions
+    accDescr: Each tool call is checked against the operation inventory and the immutable release policy. Read is on by default. Non-read operations, including writes and critical operations, are denied before signing; no write previews are available. Sensitive read cannot expand the validated ceiling. Export, email and HTTP are rejected.
+    T["tools/call"] --> Q{"Operation in inventory<br/>and profile enabled?"}
+    Q -->|"no"| X["Denied<br/>no signing, no network"]
+    Q -->|"read · default on"| RD["Bounded read"]
+    Q -->|"excluded selector · any profile"| X
+    Q -->|"write · critical"| X
+    Q -->|"export · email · HTTP"| NO["Rejected<br/>configuration error"]
+    classDef core fill:#030D11,stroke:#FF6B00,stroke-width:2px,color:#FFFFFF
+    classDef allow fill:#FFFFFF,stroke:#4B00D7,stroke-width:2px,color:#030D11
+    classDef deny fill:#FFFFFF,stroke:#FF00D9,stroke-width:2px,stroke-dasharray:5 3,color:#030D11
+    class T,Q core
+    class RD allow
+    class X,NO deny
+```
+
+Only the operator sets profiles, at startup. The release rejects write and critical settings; no client or model approval can enable those capabilities. Model or host approval is never authorization; appliance token ACLs remain authoritative. Writes are deferred to a later release (§8.2).
+
+### 3.3 Docker runtime
+
+```mermaid
+flowchart TB
+    accTitle: Docker runtime boundaries
+    accDescr: The MCP client starts docker with stdio attached and no published ports. Token files are bind mounted read-only. The container runs as UID 1000 from an image pinned by ID with pull disabled, with a read-only root, all capabilities dropped, no new privileges and PID and memory limits. It only makes outbound HTTPS to the appliance.
+    subgraph HOSTD["Host · operator-owned"]
+        CL["MCP client<br/>absolute docker path"]
+        TK["Token files<br/>0600, owned by UID 1000"]
+    end
+    subgraph CT["Container · image pinned by ID · --pull=never"]
+        S["node dist/src/index.js<br/>UID 1000:1000"]
+        L["Read-only root<br/>all capabilities dropped<br/>no-new-privileges · init<br/>PIDs 64 · memory 256 MiB<br/>Docker logging off"]
+    end
+    CL -->|"stdin/stdout only<br/>no published ports"| S
+    TK -.->|"read-only bind mounts<br/>/run/secrets"| S
+    S -->|"outbound HTTPS only"| DT2["Darktrace appliance"]
+    classDef host fill:#FFFFFF,stroke:#030D11,color:#030D11
+    classDef core fill:#030D11,stroke:#FF6B00,stroke-width:2px,color:#FFFFFF
+    classDef ext fill:#FFFFFF,stroke:#4B00D7,stroke-width:2px,color:#030D11
+    class CL,TK host
+    class S,L core
+    class DT2 ext
+```
+
+The local image is built from a digest-pinned Node 22 base. Remediation of the base-image vulnerability scan is still in progress, so this document claims no clean scan. See the [Docker guide](docker.md) for the current record.
+
+### 3.4 Internal execution order
+
+```mermaid
+flowchart TB
     H[MCP host/model] -->|stdio untrusted arguments| V[Bounded input validation]
     V --> P[Runtime operation policy]
-    P -->|preview| D[Unsigned four-field summary]
-    P -->|eligible execution only| A[Await pre-action audit]
-    A --> O[Recheck operation policy and budgets]
-    O --> S[Immutable request and signer]
+    P -->|denied non-read operation| D[No tool registration or signing]
+    P -->|eligible read operation only| O[Recheck read policy and budgets]
+    O --> B[Build immutable read request]
+    B --> S[Request signer]
     S --> N[Pinned node:https connector]
     N -->|verified HTTPS| DT[Single Darktrace origin]
     DT --> R[Bounded untrusted response and redaction]
@@ -44,13 +156,13 @@ Policy denies before builder/signer/network. Registration is a usability filter,
 
 ## 4. Repository responsibilities
 
-`src/config/` validates operator-only startup state; `src/server/` handles bounded stdio input and lifecycle; `src/tools/` defines curated tools; `src/policy/` enforces runtime permissions and previews; `src/api/` contains static spec-derived descriptors and validation; `src/client/` handles canonicalization and the pinned HTTPS connector; `src/shape/` minimizes and redacts output; `src/observability/` owns awaited audit and diagnostics. `scripts/` may generate static catalogue data from the local spec at build time. No production module fetches schemas or code from an appliance. Source and tests are in progress; this layout is responsibility allocation, not an assertion that every planned module exists.
+`src/config/` validates operator-only startup state; `src/server/` handles bounded stdio input and lifecycle; `src/tools/` defines curated tools; `src/policy/` enforces the immutable read-only release gate; `src/api/` contains static spec-derived descriptors and validation; `src/client/` handles canonicalization and the pinned HTTPS connector; `src/shape/` minimizes and redacts output; `src/observability/` owns diagnostics. `scripts/` may generate static catalogue data from the local spec at build time. No production module fetches schemas or code from an appliance. Historical write-preview and audit flows below are future design material, not active release behavior.
 
 ## 5. Module interfaces
 
 ### 5.1 Configuration and credentials
 
-Configuration is validated strictly at startup from an operator-owned file/environment. Unknown or unsupported bypass fields fail closed. Production config has no `compat.assumeVersion` (test-only injection may supply a version), no HTTP host/port/bearer tokens and no export writer settings. `transport.kind`, if present, accepts only `stdio`; `transport.http` and `bearerTokens` are rejected. `DARKTRACE_PROFILES` accepts `read` and `write` only; requesting `email` or `export` is an error.
+Configuration is validated strictly at startup from an operator-owned file/environment. Unknown or unsupported bypass fields fail closed. Production config has no `compat.assumeVersion` (test-only injection may supply a version), no HTTP host/port/bearer tokens and no export writer settings. `transport.kind`, if present, accepts only `stdio`; `transport.http` and `bearerTokens` are rejected. `DARKTRACE_PROFILES` accepts only `read`; `read,write` is rejected. Requesting `email` or `export` is also an error.
 
 | Field | Required semantics |
 |---|---|
@@ -60,9 +172,9 @@ Configuration is validated strictly at startup from an operator-owned file/envir
 | `auth.querySignatureEncoding` / `DARKTRACE_QUERY_SIGNATURE_ENCODING` | `encoded` or `unencoded`; default `unencoded`, chosen once at startup. |
 | `auth.dateFormat` / `DARKTRACE_DATE_FORMAT` | `compact` (default UTC) or `spaced`; invalid header characters rejected. |
 | `profiles.read` | Always true. |
-| `profiles.write` / `DARKTRACE_PROFILES=read,write` | False by default; operator permission for eligible medium/high tools. Release approval is procedural (§12), not checked by runtime. |
-| `profiles.writeCritical` / `DARKTRACE_WRITE_CRITICAL` | False by default; `true` with `profiles.write:false` is a startup configuration error. With write enabled it only exposes non-email critical previews. |
-| `profiles.sensitiveRead` / `DARKTRACE_SENSITIVE_READ` | False by default; explicit operator permission for POST Advanced Search. |
+| `profiles.write` / `DARKTRACE_PROFILES=read,write` | Any attempt to enable write is rejected at startup; the immutable release capability is read-only. |
+| `profiles.writeCritical` / `DARKTRACE_WRITE_CRITICAL` | Any attempt to enable critical capability is rejected at startup; no critical preview or execution is exposed. |
+| `profiles.sensitiveRead` / `DARKTRACE_SENSITIVE_READ` | False by default; either setting preserves the same 15 tools / 19 GET ceiling. |
 | `limits.*` | Bounded integers; only lower the ceilings in §5.3, never raise them. |
 
 The finalized configuration field contract is below; source implementation is in progress, so these names and bounds are requirements rather than an assertion of enforcement. The listed maxima are hard ceilings; configuration can only lower them and must reject noninteger, negative or above-ceiling values.
@@ -101,7 +213,7 @@ request({ operationId, pathParams, query, body, contentType, signal })
 
 HMAC-SHA1 uses the local spec's `<path+query>\n<public>\n<date>` message and hex digest. Build once, serialize JSON/form once, freeze/copy the result and send those exact bytes. Percent-encode values on wire; the startup mode determines encoded versus unencoded query values in the signature. Preserve query ordering; reject CR/LF; never try another mode on 401. Default unencoded follows the SDK evidence in [API S1](api-contract.md#3-authentication-and-signing-ambiguities) and is **lab-unverified**. A Date header may support a sanitized clock diagnostic, never clock adjustment, tolerance widening or replay.
 
-S4 query+JSON, S5 DELETE+query and S6 base64-in-GET-path are **blocked before build/sign/network**. No quirk flag, startup signing mode, tool argument or version response enables them. POST Advanced Search is the only eligible advanced-search form, with sensitiveRead opt-in, bounded documented body and no query+JSON combination. Email S9 is blocked. Future lab evidence alone does not change production gates without reviewed code/design changes.
+S4 query+JSON, S5 DELETE+query and S6 base64-in-GET-path are **blocked before build/sign/network**. No quirk flag, startup signing mode, tool argument or version response enables them. Advanced Search POST is deferred and ineligible in this release, including with sensitiveRead; its source design does not grant release access. Email S9 is blocked. Future lab evidence alone does not change production gates without reviewed code/design changes.
 
 ### 5.3 Dedicated HTTPS connector and budgets
 
@@ -135,7 +247,9 @@ No POST/DELETE retry, including read-via-POST. No retries on authentication fail
 
 There is **no automatic startup status probe**. The baseline starts with version unknown. Only an explicit bounded `get_status` tool call requests `GET /status`; its response is untrusted compatibility data, not automatic enablement. Quirks may warn, narrow an allowed parameter set, or disable operations. They **never** change signing mode, routes to new destinations, risk/profile requirements, schema trust, or resource ceilings; they cannot enable blocked shapes. No automatic `alter_request` substitution (such as silently dropping `hours` for a broader query). Unknown/unavailable version retains conservative gates, and no production `assumeVersion` bypass exists. `documentedIn:6.1` and actual `validatedOn:7.1` evidence remain separate; a reported version is not validation.
 
-### 5.6 Runtime policy, preview and audit ordering
+### 5.6 Runtime policy and deferred write-design material
+
+**Current release behavior:** the immutable release-capability gate permits only the 19 validated GET selectors. It denies every write and critical operation before registration or signing; there is no dry-run preview, write audit flow or configuration switch that enables one. The numbered write/preview flow below is retained as future design material only and does not describe a capability available in this release.
 
 0. At dispatch **and** inside operation execution, re-resolve trusted descriptors and enforce current operator profiles, compatibility restrictions, sensitivity and unconditional email/export/deprecated/shape gates. Unknown or forbidden operations yield zero signer/network calls. Registration filters the same rules but is not sufficient.
 1. Validate bounded arguments and reject unsupported fields such as `confirm`. Non-email critical descriptors may be used only to produce metadata previews under write+writeCritical; no request is built for them. Email never registers even for preview.
@@ -164,7 +278,7 @@ interface Audit {
 
 ### 5.7 Tool definitions and output
 
-Tool names, route mapping and required permissions are code-owned. Describe critical tools as preview-only and sensitive search as operator-gated. `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint` reflect semantics but never authorize execution or retries. Results use bounded text/structured data and sanitized `isError` failures with correlation IDs. Treat comments, hostnames, Markdown, HTML and error text as untrusted data. No execution, auto-fetch, schema generation or policy mutation from responses.
+This release exposes consultation operations only; write actions are unavailable. The current release registers no critical tools; catalogue metadata for future tools must not be described as an available preview. Sensitive search remains explicitly operator-gated and not lab validated. `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint` reflect semantics but never authorize execution or retries. Results use bounded text/structured data and sanitized `isError` failures with correlation IDs. Treat comments, hostnames, Markdown, HTML and error text as untrusted data. No execution, auto-fetch, schema generation or policy mutation from responses.
 
 Response minimization uses code-owned, schema-backed views (AD-03), not caller-selected or response-defined field maps. The projection omits unknown properties and reduces unknown/unmodeled structures to a fixed summary; the Advanced Search `@message` field is excluded, while the `@fields` slot carries only a fixed summary and never copies its dynamic protocol fields. This minimization is independent of token redaction. Redaction (AD-01) replaces configured token literals and a finite set of one-step UTF-8 representations: JSON-escaped text, standard/base64url with or without padding, percent-encoded URI forms with hex-case variants, and hexadecimal for tokens of at least four bytes. It does not promise detection of arbitrary transforms, recursive/double encoding, or prefixed/wrapped encodings. See ST-02 sink and ST-09 minimization tests.
 
@@ -184,7 +298,7 @@ Stdout is protocol only. Structured logs/audit go to redacted stderr or an opera
 
 ## 6. Tool catalogue (curated)
 
-Naming: `darktrace_<verb>_<object>`. Tier and annotations follow `operation-inventory.json`. Operations column uses the spec's `operationId`s. This is a design catalogue, not a claim of implemented or registered tool counts. Current runtime input uses a fixed `operation: operationId` enum for multi-operation tools with strict `path`, `query` and `body` groups; a single-operation tool defaults its operation. Descriptions below do not promise separate ergonomic aliases. All 7.1 validation remains pending. Registration and execution are filtered by §5.6, including shape gates.
+Current counts are in [§1.1](#11-current-implementation-snapshot); this section is the original design catalogue. Naming: `darktrace_<verb>_<object>`. Tier and annotations follow `operation-inventory.json`. Operations column uses the spec's `operationId`s. This is a design catalogue, not a claim of implemented or registered tool counts. Current runtime input uses a fixed `operation: operationId` enum for multi-operation tools with strict `path`, `query` and `body` groups; a single-operation tool defaults its operation. Descriptions below do not promise separate ergonomic aliases. Broader catalogue validation remains deferred; only the 19 current permitted recipes have native/Docker 7.1.0 evidence. Registration and execution are filtered by §5.6, including shape gates.
 
 ### 6.1 Read catalogue: 28 tools, 42 operations
 
@@ -216,12 +330,12 @@ Naming: `darktrace_<verb>_<object>`. Tier and annotations follow `operation-inve
 | `darktrace_get_intel_feed` | `get_intelfeed` | |
 | `darktrace_get_summary_statistics` | `get_summarystatistics` | A reported version can disable unsupported `hours`; it cannot rewrite or broaden the request. |
 | `darktrace_get_reference_data` | `get_enums`, `get_filtertypes` | |
-| `darktrace_advanced_search` | `get_advancedsearch_api_search_query`, `post_advancedsearch_api_search`, `get_advancedsearch_api_analyze_field_analysis_query`, `get_advancedsearch_api_graph_graphmode_interval_query` | Only POST search is eligible with `profiles.sensitiveRead:true` (default false); all three GET/base64 forms are blocked by S6. Passes bounded `size` through; minimized output and provider eligibility notice required. |
+| `darktrace_advanced_search` | `get_advancedsearch_api_search_query`, `post_advancedsearch_api_search`, `get_advancedsearch_api_analyze_field_analysis_query`, `get_advancedsearch_api_graph_graphmode_interval_query` | Only POST search is eligible with `profiles.sensitiveRead:true` (default false); it is not lab validated. All three GET/base64 forms are blocked by S6. Passes bounded `size` through; minimized output and provider eligibility notice required. |
 | `darktrace_list_pcaps` | `get_pcaps` | Lists captures only; download is blocked by the baseline export gate. |
 
-### 6.2 Write profile: 9 tools, 16 operations (tiers medium and high)
+### 6.2 Historical write catalogue: 9 tools, 16 operations (not exposed)
 
-All carry `readOnlyHint: false`, `destructiveHint` as listed, and default to `dryRun:true`. Execution requires operator `write` opt-in, explicit `dryRun:false`, an eligible request shape and successful awaited pre-audit. No POST or DELETE retries. ST-07/12/13 is a **procedural release review gate**, not a runtime check; an operator can enable write and dryRun:false before that evidence exists. The baseline must not be described as enforcing release approval.
+The table preserves source-catalogue design accounting only. None of these tools or operations is registered in the current first-stable release; the immutable release gate denies non-read tiers, and no write profile, preview or execution path is available. A later release requires a new reviewed activation and authorization gate.
 
 | Tool | Operations covered | Tier | destructiveHint | idempotentHint |
 |---|---|---|---|---|
@@ -235,9 +349,9 @@ All carry `readOnlyHint: false`, `destructiveHint` as listed, and default to `dr
 | `darktrace_manage_tags` | `post_tags`, `post_tags_entities`, `delete_tags_entities` **blocked (S5)**, `post_tags_tid_entities`, `delete_tags_tid_entities_teid` | high | true | partly |
 | `darktrace_request_pcap` | `post_pcaps` | high | false | false |
 
-### 6.3 Write profile with critical gate: 6 tools, 6 operations
+### 6.3 Historical critical catalogue: 6 tools, 6 operations (not exposed)
 
-Non-email critical tools register as **preview-only** when `write` and `writeCritical` are enabled. All six critical operations are permanently non-executable in this baseline: no input enables signing or network access, and no `confirm` field exists. Email action is not registered even for preview. `destructiveHint:true` is descriptive, never an authorization mechanism.
+The table preserves source-catalogue design accounting only. No critical operation or preview is registered in the current release; write and critical settings are rejected at startup, and all non-read operations are denied before signing. A later release needs a separate reviewed activation gate. `destructiveHint:true` is descriptive, never an authorization mechanism.
 
 | Tool | Operation | Why critical |
 |---|---|---|
@@ -276,6 +390,8 @@ All 14 email operations are blocked, including the action and download placed in
 
 ### 6.7 Totals
 
+The totals below are historical catalogue accounting, not shipping capability or enabled-tool counts.
+
 | Bucket | Tools | Operations |
 |---|---|---|
 | read | 28 | 42 |
@@ -289,9 +405,9 @@ All 14 email operations are blocked, including the action and download placed in
 | of which blocked (email read) | 6 | 12 |
 | of which excluded | 0 | 1 |
 
-Operations: each of the 79 spec operations appears in exactly one row. The two email operations with a write or binary nature are placed by tier, not by module: `post_..._emails_uuid_action` is in the critical row and `get_..._emails_uuid_download` in the export row, so the email row holds the remaining 12. Check: 42 + 16 + 6 + 2 + 12 + 1 = 79. By tier this equals `docs/operation-inventory.json`: read 57 = 42 + 2 + 12 + 1, medium 9 + high 7 = 16, critical 6.
+Operations: each of the 79 spec operations appears in exactly one historical catalogue row. The two email operations with a write or binary nature are placed by tier, not by module: `post_..._emails_uuid_action` is in the critical row and `get_..._emails_uuid_download` in the export row, so the email row holds the remaining 12. Check: 42 + 16 + 6 + 2 + 12 + 1 = 79. By tier this equals `docs/operation-inventory.json`: read 57 = 42 + 2 + 12 + 1, medium 9 + high 7 = 16, critical 6.
 
-Tools: 51 conceptual definitions preserve inventory accounting. This does not imply 51 or 45 registered tools: export, all email, S6 GET forms and the deprecated operation remain blocked; sensitive search is off by default; critical is preview-only. A tool can cover several operations. Coverage must record each blocked operation even when another operation in its tool is eligible.
+Tools: 51 conceptual definitions preserve inventory accounting. This does not imply 51 or 45 registered tools. The current release registers 15 read tools covering 19 GET selectors in either profile; every write and critical operation is denied, no preview is available, export and email remain blocked, and S6 GET forms plus the deprecated operation remain excluded. A tool can cover several operations. Coverage must record each blocked operation even when another operation in its catalogue tool is eligible.
 
 ## 7. Coverage tracking
 
@@ -313,16 +429,16 @@ The future binary descriptor alone may specify a distinct byte ceiling: **200,00
 
 | Setting | Default | Baseline behavior |
 |---|---|---|
-| read | true | Eligible non-sensitive reads within fixed shapes and budgets. |
-| write | false | Medium/high tools default to unsigned preview; runtime execution needs operator opt-in, explicit false dryRun and awaited audit. Release evidence gate is procedural only. |
-| write + writeCritical | false | writeCritical=true without write is a startup error; otherwise non-email critical previews only, with no signer/network path. |
-| sensitiveRead | false | POST Advanced Search only after explicit operator opt-in and provider eligibility assessment. |
+| read | true | Registers 15 tools covering the exact 19 validated GET selectors. |
+| write | false | Any attempt to enable write is rejected; no write operation or preview is exposed. Writes are deferred to a later release. |
+| writeCritical | false | Any attempt to enable critical capability is rejected; no critical operation or preview is exposed. |
+| sensitiveRead | false | Does not change the 15 tools / 19 GET selectors; Advanced Search stays excluded. |
 | export / email | unsupported | Configuration error; unconditional runtime denial. |
 | HTTP | unsupported | Configuration error; no listener. |
 
 ### 8.3 Model-provider egress and residual risks
 
-**Operator notice:** tool results enter the MCP host/model context and may leave the organization for its model provider. Before enabling any deployment, the operator must assess that provider's data processing, retention, residency and organizational eligibility for appliance data. `sensitiveRead` is an additional opt-in for Advanced Search, not proof of eligibility and not approval supplied by a model. Default views minimize fields; raw captures/mail stay blocked. The README/distribution owner must reproduce this notice before release (ST-09/TM-17).
+**Operator notice:** tool results enter the MCP host/model context and may leave the organization for its model provider. Before enabling any deployment, the operator must assess that provider's data processing, retention, residency and organizational eligibility for appliance data. `sensitiveRead` cannot grant excluded operations, certify provider eligibility or substitute for authorization. Default views minimize fields; raw captures/mail stay blocked. The README/distribution owner must reproduce this notice before release (ST-09/TM-17).
 
 Residual risks include bootstrap DNS trust without an explicit allowlist, remote signature replay tolerance, host semantic prompt injection, same-user/OS compromise, trusted NODE_OPTIONS preloads, aggregate load from multiple processes and supply-chain compromise. No residual risk acceptance is recorded. The [threat model](security/threat-model.md) specifies controls and tests, not claims of effectiveness.
 
@@ -351,16 +467,20 @@ Future private release artifacts require independently verified SHA-256 checksum
 Use a non-root runtime image pinned by digest, a read-only filesystem and dropped capabilities; build/install dependencies with scripts disabled and no embedded credentials. Default secret provisioning is a **read-only mounted token file**, not plaintext private-token environment or `--env-file`:
 
 ```sh
-# Illustrative only: supply an actual verified image digest and an existing secure file.
-docker run -i --rm --init --read-only --cap-drop ALL \
-  --mount type=bind,src=/secure/darktrace-private,dst=/run/secrets/darktrace_private,readonly \
-  -e DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/darktrace_private \
-  -e DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/darktrace_public \
-  --mount type=bind,src=/secure/darktrace-public,dst=/run/secrets/darktrace_public,readonly \
+# Illustrative only: use the ID of your locally built and inspected image and existing secure files.
+docker run -i --rm --init --pull=never --log-driver=none \
+  --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+  --pids-limit=64 --memory=256m --user 1000:1000 \
+  --mount type=bind,src=/secure/darktrace-public,dst=/run/secrets/public-token,readonly \
+  --mount type=bind,src=/secure/darktrace-private,dst=/run/secrets/private-token,readonly \
   -e DARKTRACE_URL=https://appliance.example \
+  -e DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token \
+  -e DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token \
   -e DARKTRACE_PROFILES=read \
-  ghcr.io/nuoframework/darktrace-mcp@sha256:<verified-digest>
+  sha256:<local-image-id>
 ```
+
+No image is published to a registry. The [Docker guide](docker.md) and [Docker client example](../examples/docker.mcp.json) are the operational references.
 
 Files must be readable by and owned by the container's non-root UID with mode 0600 or stricter; a read-only mount does not waive ownership/mode checks. Host provisioning must arrange that ownership. No export mount is active in the baseline. Image build, digest, platforms and runtime behavior still require evidence.
 
@@ -368,13 +488,13 @@ Files must be readable by and owned by the container's non-root UID with mode 06
 
 The normative oracle is [ST-01–16](security/security-test-plan.md#traceable-test-matrix). Use `tsc` plus `node:test`, synthetic fixtures and deterministic clock/DNS/connector seams. Real child-process stdio and isolated loopback **TLS** connector tests are required; production cannot enable loopback test overrides. Ordinary offline tests deny external networking and never load lab secrets. All acceptance tests here are requirements, not reported results.
 
-Critical assertions: unsigned previews and every forbidden call have **zero signer and network calls**; hidden operations cannot bypass runtime checks; all six critical operations remain non-executable; post-audit failure cannot trigger replay. Verify exact budgets at boundary and +1, actual pinned sockets/SNI/certificates and SDK stdio framing/EOF. Catalogue and fixture checks cannot prove live 7.1 compatibility. Build fixtures for blocked forms only to test refusal, not to enable them.
+Critical assertions for the current release: every denied non-read call has **zero registration, signer and network calls**; hidden operations cannot bypass runtime checks; all critical operations remain unavailable. Future write-preview/audit flows require a new reviewed activation and tests before they can be described as current behavior. Verify exact budgets at boundary and +1, actual pinned sockets/SNI/certificates and SDK stdio framing/EOF. Catalogue and fixture checks cannot prove live 7.1 compatibility. Build fixtures for blocked forms only to test refusal, not to enable them.
 
 ## 12. Release plan
 
 Release remains gated on exact-commit offline/security evidence, dependency review, installed-tree verification and actual tarball/image inspection (ST-15). A green build or documentation matrix is not security validation. Keep package pins from §2 exact in the manifest and shrinkwrap; reviewed updates regenerate and recheck the actual installed tree. Publication or pushing images requires a separate authorized release workflow. No release occurs as part of this document change.
 
-Record commit, runtime/OS, command, fixture provenance, budgets, outcome and evidence location for each ST ID. A skipped check is not passed. Compatibility claims must explicitly separate local spec 6.1 from authorized 7.1 results. Medium/high write approval requires ST-07/12/13 and action-specific lab authorization as a **procedural release gate**. Runtime does not read ST evidence or enforce that approval: operator write opt-in can permit execution before validation. This is a deployment/release responsibility, not a security guarantee; critical execution has no baseline release gate because it is excluded permanently here.
+Record commit, runtime/OS, command, fixture provenance, budgets, outcome and evidence location for each ST ID. A skipped check is not passed. Compatibility claims must explicitly separate local spec 6.1 from authorized 7.1 results. The current release denies writes and has no preview path; any later medium/high or critical capability needs a new reviewed runtime gate, action-specific lab authorization and release approval. No operator profile or lab result alone can enable it.
 
 ## 13. Decisions closed and external gates
 
@@ -387,7 +507,7 @@ External validation remains: S1 and other eligible canonicalization against an a
 | Owner | Required acceptance before release/activation |
 |---|---|
 | Config/network | Strict startup schema, secure token files, explicit signing mode, env refusal, pinned node:https and all ceilings; ST-01–05/11/12. |
-| Policy/API | Inventory completeness, dispatch/execution rechecks, unsigned four-field previews, critical no-execution, sensitivity gate, restrictive quirks; ST-06–09. |
+| Policy/API | Inventory completeness, dispatch/execution rechecks, immutable read-only release gate, denied-operation zero registration/sign/network, sensitivity gate, restrictive quirks; ST-06–09. |
 | Observability/server | Awaited audit fail-closed, bounded sanitized results, stdio EOF/frames/no listener; ST-02/13/14/16. |
 | Release | Exact pins, shrinkwrap and actual installed tree, private artifact and Docker mount evidence; ST-15. |
 | Separate future work | Export writer ST-09/10/11; pinned email contract/S9; HTTP threat review; separately reviewed trusted host approval outside this baseline. |

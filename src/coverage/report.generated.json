@@ -28,6 +28,11 @@
       "status": "blocked",
       "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -98,8 +103,13 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "preview-only",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -148,8 +158,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -220,6 +235,11 @@
       "status": "blocked",
       "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -693,6 +713,11 @@
       "status": "blocked",
       "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -984,6 +1009,11 @@
       "status": "blocked",
       "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1139,6 +1169,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1162,6 +1197,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1185,6 +1225,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1208,6 +1253,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1231,6 +1281,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1254,6 +1309,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1306,6 +1366,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1358,6 +1423,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1381,6 +1451,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1404,6 +1479,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1427,6 +1507,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1450,6 +1535,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1473,6 +1563,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -1967,8 +2062,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -2056,6 +2156,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -2570,6 +2675,11 @@
       "status": "excluded",
       "reason": "Deprecated endpoint",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -2816,6 +2926,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -2955,6 +3070,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -3154,6 +3274,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -3180,15 +3305,23 @@
                 "kind": "boolean"
               },
               "triggerer": {
-                "kind": "object",
-                "fields": {
-                  "username": {
-                    "kind": "string"
+                "kind": "union",
+                "variants": [
+                  {
+                    "kind": "object",
+                    "fields": {
+                      "username": {
+                        "kind": "string"
+                      },
+                      "reason": {
+                        "kind": "string"
+                      }
+                    }
                   },
-                  "reason": {
-                    "kind": "string"
+                  {
+                    "kind": "null"
                   }
-                }
+                ]
               },
               "label": {
                 "kind": "string"
@@ -3456,6 +3589,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -3473,13 +3611,13 @@
             "pendingActionDevices": {
               "kind": "array",
               "items": {
-                "kind": "summary"
+                "kind": "number"
               }
             },
             "activeActionDevices": {
               "kind": "array",
               "items": {
-                "kind": "summary"
+                "kind": "number"
               }
             }
           }
@@ -3564,8 +3702,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -3685,8 +3828,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -3824,8 +3972,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -3968,6 +4121,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -4519,8 +4677,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -4863,6 +5026,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -5242,6 +5410,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -5524,8 +5697,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -5592,6 +5770,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -5858,8 +6041,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6017,8 +6205,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6083,6 +6276,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -6204,6 +6402,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -6357,8 +6560,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6764,8 +6972,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6838,8 +7051,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6931,6 +7149,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -7943,8 +8166,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -8974,8 +9202,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9057,8 +9290,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9196,8 +9434,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9325,8 +9568,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9974,8 +10222,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10027,6 +10280,11 @@
       "status": "blocked",
       "reason": "Independent export approval, retention and aggregate disk quota pending",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -10072,6 +10330,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -10245,6 +10508,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -10354,6 +10622,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -10469,8 +10742,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10594,6 +10872,39 @@
             }
           }
         },
+        "requestVariants": [
+          {
+            "query": {
+              "eventtype": "loginput"
+            },
+            "schema": "SummarystatisticsEventtypeLoginput",
+            "fields": {
+              "kind": "object",
+              "fields": {
+                "events": {
+                  "kind": "boolean"
+                },
+                "data": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "timems": {
+                        "kind": "number"
+                      },
+                      "time": {
+                        "kind": "string"
+                      },
+                      "events": {
+                        "kind": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
         "unknownFields": "omitted",
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
@@ -10645,8 +10956,8 @@
           "name": "endtime",
           "location": "query",
           "required": false,
-          "status": "blocked",
-          "reason": "Standalone time endpoint has no paired endpoint in this operation schema; form rejected",
+          "status": "accepted",
+          "reason": null,
           "units": "milliseconds",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10660,15 +10971,21 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "paired range validation rejection",
-          "rangeRule": "paired endpoints, ordered, at most seven days; explicit descriptor units"
+          "enforcement": "strict schema validation before request building",
+          "conditionalRules": [
+            {
+              "id": "summary_hourly_anchor",
+              "description": "Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion"
+            }
+          ],
+          "rangeRule": "Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion"
         },
         {
           "name": "to",
           "location": "query",
           "required": false,
-          "status": "blocked",
-          "reason": "Standalone time endpoint has no paired endpoint in this operation schema; form rejected",
+          "status": "accepted",
+          "reason": null,
           "units": "UTC datetime",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10683,8 +11000,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "paired range validation rejection",
-          "rangeRule": "paired endpoints, ordered, at most seven days; explicit descriptor units",
+          "enforcement": "strict schema validation before request building",
+          "conditionalRules": [
+            {
+              "id": "summary_hourly_anchor",
+              "description": "Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion"
+            }
+          ],
+          "rangeRule": "Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion",
           "additionalRules": [
             {
               "id": "utc_calendar",
@@ -10762,8 +11085,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10869,6 +11197,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -11046,6 +11379,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -11149,6 +11487,11 @@
       "status": "implemented",
       "reason": null,
       "discovery": "profile dependent",
+      "releaseEligible": true,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "operator profile dependent",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -11304,8 +11647,13 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -11772,6 +12120,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -11818,6 +12171,11 @@
       "status": "blocked",
       "reason": "Instance email schema and authentication contract required",
       "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
       "execution": "blocked",
       "documentedIn": "6.1",
       "validatedOn": [],
@@ -11891,8 +12249,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -11980,8 +12343,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12090,8 +12458,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "blocked input form",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12196,8 +12569,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12285,8 +12663,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12374,8 +12757,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12463,8 +12851,13 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "preview-only",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12645,8 +13038,13 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "preview-only",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13041,8 +13439,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13341,8 +13744,13 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "preview-only",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13912,8 +14320,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14080,8 +14493,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14183,8 +14601,13 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14351,8 +14774,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14634,8 +15062,13 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "preview-only",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15215,8 +15648,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15481,8 +15919,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15614,8 +16057,13 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "profile dependent",
-      "execution": "operator profile dependent",
+      "discovery": "unavailable",
+      "releaseEligible": false,
+      "releaseCapability": {
+        "write": false,
+        "writeCritical": false
+      },
+      "execution": "release capability denied",
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {

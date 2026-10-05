@@ -57,7 +57,7 @@ export function validateOperation(op:Operation, raw:unknown, limits:number|Parti
     args.body=schemaFromOpenApi(chosen.schema).parse(args.body);
   }
   for (const [name,value] of Object.entries(args.path??{})) {if(args.query?.[name]!==undefined&&String(args.query[name])!==String(value)) throw new Error('Conflicting target parameters');}
-  checkRanges(args.query??{},Object.fromEntries(queryParams.map(p=>[p.name,inputUnit({...p.schema,description:p.description},p.name)])));
+  checkRanges(args.query??{},Object.fromEntries(queryParams.map(p=>[p.name,inputUnit({...p.schema,description:p.description},p.name)])),op.operationId);
   const bodyProperties=op.bodies.find(b=>b.contentType===(args.contentType??op.bodies[0]?.contentType))?.schema.properties??{};
   checkRanges((args.body&&typeof args.body==='object'?args.body:{}) as Record<string,unknown>,Object.fromEntries(Object.entries(bodyProperties).map(([name,schema])=>[name,inputUnit(schema as any,name)])));
   for (const [key,value] of Object.entries(args.path??{})) {

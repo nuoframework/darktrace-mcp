@@ -1,0 +1,17 @@
+{
+  "purpose": "Historical pre-first-stable alpha assertions, not active stable tests; no runtime bypass",
+  "sourceTreeSha256": "4f6ef96c82b8c3bff7628fbad18aea6eb694819a2e001dc0e30086d1daefd834",
+  "fixtureSha256": "37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72",
+  "originalPathsSha256": {
+    "test/unit/config.test.ts": "9cfbbaad204b392cb84a037d2a2ddc72c266103da6b956963d4f7cc57f707e72",
+    "test/unit/policy.test.ts": "aaa6e264a0d62df23b4c2b4e031ea6d20ce32f0712401b03629c54f9cb7d8857",
+    "test/contract/integration.test.ts": "32bf36805ad0e64bf0b2a7af6a41c67c00555be963f989d36d5b1325d988ca0e",
+    "test/mcp/server.test.ts": "6f0f51b3e0c65724a7300ed062ee2989ebc43db52b7373be290d5edd8d9738f0",
+    "test/mcp/corrections.test.ts": "d20a61e540873de3d2051eac50adf16eef6a23bc7bc78d9603c1f0ac0047cb15",
+    "test/mcp/integration-final.test.ts": "b5f09c8e7e9a79c98c8b6f2f24610208818ae31b7e549e10af9adacfb7c14f3e",
+    "test/security/policy-sinks.test.mjs": "909ffb96f8f1210fb8515ec43be351a4f95a7b3e6dbf8647c373014d593d8914",
+    "test/security/config.test.mjs": "224ae98614311f588f7d88acd386eb11bb41bafb935e499127be7453c5afec7a",
+    "test/security/mcp-defense.test.mjs": "ce7f63514613f432ac68ab61bc3aefebb3ecdb788474042749a5adb17f10367e",
+    "test/security/mcp-contracts.mjs": "d9332495067aa2a5e3980d746d8e607057295dafa81f6815b5ade552a58d1a1d"
+  }
+}

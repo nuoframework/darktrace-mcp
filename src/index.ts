@@ -9,7 +9,8 @@ Usage: darktrace-mcp [--help | --version | --check-config | doctor]
 Default: MCP over stdio. Configuration and credentials come from operator environment or private files.
 --check-config / doctor validate local configuration without network access.
 Private CA: NODE_EXTRA_CA_CERTS. TLS verification is mandatory. HTTP transport is unavailable.
-Writes require an operator profile and default to preview. Advanced Search requires DARKTRACE_SENSITIVE_READ.
+This release permits consultation only. Write/writeCritical profiles and write previews are unavailable.
+Advanced Search is sensitive read-only and requires DARKTRACE_SENSITIVE_READ; lab compatibility is not established.
 Critical execution, email and PCAP export are blocked.
 Appliance results enter the MCP host/model context; assess provider processing, retention and organizational eligibility before enabling sensitive reads.
 `;

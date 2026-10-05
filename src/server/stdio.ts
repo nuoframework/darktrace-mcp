@@ -3,22 +3,31 @@ import type { Readable, Writable } from 'node:stream';
 import type { EventEmitter } from 'node:events';
 import type { Config } from '../config/schema.js';
 import { createHttpClient } from '../client/httpClient.js';
-import { operationDescriptors, type OperationClient } from '../api/operations.js';
+import { operations, type OperationClient } from '../api/operations.js';
+import { releaseAllowsOperation } from '../policy/release-capability.js';
 import { inputLimits } from '../api/validation.js';
 import { redactValue } from '../observability/redact.js';
 import { createServer } from './createServer.js';
 import { boundedInput } from './input.js';
 import { logEvent } from '../observability/log.js';
+export const productionOperationDescriptors=Object.freeze(Object.values(operations).filter(releaseAllowsOperation).map(({operationId,method,pathTemplate})=>Object.freeze({operationId,method,pathTemplate})));
 interface TestRuntime {testOnly:true;client:OperationClient&{close():void};stdin:Readable;stdout:Writable;signals:EventEmitter;}
 export function runStdio(cfg:Config, test?:TestRuntime) {
   if(test!==undefined && (test===null || !Object.hasOwn(test,'testOnly') || test.testOnly!==true)) throw new Error('Test runtime requires explicit testOnly');
-  const client=test?.client??createHttpClient(cfg,{operations:operationDescriptors});
+  const client=test?.client??createHttpClient(cfg,{operations:productionOperationDescriptors});
   const stdin=test?.stdin??process.stdin, stdout=test?.stdout??process.stdout, signals=test?.signals??process;
   const limits=inputLimits(cfg.limits);
   const input=boundedInput(limits);
   const transport=new StdioServerTransport(input,stdout,{maxBufferSize:limits.maxToolInputBytes});
   const send=transport.send.bind(transport);
-  transport.send=message=>send(redactValue(message,[cfg.auth.publicToken,cfg.auth.privateToken]));
+  transport.send=message=>{
+    const tokens=[cfg.auth.publicToken,cfg.auth.privateToken];
+    // Correlation IDs belong to the JSON-RPC envelope, not tool data. Echo them verbatim.
+    if('result' in message) return send({...message,result:redactValue(message.result,tokens)});
+    if('error' in message) return send({...message,error:redactValue(message.error,tokens)});
+    if('params' in message) return send({...message,params:redactValue(message.params,tokens)});
+    return send(message);
+  };
   const diagnostic=()=>{try{logEvent('protocol_error');}catch{/* cleanup must survive a closed stderr */}};
   let closing:Promise<void>|undefined;
   let handle:ReturnType<typeof serveStdio>|undefined;

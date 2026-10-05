@@ -18,9 +18,9 @@ async function connected(profiles={}) {
 test('MCP tools/list default, fixture read, hidden write, untrusted args',async()=>{
  const connection=await connected();
  try {
-  const list=await connection.client.listTools();assert.ok(list.tools.some(t=>t.name==='darktrace_get_status'));
-  assert.ok(list.tools.every(t=>t.annotations?.readOnlyHint));
-  assert.equal(list.tools.some(t=>t.name.includes('email')||t.name==='darktrace_download_pcap'),false);
+  const list=await connection.client.listTools();assert.ok(list.tools.some((t: {name:string})=>t.name==='darktrace_get_status'));
+  assert.ok(list.tools.every((t: {annotations?:{readOnlyHint?:boolean}})=>t.annotations?.readOnlyHint));
+  assert.equal(list.tools.some((t: {name:string})=>t.name.includes('email')||t.name==='darktrace_download_pcap'),false);
   const result=await connection.client.callTool({name:'darktrace_get_status',arguments:{query:{fast:true}}});
   assert.equal(result.isError,undefined);assert.equal(((result.structuredContent as any)?.data as any).version,'7.1-fixture');
   assert.equal(connection.requests.length,1);
@@ -30,12 +30,9 @@ test('MCP tools/list default, fixture read, hidden write, untrusted args',async(
   assert.equal(injection.isError,true);assert.equal(connection.requests.length,1);
  } finally {await connection.close();}
 });
-test('MCP critical tool is preview only with operator writeCritical',async()=>{
- const connection=await connected({write:true,writeCritical:true});
- try {
-  const list=await connection.client.listTools();assert.ok(list.tools.some(t=>t.name==='darktrace_antigena_manual_action'));
-  const result=await connection.client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:5,reason:'PRIVATE_SECRET'},dryRun:false}});
-  assert.equal((result.structuredContent as any)?.dryRun,true);assert.equal(connection.requests.length,0);
-  assert.equal(JSON.stringify(result).includes('PRIVATE_SECRET'),false);
- } finally {await connection.close();}
+test('MCP refuses writeCritical configuration and forged config still hides critical tools',async()=>{
+ assert.throws(()=>config({write:true,writeCritical:true}),/read-only release/);
+ const requests:ApiRequest[]=[];const base=config();const server=createServer({cfg:{...base,profiles:{...base.profiles,write:true,writeCritical:true}},client:{async request(req){requests.push(req);return {};}}});
+ const client=new Client({name:'release-denial',version:'1'});const[a,b]=InMemoryTransport.createLinkedPair();
+ try{await server.connect(b);await client.connect(a);const list=await client.listTools();assert.equal(list.tools.some((t: {name:string})=>t.name==='darktrace_antigena_manual_action'),false);const result=await client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1},dryRun:false}});assert.equal(result.isError,true);assert.equal(requests.length,0);}finally{await client.close();await server.close();}
 });

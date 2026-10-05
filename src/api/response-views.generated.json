@@ -1145,15 +1145,23 @@
             "kind": "boolean"
           },
           "triggerer": {
-            "kind": "object",
-            "fields": {
-              "username": {
-                "kind": "string"
+            "kind": "union",
+            "variants": [
+              {
+                "kind": "object",
+                "fields": {
+                  "username": {
+                    "kind": "string"
+                  },
+                  "reason": {
+                    "kind": "string"
+                  }
+                }
               },
-              "reason": {
-                "kind": "string"
+              {
+                "kind": "null"
               }
-            }
+            ]
           },
           "label": {
             "kind": "string"
@@ -1192,13 +1200,13 @@
         "pendingActionDevices": {
           "kind": "array",
           "items": {
-            "kind": "summary"
+            "kind": "number"
           }
         },
         "activeActionDevices": {
           "kind": "array",
           "items": {
-            "kind": "summary"
+            "kind": "number"
           }
         }
       }

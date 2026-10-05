@@ -1,5 +1,17 @@
 # Private prerelease preparation — 0.1.0-alpha.0
 
+Current accepted 19-selector scope, bound lab 19/19 results and outstanding publication gates are recorded in [candidate preparation](release-preparation-docker-mcp.md). The package version and published alpha assets remain unchanged. The evidence below is historical and does not claim final candidate suite completion.
+
+> Historical alpha preparation evidence. The earlier [Docker/MR-04 preparation record](release-preparation-docker-mcp.md) retains its original findings; the dated update below records the later local Docker SDK smoke and current release direction. This report’s original hashes and results remain unchanged and do not establish compatibility or final gates for the newer source.
+
+## Historical release direction and Docker smoke
+
+As of 2026-10-05, `0.1.0` without a prerelease suffix is proposed as the first stable target and remains under consultation. The proposed initial scope is supported read-only queries; write operations require separate review for a later delivery. The package version and immutable `v0.1.0-alpha.0` assets remain unchanged. This is not stable approval, a tag, or a publication.
+
+The current checkout built locally with `docker build --pull --tag darktrace-mcp:ci-sdk-smoke .` (exit 0) on Docker Desktop 29.8.1. The resulting local image ID was `sha256:6bcd34fb4f3fded4d0fcbcf049c481e828fceed4627297c3b1ab5f0ee976f8ec`. A separate temporary host dependency directory completed `npm ci --ignore-scripts --no-audit --no-fund`; SDK 2.3.0 `Client.connect()` followed by `listTools()` returned 27 tools against that image. The run used synthetic 0600 token files, a read profile, `--network=none`, `--log-driver=none`, nonroot UID/GID, read-only root filesystem, all capabilities dropped, no privilege escalation, and bounded memory/process limits; its uniquely named `--rm` container was absent after close. Direct synthetic-file checks under `/private/tmp` and this checkout observed matching lstat/fstat owner UID 501, mode 0600 and one link. These results are local to this image and these paths; they do not establish GitHub workflow results, appliance compatibility, or consistent bind-mount metadata on every Docker Desktop path/host.
+
+No package version, release assets, tag or publication changed as part of this update. The full release candidate must still be rebuilt from the final reviewed source after documentation/workflow changes, and all applicable security, compatibility and organizational gates must be reviewed before a stable release.
+
 This report supersedes the preliminary packaging evidence in `packaging-report.md`. Preparation only: no commit, tag, push, GitHub Release, npm publication or container publication was performed. The version remains `0.1.0-alpha.0`, with `package.private:true`. The owner's independent artifact review and publication remain pending.
 
 ## Implemented preparation
@@ -81,4 +93,4 @@ GitHub CI and manual preparation workflow were not dispatched during this task. 
 
 Repository rulesets, release write permissions and eligible private-environment reviewer protections must be verified by the owner before publication. No entitlement, configured remote protection or artifact attestation is claimed. Required environment reviewers for private repositories depend on the GitHub plan; see the primary [GitHub environment documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments).
 
-Darktrace 7.1 signing/ACL/response/mutation behavior, real private-network deployment pinning, provider/host processing eligibility, retention/residency and Docker build/run remain pending. Output views are conservative projections, not a universal sensitive-data-removal guarantee. Three macOS setgid tests are skipped, not passed. Offline/security/package results do not establish that every ST control, organizational gate or residual risk is accepted.
+Darktrace 7.1 signing/ACL/response/mutation behavior, real private-network deployment pinning, provider/host processing eligibility and retention/residency remain pending. A local Docker build and SDK session smoke are recorded above; GitHub CI was not dispatched, and local success is not a global release gate. Output views are conservative projections, not a universal sensitive-data-removal guarantee. Three macOS setgid tests are skipped, not passed. Offline/security/package results do not establish that every ST control, organizational gate or residual risk is accepted.

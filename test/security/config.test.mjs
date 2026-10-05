@@ -43,11 +43,11 @@ for(const bytes of [65536,65537]) test('ST-02.BOUND JSON '+bytes+' protected inl
   if(bytes===65536)assert.doesNotThrow(()=>loadConfig(e));else assert.throws(()=>loadConfig(e));diagnostics(e,bytes===65536,path);
 });
 for(const mode of [0o640,0o604,0o620,0o700,0o1600,0o2600,0o4600]) test('ST-02.POLICY nonsecret JSON insecure mode '+mode.toString(8),t=>{
-  const path=file('{"profiles":{"write":true}}',mode);if((statSync(path).mode&0o7777)!==mode){t.skip('BLOCKED: OS discarded requested special permission bits; no invalid fixture exists');return;}
+  const path=file('{"profiles":{"write":false}}',mode);if((statSync(path).mode&0o7777)!==mode){t.skip('BLOCKED: OS discarded requested special permission bits; no invalid fixture exists');return;}
   const e=env({DARKTRACE_CONFIG_FILE:path});assert.throws(()=>loadConfig(e));diagnostics(e,false,path);
 });
 for(const type of ['symlink','fifo','directory','malformed']) test('ST-02/14.JSON '+type,()=>{
-  let path=join(directory,'json-'+n++);if(type==='symlink')symlinkSync(file('{"profiles":{"write":true}}'),path);else if(type==='fifo')assert.equal(spawnSync('mkfifo',[path]).status,0);else if(type==='directory')mkdirSync(path);else path=file('{'+PRIVATE);
+  let path=join(directory,'json-'+n++);if(type==='symlink')symlinkSync(file('{"profiles":{"write":false}}'),path);else if(type==='fifo')assert.equal(spawnSync('mkfifo',[path]).status,0);else if(type==='directory')mkdirSync(path);else path=file('{'+PRIVATE);
   const e=env({DARKTRACE_CONFIG_FILE:path});assert.throws(()=>loadConfig(e));diagnostics(e,false,path);
 });
 test('ST-02.GROW JSON and token bounded read rejects before JSON.parse (instrumented fs)',()=>{

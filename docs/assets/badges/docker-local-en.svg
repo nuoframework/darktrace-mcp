@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="224" height="22" viewBox="0 0 224 22" role="img" aria-label="docker: local build · pinned ID">
+<title>docker: local build · pinned ID</title>
+<rect width="56" height="22" fill="#030D11"/>
+<rect x="56" width="168" height="22" fill="#FF6B00"/>
+<rect x="0.5" y="0.5" width="223" height="21" fill="none" stroke="#B6B6B6"/>
+<g font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', monospace" font-size="11" text-anchor="middle">
+<text x="28.0" y="15" fill="#FFFFFF">docker</text>
+<text x="140.0" y="15" fill="#030D11">local build · pinned ID</text>
+</g>
+</svg>

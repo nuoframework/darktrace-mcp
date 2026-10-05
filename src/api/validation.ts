@@ -156,9 +156,33 @@ export function validateSearchHash(hash: string): void {
   checkRanges(parsed.time ?? {});
   if (parsed.timeframe === 'custom' && !(('starttime' in (parsed.time??{}) && 'endtime' in (parsed.time??{})) || ('from' in (parsed.time??{}) && 'to' in (parsed.time??{})))) throw new Error('Time pair required');
 }
-export function checkRanges(query: Record<string,unknown>, units:Record<string,string>={}): void {
+export const SUMMARY_HOURLY_RULE:ValidationRule=Object.freeze({id:'summary_hourly_anchor',description:'Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion'});
+export function summaryAnchorParameter(operationId:string,name:string):boolean {return operationId==='get_summarystatistics'&&['endtime','to'].includes(name);}
+export function checkRanges(query: Record<string,unknown>, units:Record<string,string>={},operationId?:string): void {
+  let summaryAnchor=false;
+  if(operationId==='get_summarystatistics') {
+    const modes=['eventtype','csensor','mitreTactics'].filter(key=>query[key]!==undefined);
+    if(modes.length>1)throw new Error('Summary modes are mutually exclusive');
+    if(['hours','endtime','to'].some(key=>query[key]!==undefined)&&!(typeof query.eventtype==='string'&&query.eventtype.trim().length))throw new Error('Summary eventtype required');
+    if(query.endtime!==undefined&&query.to!==undefined)throw new Error('Summary accepts one time anchor');
+    if(query.endtime!==undefined||query.to!==undefined) {
+      if(query.eventtype!=='loginput'||!Number.isSafeInteger(query.hours)||Number(query.hours)<1||Number(query.hours)>168)throw new Error('Unreviewed summary time anchor');
+      if(query.endtime!==undefined) {
+        if(units.endtime!=='milliseconds'||!Number.isSafeInteger(query.endtime)||Number(query.endtime)<0)throw new Error('Invalid summary anchor');
+      }else {
+        const value=query.to;
+        if(units.to!=='UTC datetime'||typeof value!=='string'||!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value))throw new Error('Invalid summary anchor');
+        const iso=value.replace(' ','T')+'Z',parsed=new Date(iso);
+        if(!Number.isFinite(parsed.getTime())||parsed.toISOString().replace('.000Z','Z')!==iso)throw new Error('Invalid summary calendar');
+      }
+      summaryAnchor=true;
+    }
+  }
   for (const [start,end] of [['starttime','endtime'],['from','to'],['start','end']]) {
-    if ((query[start]===undefined)!==(query[end]===undefined)) throw new Error('Time parameters must be paired');
+    if ((query[start]===undefined)!==(query[end]===undefined)) {
+      if(summaryAnchor&&query[start]===undefined&&summaryAnchorParameter(operationId!,end))continue;
+      throw new Error('Time parameters must be paired');
+    }
     if (query[start]===undefined) continue;
     const parseTime = (v: unknown) => typeof v==='number'?v:typeof v==='string'&&/^\d+$/.test(v)?Number(v):typeof v==='string'?Date.parse(v.includes('T')?v:v.replace(' ','T')+'Z'):NaN;
     const first=parseTime(query[start]), last=parseTime(query[end]);

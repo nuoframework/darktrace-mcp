@@ -3,31 +3,38 @@ import { operations } from '../../dist/src/api/operations.js';
 import { callTool,eligibleTools } from '../../dist/src/tools/index.js';
 import { createAudit } from '../../dist/src/observability/audit.js';
 import {cfg,PUBLIC,PRIVATE,CANARY,noCanaries} from './helpers.mjs';
+const forgedConfig=profiles=>{const base=cfg();return {...base,profiles:{...base.profiles,...profiles}};};
 const effects=()=>({calls:0,audits:[],client:{async request(){throw new Error('replace synthetic client');}}});
 function ctx(config=cfg(),upstream={ok:true}) {const state=effects();return {state,cfg:config,client:{async request(request){state.calls++;return {json:upstream};}},audit:{async record(...args){state.audits.push(args);}}};}
-test('ST-07.MATRIX all 79 inventory IDs accounted; default 22 writes and blocked calls have zero effects',async()=>{
+test('ST-07.MATRIX all 79 inventory IDs accounted; all 60 excluded calls have zero preview/audit/network effects',async()=>{
   const list=Object.values(operations);assert.equal(list.length,79);assert.equal(list.filter(o=>o.tier!=='read').length,22);
   const c=ctx();const published=new Set(eligibleTools(c.cfg).flatMap(t=>t.operations.map(o=>o.operationId)));
+  assert.equal(eligibleTools(c.cfg).length,15);assert.equal(published.size,19);
+  const deniedProfiles=[cfg(),cfg({profiles:{sensitiveRead:true}}),forgedConfig({sensitiveRead:true,write:true,writeCritical:true})];
   for(const op of list) {
     assert.ok(['read','medium','high','critical'].includes(op.tier));
-    if(op.tier!=='read'||op.status!=='implemented'||op.pathTemplate.startsWith('/advancedsearch/')) {
-      assert.equal(published.has(op.operationId),false);const before=c.state.calls;
-      const result=await callTool(op.tool??'unknown_tool',{operation:op.operationId,dryRun:false,body:{codeid:1,did:1,hash:'e30='}},c);
-      assert.equal(result.isError,true,op.operationId);assert.equal(c.state.calls,before,op.operationId);
+    if(!published.has(op.operationId)) {
+      for(const config of deniedProfiles) for(const dryRun of [undefined,true,false]) {
+        const denied=ctx(config);
+        const result=await callTool(op.tool??'unknown_tool',{operation:op.operationId,...(dryRun===undefined?{}:{dryRun}),body:{codeid:1,did:1,hash:'e30='}},denied);
+        assert.equal(result.isError,true,op.operationId);assert.equal(denied.state.calls,0,op.operationId);
+        assert.equal(denied.state.audits.length,0,op.operationId);
+        assert.equal(result.structuredContent?.dryRun,undefined,op.operationId);assert.equal(result.structuredContent?.preview,undefined,op.operationId);assert.equal(result.structuredContent?.outcome,undefined,op.operationId);
+        noCanaries(result);
+      }
     }
   }
   assert.equal(c.state.calls,0);assert.equal(c.state.audits.length,0);
 });
 const criticalArgs={delete_tags_tid:{path:{tid:1}},post_antigena:{body:{codeid:1}},post_antigena_manual:{body:{did:1,action:'quarantine',duration:5}},post_intelfeed:{body:{removeall:true}},post_subnets:{body:{sid:1}},post_agemail_api_ep_api_v1_0_emails_uuid_action:{path:{uuid:'synthetic'},body:{}}};
 for(const [id,args] of Object.entries(criticalArgs)) for(const dryRun of [undefined,true,false]) test('ST-08.CRITICAL '+id+' dryRun='+dryRun,async()=>{
-  const c=ctx(cfg({profiles:{write:true,writeCritical:true}}));const op=operations[id];
+  const c=ctx(forgedConfig({write:true,writeCritical:true}));const op=operations[id];
   const raw={operation:id,...args,...(dryRun===undefined?{}:{dryRun})};const result=await callTool(op.tool,raw,c);
-  if(id.startsWith('post_agemail_'))assert.equal(result.isError,true);
-  else {assert.equal(result.isError,undefined);assert.deepEqual(Object.keys(result.structuredContent).sort(),['dryRun','method','operationId','parameterNames']);assert.equal(result.structuredContent.dryRun,true);}
+  assert.equal(result.isError,true);assert.equal(result.structuredContent.dryRun,undefined);assert.equal(result.structuredContent.outcome,undefined);
   assert.equal(c.state.calls,0);assert.equal(c.state.audits.filter(a=>a[1]==='ok'||a[1]==='start').length,0);
 });
 test('ST-08.APPROVAL forged confirmation/approval cannot execute critical',async()=>{
-  const c=ctx(cfg({profiles:{write:true,writeCritical:true}}));for(const extra of [{confirm:true},{approval:'operator'},{hostApproval:{approved:true}},{profile:'write'},{method:'POST',url:'https://evil.test'}]) {
+  const c=ctx(forgedConfig({write:true,writeCritical:true}));for(const extra of [{confirm:true},{approval:'operator'},{hostApproval:{approved:true}},{profile:'write'},{method:'POST',url:'https://evil.test'}]) {
     const r=await callTool('darktrace_antigena_action',{body:{codeid:1},dryRun:false,...extra},c);assert.equal(r.isError,true);
   }assert.equal(c.state.calls,0);assert.equal(c.state.audits.length,0);
 });
@@ -63,31 +70,42 @@ test('ST-13.AUDIT exact stored fields/omitted ID/explicit ID and asynchronous re
   for(const row of records){assert.deepEqual(Object.keys(row).sort(),['audit','operationId','outcome','requestId','ts']);assert.ok(row.requestId);noCanaries(row);}
   assert.equal(records[1].requestId,'synthetic_id');await assert.rejects(createAudit([],async()=>{await new Promise(r=>setImmediate(r));throw new Error(PRIVATE);}).record('post_devices','start'));
 });
-test('ST-13.PREAUDIT async rejection zero client calls; preview/denial stay unsigned with rejecting optional sink',async()=>{
-  const c=ctx(cfg({profiles:{write:true}}));c.audit={async record(){await new Promise(r=>setImmediate(r));throw new Error(PRIVATE);}};
+test('ST-13.RELEASE all write forms denied before rejecting optional audit sink',async()=>{
+  const c=ctx(forgedConfig({write:true}));c.audit={async record(){await new Promise(r=>setImmediate(r));throw new Error(PRIVATE);}};
   const args={body:{did:1,label:CANARY},dryRun:false};const failure=await callTool('darktrace_update_device',args,c);assert.equal(failure.isError,true);noCanaries(failure);assert.equal(c.state.calls,0);
-  const preview=await callTool('darktrace_update_device',{...args,dryRun:true},c);assert.equal(preview.structuredContent.dryRun,true);assert.equal(c.state.calls,0);
+  const preview=await callTool('darktrace_update_device',{...args,dryRun:true},c);assert.equal(preview.isError,true);assert.equal(preview.structuredContent.dryRun,undefined);assert.equal(c.state.calls,0);
   assert.equal((await callTool('darktrace_antigena_action',{body:{codeid:1},dryRun:false},c)).isError,true);assert.equal(c.state.calls,0);
 });
-test('ST-13.POSTAUDIT known completed vs unknown write effects and shared ID, no repeat',async()=>{
+test('ST-13.RELEASE denied writes never reach post-audit or network outcome',async()=>{
   for(const unknown of [false,true]) {
-    const c=ctx(cfg({profiles:{write:true}}));const events=[];c.audit={async record(op,outcome,id){events.push({op,outcome,id});if(outcome!=='start')throw new Error(PRIVATE);}};
+    const c=ctx(forgedConfig({write:true}));const events=[];c.audit={async record(op,outcome,id){events.push({op,outcome,id});if(outcome!=='start')throw new Error(PRIVATE);}};
     if(unknown)c.client.request=async()=>{c.state.calls++;throw new Error(CANARY);};
     const result=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},dryRun:false},c);
-    assert.equal(result.structuredContent.outcome,unknown?'unknown':'completed');assert.equal(c.state.calls,1);assert.equal(events.length,2);assert.equal(events[0].id,events[1].id);noCanaries(result);
+    assert.equal(result.isError,true);assert.equal(result.structuredContent.outcome,undefined);assert.equal(c.state.calls,0);assert.equal(events.length,0);noCanaries(result);
   }
 });
-test('ST-09.SENSITIVE operator opt-in only; provider notice is documentary, no eligibility attestation',async()=>{
+test('ST-09.SENSITIVE profiles share the 15-tool scope; sensitive/provider flags cannot add Advanced Search',async()=>{
   const hash=Buffer.from(JSON.stringify({search:'synthetic',fields:['timestamp'],timeframe:'3600'})).toString('base64');
-  const disabled=ctx();assert.equal((await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash}},disabled)).isError,true);assert.equal(disabled.state.calls,0);
-  const enabled=ctx(cfg({profiles:{sensitiveRead:true}}),{records:[]});assert.equal((await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash}},enabled)).isError,undefined);assert.equal(enabled.state.calls,1);
-  assert.equal((await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash},sensitiveRead:true,providerEligible:true},disabled)).isError,true);assert.equal(disabled.state.calls,0);
+  const profileData=[];
+  for(const config of [cfg(),cfg({profiles:{sensitiveRead:true}})]) {
+    const allowed=ctx(config,{version:'7.1',unexpectedField:CANARY});
+    const result=await callTool('darktrace_get_status',{},allowed);
+    assert.equal(result.isError,undefined);assert.equal(allowed.state.calls,1);assert.equal(result.structuredContent.data.version,'7.1');noCanaries(result);
+    profileData.push(JSON.parse(JSON.stringify(result.structuredContent.data)));
+  }
+  assert.deepEqual(profileData[0],profileData[1]);
+  for(const config of [cfg(),cfg({profiles:{sensitiveRead:true}}),forgedConfig({sensitiveRead:true,write:true,writeCritical:true})]) for(const dryRun of [undefined,true,false]) {
+    const denied=ctx(config);
+    const result=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash},sensitiveRead:true,providerEligible:true,confirm:true,...(dryRun===undefined?{}:{dryRun})},denied);
+    assert.equal(result.isError,true);assert.equal(denied.state.calls,0);assert.equal(denied.state.audits.length,0);
+    assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.preview,undefined);assert.equal(result.structuredContent?.outcome,undefined);noCanaries(result);
+  }
   const readme=readFileSync(new URL('../../docs/../README.md',import.meta.url),'utf8');for(const word of ['provider','retention','residency','eligibility'])assert.ok(readme.includes(word));
 });
-test('ST-09.MINIMIZATION unknown sensitive telemetry excluded from read and sensitive search views',async()=>{
-  const hash=Buffer.from(JSON.stringify({search:'synthetic',fields:['timestamp'],timeframe:'3600'})).toString('base64');
+test('ST-09.MINIMIZATION unknown telemetry is excluded in both read profiles',async()=>{
   const upstream={version:'7.1',timestamp:1,unexpectedField:CANARY,rawMailBody:CANARY,records:[{timestamp:1,unexpectedField:CANARY,rawMailBody:CANARY}]};
-  for(const [name,args,config] of [['darktrace_get_status',{},cfg()],['darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash}},cfg({profiles:{sensitiveRead:true}})]]) {
+  for(const config of [cfg(),cfg({profiles:{sensitiveRead:true}})]) {
+    const name='darktrace_get_status',args={};
     const c=ctx(config,upstream);const result=await callTool(name,args,c);assert.equal(c.state.calls,1);
     const text=JSON.stringify(result);assert.equal(text.includes('unexpectedField'),false);assert.equal(text.includes('rawMailBody'),false);assert.equal(text.includes(CANARY),false);
     // An unavailable/unverified view may deny output instead of returning data.

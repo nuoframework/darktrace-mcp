@@ -1,6 +1,6 @@
 import { constants, fstatSync, openSync, readSync, closeSync } from 'node:fs';
 import path from 'node:path';
-import { assertSafeNetworkEnvironment, ConfigValidationError, parseConfig, type Config, type ConfigSource } from './schema.js';
+import { assertSafeNetworkEnvironment, ConfigValidationError, assertReleaseProfiles, parseConfig, type Config, type ConfigSource } from './schema.js';
 
 type RawConfig = Record<string, unknown>;
 const TOKEN_FILE_MAX_BYTES = 4_096;
@@ -138,6 +138,7 @@ function applyProfiles(raw: RawConfig, value: string | undefined): void {
   if (requested.some((name) => !allowed.has(name)) || new Set(requested).size !== requested.length) {
     throw new ConfigValidationError('DARKTRACE_PROFILES may contain read and write once each; email/export are unsupported');
   }
+  if(requested.includes('write')) throw new ConfigValidationError('DARKTRACE_PROFILES write is unavailable in this read-only release');
   const existing = asObject(raw.profiles);
   raw.profiles = { ...existing, read: true, write: requested.includes('write') };
 }
@@ -165,6 +166,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
 
   const configPath = fileOverride ?? env.DARKTRACE_CONFIG_FILE;
   const raw: RawConfig = configPath === undefined ? {} : parseConfigFile(configPath);
+  assertReleaseProfiles(raw.profiles);
   const instance = asObject(raw.instance);
   const auth = asObject(raw.auth);
   const profiles = asObject(raw.profiles);

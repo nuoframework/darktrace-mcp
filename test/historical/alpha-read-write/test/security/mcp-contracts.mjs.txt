@@ -1,0 +1,28 @@
+import { createHash } from 'node:crypto';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
+import { createServer } from '../../dist/src/server/createServer.js';
+import { cfg } from './helpers.mjs';
+export const profiles = {
+  read: {},
+  'read+sensitive': { sensitiveRead: true },
+  'read+write': { write: true },
+  'read+writeCritical': { write: true, writeCritical: true },
+};
+export function canonical(value) {
+  if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+  if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';
+  return JSON.stringify(value);
+}
+export const digest = value => createHash('sha256').update(canonical(value)).digest('hex');
+export async function toolContract(profile) {
+  const server = createServer({ cfg: cfg({ profiles: profile }), client: { async request() { throw new Error('Contract listing must never dispatch'); } } });
+  const client = new Client({ name: 'synthetic-contract-review', version: '1' });
+  const [a, b] = InMemoryTransport.createLinkedPair();
+  try {
+    await server.connect(b); await client.connect(a);
+    const { tools } = await client.listTools();
+    // Fixed order as well as exact description, schema and annotations are reviewed.
+    return tools.map(({ name, description, inputSchema, annotations }) => ({ name, description, inputSchema, annotations }));
+  } finally { await client.close(); await server.close(); }
+}

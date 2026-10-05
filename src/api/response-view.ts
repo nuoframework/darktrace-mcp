@@ -1,5 +1,37 @@
 /** Code-owned output projection: no dynamic property maps or caller-selected allowlists. */
-export type ResponseView={kind:'string'|'number'|'boolean'|'summary'}|{kind:'object';fields:Record<string,ResponseView>}|{kind:'array';items:ResponseView}|{kind:'union';variants:ResponseView[]};
+export type ResponseView={kind:'string'|'number'|'boolean'|'null'|'summary'}|{kind:'object';fields:Record<string,ResponseView>}|{kind:'array';items:ResponseView}|{kind:'union';variants:ResponseView[]};
+/** Exact documented hourly aggregate variant; never selected from upstream keys. */
+export const SUMMARY_LOGINPUT_VIEW:ResponseView={kind:'object',fields:{events:{kind:'boolean'},data:{kind:'array',items:{kind:'object',fields:{timems:{kind:'number'},time:{kind:'string'},events:{kind:'number'}}}}}};
+export function operationResponseVariants(operationId:string) {
+  return operationId==='get_summarystatistics'?[{query:{eventtype:'loginput'},schema:'SummarystatisticsEventtypeLoginput',fields:SUMMARY_LOGINPUT_VIEW}]:[];
+}
+export function selectResponseView(operationId:string,query:Record<string,unknown>|undefined,base:ResponseView|undefined):ResponseView|undefined {
+  return operationId==='get_summarystatistics'&&query?.eventtype==='loginput'?SUMMARY_LOGINPUT_VIEW:base;
+}
+type ResponseViewOverride=Readonly<{operationId:string;path:readonly string[];compiledKind:ResponseView['kind'];schema:string;property:string;quote:string;view?:ResponseView;nullable?:true}>;
+/** Build-time corrections bound to verbatim local OpenAPI 6.1 descriptions; '[]' addresses array items. */
+export const RESPONSE_VIEW_OVERRIDES:readonly ResponseViewOverride[]=Object.freeze([
+  {operationId:'get_antigena_summary',path:['pendingActionDevices','[]'],compiledKind:'summary',schema:'AntigenaSummary',property:'pendingActionDevices',quote:'An array of did values',view:{kind:'number'}},
+  {operationId:'get_antigena_summary',path:['activeActionDevices','[]'],compiledKind:'summary',schema:'AntigenaSummary',property:'activeActionDevices',quote:'An array of did values',view:{kind:'number'}},
+  {operationId:'get_antigena',path:['[]','triggerer'],compiledKind:'object',schema:'AntigenaFulldevicedetailsFalse',property:'triggerer',quote:'If triggered by Darktrace automatically, "null".',nullable:true},
+] as const);
+/** Fails closed when an override path is absent, already corrected upstream or its evidence quote changed. */
+export function applyResponseViewOverrides(views:Record<string,ResponseView>,schemas:Record<string,any>,overrides:readonly ResponseViewOverride[]=RESPONSE_VIEW_OVERRIDES):void {
+  for(const o of overrides) {
+    const description=schemas[o.schema]?.properties?.[o.property]?.description;
+    if(typeof description!=='string'||!description.includes(o.quote))throw new Error(`Override evidence changed: ${o.operationId}`);
+    let parent:Record<string,any>|undefined,key='',node:any=views[o.operationId];
+    for(const step of o.path) {
+      parent=node;
+      if(step==='[]'&&node?.kind==='array')key='items';
+      else if(step!=='[]'&&node?.kind==='object'&&Object.hasOwn(node.fields,step)){parent=node.fields;key=step;}
+      else throw new Error(`Override path missing: ${o.operationId}`);
+      node=parent![key];
+    }
+    if(!parent||node?.kind!==o.compiledKind)throw new Error(`Override path missing: ${o.operationId}`);
+    parent[key]=o.nullable?{kind:'union',variants:[node,{kind:'null'}]}:o.view;
+  }
+}
 const unsafe=/^(?:__proto__|prototype|constructor)$|token|password|secret|signature|authorization|cookie|canonical|credential|rawMailBody|payload|^@message$/i;
 export function compileResponseView(raw:Record<string,any>|undefined,schemas:Record<string,any>,fields?:readonly string[],depth=0,seen:readonly string[]=[]):ResponseView {
   if(!raw||depth>8)return {kind:'summary'};
@@ -26,7 +58,7 @@ export function projectResponse(view:ResponseView|undefined,value:unknown):{valu
   function visit(v:ResponseView|undefined,input:unknown,depth:number):unknown {
     if(!v||v.kind==='summary'||depth>8){omitted=true;return summary();}
     if(v.kind==='union') {
-      const variant=v.variants.find(item=>(item.kind==='array'&&Array.isArray(input))||(item.kind==='object'&&input!==null&&typeof input==='object'&&!Array.isArray(input))||(item.kind===typeof input));
+      const variant=v.variants.find(item=>item.kind==='array'?Array.isArray(input):item.kind==='object'?input!==null&&typeof input==='object'&&!Array.isArray(input):item.kind==='null'?input===null:(['string','number','boolean'].includes(item.kind)&&item.kind===typeof input));
       return visit(variant,input,depth+1);
     }
     if(v.kind==='array') {
@@ -42,6 +74,7 @@ export function projectResponse(view:ResponseView|undefined,value:unknown):{valu
       if(!Object.keys(out).length&&Object.keys(data).length){omitted=true;return summary();}
       return out;
     }
+    if(v.kind==='null'){if(input===null)return null;omitted=true;return summary();}
     if(typeof input!==v.kind||(typeof input==='number'&&!Number.isFinite(input))){omitted=true;return summary();}
     if(typeof input==='string'&&input.length>16384){truncated=true;return input.slice(0,16384);}
     return input;

@@ -6,16 +6,11 @@
 !tsconfig.generate.json
 !src/
 !src/**
-!test/
-!test/**
 !scripts/
 !scripts/build.mjs
 !scripts/generate-catalogue.ts
 !openapi/
 !openapi/darktrace-threat-visualizer.yaml
 !docs/
-!docs/architecture.md
 !docs/operation-inventory.json
 !LICENSE
-!README.md
-!SECURITY.md

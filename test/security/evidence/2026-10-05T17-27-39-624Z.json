@@ -1,0 +1,2109 @@
+{
+  "date": "2026-10-05T17:27:39.633Z",
+  "snapshot": "/var/folders/tl/x0ps4dwd14x4qhyyh6x0lmgw0000gn/T/darktrace-adversarial-ugzvED",
+  "node": "v24.14.1",
+  "platform": "darwin",
+  "arch": "arm64",
+  "commit": "f62d941048399a81652404c99baabc3f48d91bff",
+  "commitMetadata": {
+    "status": 0,
+    "signal": null,
+    "errorCode": null
+  },
+  "commands": {
+    "build": [
+      "/Users/nuofrwk/.nvm/versions/node/v24.14.1/bin/node",
+      "scripts/build.mjs"
+    ],
+    "test": [
+      "/Users/nuofrwk/.nvm/versions/node/v24.14.1/bin/node",
+      "--import",
+      "./dist/test/security/test-runtime-argv.js",
+      "--import",
+      "./test/security/assertion-counter.mjs",
+      "--test",
+      "--test-reporter=spec",
+      "--test-concurrency=1",
+      "test/security/config.test.mjs",
+      "test/security/limits-retries.test.mjs",
+      "test/security/mcp-defense.test.mjs",
+      "test/security/network.test.mjs",
+      "test/security/policy-sinks.test.mjs",
+      "test/security/signer-client.test.mjs",
+      "test/security/stdio.test.mjs"
+    ]
+  },
+  "sourceHashes": {
+    "api/catalogue.generated.json": "592f9bc1863b23042b1a7c00bb61e113dd019f8d5e73746c6a728e7be87a0f6e",
+    "api/operations.ts": "90370737c78280459a84f5a5fc68b06a3e815b8e74a7c46ca578a4d6a671c8fd",
+    "api/response-fields.json": "1e42be59faf7d66aa68a99bb5dc1ba010cda2e18830f45c13aecabcd19e35941",
+    "api/response-view.ts": "5f69e5c82283100cc5039e239f64faa2cfd5164a58bc88f0319819b1ccaa010e",
+    "api/response-views.generated.json": "0b8870f9611af5ba26e7c004f36f4feff9e0212e3bfb0e7110e98465de487838",
+    "api/tool-groups.json": "2990cc20fd6ee8c821937f465a028878b1c3893558f27d0aaf9666673eb9e94f",
+    "api/validation.ts": "265a84f9d6c9858121ea00e532858f2f0357bb4a762343718dfcaf87ca560c40",
+    "client/errors.ts": "aff074a0446fe29823e1c66e855785f58b5ef941f92e6f5a614020dcfc923ce3",
+    "client/httpClient.ts": "0d62af42ab0741776afa8533fa02c42faea6a80efb015c40a6a43f8de57f449b",
+    "client/httpsConnector.ts": "cc48293791dec4a615e145dadf1aeba56ef0d805c9a276739ae307c457ae9e8c",
+    "client/signer.ts": "267ad8ba85ac16d9f144911863e38568ccb50886ee2f96e69772a62129ac094d",
+    "config/address.ts": "095e032867be614dd44dffd49de774a87effe4b9d8ac305cd62de4e1319da61e",
+    "config/load.ts": "e12438d21878c95fd1749011903300ba2a3cb589c3947a03e0388c960e8f6d10",
+    "config/schema.ts": "3c2a4be497ccc8a85f48be54b8ba8e5b612d39e563f0b25eb989504673b893b5",
+    "coverage/report.generated.json": "861e2e5cddf65c30f3e939acf7716334c2a774f7aa6fe1c66a24cec20a98bde2",
+    "coverage/report.ts": "de8133ab11cbbbca0b3fd9edcdd3a8d94b33893a3156dcf2bcbba36f70c246e5",
+    "index.ts": "64e05f41266823334c396eeef9d1e7e82cb3cb61e9af2aa86157d4f892775a9c",
+    "observability/audit.ts": "edc78c3ac415181351c5ed744efd00ed93858237acb7f5e0100b67aec01f12c2",
+    "observability/log.ts": "9080a65ff4aed7db68c368010c90e1458228c237ef01a2bfae8987f3e4f6c15a",
+    "observability/redact.ts": "c3dc4b61b2cd59595d315fda90ab09d918d4efba68a21f050ae2c528e4f4c26b",
+    "policy/guard.ts": "172fee591aa1ffc1ce9eef0e1ac155fb3d718d1070bb5875b2f5ad4854cd8137",
+    "server/createServer.ts": "989c59c2eca75af687ff897626b2190b6a916bc7991f04502697d4526cff7744",
+    "server/input.ts": "061142aaee64ebefe552097a3868d3aa6f06bb45005bcf5c902a1a3e0429ca2e",
+    "server/stdio.ts": "5f674483f2ad5b47a09242b66855c13e7c7456f7197bdcac8293a052d9fd7510",
+    "shape/output.ts": "38d50128abd7f252bf098362a120da434c9db3915ae4282efd175e4b6bf58135",
+    "shape/redact.ts": "8c79e7f45fe3d51f174d8473b2d49583681d0704c3a460b78abec27dea0716dc",
+    "tools/index.ts": "6c792914e076df3537f6d83eb0884803fe1eb01f01feb5241f6d8e9be1048843"
+  },
+  "runtimeHashes": {
+    "api/catalogue.generated.json": "a0567c9388bd2ab8b91c8374a5e9564ff0d64f764ecccdccbfeb7f649a5b1a9f",
+    "api/operations.d.ts": "1c98962228e040fd436c94f01890692625af82fc66958a33df281f0dc59af6a3",
+    "api/operations.js": "53252dd4bff3c060b783f1522945ddb00ed78057e297c6f3f8633ee8d5c97eb8",
+    "api/response-view.d.ts": "433000720832c64bb5eea7e15c2c432629b98d6dcd127a14fef32129c48553c5",
+    "api/response-view.js": "172cd07a94cd6c90ba531abfbb92df100a3c70cb21ab3c80a7f489f897dd4766",
+    "api/response-views.generated.json": "180038582a5f979935f5fd9fafe03167e3ecdc7a2750f5e8ea7a79fa15253d7f",
+    "api/validation.d.ts": "da9dee0a0efc44ae04ac6d993e44134e61ccc6e6729c8a827bbdb896dc1173f3",
+    "api/validation.js": "cf0b9e6d1b4ae0d8861cbb0cd91126acb858bb345e1b3bb6d1b8e41f2123e720",
+    "client/errors.d.ts": "61b60cc5ea19b23c5f1a00f34dee4d04f38f51c8f53af158884cd9beaecc5393",
+    "client/errors.js": "e58008b5214bc9c4c52c9108df9fea3c37c92c45c48b3fbb195fe8255faa4db8",
+    "client/httpClient.d.ts": "80b3019502934917ea5abe8335364cbcc88fd1e15f6a3989bd856566fa68f84d",
+    "client/httpClient.js": "e5bcb0937e2f6cf388053f0bce48d0e27109846f4370a1123f4b853df087c67d",
+    "client/httpsConnector.d.ts": "c8f9feb3d905a88f1aac95a5169f8540869807a254d687ce33ed4719c0ac51e7",
+    "client/httpsConnector.js": "56883a038f8664437a251de72682f5b2fff1dd1a1607cda0dbd2c993e8477442",
+    "client/signer.d.ts": "8b6c72ab40a175632f9e5a9247aef676277a4c7d38853349b480ef5536a4521d",
+    "client/signer.js": "3d894b0747266d1026e8af8b8d62cc54dcb5e51cd0174135c7f2be5fd80e929d",
+    "config/address.d.ts": "bfab22160fcdcf3d20c57d4fd7f2901ba7f7ae7ac0f09cc0b4bdb8ab35d79110",
+    "config/address.js": "f87a7cb2c08ae69b340438f95ede7c8dbeef8aa3adf1f1afb84a8c602c579763",
+    "config/load.d.ts": "aad304093bddd32b883e8641ac391a6a180f0be1e12a5765f5c122c2c25eafe3",
+    "config/load.js": "3a1a47aed91744d8a0b027d3ff53e7de3bf725e63c901ad13617aa0c6f4c02fb",
+    "config/schema.d.ts": "5b6536cd71ff9682ea858c1100482323d41c480d90698acf6b9f15226cd3b47a",
+    "config/schema.js": "2e118ab39ed0d85a7666395fca7263d7f0318f6f8b512d12c72d89f092bb43df",
+    "coverage/report.d.ts": "9f0b7a39c3179570044c25ea7e4b925967cf2cd3f5a4445c06b1b77b5cdd54b5",
+    "coverage/report.generated.json": "861e2e5cddf65c30f3e939acf7716334c2a774f7aa6fe1c66a24cec20a98bde2",
+    "coverage/report.js": "d21d013a99124429873ac3f7a686a8bc376a6600c747a6f165a917a0026d94df",
+    "index.d.ts": "43e818adf60173644896298637f47b01d5819b17eda46eaa32d0c7d64724d012",
+    "index.js": "ecf2842eaf54b20bf71ebceebae7bdac7656e880763ab55347a098e7615c2bd3",
+    "observability/audit.d.ts": "9a9f62c1a88f6f4fcd5475da8faa0ff9c6db6b3fa4c63430822e6574a62d2506",
+    "observability/audit.js": "52d4653cd6cc7a83cfa7249e360c8a34590861a88a2a60de2b65dc10eb01a98a",
+    "observability/log.d.ts": "86f5c418ad4157eee399232f396486ec2cc3cb56abc5a3b0f864b0f734359473",
+    "observability/log.js": "64b1d265d095a04902f60749cbacbc5cbf8ecec2b94084e830fa7ce7f7166596",
+    "observability/redact.d.ts": "51464e06ad2931920b787feae957da3341bb1b2228879000547b1a772612ebce",
+    "observability/redact.js": "28131f2aac028c831f40ced984abf7ed775ef41b957aebbadc469fa2390c677e",
+    "policy/guard.d.ts": "f33642d8f185f339bf58de51773e3fef559c2881eda2a97787faf299a02021b9",
+    "policy/guard.js": "8f8853f78c60fc55abaf70d0f1e55507a9460c4ba45b5593489e3f71a4bcb094",
+    "server/createServer.d.ts": "7b4d28a06379006cfad20af8454b3503aa55db8282c33fb094802eef8665e1b5",
+    "server/createServer.js": "7c70a0ba1fa9c4d85efd1d8840b56d3141ea1d6a8ef35c99056063ff33f06b2a",
+    "server/input.d.ts": "d3b03373548d9a143890425ff870c5fe47b5878091d9237ed2964cbca95c4189",
+    "server/input.js": "66cc44187e78cdc8ba9c79a6966298f920b5b6e456cd85d489cfc16de092a6af",
+    "server/stdio.d.ts": "2e783318de15bbbfa8292c299369e72bb17be2fe03aac9be59efac40b41c8992",
+    "server/stdio.js": "5b3ac4d3b673114311f8ae364c3a4538ad8efd02b11d91de82d3e4f52e083883",
+    "shape/output.d.ts": "0b771d8092aee37808285b9de356c48e16fea7941dfc031418cded8b0ba56732",
+    "shape/output.js": "e8a5594b78d2a0cbc1e76954c2490ce812a203bf882d7fb1e97518886a4591cb",
+    "shape/redact.d.ts": "5c382eaa13bb80c0214e66526c68ad720d1179fc807a9bee820cdde332a8507b",
+    "shape/redact.js": "b3c10269da0ec231d970a4ff1dc6a3f649e385f9c3f4b833de3b8548e213a6a7",
+    "tools/index.d.ts": "f93334e5e8d499111d118ee99bc9fc84315fd2502aefd99fbc9c491de43b549a",
+    "tools/index.js": "3168097f7178c59592a884a89ce4d84d325515b8b498ef3827199eb4d4bdaebe"
+  },
+  "builtSourceHashes": {
+    "api/catalogue.generated.json": "592f9bc1863b23042b1a7c00bb61e113dd019f8d5e73746c6a728e7be87a0f6e",
+    "api/operations.ts": "90370737c78280459a84f5a5fc68b06a3e815b8e74a7c46ca578a4d6a671c8fd",
+    "api/response-fields.json": "1e42be59faf7d66aa68a99bb5dc1ba010cda2e18830f45c13aecabcd19e35941",
+    "api/response-view.ts": "5f69e5c82283100cc5039e239f64faa2cfd5164a58bc88f0319819b1ccaa010e",
+    "api/response-views.generated.json": "0b8870f9611af5ba26e7c004f36f4feff9e0212e3bfb0e7110e98465de487838",
+    "api/tool-groups.json": "2990cc20fd6ee8c821937f465a028878b1c3893558f27d0aaf9666673eb9e94f",
+    "api/validation.ts": "265a84f9d6c9858121ea00e532858f2f0357bb4a762343718dfcaf87ca560c40",
+    "client/errors.ts": "aff074a0446fe29823e1c66e855785f58b5ef941f92e6f5a614020dcfc923ce3",
+    "client/httpClient.ts": "0d62af42ab0741776afa8533fa02c42faea6a80efb015c40a6a43f8de57f449b",
+    "client/httpsConnector.ts": "cc48293791dec4a615e145dadf1aeba56ef0d805c9a276739ae307c457ae9e8c",
+    "client/signer.ts": "267ad8ba85ac16d9f144911863e38568ccb50886ee2f96e69772a62129ac094d",
+    "config/address.ts": "095e032867be614dd44dffd49de774a87effe4b9d8ac305cd62de4e1319da61e",
+    "config/load.ts": "e12438d21878c95fd1749011903300ba2a3cb589c3947a03e0388c960e8f6d10",
+    "config/schema.ts": "3c2a4be497ccc8a85f48be54b8ba8e5b612d39e563f0b25eb989504673b893b5",
+    "coverage/report.generated.json": "861e2e5cddf65c30f3e939acf7716334c2a774f7aa6fe1c66a24cec20a98bde2",
+    "coverage/report.ts": "de8133ab11cbbbca0b3fd9edcdd3a8d94b33893a3156dcf2bcbba36f70c246e5",
+    "index.ts": "64e05f41266823334c396eeef9d1e7e82cb3cb61e9af2aa86157d4f892775a9c",
+    "observability/audit.ts": "edc78c3ac415181351c5ed744efd00ed93858237acb7f5e0100b67aec01f12c2",
+    "observability/log.ts": "9080a65ff4aed7db68c368010c90e1458228c237ef01a2bfae8987f3e4f6c15a",
+    "observability/redact.ts": "c3dc4b61b2cd59595d315fda90ab09d918d4efba68a21f050ae2c528e4f4c26b",
+    "policy/guard.ts": "172fee591aa1ffc1ce9eef0e1ac155fb3d718d1070bb5875b2f5ad4854cd8137",
+    "server/createServer.ts": "989c59c2eca75af687ff897626b2190b6a916bc7991f04502697d4526cff7744",
+    "server/input.ts": "061142aaee64ebefe552097a3868d3aa6f06bb45005bcf5c902a1a3e0429ca2e",
+    "server/stdio.ts": "5f674483f2ad5b47a09242b66855c13e7c7456f7197bdcac8293a052d9fd7510",
+    "shape/output.ts": "38d50128abd7f252bf098362a120da434c9db3915ae4282efd175e4b6bf58135",
+    "shape/redact.ts": "8c79e7f45fe3d51f174d8473b2d49583681d0704c3a460b78abec27dea0716dc",
+    "tools/index.ts": "6c792914e076df3537f6d83eb0884803fe1eb01f01feb5241f6d8e9be1048843"
+  },
+  "fixtureHashes": {
+    "ca.pem": "9be9fd4e7fcc491a35a8dcff5ea220a3443cb411962eac1c66ca4108234d5367",
+    "expired-cert.pem": "81ce259f1a8ff73b887ebb840f943dfe5074045bc291fa4bf33a38ceb07c6827",
+    "expired-key.pem": "ce1e34d1ad93bed37d059270b5af42ffb1637ba324a76cda44ee08732f4475aa",
+    "hmac-vectors.json": "2cc1485514a0ea7dfe7ea69070ae138dcd7888e7ec4b36aed6348e9ac7d76e5c",
+    "mcp-tool-contracts.json": "37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72",
+    "trusted-cert.pem": "5f1ca0c7f76679124e6e125ca8fa5138b52eb29ea21d15927883a04065bd6c7b",
+    "trusted-key.pem": "eba88591275becd566e2b1517795ea418c6fb32ca54d0b894b9313a986f307ed",
+    "untrusted-cert.pem": "d9d7d141479149acd9200ed1e2249d8e8e51f8fd35ce1e7538b452a72a130503",
+    "untrusted-key.pem": "19f7e287295d6d486a84220f07d8e53801b5a6c5854df3c49500b93ded144ccf",
+    "wronghostname-cert.pem": "f356cb2d417416bb797bd27e4231d4c8b15ad5779c4a3b8524d1768bfe94dbf1",
+    "wronghostname-key.pem": "501225b95797c9560bf18466daeb4bfe6e0c8486615d5830a290f66a54976b04"
+  },
+  "sourceTreeSha256": "eadfe11732bd6c9bfa89cbfbbb2dc530d86e6984ad285576aab49b4dfc01d917",
+  "build": {
+    "status": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "assertionInvocations": 23553,
+  "subcases": [
+    {
+      "name": "ST-02.FILE token PUBLIC valid 400",
+      "status": "PASSED",
+      "durationMs": 361.793542,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC valid 600",
+      "status": "PASSED",
+      "durationMs": 348.134291,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 640",
+      "status": "PASSED",
+      "durationMs": 364.103333,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 604",
+      "status": "PASSED",
+      "durationMs": 354.437167,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 700",
+      "status": "PASSED",
+      "durationMs": 364.018875,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 1600",
+      "status": "PASSED",
+      "durationMs": 357.528125,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 2600",
+      "status": "BLOCKED",
+      "durationMs": 0.64225,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC mode reject 4600",
+      "status": "BLOCKED",
+      "durationMs": 0.170708,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02.BOUND token PUBLIC 4096",
+      "status": "PASSED",
+      "durationMs": 367.739708,
+      "note": ""
+    },
+    {
+      "name": "ST-02.BOUND token PUBLIC 4097",
+      "status": "PASSED",
+      "durationMs": 360.14925,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC symlink",
+      "status": "PASSED",
+      "durationMs": 353.788166,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC fifo",
+      "status": "PASSED",
+      "durationMs": 362.540166,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC directory",
+      "status": "PASSED",
+      "durationMs": 355.310042,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PUBLIC conflict",
+      "status": "PASSED",
+      "durationMs": 354.755042,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE valid 400",
+      "status": "PASSED",
+      "durationMs": 355.57075,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE valid 600",
+      "status": "PASSED",
+      "durationMs": 368.177167,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 640",
+      "status": "PASSED",
+      "durationMs": 373.822417,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 604",
+      "status": "PASSED",
+      "durationMs": 370.901667,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 700",
+      "status": "PASSED",
+      "durationMs": 368.89775,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 1600",
+      "status": "PASSED",
+      "durationMs": 486.217542,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 2600",
+      "status": "BLOCKED",
+      "durationMs": 0.265083,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE mode reject 4600",
+      "status": "BLOCKED",
+      "durationMs": 0.129875,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02.BOUND token PRIVATE 4096",
+      "status": "PASSED",
+      "durationMs": 387.4105,
+      "note": ""
+    },
+    {
+      "name": "ST-02.BOUND token PRIVATE 4097",
+      "status": "PASSED",
+      "durationMs": 374.225917,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE symlink",
+      "status": "PASSED",
+      "durationMs": 335.482917,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE fifo",
+      "status": "PASSED",
+      "durationMs": 342.180459,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE directory",
+      "status": "PASSED",
+      "durationMs": 317.851459,
+      "note": ""
+    },
+    {
+      "name": "ST-02.FILE token PRIVATE conflict",
+      "status": "PASSED",
+      "durationMs": 327.880875,
+      "note": ""
+    },
+    {
+      "name": "ST-02.BOUND JSON 65536 protected inline auth",
+      "status": "PASSED",
+      "durationMs": 340.257708,
+      "note": ""
+    },
+    {
+      "name": "ST-02.BOUND JSON 65537 protected inline auth",
+      "status": "PASSED",
+      "durationMs": 338.286833,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 640",
+      "status": "PASSED",
+      "durationMs": 337.164542,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 604",
+      "status": "PASSED",
+      "durationMs": 340.543584,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 620",
+      "status": "PASSED",
+      "durationMs": 347.350166,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 700",
+      "status": "PASSED",
+      "durationMs": 342.888875,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 1600",
+      "status": "PASSED",
+      "durationMs": 332.36775,
+      "note": ""
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 2600",
+      "status": "BLOCKED",
+      "durationMs": 0.256542,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02.POLICY nonsecret JSON insecure mode 4600",
+      "status": "BLOCKED",
+      "durationMs": 0.186542,
+      "note": "# BLOCKED: OS discarded requested special permission bits; no invalid fixture exists"
+    },
+    {
+      "name": "ST-02/14.JSON symlink",
+      "status": "PASSED",
+      "durationMs": 340.541834,
+      "note": ""
+    },
+    {
+      "name": "ST-02/14.JSON fifo",
+      "status": "PASSED",
+      "durationMs": 344.043541,
+      "note": ""
+    },
+    {
+      "name": "ST-02/14.JSON directory",
+      "status": "PASSED",
+      "durationMs": 350.49525,
+      "note": ""
+    },
+    {
+      "name": "ST-02/14.JSON malformed",
+      "status": "PASSED",
+      "durationMs": 341.8445,
+      "note": ""
+    },
+    {
+      "name": "ST-02.GROW JSON and token bounded read rejects before JSON.parse (instrumented fs)",
+      "status": "PASSED",
+      "durationMs": 1.630667,
+      "note": ""
+    },
+    {
+      "name": "ST-02.UID token and JSON wrong owner denied (instrumented fstat)",
+      "status": "PASSED",
+      "durationMs": 0.681375,
+      "note": ""
+    },
+    {
+      "name": "ST-02.MODE all special bits denied on open handle (instrumented fstat, distinct from OS fixture)",
+      "status": "PASSED",
+      "durationMs": 1.786125,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY HTTP_PROXY value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 684.198584,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY HTTPS_PROXY value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 664.262833,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY ALL_PROXY value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 657.42775,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY NO_PROXY value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 673.077916,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY http_proxy value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 683.724,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY https_proxy value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 675.67925,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY all_proxy value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 664.062583,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY no_proxy value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 668.234875,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY NODE_USE_ENV_PROXY value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 650.544959,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.PROXY NODE_TLS_REJECT_UNAUTHORIZED value and empty refusal",
+      "status": "PASSED",
+      "durationMs": 335.567667,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.FLAGS --use-env-proxy",
+      "status": "PASSED",
+      "durationMs": 0.174209,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.FLAGS --tls-min-v1.0",
+      "status": "PASSED",
+      "durationMs": 0.035083,
+      "note": ""
+    },
+    {
+      "name": "ST-03/04.FLAGS --tls-keylog",
+      "status": "PASSED",
+      "durationMs": 0.03225,
+      "note": ""
+    },
+    {
+      "name": "ST-03/07/09/16.ENV unsupported DARKTRACE_TLS_INSECURE",
+      "status": "PASSED",
+      "durationMs": 332.050958,
+      "note": ""
+    },
+    {
+      "name": "ST-03/07/09/16.ENV unsupported DARKTRACE_ASSUME_VERSION",
+      "status": "PASSED",
+      "durationMs": 334.25575,
+      "note": ""
+    },
+    {
+      "name": "ST-03/07/09/16.ENV unsupported DARKTRACE_EXPORT_DIR",
+      "status": "PASSED",
+      "durationMs": 328.941208,
+      "note": ""
+    },
+    {
+      "name": "ST-03/07/09/16.ENV unsupported DARKTRACE_HTTP",
+      "status": "PASSED",
+      "durationMs": 336.221292,
+      "note": ""
+    },
+    {
+      "name": "ST-03/07/09/16.ENV unsupported DARKTRACE_EMAIL",
+      "status": "PASSED",
+      "durationMs": 340.319709,
+      "note": ""
+    },
+    {
+      "name": "ST-02.ARGV tokens are never echoed/accepted",
+      "status": "PASSED",
+      "durationMs": 103.724792,
+      "note": ""
+    },
+    {
+      "name": "ST-11.CONFIG every ceiling rejects increase; ST-08/16 strict critical/transport",
+      "status": "PASSED",
+      "durationMs": 0.4295,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 301 https://appliance.test/again",
+      "status": "PASSED",
+      "durationMs": 11.084791,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 301 https://other.test/x",
+      "status": "PASSED",
+      "durationMs": 0.451209,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 301 http://appliance.test/x",
+      "status": "PASSED",
+      "durationMs": 0.272417,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 301 https://169.254.169.254/latest",
+      "status": "PASSED",
+      "durationMs": 0.225167,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 301 https://10.1.2.3/x",
+      "status": "PASSED",
+      "durationMs": 0.227083,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 302 https://appliance.test/again",
+      "status": "PASSED",
+      "durationMs": 0.17325,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 302 https://other.test/x",
+      "status": "PASSED",
+      "durationMs": 0.144542,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 302 http://appliance.test/x",
+      "status": "PASSED",
+      "durationMs": 0.140375,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 302 https://169.254.169.254/latest",
+      "status": "PASSED",
+      "durationMs": 0.676333,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 302 https://10.1.2.3/x",
+      "status": "PASSED",
+      "durationMs": 0.304209,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 303 https://appliance.test/again",
+      "status": "PASSED",
+      "durationMs": 0.156666,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 303 https://other.test/x",
+      "status": "PASSED",
+      "durationMs": 0.121125,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 303 http://appliance.test/x",
+      "status": "PASSED",
+      "durationMs": 0.136709,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 303 https://169.254.169.254/latest",
+      "status": "PASSED",
+      "durationMs": 0.106916,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 303 https://10.1.2.3/x",
+      "status": "PASSED",
+      "durationMs": 0.113208,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 307 https://appliance.test/again",
+      "status": "PASSED",
+      "durationMs": 0.151083,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 307 https://other.test/x",
+      "status": "PASSED",
+      "durationMs": 0.125292,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 307 http://appliance.test/x",
+      "status": "PASSED",
+      "durationMs": 0.111625,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 307 https://169.254.169.254/latest",
+      "status": "PASSED",
+      "durationMs": 0.100042,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 307 https://10.1.2.3/x",
+      "status": "PASSED",
+      "durationMs": 0.100375,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 308 https://appliance.test/again",
+      "status": "PASSED",
+      "durationMs": 0.095,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 308 https://other.test/x",
+      "status": "PASSED",
+      "durationMs": 0.08775,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 308 http://appliance.test/x",
+      "status": "PASSED",
+      "durationMs": 0.084583,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 308 https://169.254.169.254/latest",
+      "status": "PASSED",
+      "durationMs": 0.0895,
+      "note": ""
+    },
+    {
+      "name": "ST-05.REDIRECT 308 https://10.1.2.3/x",
+      "status": "PASSED",
+      "durationMs": 0.1005,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY excessive/invalid 60",
+      "status": "PASSED",
+      "durationMs": 1.331666,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY excessive/invalid -1",
+      "status": "PASSED",
+      "durationMs": 0.278875,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY excessive/invalid NaN",
+      "status": "PASSED",
+      "durationMs": 0.218916,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY excessive/invalid 9999999999999999999999999",
+      "status": "PASSED",
+      "durationMs": 0.135959,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY excessive/invalid Mon, 05 Oct 2026 11:01:00 GMT",
+      "status": "PASSED",
+      "durationMs": 0.145583,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY safeGET 429 at most three attempts",
+      "status": "PASSED",
+      "durationMs": 0.318917,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY safeGET 502 at most three attempts",
+      "status": "PASSED",
+      "durationMs": 0.24725,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY safeGET 503 at most three attempts",
+      "status": "PASSED",
+      "durationMs": 0.218791,
+      "note": ""
+    },
+    {
+      "name": "ST-12.RETRY safeGET 504 at most three attempts",
+      "status": "PASSED",
+      "durationMs": 0.177167,
+      "note": ""
+    },
+    {
+      "name": "ST-12.AUTH 401 zero retries",
+      "status": "PASSED",
+      "durationMs": 0.128666,
+      "note": ""
+    },
+    {
+      "name": "ST-12.AUTH 403 zero retries",
+      "status": "PASSED",
+      "durationMs": 0.099208,
+      "note": ""
+    },
+    {
+      "name": "ST-12.MUTATION post_synthetic status zero retries",
+      "status": "PASSED",
+      "durationMs": 0.121416,
+      "note": ""
+    },
+    {
+      "name": "ST-12.MUTATION post_synthetic accepted-network-failure zero retries",
+      "status": "PASSED",
+      "durationMs": 0.095292,
+      "note": ""
+    },
+    {
+      "name": "ST-12.MUTATION delete_synthetic status zero retries",
+      "status": "PASSED",
+      "durationMs": 0.09875,
+      "note": ""
+    },
+    {
+      "name": "ST-12.MUTATION delete_synthetic accepted-network-failure zero retries",
+      "status": "PASSED",
+      "durationMs": 0.086208,
+      "note": ""
+    },
+    {
+      "name": "ST-03/12.TLS-code UNABLE_TO_GET_ISSUER_CERT_LOCALLY zero retries",
+      "status": "PASSED",
+      "durationMs": 0.10375,
+      "note": ""
+    },
+    {
+      "name": "ST-03/12.TLS-code UNABLE_TO_GET_ISSUER_CERT zero retries",
+      "status": "PASSED",
+      "durationMs": 0.082792,
+      "note": ""
+    },
+    {
+      "name": "ST-03/12.TLS-code INVALID_CA zero retries",
+      "status": "PASSED",
+      "durationMs": 0.08175,
+      "note": ""
+    },
+    {
+      "name": "ST-03/12.TLS-code CERT_HAS_EXPIRED zero retries",
+      "status": "PASSED",
+      "durationMs": 0.07775,
+      "note": ""
+    },
+    {
+      "name": "ST-03/12.TLS-code ERR_TLS_CERT_ALTNAME_INVALID zero retries",
+      "status": "PASSED",
+      "durationMs": 0.076417,
+      "note": ""
+    },
+    {
+      "name": "ST-12.WAIT accepted delay respected; never exceeds remaining deadline",
+      "status": "PASSED",
+      "durationMs": 0.266458,
+      "note": ""
+    },
+    {
+      "name": "ST-11.BYTES cumulative retry bodies and lying Content-Length cancelled",
+      "status": "PASSED",
+      "durationMs": 0.409625,
+      "note": ""
+    },
+    {
+      "name": "ST-11.BYTES hard boundary 2097152",
+      "status": "PASSED",
+      "durationMs": 2.1425,
+      "note": ""
+    },
+    {
+      "name": "ST-11.BYTES hard boundary 2097153",
+      "status": "PASSED",
+      "durationMs": 1.079958,
+      "note": ""
+    },
+    {
+      "name": "ST-11.COMPRESSION gzip rejected and cancelled",
+      "status": "PASSED",
+      "durationMs": 0.229291,
+      "note": ""
+    },
+    {
+      "name": "ST-11.COMPRESSION br rejected and cancelled",
+      "status": "PASSED",
+      "durationMs": 0.131375,
+      "note": ""
+    },
+    {
+      "name": "ST-11.COMPRESSION deflate rejected and cancelled",
+      "status": "PASSED",
+      "durationMs": 0.114833,
+      "note": ""
+    },
+    {
+      "name": "ST-11/12.RATE 120 attempts permitted and attempt121 unsigned",
+      "status": "PASSED",
+      "durationMs": 4.701375,
+      "note": ""
+    },
+    {
+      "name": "ST-11.QUEUE exact 4 active/16 queued then overflow; close drains cancellation",
+      "status": "PASSED",
+      "durationMs": 6.170416,
+      "note": ""
+    },
+    {
+      "name": "ST-11.DEADLINE admission includes queue and retries; cancellation removes queued job",
+      "status": "PASSED",
+      "durationMs": 211.649917,
+      "note": ""
+    },
+    {
+      "name": "ST-12.CANCEL during backoff prevents any extra attempt",
+      "status": "PASSED",
+      "durationMs": 0.889916,
+      "note": ""
+    },
+    {
+      "name": "MR-01.UNICODE every required code point is escaped in nested strings and keys; visible text preserved",
+      "status": "PASSED",
+      "durationMs": 1.631125,
+      "note": ""
+    },
+    {
+      "name": "MR-01.TOOL darktrace_get_status final text/structured output neutralized with code-owned flag and no extra effects",
+      "status": "PASSED",
+      "durationMs": 1.835291,
+      "note": ""
+    },
+    {
+      "name": "MR-01.TOOL darktrace_advanced_search final text/structured output neutralized with code-owned flag and no extra effects",
+      "status": "PASSED",
+      "durationMs": 1.610958,
+      "note": ""
+    },
+    {
+      "name": "MR-01.ERROR/output-budget fixed errors cannot reflect controls; expanded escapes remain bounded",
+      "status": "PASSED",
+      "durationMs": 2.041209,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca argv bare",
+      "status": "PASSED",
+      "durationMs": 0.213417,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca argv equals",
+      "status": "PASSED",
+      "durationMs": 0.128584,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.034416,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.048333,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.041792,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-openssl-ca NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.060958,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca argv bare",
+      "status": "PASSED",
+      "durationMs": 0.07025,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca argv equals",
+      "status": "PASSED",
+      "durationMs": 0.042458,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.031541,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.038125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.032125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --use-system-ca NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.027208,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config argv bare",
+      "status": "PASSED",
+      "durationMs": 0.036125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config argv equals",
+      "status": "PASSED",
+      "durationMs": 0.027959,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.021291,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.021375,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.022125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-config NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.031208,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider argv bare",
+      "status": "PASSED",
+      "durationMs": 0.0285,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider argv equals",
+      "status": "PASSED",
+      "durationMs": 0.0215,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.024375,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.027583,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.023084,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.02075,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list argv bare",
+      "status": "PASSED",
+      "durationMs": 0.019375,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list argv equals",
+      "status": "PASSED",
+      "durationMs": 0.023708,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.029125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.02025,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.019792,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-list NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.018583,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites argv bare",
+      "status": "PASSED",
+      "durationMs": 0.018875,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites argv equals",
+      "status": "PASSED",
+      "durationMs": 0.031166,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites argv quoted",
+      "status": "PASSED",
+      "durationMs": 0.025542,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS bare",
+      "status": "PASSED",
+      "durationMs": 0.021,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS equals",
+      "status": "PASSED",
+      "durationMs": 0.032958,
+      "note": ""
+    },
+    {
+      "name": "MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS quoted",
+      "status": "PASSED",
+      "durationMs": 0.019959,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV SSL_CERT_FILE defined=empty",
+      "status": "PASSED",
+      "durationMs": 0.0565,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV SSL_CERT_FILE defined=canary",
+      "status": "PASSED",
+      "durationMs": 0.032875,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV SSL_CERT_DIR defined=empty",
+      "status": "PASSED",
+      "durationMs": 0.023333,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV SSL_CERT_DIR defined=canary",
+      "status": "PASSED",
+      "durationMs": 0.019792,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV OPENSSL_CONF defined=empty",
+      "status": "PASSED",
+      "durationMs": 0.019875,
+      "note": ""
+    },
+    {
+      "name": "MR-02.ENV OPENSSL_CONF defined=canary",
+      "status": "PASSED",
+      "durationMs": 0.016875,
+      "note": ""
+    },
+    {
+      "name": "MR-02 approved NODE_EXTRA_CA_CERTS remains allowed; diagnostic classifier cannot reflect arbitrary names/flags",
+      "status": "PASSED",
+      "durationMs": 0.068125,
+      "note": ""
+    },
+    {
+      "name": "MR-02.TEST-RUNTIME bootstrap removes only exact native cipher default in test context and never custom flags",
+      "status": "PASSED",
+      "durationMs": 57.176958,
+      "note": ""
+    },
+    {
+      "name": "MR-02/06.STARTUP stdio guards precede DNS/socket/signing and emit only fixed metadata",
+      "status": "PASSED",
+      "durationMs": 1141.476417,
+      "note": ""
+    },
+    {
+      "name": "MR-02/06.STARTUP doctor guards precede DNS/socket/signing and emit only fixed metadata",
+      "status": "PASSED",
+      "durationMs": 1143.844625,
+      "note": ""
+    },
+    {
+      "name": "MR-02/06.STARTUP --check-config guards precede DNS/socket/signing and emit only fixed metadata",
+      "status": "PASSED",
+      "durationMs": 1132.90425,
+      "note": ""
+    },
+    {
+      "name": "MR-06.PROFILES toxic sensitive+write combinations rejected in object/env/file+env overlays; independent profiles accepted",
+      "status": "PASSED",
+      "durationMs": 1.716708,
+      "note": ""
+    },
+    {
+      "name": "MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read",
+      "status": "PASSED",
+      "durationMs": 20.809833,
+      "note": ""
+    },
+    {
+      "name": "MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+sensitive",
+      "status": "PASSED",
+      "durationMs": 6.634875,
+      "note": ""
+    },
+    {
+      "name": "MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+write",
+      "status": "PASSED",
+      "durationMs": 3.930792,
+      "note": ""
+    },
+    {
+      "name": "MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+writeCritical",
+      "status": "PASSED",
+      "durationMs": 3.645833,
+      "note": ""
+    },
+    {
+      "name": "MR-05.LIFECYCLE pre-init tools/list/call and forged initialized reject with zero client; later proper init succeeds",
+      "status": "PASSED",
+      "durationMs": 20.110333,
+      "note": ""
+    },
+    {
+      "name": "MR-01/05.JSONRPC correlation IDs remain byte-for-byte even if containing controls or token literals",
+      "status": "PASSED",
+      "durationMs": 4.846833,
+      "note": ""
+    },
+    {
+      "name": "MR-07.FRAMES 30000-deep below64KiB plus legacy batch and duplicate-operation frames never dispatch; session survives",
+      "status": "PASSED",
+      "durationMs": 19.331417,
+      "note": ""
+    },
+    {
+      "name": "MR-05/07.PROCESS diagnostic guard confirms premature/deep/batch/duplicate frames have no DNS/socket/signing and clean stdout",
+      "status": "PASSED",
+      "durationMs": 153.589208,
+      "note": ""
+    },
+    {
+      "name": "MR-07.DUPLICATES escaped keys and nested duplicate scopes reject; strings/delimiters and distinct object scopes remain intact",
+      "status": "PASSED",
+      "durationMs": 1.011916,
+      "note": ""
+    },
+    {
+      "name": "MR-03.DISTRIBUTION only verified private tgz/local source examples; documentary scanner distinguishes warnings and installs",
+      "status": "PASSED",
+      "durationMs": 15.959125,
+      "note": ""
+    },
+    {
+      "name": "IR-01.UNICODE-EXT all269 explicit new points neutralized in nested values/keys with visible escapes",
+      "status": "PASSED",
+      "durationMs": 1.447834,
+      "note": ""
+    },
+    {
+      "name": "IR-01.EMOJI selectors encode synthetic bytes but returned strings/keys contain neither selectors nor canary bytes",
+      "status": "PASSED",
+      "durationMs": 0.164792,
+      "note": ""
+    },
+    {
+      "name": "IR-01.TOOL darktrace_get_status structured/text preserve visible emoji and remove variation smuggling with one fake call",
+      "status": "PASSED",
+      "durationMs": 0.921125,
+      "note": ""
+    },
+    {
+      "name": "IR-01.TOOL darktrace_advanced_search structured/text preserve visible emoji and remove variation smuggling with one fake call",
+      "status": "PASSED",
+      "durationMs": 0.979458,
+      "note": ""
+    },
+    {
+      "name": "IR-01.BOUNDS expanded escapes honor cap/flag, both collision orders fail closed, ordinary emoji/text unchanged",
+      "status": "PASSED",
+      "durationMs": 1.529,
+      "note": ""
+    },
+    {
+      "name": "IR-01.PROCESS diagnostic guard proves no real DNS/socket/HMAC while synthetic tool results and stderr omit smuggling canary",
+      "status": "PASSED",
+      "durationMs": 96.790667,
+      "note": ""
+    },
+    {
+      "name": "IR-02.ENV NODE_USE_SYSTEM_CA defined=empty",
+      "status": "PASSED",
+      "durationMs": 0.109333,
+      "note": ""
+    },
+    {
+      "name": "IR-02.ENV NODE_USE_SYSTEM_CA defined=0",
+      "status": "PASSED",
+      "durationMs": 0.030208,
+      "note": ""
+    },
+    {
+      "name": "IR-02.ENV NODE_USE_SYSTEM_CA defined=1",
+      "status": "PASSED",
+      "durationMs": 0.021875,
+      "note": ""
+    },
+    {
+      "name": "IR-02.ENV NODE_USE_SYSTEM_CA defined=canary",
+      "status": "PASSED",
+      "durationMs": 0.019792,
+      "note": ""
+    },
+    {
+      "name": "IR-02.EQUIVALENCE explicit argv/NODE_OPTIONS use-system-ca denied and only approved extra CA remains allowed",
+      "status": "PASSED",
+      "durationMs": 0.109334,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 115.606208,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 114.396042,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 118.983583,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 112.565583,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 118.595041,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 114.814375,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 115.490958,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 121.173083,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 119.331625,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 108.884833,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 113.29075,
+      "note": ""
+    },
+    {
+      "name": "IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata",
+      "status": "PASSED",
+      "durationMs": 117.348,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DNS terminal resolver concurrent/recovery/new-instance",
+      "status": "PASSED",
+      "durationMs": 6.847167,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DNS terminal mixed concurrent/recovery/new-instance",
+      "status": "PASSED",
+      "durationMs": 0.778459,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DNS terminal allowlist concurrent/recovery/new-instance",
+      "status": "PASSED",
+      "durationMs": 0.598958,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 127.0.0.1",
+      "status": "PASSED",
+      "durationMs": 0.2015,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject ::1",
+      "status": "PASSED",
+      "durationMs": 0.314583,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 169.254.169.254",
+      "status": "PASSED",
+      "durationMs": 0.119334,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject fe80::1",
+      "status": "PASSED",
+      "durationMs": 0.127083,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 0.0.0.0",
+      "status": "PASSED",
+      "durationMs": 0.101875,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 224.0.0.1",
+      "status": "PASSED",
+      "durationMs": 0.110583,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject ::ffff:127.0.0.1",
+      "status": "PASSED",
+      "durationMs": 0.144084,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 100.100.100.200",
+      "status": "PASSED",
+      "durationMs": 0.108,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 64:ff9b::a9fe:a9fe",
+      "status": "PASSED",
+      "durationMs": 0.115875,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject 2002:7f00:1::",
+      "status": "PASSED",
+      "durationMs": 0.092625,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject fec0::1",
+      "status": "PASSED",
+      "durationMs": 0.086459,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DEST reject ::7f00:1",
+      "status": "PASSED",
+      "durationMs": 0.101042,
+      "note": ""
+    },
+    {
+      "name": "ST-04.PUBLIC clarified operator origin allows global snapshot; explicit private allowlist denies it",
+      "status": "PASSED",
+      "durationMs": 0.105834,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:a9fe:a9fe allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.589333,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:a9fe:a9fe allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.162583,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:7f00:1 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.141125,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:7f00:1 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.1385,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:a14:1e28 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.150875,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::ffff:0:a14:1e28 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.124458,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 2001:0:4136:e378:8000:63bf:3fff:fdd2 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.134084,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 2001:0:4136:e378:8000:63bf:3fff:fdd2 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.12625,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1:a00:a9:fea9:fe00:0 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.141416,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1:a00:a9:fea9:fe00:0 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.125083,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1:a00:7f:1:0:0 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.129708,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1:a00:7f:1:0:0 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.134292,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1::1 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.123333,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b:1::1 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.114,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b::a14:1e28 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.113708,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 64:ff9b::a14:1e28 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.129667,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 2002:a14:1e28::1 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.113583,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject 2002:a14:1e28::1 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.118167,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::a14:1e28 allowlist=false",
+      "status": "PASSED",
+      "durationMs": 0.119292,
+      "note": ""
+    },
+    {
+      "name": "ST-04.FR01 translated/transition reject ::a14:1e28 allowlist=true",
+      "status": "PASSED",
+      "durationMs": 0.397459,
+      "note": ""
+    },
+    {
+      "name": "ST-04.SNAPSHOT private IPv4/ULA/mapped normalization and immutable lookup no rebind",
+      "status": "PASSED",
+      "durationMs": 0.188291,
+      "note": ""
+    },
+    {
+      "name": "ST-04.DNS initial caller abort is terminal for concurrent waiters and later calls",
+      "status": "PASSED",
+      "durationMs": 0.308083,
+      "note": ""
+    },
+    {
+      "name": "ST-03.TLS real trusted",
+      "status": "BLOCKED",
+      "durationMs": 2.927042,
+      "note": ""
+    },
+    {
+      "name": "ST-03.TLS real wronghostname",
+      "status": "BLOCKED",
+      "durationMs": 0.893458,
+      "note": ""
+    },
+    {
+      "name": "ST-03.TLS real untrusted",
+      "status": "BLOCKED",
+      "durationMs": 0.920291,
+      "note": ""
+    },
+    {
+      "name": "ST-03.TLS real expired",
+      "status": "BLOCKED",
+      "durationMs": 1.183208,
+      "note": ""
+    },
+    {
+      "name": "ST-11.TLS real slow body admission deadline",
+      "status": "BLOCKED",
+      "durationMs": 0.926333,
+      "note": ""
+    },
+    {
+      "name": "ST-11.TLS real slow body caller cancellation",
+      "status": "BLOCKED",
+      "durationMs": 0.602833,
+      "note": ""
+    },
+    {
+      "name": "ST-07.MATRIX all 79 inventory IDs accounted; default 22 writes and blocked calls have zero effects",
+      "status": "PASSED",
+      "durationMs": 28.961917,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL delete_tags_tid dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 1.591417,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL delete_tags_tid dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.717208,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL delete_tags_tid dryRun=false",
+      "status": "PASSED",
+      "durationMs": 0.6035,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 1.1,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.789792,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena dryRun=false",
+      "status": "PASSED",
+      "durationMs": 3.952834,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena_manual dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 1.121583,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena_manual dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.820125,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_antigena_manual dryRun=false",
+      "status": "PASSED",
+      "durationMs": 0.823958,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_intelfeed dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 0.938334,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_intelfeed dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.670458,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_intelfeed dryRun=false",
+      "status": "PASSED",
+      "durationMs": 0.722125,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_subnets dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 0.866041,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_subnets dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.687083,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_subnets dryRun=false",
+      "status": "PASSED",
+      "durationMs": 0.700208,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=undefined",
+      "status": "PASSED",
+      "durationMs": 0.446083,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=true",
+      "status": "PASSED",
+      "durationMs": 0.535208,
+      "note": ""
+    },
+    {
+      "name": "ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=false",
+      "status": "PASSED",
+      "durationMs": 0.448584,
+      "note": ""
+    },
+    {
+      "name": "ST-08.APPROVAL forged confirmation/approval cannot execute critical",
+      "status": "PASSED",
+      "durationMs": 2.687583,
+      "note": ""
+    },
+    {
+      "name": "ST-06.INJECTION retrieved text remains bounded provenance data; follow-up mutation/export denied",
+      "status": "PASSED",
+      "durationMs": 2.656333,
+      "note": ""
+    },
+    {
+      "name": "ST-02/13/14.SINK literals, key-based secrets, canonical/signature and nested error canaries absent",
+      "status": "PASSED",
+      "durationMs": 1.1965,
+      "note": ""
+    },
+    {
+      "name": "ST-02.SINK base64 token equivalent must never reach model-visible output",
+      "status": "PASSED",
+      "durationMs": 0.635292,
+      "note": ""
+    },
+    {
+      "name": "ST-14.PROTO response keys cannot mutate prototypes and malicious caller fields never reach client",
+      "status": "PASSED",
+      "durationMs": 3.91425,
+      "note": ""
+    },
+    {
+      "name": "ST-11.OUTPUT cap includes both text and structured representation and marks truncation",
+      "status": "PASSED",
+      "durationMs": 0.673334,
+      "note": ""
+    },
+    {
+      "name": "ST-13.AUDIT exact stored fields/omitted ID/explicit ID and asynchronous rejection awaited",
+      "status": "PASSED",
+      "durationMs": 4.361334,
+      "note": ""
+    },
+    {
+      "name": "ST-13.PREAUDIT async rejection zero client calls; preview/denial stay unsigned with rejecting optional sink",
+      "status": "PASSED",
+      "durationMs": 3.5895,
+      "note": ""
+    },
+    {
+      "name": "ST-13.POSTAUDIT known completed vs unknown write effects and shared ID, no repeat",
+      "status": "PASSED",
+      "durationMs": 2.735375,
+      "note": ""
+    },
+    {
+      "name": "ST-09.SENSITIVE operator opt-in only; provider notice is documentary, no eligibility attestation",
+      "status": "PASSED",
+      "durationMs": 3.857917,
+      "note": ""
+    },
+    {
+      "name": "ST-09.MINIMIZATION unknown sensitive telemetry excluded from read and sensitive search views",
+      "status": "PASSED",
+      "durationMs": 3.23575,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-empty-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.698833,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-special-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.137292,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ba-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.10425,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ab-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.072125,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-form-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.085208,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT delete-primitive-unencoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.065209,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-empty-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.038375,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-special-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.041416,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ba-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.070625,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ab-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.103333,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-form-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.059167,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT delete-primitive-encoded-20261005T110000",
+      "status": "PASSED",
+      "durationMs": 0.04375,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-empty-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.027084,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-special-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.032833,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ba-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.041292,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ab-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.030542,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-form-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.03825,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT delete-primitive-unencoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.024958,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-empty-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.020667,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT get-special-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.021042,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ba-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.023792,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-json-ab-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.029708,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT post-form-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.029208,
+      "note": ""
+    },
+    {
+      "name": "ST-01.KAT delete-primitive-encoded-2026-10-05 11:00:00",
+      "status": "PASSED",
+      "durationMs": 0.022167,
+      "note": ""
+    },
+    {
+      "name": "ST-01.WIRE mutation during async DNS does not change signed URL/body",
+      "status": "PASSED",
+      "durationMs": 9.56975,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK encoded {\"operationId\":\"post_synthetic\",\"query\":[[\"q\",\"x\"]],\"body\":{\"value\":\"x\"}}",
+      "status": "PASSED",
+      "durationMs": 0.442667,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK encoded {\"operationId\":\"delete_synthetic\",\"query\":[[\"id\",\"1\"]]}",
+      "status": "PASSED",
+      "durationMs": 0.108041,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK encoded {\"operationId\":\"get_advancedsearch_api_search_query\",\"pathParams\":{\"query\":\"+/=\"}}",
+      "status": "PASSED",
+      "durationMs": 0.0755,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK encoded {\"operationId\":\"get_status\",\"query\":[[\"x\",\"a\\r\\nb\"]]}",
+      "status": "PASSED",
+      "durationMs": 0.107833,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK encoded {\"operationId\":\"get_segment\",\"pathParams\":{\"id\":\"%252e%252e%252fstatus\"}}",
+      "status": "PASSED",
+      "durationMs": 0.214833,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK unencoded {\"operationId\":\"post_synthetic\",\"query\":[[\"q\",\"x\"]],\"body\":{\"value\":\"x\"}}",
+      "status": "PASSED",
+      "durationMs": 0.109459,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK unencoded {\"operationId\":\"delete_synthetic\",\"query\":[[\"id\",\"1\"]]}",
+      "status": "PASSED",
+      "durationMs": 0.077333,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK unencoded {\"operationId\":\"get_advancedsearch_api_search_query\",\"pathParams\":{\"query\":\"+/=\"}}",
+      "status": "PASSED",
+      "durationMs": 0.392625,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK unencoded {\"operationId\":\"get_status\",\"query\":[[\"x\",\"a\\r\\nb\"]]}",
+      "status": "PASSED",
+      "durationMs": 0.123542,
+      "note": ""
+    },
+    {
+      "name": "ST-01/04.BLOCK unencoded {\"operationId\":\"get_segment\",\"pathParams\":{\"id\":\"%252e%252e%252fstatus\"}}",
+      "status": "PASSED",
+      "durationMs": 0.085666,
+      "note": ""
+    },
+    {
+      "name": "ST-01.AUTH401 no alternate signature or retry",
+      "status": "PASSED",
+      "durationMs": 1.809708,
+      "note": ""
+    },
+    {
+      "name": "ST-01.PREVIEW exact unsigned result with code-owned names and zero sign/network",
+      "status": "PASSED",
+      "durationMs": 0.332167,
+      "note": ""
+    },
+    {
+      "name": "ST-11.FRAMES hard64KiB/lowered boundary newline inclusive; overflow zero parser/handler",
+      "status": "PASSED",
+      "durationMs": 16.92875,
+      "note": ""
+    },
+    {
+      "name": "ST-11.INPUT actual depth8/elements5000 limits and +1",
+      "status": "PASSED",
+      "durationMs": 1.07825,
+      "note": ""
+    },
+    {
+      "name": "ST-14.MALFORMED bounded invalid frames/EOF remain protocol-only without canaries",
+      "status": "PASSED",
+      "durationMs": 138.083292,
+      "note": ""
+    },
+    {
+      "name": "ST-11/14.PROCESS fragmented overflow closes session without EOF or partial echo",
+      "status": "PASSED",
+      "durationMs": 113.73475,
+      "note": ""
+    },
+    {
+      "name": "ST-14.PROTO raw protocol attack denied before operation client; EOF cancels active work",
+      "status": "PASSED",
+      "durationMs": 17.956875,
+      "note": ""
+    },
+    {
+      "name": "ST-11/14.CANCEL EOF active operation stops client/queue exactly once",
+      "status": "PASSED",
+      "durationMs": 4.053875,
+      "note": ""
+    },
+    {
+      "name": "ST-16.PROCESS stdio startup/listing has no inbound listener/DNS/signing; unsupported HTTP aborts",
+      "status": "PASSED",
+      "durationMs": 260.404209,
+      "note": ""
+    }
+  ],
+  "tests": {
+    "status": 1,
+    "stdout": "✔ ST-02.FILE token PUBLIC valid 400 (361.793542ms)\n✔ ST-02.FILE token PUBLIC valid 600 (348.134291ms)\n✔ ST-02.FILE token PUBLIC mode reject 640 (364.103333ms)\n✔ ST-02.FILE token PUBLIC mode reject 604 (354.437167ms)\n✔ ST-02.FILE token PUBLIC mode reject 700 (364.018875ms)\n✔ ST-02.FILE token PUBLIC mode reject 1600 (357.528125ms)\n﹣ ST-02.FILE token PUBLIC mode reject 2600 (0.64225ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n﹣ ST-02.FILE token PUBLIC mode reject 4600 (0.170708ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n✔ ST-02.BOUND token PUBLIC 4096 (367.739708ms)\n✔ ST-02.BOUND token PUBLIC 4097 (360.14925ms)\n✔ ST-02.FILE token PUBLIC symlink (353.788166ms)\n✔ ST-02.FILE token PUBLIC fifo (362.540166ms)\n✔ ST-02.FILE token PUBLIC directory (355.310042ms)\n✔ ST-02.FILE token PUBLIC conflict (354.755042ms)\n✔ ST-02.FILE token PRIVATE valid 400 (355.57075ms)\n✔ ST-02.FILE token PRIVATE valid 600 (368.177167ms)\n✔ ST-02.FILE token PRIVATE mode reject 640 (373.822417ms)\n✔ ST-02.FILE token PRIVATE mode reject 604 (370.901667ms)\n✔ ST-02.FILE token PRIVATE mode reject 700 (368.89775ms)\n✔ ST-02.FILE token PRIVATE mode reject 1600 (486.217542ms)\n﹣ ST-02.FILE token PRIVATE mode reject 2600 (0.265083ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n﹣ ST-02.FILE token PRIVATE mode reject 4600 (0.129875ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n✔ ST-02.BOUND token PRIVATE 4096 (387.4105ms)\n✔ ST-02.BOUND token PRIVATE 4097 (374.225917ms)\n✔ ST-02.FILE token PRIVATE symlink (335.482917ms)\n✔ ST-02.FILE token PRIVATE fifo (342.180459ms)\n✔ ST-02.FILE token PRIVATE directory (317.851459ms)\n✔ ST-02.FILE token PRIVATE conflict (327.880875ms)\n✔ ST-02.BOUND JSON 65536 protected inline auth (340.257708ms)\n✔ ST-02.BOUND JSON 65537 protected inline auth (338.286833ms)\n✔ ST-02.POLICY nonsecret JSON insecure mode 640 (337.164542ms)\n✔ ST-02.POLICY nonsecret JSON insecure mode 604 (340.543584ms)\n✔ ST-02.POLICY nonsecret JSON insecure mode 620 (347.350166ms)\n✔ ST-02.POLICY nonsecret JSON insecure mode 700 (342.888875ms)\n✔ ST-02.POLICY nonsecret JSON insecure mode 1600 (332.36775ms)\n﹣ ST-02.POLICY nonsecret JSON insecure mode 2600 (0.256542ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n﹣ ST-02.POLICY nonsecret JSON insecure mode 4600 (0.186542ms) # BLOCKED: OS discarded requested special permission bits; no invalid fixture exists\n✔ ST-02/14.JSON symlink (340.541834ms)\n✔ ST-02/14.JSON fifo (344.043541ms)\n✔ ST-02/14.JSON directory (350.49525ms)\n✔ ST-02/14.JSON malformed (341.8445ms)\n✔ ST-02.GROW JSON and token bounded read rejects before JSON.parse (instrumented fs) (1.630667ms)\n✔ ST-02.UID token and JSON wrong owner denied (instrumented fstat) (0.681375ms)\n✔ ST-02.MODE all special bits denied on open handle (instrumented fstat, distinct from OS fixture) (1.786125ms)\n✔ ST-03/04.PROXY HTTP_PROXY value and empty refusal (684.198584ms)\n✔ ST-03/04.PROXY HTTPS_PROXY value and empty refusal (664.262833ms)\n✔ ST-03/04.PROXY ALL_PROXY value and empty refusal (657.42775ms)\n✔ ST-03/04.PROXY NO_PROXY value and empty refusal (673.077916ms)\n✔ ST-03/04.PROXY http_proxy value and empty refusal (683.724ms)\n✔ ST-03/04.PROXY https_proxy value and empty refusal (675.67925ms)\n✔ ST-03/04.PROXY all_proxy value and empty refusal (664.062583ms)\n✔ ST-03/04.PROXY no_proxy value and empty refusal (668.234875ms)\n✔ ST-03/04.PROXY NODE_USE_ENV_PROXY value and empty refusal (650.544959ms)\n✔ ST-03/04.PROXY NODE_TLS_REJECT_UNAUTHORIZED value and empty refusal (335.567667ms)\n✔ ST-03/04.FLAGS --use-env-proxy (0.174209ms)\n✔ ST-03/04.FLAGS --tls-min-v1.0 (0.035083ms)\n✔ ST-03/04.FLAGS --tls-keylog (0.03225ms)\n✔ ST-03/07/09/16.ENV unsupported DARKTRACE_TLS_INSECURE (332.050958ms)\n✔ ST-03/07/09/16.ENV unsupported DARKTRACE_ASSUME_VERSION (334.25575ms)\n✔ ST-03/07/09/16.ENV unsupported DARKTRACE_EXPORT_DIR (328.941208ms)\n✔ ST-03/07/09/16.ENV unsupported DARKTRACE_HTTP (336.221292ms)\n✔ ST-03/07/09/16.ENV unsupported DARKTRACE_EMAIL (340.319709ms)\n✔ ST-02.ARGV tokens are never echoed/accepted (103.724792ms)\n✔ ST-11.CONFIG every ceiling rejects increase; ST-08/16 strict critical/transport (0.4295ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":2722}\n✔ ST-05.REDIRECT 301 https://appliance.test/again (11.084791ms)\n✔ ST-05.REDIRECT 301 https://other.test/x (0.451209ms)\n✔ ST-05.REDIRECT 301 http://appliance.test/x (0.272417ms)\n✔ ST-05.REDIRECT 301 https://169.254.169.254/latest (0.225167ms)\n✔ ST-05.REDIRECT 301 https://10.1.2.3/x (0.227083ms)\n✔ ST-05.REDIRECT 302 https://appliance.test/again (0.17325ms)\n✔ ST-05.REDIRECT 302 https://other.test/x (0.144542ms)\n✔ ST-05.REDIRECT 302 http://appliance.test/x (0.140375ms)\n✔ ST-05.REDIRECT 302 https://169.254.169.254/latest (0.676333ms)\n✔ ST-05.REDIRECT 302 https://10.1.2.3/x (0.304209ms)\n✔ ST-05.REDIRECT 303 https://appliance.test/again (0.156666ms)\n✔ ST-05.REDIRECT 303 https://other.test/x (0.121125ms)\n✔ ST-05.REDIRECT 303 http://appliance.test/x (0.136709ms)\n✔ ST-05.REDIRECT 303 https://169.254.169.254/latest (0.106916ms)\n✔ ST-05.REDIRECT 303 https://10.1.2.3/x (0.113208ms)\n✔ ST-05.REDIRECT 307 https://appliance.test/again (0.151083ms)\n✔ ST-05.REDIRECT 307 https://other.test/x (0.125292ms)\n✔ ST-05.REDIRECT 307 http://appliance.test/x (0.111625ms)\n✔ ST-05.REDIRECT 307 https://169.254.169.254/latest (0.100042ms)\n✔ ST-05.REDIRECT 307 https://10.1.2.3/x (0.100375ms)\n✔ ST-05.REDIRECT 308 https://appliance.test/again (0.095ms)\n✔ ST-05.REDIRECT 308 https://other.test/x (0.08775ms)\n✔ ST-05.REDIRECT 308 http://appliance.test/x (0.084583ms)\n✔ ST-05.REDIRECT 308 https://169.254.169.254/latest (0.0895ms)\n✔ ST-05.REDIRECT 308 https://10.1.2.3/x (0.1005ms)\n✔ ST-12.RETRY excessive/invalid 60 (1.331666ms)\n✔ ST-12.RETRY excessive/invalid -1 (0.278875ms)\n✔ ST-12.RETRY excessive/invalid NaN (0.218916ms)\n✔ ST-12.RETRY excessive/invalid 9999999999999999999999999 (0.135959ms)\n✔ ST-12.RETRY excessive/invalid Mon, 05 Oct 2026 11:01:00 GMT (0.145583ms)\n✔ ST-12.RETRY safeGET 429 at most three attempts (0.318917ms)\n✔ ST-12.RETRY safeGET 502 at most three attempts (0.24725ms)\n✔ ST-12.RETRY safeGET 503 at most three attempts (0.218791ms)\n✔ ST-12.RETRY safeGET 504 at most three attempts (0.177167ms)\n✔ ST-12.AUTH 401 zero retries (0.128666ms)\n✔ ST-12.AUTH 403 zero retries (0.099208ms)\n✔ ST-12.MUTATION post_synthetic status zero retries (0.121416ms)\n✔ ST-12.MUTATION post_synthetic accepted-network-failure zero retries (0.095292ms)\n✔ ST-12.MUTATION delete_synthetic status zero retries (0.09875ms)\n✔ ST-12.MUTATION delete_synthetic accepted-network-failure zero retries (0.086208ms)\n✔ ST-03/12.TLS-code UNABLE_TO_GET_ISSUER_CERT_LOCALLY zero retries (0.10375ms)\n✔ ST-03/12.TLS-code UNABLE_TO_GET_ISSUER_CERT zero retries (0.082792ms)\n✔ ST-03/12.TLS-code INVALID_CA zero retries (0.08175ms)\n✔ ST-03/12.TLS-code CERT_HAS_EXPIRED zero retries (0.07775ms)\n✔ ST-03/12.TLS-code ERR_TLS_CERT_ALTNAME_INVALID zero retries (0.076417ms)\n✔ ST-12.WAIT accepted delay respected; never exceeds remaining deadline (0.266458ms)\n✔ ST-11.BYTES cumulative retry bodies and lying Content-Length cancelled (0.409625ms)\n✔ ST-11.BYTES hard boundary 2097152 (2.1425ms)\n✔ ST-11.BYTES hard boundary 2097153 (1.079958ms)\n✔ ST-11.COMPRESSION gzip rejected and cancelled (0.229291ms)\n✔ ST-11.COMPRESSION br rejected and cancelled (0.131375ms)\n✔ ST-11.COMPRESSION deflate rejected and cancelled (0.114833ms)\n✔ ST-11/12.RATE 120 attempts permitted and attempt121 unsigned (4.701375ms)\n✔ ST-11.QUEUE exact 4 active/16 queued then overflow; close drains cancellation (6.170416ms)\n✔ ST-11.DEADLINE admission includes queue and retries; cancellation removes queued job (211.649917ms)\n✔ ST-12.CANCEL during backoff prevents any extra attempt (0.889916ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":512}\n{\"event\":\"protocol_error\",\"ts\":\"2026-10-05T17:27:36.959Z\"}\n{\"event\":\"protocol_error\",\"ts\":\"2026-10-05T17:27:36.960Z\"}\n{\"event\":\"protocol_error\",\"ts\":\"2026-10-05T17:27:36.960Z\"}\n{\"event\":\"protocol_error\",\"ts\":\"2026-10-05T17:27:36.960Z\"}\n{\"event\":\"protocol_error\",\"ts\":\"2026-10-05T17:27:36.960Z\"}\n✔ MR-01.UNICODE every required code point is escaped in nested strings and keys; visible text preserved (1.631125ms)\n✔ MR-01.TOOL darktrace_get_status final text/structured output neutralized with code-owned flag and no extra effects (1.835291ms)\n✔ MR-01.TOOL darktrace_advanced_search final text/structured output neutralized with code-owned flag and no extra effects (1.610958ms)\n✔ MR-01.ERROR/output-budget fixed errors cannot reflect controls; expanded escapes remain bounded (2.041209ms)\n✔ MR-02.FLAGS --use-openssl-ca argv bare (0.213417ms)\n✔ MR-02.FLAGS --use-openssl-ca argv equals (0.128584ms)\n✔ MR-02.FLAGS --use-openssl-ca argv quoted (0.034416ms)\n✔ MR-02.FLAGS --use-openssl-ca NODE_OPTIONS bare (0.048333ms)\n✔ MR-02.FLAGS --use-openssl-ca NODE_OPTIONS equals (0.041792ms)\n✔ MR-02.FLAGS --use-openssl-ca NODE_OPTIONS quoted (0.060958ms)\n✔ MR-02.FLAGS --use-system-ca argv bare (0.07025ms)\n✔ MR-02.FLAGS --use-system-ca argv equals (0.042458ms)\n✔ MR-02.FLAGS --use-system-ca argv quoted (0.031541ms)\n✔ MR-02.FLAGS --use-system-ca NODE_OPTIONS bare (0.038125ms)\n✔ MR-02.FLAGS --use-system-ca NODE_OPTIONS equals (0.032125ms)\n✔ MR-02.FLAGS --use-system-ca NODE_OPTIONS quoted (0.027208ms)\n✔ MR-02.FLAGS --openssl-config argv bare (0.036125ms)\n✔ MR-02.FLAGS --openssl-config argv equals (0.027959ms)\n✔ MR-02.FLAGS --openssl-config argv quoted (0.021291ms)\n✔ MR-02.FLAGS --openssl-config NODE_OPTIONS bare (0.021375ms)\n✔ MR-02.FLAGS --openssl-config NODE_OPTIONS equals (0.022125ms)\n✔ MR-02.FLAGS --openssl-config NODE_OPTIONS quoted (0.031208ms)\n✔ MR-02.FLAGS --openssl-legacy-provider argv bare (0.0285ms)\n✔ MR-02.FLAGS --openssl-legacy-provider argv equals (0.0215ms)\n✔ MR-02.FLAGS --openssl-legacy-provider argv quoted (0.024375ms)\n✔ MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS bare (0.027583ms)\n✔ MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS equals (0.023084ms)\n✔ MR-02.FLAGS --openssl-legacy-provider NODE_OPTIONS quoted (0.02075ms)\n✔ MR-02.FLAGS --tls-cipher-list argv bare (0.019375ms)\n✔ MR-02.FLAGS --tls-cipher-list argv equals (0.023708ms)\n✔ MR-02.FLAGS --tls-cipher-list argv quoted (0.029125ms)\n✔ MR-02.FLAGS --tls-cipher-list NODE_OPTIONS bare (0.02025ms)\n✔ MR-02.FLAGS --tls-cipher-list NODE_OPTIONS equals (0.019792ms)\n✔ MR-02.FLAGS --tls-cipher-list NODE_OPTIONS quoted (0.018583ms)\n✔ MR-02.FLAGS --tls-cipher-suites argv bare (0.018875ms)\n✔ MR-02.FLAGS --tls-cipher-suites argv equals (0.031166ms)\n✔ MR-02.FLAGS --tls-cipher-suites argv quoted (0.025542ms)\n✔ MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS bare (0.021ms)\n✔ MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS equals (0.032958ms)\n✔ MR-02.FLAGS --tls-cipher-suites NODE_OPTIONS quoted (0.019959ms)\n✔ MR-02.ENV SSL_CERT_FILE defined=empty (0.0565ms)\n✔ MR-02.ENV SSL_CERT_FILE defined=canary (0.032875ms)\n✔ MR-02.ENV SSL_CERT_DIR defined=empty (0.023333ms)\n✔ MR-02.ENV SSL_CERT_DIR defined=canary (0.019792ms)\n✔ MR-02.ENV OPENSSL_CONF defined=empty (0.019875ms)\n✔ MR-02.ENV OPENSSL_CONF defined=canary (0.016875ms)\n✔ MR-02 approved NODE_EXTRA_CA_CERTS remains allowed; diagnostic classifier cannot reflect arbitrary names/flags (0.068125ms)\n✔ MR-02.TEST-RUNTIME bootstrap removes only exact native cipher default in test context and never custom flags (57.176958ms)\n✔ MR-02/06.STARTUP stdio guards precede DNS/socket/signing and emit only fixed metadata (1141.476417ms)\n✔ MR-02/06.STARTUP doctor guards precede DNS/socket/signing and emit only fixed metadata (1143.844625ms)\n✔ MR-02/06.STARTUP --check-config guards precede DNS/socket/signing and emit only fixed metadata (1132.90425ms)\n✔ MR-06.PROFILES toxic sensitive+write combinations rejected in object/env/file+env overlays; independent profiles accepted (1.716708ms)\n✔ MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read (20.809833ms)\n✔ MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+sensitive (6.634875ms)\n✔ MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+write (3.930792ms)\n✔ MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot read+writeCritical (3.645833ms)\n✔ MR-05.LIFECYCLE pre-init tools/list/call and forged initialized reject with zero client; later proper init succeeds (20.110333ms)\n✔ MR-01/05.JSONRPC correlation IDs remain byte-for-byte even if containing controls or token literals (4.846833ms)\n✔ MR-07.FRAMES 30000-deep below64KiB plus legacy batch and duplicate-operation frames never dispatch; session survives (19.331417ms)\n✔ MR-05/07.PROCESS diagnostic guard confirms premature/deep/batch/duplicate frames have no DNS/socket/signing and clean stdout (153.589208ms)\n✔ MR-07.DUPLICATES escaped keys and nested duplicate scopes reject; strings/delimiters and distinct object scopes remain intact (1.011916ms)\n✔ MR-03.DISTRIBUTION only verified private tgz/local source examples; documentary scanner distinguishes warnings and installs (15.959125ms)\n✔ IR-01.UNICODE-EXT all269 explicit new points neutralized in nested values/keys with visible escapes (1.447834ms)\n✔ IR-01.EMOJI selectors encode synthetic bytes but returned strings/keys contain neither selectors nor canary bytes (0.164792ms)\n✔ IR-01.TOOL darktrace_get_status structured/text preserve visible emoji and remove variation smuggling with one fake call (0.921125ms)\n✔ IR-01.TOOL darktrace_advanced_search structured/text preserve visible emoji and remove variation smuggling with one fake call (0.979458ms)\n✔ IR-01.BOUNDS expanded escapes honor cap/flag, both collision orders fail closed, ordinary emoji/text unchanged (1.529ms)\n✔ IR-01.PROCESS diagnostic guard proves no real DNS/socket/HMAC while synthetic tool results and stderr omit smuggling canary (96.790667ms)\n✔ IR-02.ENV NODE_USE_SYSTEM_CA defined=empty (0.109333ms)\n✔ IR-02.ENV NODE_USE_SYSTEM_CA defined=0 (0.030208ms)\n✔ IR-02.ENV NODE_USE_SYSTEM_CA defined=1 (0.021875ms)\n✔ IR-02.ENV NODE_USE_SYSTEM_CA defined=canary (0.019792ms)\n✔ IR-02.EQUIVALENCE explicit argv/NODE_OPTIONS use-system-ca denied and only approved extra CA remains allowed (0.109334ms)\n✔ IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata (115.606208ms)\n✔ IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata (114.396042ms)\n✔ IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata (118.983583ms)\n✔ IR-02.STARTUP stdio NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata (112.565583ms)\n✔ IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata (118.595041ms)\n✔ IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata (114.814375ms)\n✔ IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata (115.490958ms)\n✔ IR-02.STARTUP doctor NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata (121.173083ms)\n✔ IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=empty zero network/signing and fixed metadata (119.331625ms)\n✔ IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=0 zero network/signing and fixed metadata (108.884833ms)\n✔ IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=1 zero network/signing and fixed metadata (113.29075ms)\n✔ IR-02.STARTUP --check-config NODE_USE_SYSTEM_CA=canary zero network/signing and fixed metadata (117.348ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":19284}\n✔ ST-04.DNS terminal resolver concurrent/recovery/new-instance (6.847167ms)\n✔ ST-04.DNS terminal mixed concurrent/recovery/new-instance (0.778459ms)\n✔ ST-04.DNS terminal allowlist concurrent/recovery/new-instance (0.598958ms)\n✔ ST-04.DEST reject 127.0.0.1 (0.2015ms)\n✔ ST-04.DEST reject ::1 (0.314583ms)\n✔ ST-04.DEST reject 169.254.169.254 (0.119334ms)\n✔ ST-04.DEST reject fe80::1 (0.127083ms)\n✔ ST-04.DEST reject 0.0.0.0 (0.101875ms)\n✔ ST-04.DEST reject 224.0.0.1 (0.110583ms)\n✔ ST-04.DEST reject ::ffff:127.0.0.1 (0.144084ms)\n✔ ST-04.DEST reject 100.100.100.200 (0.108ms)\n✔ ST-04.DEST reject 64:ff9b::a9fe:a9fe (0.115875ms)\n✔ ST-04.DEST reject 2002:7f00:1:: (0.092625ms)\n✔ ST-04.DEST reject fec0::1 (0.086459ms)\n✔ ST-04.DEST reject ::7f00:1 (0.101042ms)\n✔ ST-04.PUBLIC clarified operator origin allows global snapshot; explicit private allowlist denies it (0.105834ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:a9fe:a9fe allowlist=false (0.589333ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:a9fe:a9fe allowlist=true (0.162583ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:7f00:1 allowlist=false (0.141125ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:7f00:1 allowlist=true (0.1385ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:a14:1e28 allowlist=false (0.150875ms)\n✔ ST-04.FR01 translated/transition reject ::ffff:0:a14:1e28 allowlist=true (0.124458ms)\n✔ ST-04.FR01 translated/transition reject 2001:0:4136:e378:8000:63bf:3fff:fdd2 allowlist=false (0.134084ms)\n✔ ST-04.FR01 translated/transition reject 2001:0:4136:e378:8000:63bf:3fff:fdd2 allowlist=true (0.12625ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1:a00:a9:fea9:fe00:0 allowlist=false (0.141416ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1:a00:a9:fea9:fe00:0 allowlist=true (0.125083ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1:a00:7f:1:0:0 allowlist=false (0.129708ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1:a00:7f:1:0:0 allowlist=true (0.134292ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1::1 allowlist=false (0.123333ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b:1::1 allowlist=true (0.114ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b::a14:1e28 allowlist=false (0.113708ms)\n✔ ST-04.FR01 translated/transition reject 64:ff9b::a14:1e28 allowlist=true (0.129667ms)\n✔ ST-04.FR01 translated/transition reject 2002:a14:1e28::1 allowlist=false (0.113583ms)\n✔ ST-04.FR01 translated/transition reject 2002:a14:1e28::1 allowlist=true (0.118167ms)\n✔ ST-04.FR01 translated/transition reject ::a14:1e28 allowlist=false (0.119292ms)\n✔ ST-04.FR01 translated/transition reject ::a14:1e28 allowlist=true (0.397459ms)\n✔ ST-04.SNAPSHOT private IPv4/ULA/mapped normalization and immutable lookup no rebind (0.188291ms)\n✔ ST-04.DNS initial caller abort is terminal for concurrent waiters and later calls (0.308083ms)\n✖ ST-03.TLS real trusted (2.927042ms)\n✖ ST-03.TLS real wronghostname (0.893458ms)\n✖ ST-03.TLS real untrusted (0.920291ms)\n✖ ST-03.TLS real expired (1.183208ms)\n✖ ST-11.TLS real slow body admission deadline (0.926333ms)\n✖ ST-11.TLS real slow body caller cancellation (0.602833ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":295}\n✔ ST-07.MATRIX all 79 inventory IDs accounted; default 22 writes and blocked calls have zero effects (28.961917ms)\n✔ ST-08.CRITICAL delete_tags_tid dryRun=undefined (1.591417ms)\n✔ ST-08.CRITICAL delete_tags_tid dryRun=true (0.717208ms)\n✔ ST-08.CRITICAL delete_tags_tid dryRun=false (0.6035ms)\n✔ ST-08.CRITICAL post_antigena dryRun=undefined (1.1ms)\n✔ ST-08.CRITICAL post_antigena dryRun=true (0.789792ms)\n✔ ST-08.CRITICAL post_antigena dryRun=false (3.952834ms)\n✔ ST-08.CRITICAL post_antigena_manual dryRun=undefined (1.121583ms)\n✔ ST-08.CRITICAL post_antigena_manual dryRun=true (0.820125ms)\n✔ ST-08.CRITICAL post_antigena_manual dryRun=false (0.823958ms)\n✔ ST-08.CRITICAL post_intelfeed dryRun=undefined (0.938334ms)\n✔ ST-08.CRITICAL post_intelfeed dryRun=true (0.670458ms)\n✔ ST-08.CRITICAL post_intelfeed dryRun=false (0.722125ms)\n✔ ST-08.CRITICAL post_subnets dryRun=undefined (0.866041ms)\n✔ ST-08.CRITICAL post_subnets dryRun=true (0.687083ms)\n✔ ST-08.CRITICAL post_subnets dryRun=false (0.700208ms)\n✔ ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=undefined (0.446083ms)\n✔ ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=true (0.535208ms)\n✔ ST-08.CRITICAL post_agemail_api_ep_api_v1_0_emails_uuid_action dryRun=false (0.448584ms)\n✔ ST-08.APPROVAL forged confirmation/approval cannot execute critical (2.687583ms)\n✔ ST-06.INJECTION retrieved text remains bounded provenance data; follow-up mutation/export denied (2.656333ms)\n✔ ST-02/13/14.SINK literals, key-based secrets, canonical/signature and nested error canaries absent (1.1965ms)\n✔ ST-02.SINK base64 token equivalent must never reach model-visible output (0.635292ms)\n✔ ST-14.PROTO response keys cannot mutate prototypes and malicious caller fields never reach client (3.91425ms)\n✔ ST-11.OUTPUT cap includes both text and structured representation and marks truncation (0.673334ms)\n✔ ST-13.AUDIT exact stored fields/omitted ID/explicit ID and asynchronous rejection awaited (4.361334ms)\n✔ ST-13.PREAUDIT async rejection zero client calls; preview/denial stay unsigned with rejecting optional sink (3.5895ms)\n✔ ST-13.POSTAUDIT known completed vs unknown write effects and shared ID, no repeat (2.735375ms)\n✔ ST-09.SENSITIVE operator opt-in only; provider notice is documentary, no eligibility attestation (3.857917ms)\n✔ ST-09.MINIMIZATION unknown sensitive telemetry excluded from read and sensitive search views (3.23575ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":436}\n✔ ST-01.KAT get-empty-unencoded-20261005T110000 (0.698833ms)\n✔ ST-01.KAT get-special-unencoded-20261005T110000 (0.137292ms)\n✔ ST-01.KAT post-json-ba-unencoded-20261005T110000 (0.10425ms)\n✔ ST-01.KAT post-json-ab-unencoded-20261005T110000 (0.072125ms)\n✔ ST-01.KAT post-form-unencoded-20261005T110000 (0.085208ms)\n✔ ST-01.KAT delete-primitive-unencoded-20261005T110000 (0.065209ms)\n✔ ST-01.KAT get-empty-encoded-20261005T110000 (0.038375ms)\n✔ ST-01.KAT get-special-encoded-20261005T110000 (0.041416ms)\n✔ ST-01.KAT post-json-ba-encoded-20261005T110000 (0.070625ms)\n✔ ST-01.KAT post-json-ab-encoded-20261005T110000 (0.103333ms)\n✔ ST-01.KAT post-form-encoded-20261005T110000 (0.059167ms)\n✔ ST-01.KAT delete-primitive-encoded-20261005T110000 (0.04375ms)\n✔ ST-01.KAT get-empty-unencoded-2026-10-05 11:00:00 (0.027084ms)\n✔ ST-01.KAT get-special-unencoded-2026-10-05 11:00:00 (0.032833ms)\n✔ ST-01.KAT post-json-ba-unencoded-2026-10-05 11:00:00 (0.041292ms)\n✔ ST-01.KAT post-json-ab-unencoded-2026-10-05 11:00:00 (0.030542ms)\n✔ ST-01.KAT post-form-unencoded-2026-10-05 11:00:00 (0.03825ms)\n✔ ST-01.KAT delete-primitive-unencoded-2026-10-05 11:00:00 (0.024958ms)\n✔ ST-01.KAT get-empty-encoded-2026-10-05 11:00:00 (0.020667ms)\n✔ ST-01.KAT get-special-encoded-2026-10-05 11:00:00 (0.021042ms)\n✔ ST-01.KAT post-json-ba-encoded-2026-10-05 11:00:00 (0.023792ms)\n✔ ST-01.KAT post-json-ab-encoded-2026-10-05 11:00:00 (0.029708ms)\n✔ ST-01.KAT post-form-encoded-2026-10-05 11:00:00 (0.029208ms)\n✔ ST-01.KAT delete-primitive-encoded-2026-10-05 11:00:00 (0.022167ms)\n✔ ST-01.WIRE mutation during async DNS does not change signed URL/body (9.56975ms)\n✔ ST-01/04.BLOCK encoded {\"operationId\":\"post_synthetic\",\"query\":[[\"q\",\"x\"]],\"body\":{\"value\":\"x\"}} (0.442667ms)\n✔ ST-01/04.BLOCK encoded {\"operationId\":\"delete_synthetic\",\"query\":[[\"id\",\"1\"]]} (0.108041ms)\n✔ ST-01/04.BLOCK encoded {\"operationId\":\"get_advancedsearch_api_search_query\",\"pathParams\":{\"query\":\"+/=\"}} (0.0755ms)\n✔ ST-01/04.BLOCK encoded {\"operationId\":\"get_status\",\"query\":[[\"x\",\"a\\r\\nb\"]]} (0.107833ms)\n✔ ST-01/04.BLOCK encoded {\"operationId\":\"get_segment\",\"pathParams\":{\"id\":\"%252e%252e%252fstatus\"}} (0.214833ms)\n✔ ST-01/04.BLOCK unencoded {\"operationId\":\"post_synthetic\",\"query\":[[\"q\",\"x\"]],\"body\":{\"value\":\"x\"}} (0.109459ms)\n✔ ST-01/04.BLOCK unencoded {\"operationId\":\"delete_synthetic\",\"query\":[[\"id\",\"1\"]]} (0.077333ms)\n✔ ST-01/04.BLOCK unencoded {\"operationId\":\"get_advancedsearch_api_search_query\",\"pathParams\":{\"query\":\"+/=\"}} (0.392625ms)\n✔ ST-01/04.BLOCK unencoded {\"operationId\":\"get_status\",\"query\":[[\"x\",\"a\\r\\nb\"]]} (0.123542ms)\n✔ ST-01/04.BLOCK unencoded {\"operationId\":\"get_segment\",\"pathParams\":{\"id\":\"%252e%252e%252fstatus\"}} (0.085666ms)\n✔ ST-01.AUTH401 no alternate signature or retry (1.809708ms)\n✔ ST-01.PREVIEW exact unsigned result with code-owned names and zero sign/network (0.332167ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":221}\n✔ ST-11.FRAMES hard64KiB/lowered boundary newline inclusive; overflow zero parser/handler (16.92875ms)\n✔ ST-11.INPUT actual depth8/elements5000 limits and +1 (1.07825ms)\n✔ ST-14.MALFORMED bounded invalid frames/EOF remain protocol-only without canaries (138.083292ms)\n✔ ST-11/14.PROCESS fragmented overflow closes session without EOF or partial echo (113.73475ms)\n✔ ST-14.PROTO raw protocol attack denied before operation client; EOF cancels active work (17.956875ms)\n✔ ST-11/14.CANCEL EOF active operation stops client/queue exactly once (4.053875ms)\n✔ ST-16.PROCESS stdio startup/listing has no inbound listener/DNS/signing; unsupported HTTP aborts (260.404209ms)\nADVERSARIAL_ASSERTIONS {\"invocations\":83}\nℹ tests 323\nℹ suites 0\nℹ pass 311\nℹ fail 6\nℹ cancelled 0\nℹ skipped 6\nℹ todo 0\nℹ duration_ms 27348.74425\n\n✖ failing tests:\n\ntest at test/security/network.test.mjs:74:71\n✖ ST-03.TLS real trusted (2.927042ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n\ntest at test/security/network.test.mjs:74:71\n✖ ST-03.TLS real wronghostname (0.893458ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n\ntest at test/security/network.test.mjs:74:71\n✖ ST-03.TLS real untrusted (0.920291ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n\ntest at test/security/network.test.mjs:74:71\n✖ ST-03.TLS real expired (1.183208ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n\ntest at test/security/network.test.mjs:87:41\n✖ ST-11.TLS real slow body admission deadline (0.926333ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n\ntest at test/security/network.test.mjs:87:41\n✖ ST-11.TLS real slow body caller cancellation (0.602833ms)\n  Error: listen EPERM: operation not permitted 127.0.0.1\n      at Server.setupListenHandle [as _listen2] (node:net:1926:21)\n      at listenInCluster (node:net:2005:12)\n      at node:net:2214:7\n      at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {\n    code: 'EPERM',\n    errno: -1,\n    syscall: 'listen',\n    address: '127.0.0.1'\n  }\n",
+    "stderr": ""
+  },
+  "receiptComplete": true
+}

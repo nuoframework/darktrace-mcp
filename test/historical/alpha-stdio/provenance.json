@@ -1,0 +1,6 @@
+{
+  "purpose": "Supplemental unreleased alpha-capability positive stdio case, outside active discovery; not a published-alpha byte claim",
+  "sourceTreeSha256": "4f6ef96c82b8c3bff7628fbad18aea6eb694819a2e001dc0e30086d1daefd834",
+  "originalPath": "test/mcp/stdio.test.ts",
+  "originalSha256": "e14fb7a0247bbb991cbc43c363f147881f08584425bf9175f522d8e2d32b1d5c"
+}

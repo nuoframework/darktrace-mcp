@@ -3,6 +3,7 @@ import { chmodSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import '../security/test-runtime-argv.js';
 import test from 'node:test';
 import { loadConfig } from '../../src/config/load.js';
 import { assertSafeNetworkEnvironment, ConfigValidationError, parseConfig } from '../../src/config/schema.js';
@@ -72,7 +73,7 @@ test('strict config rejects unknown keys, unsupported profiles, HTTP, export, an
   assert.throws(() => config({ instance: { baseUrl: 'https://darktrace.example', proxy: 'http://proxy' } }), /unsupported field/);
   assert.throws(() => config({ profiles: { sensitiveRead: true, export: false } }), /email and export/);
   assert.throws(() => config({ profiles: { email: false } }), /email and export/);
-  assert.throws(() => config({ profiles: { writeCritical: true } }), /requires profiles.write/);
+  assert.throws(() => config({ profiles: { writeCritical: true } }), /read-only release/);
   assert.throws(() => config({ transport: { kind: 'http' } }), /only stdio/);
   assert.throws(() => config({ transport: { kind: 'stdio', http: { port: 8080 } } }), /HTTP transport/);
   assert.throws(() => config({ compat: { assumeVersion: '7.1' } }), /compatibility overrides/);
@@ -112,8 +113,7 @@ test('loadConfig supports token files, the base URL alias, lower-only env limits
       DARKTRACE_BASE_URL: 'https://darktrace.example:8443/',
       DARKTRACE_PUBLIC_TOKEN_FILE: publicFile,
       DARKTRACE_PRIVATE_TOKEN_FILE: privateFile,
-      DARKTRACE_PROFILES: 'read,write',
-      DARKTRACE_WRITE_CRITICAL: 'true',
+      DARKTRACE_PROFILES: 'read',
       DARKTRACE_SENSITIVE_READ: 'true',
       DARKTRACE_QUERY_SIGNATURE_ENCODING: 'encoded',
       DARKTRACE_DESTINATION_ALLOWLIST: '10.0.0.4,fd12::1',
@@ -126,7 +126,7 @@ test('loadConfig supports token files, the base URL alias, lower-only env limits
     assert.equal(loaded.auth.publicToken, 'public-from-file');
     assert.equal(loaded.auth.privateToken, 'private-from-file');
     assert.equal(loaded.auth.querySignatureEncoding, 'encoded');
-    assert.deepEqual(loaded.profiles, { read: true, write: true, sensitiveRead: true, writeCritical: true });
+    assert.deepEqual(loaded.profiles, { read: true, write: false, sensitiveRead: true, writeCritical: false });
     assert.equal(loaded.limits.maxConcurrentRequests, 3);
     assert.equal(loaded.limits.maxResponseBytes, 1024);
     assert.equal(JSON.stringify(loaded.profiles).includes('private-from-file'), false);

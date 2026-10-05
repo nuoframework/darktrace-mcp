@@ -2,7 +2,7 @@
 
 [README](../README.md) · [Clients](clients.md) · [Troubleshooting](troubleshooting.md)
 
-This guide describes the private offline alpha baseline. Independent source review is complete; the enforced JSON-file ceiling is 65,536 bytes (64 KiB). Current Node 22/24 offline and packaging evidence is recorded in [release preparation](release-preparation.md). Appliance 7.1 compatibility, host/model-provider eligibility, real deployment-network validation and residual-risk decisions remain pending.
+The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. Configuration can only narrow policy and resource ceilings; it cannot grant excluded operations. The JSON-file ceiling remains 65,536 bytes (64 KiB). [Current bounded lab evidence](security/validated-consultations-lab-checkpoint.md). Stable publication remains blocked by OpenSSL 3.5.8 / CVE-2026-35189; final candidate suites and packaging remain separate gates.
 
 The server reads the operator environment and optional JSON via `DARKTRACE_CONFIG_FILE`. Environment settings override JSON fields; unknown JSON fields are rejected. It does not auto-load `.env`. Prefer protected JSON configuration and separate token files for server-validated file handling.
 
@@ -35,14 +35,16 @@ The allowlist is operator-owned and only narrows allowed destinations. Empty JSO
 
 | Setting | JSON field | Behavior |
 |---|---|---|
-| `DARKTRACE_PROFILES=read` | `profiles.read=true`, `profiles.write=false` | Default read profile; read cannot be disabled |
-| `DARKTRACE_PROFILES=read,write` | `profiles.write=true` | Eligible medium/high writes; each defaults to unsigned dry-run |
-| `DARKTRACE_SENSITIVE_READ=false` | `profiles.sensitiveRead=false` | Default; eligible POST Advanced Search additionally requires explicit `true` |
-| `DARKTRACE_WRITE_CRITICAL=false` | `profiles.writeCritical=false` | `true` requires write and exposes five critical previews only |
+| `DARKTRACE_PROFILES=read` | `profiles.read=true`, `profiles.write=false` | Only accepted profile set; default read profile, which cannot be disabled |
+| `DARKTRACE_PROFILES=read,write` | — | Rejected at startup; no write profile is accepted in this release |
+| `profiles.write=true` | — | Rejected at startup; the release capability gate cannot be enabled through configuration |
+| `DARKTRACE_SENSITIVE_READ=false` | `profiles.sensitiveRead=false` | Default; 15 tools / 19 GET selectors |
+| `DARKTRACE_SENSITIVE_READ=true` | `profiles.sensitiveRead=true` | Same 15 tools / 19 GET selectors; cannot grant Advanced Search or any excluded selector |
+| `DARKTRACE_WRITE_CRITICAL=true` or `profiles.writeCritical=true` | — | Rejected at startup; no critical preview or execution is exposed |
 
-Model/client approval is not authorization. Medium/high execution requires the operator write profile and explicit tool `dryRun:false`, subject to appliance ACLs and audit gates. Critical execution remains permanently blocked; no `confirm` field exists. Email (all 14 operations), PCAP export, HTTP and unvalidated signing shapes are blocked. `export`/`email` profile fields are rejected even when false; omit them. Export settings, HTTP fields and production version overrides are unsupported.
+The current release has no medium/high write operations, critical operations or unsigned previews. The policy denies every non-read tier before tool registration and signing; write settings cannot change that gate. Writes are deferred to a later release and require a new reviewed authorization gate. Model/client approval is not authorization. Email (all 14 operations), PCAP export, HTTP and unvalidated signing shapes are blocked. `export`/`email` profile fields are rejected even when false; omit them. Export settings, HTTP fields and production version overrides are unsupported.
 
-**For any deployment**, evaluate organizational eligibility and host/provider processing, retention, residency and forwarding of appliance data. Read-only use still enters model context. Advanced Search needs additional sensitive-data assessment; opting in does not mean provider eligibility is accepted.
+**For any deployment**, evaluate organizational eligibility and host/provider processing, retention, residency and forwarding of appliance data. Read-only use still enters model context. The sensitive-read flag cannot expand this release or certify provider eligibility.
 
 ## Resource ceilings
 
@@ -88,30 +90,40 @@ env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u NO_PROXY \
   /absolute/path/to/node /absolute/path/to/darktrace-mcp/dist/src/index.js --check-config
 ```
 
-Do not change your system-wide proxy policy or use this as a way to bypass organizational network rules. Review ambient `NODE_OPTIONS`; the runtime operator is trusted and preloads can execute code. No setting can raise limits or turn a 7.1 version report into policy authorization.
+Do not change your system-wide proxy policy or use this as a way to bypass organizational network rules. Startup rejects ambient proxy variables, `NODE_USE_ENV_PROXY`, `NODE_TLS_REJECT_UNAUTHORIZED=0`, `SSL_CERT_FILE`, `SSL_CERT_DIR`, `OPENSSL_CONF`, and known Node/OpenSSL proxy or TLS-bypass flags from `NODE_OPTIONS` or process arguments. Node applies `NODE_OPTIONS` and `NODE_EXTRA_CA_CERTS` before application startup; treat preloads and CA files as trusted executable/host configuration and protect their integrity. Only `NODE_EXTRA_CA_CERTS` is supported for an approved private CA; certificate and hostname verification stay enabled. No setting can raise limits or turn a 7.1 version report into policy authorization.
 
 ## Container secret mounts
 
-The optional Dockerfile pins the official `library/node:22-bookworm-slim` multi-platform manifest digest verified from the [Docker Hub registry manifest](https://registry-1.docker.io/v2/library/node/manifests/sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c) on 2026-10-05 (registry authentication may be required). Refresh it only after reviewed upstream validation. No image has been published and local Docker execution is unverified.
+The optional Dockerfile pins the official `library/node:22-bookworm-slim` multi-platform manifest digest verified from the [Docker Hub registry manifest](https://registry-1.docker.io/v2/library/node/manifests/sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c) on 2026-10-05, and pins the Distroless Debian 13 `cc` root filesystem digest listed in the [Docker guide](docker.md). The official Node image supplies Node 22.23.3 to the builder; the final scratch image copies that binary and the Distroless root filesystem without inheriting its environment. The final image omits npm and Corepack, retains Node and system license files, and defaults to nonroot UID/GID 1000. Build the private local image from this Dockerfile; no image has been published. Accepted source `9e7c7070…` produced image `sha256:eb3a7681…`, with both 15-tool profiles verified and native/Docker lab 19/19 bounded selector PASS. [Image/component binding](security/validated-consultations-docker-checkpoint.md) preserves the scanner-qualified findings: historical Trivy 23 MEDIUM / 8 LOW, Grype 11 High / 10 Medium / 3 Low / 7 Negligible. Component equality is not a fresh database scan; OpenSSL 3.5.8 / CVE-2026-35189 remains a stable-release blocker.
+
+The scanner SBOM omits Node and its bundled components. Manual inventory found OpenSSL 3.5.8 affected by **CVE-2026-35189 (official severity Low)** during peer TLS certificate processing. OpenSSL 3.5.9 fixes it, but the examined official supported Node 22/24/26 releases do not supply that fix as of 2026-10-05. This is a stable-publication blocker: body limits, readonly mode and dropped capabilities do not patch TLS-handshake memory exhaustion. Keep certificate and hostname verification enabled; changing system libssl does not replace Node’s bundled static OpenSSL. [Primary advisory](https://openssl-library.org/news/secadv/20260929.txt).
 
 ```sh
-docker build -t darktrace-mcp:local .
-docker run --rm -i --read-only --cap-drop=ALL \
-  --security-opt=no-new-privileges --network=bridge \
-  --user "$(id -u):$(id -g)" \
+docker build --pull -t darktrace-mcp:local .
+image_id="$(docker image inspect --format '{{.Id}}' darktrace-mcp:local)"
+```
+
+The token files must be regular non-symlink files, owned by the container's effective UID, and mode `0600` or `0400` (no group/other or special bits). Use the image's default UID 1000 when the mounted files are owned by UID 1000 as seen inside the container. Otherwise, set `--user UID:GID` to a nonzero UID matching the mounted files' owner. Keep the files read-only in the container. On Docker Desktop, run the configuration check below to verify how bind-mount ownership and permissions appear inside the container; do not loosen the file modes or bypass the checks if ownership does not match.
+
+Run this local, offline check with the same UID, mounts and non-secret environment settings intended for the MCP host:
+
+```sh
+docker run --rm -i --init --log-driver=none --read-only --cap-drop=ALL \
+  --security-opt=no-new-privileges --pids-limit=64 --memory=256m \
+  --user 1000:1000 --network=none --pull=never \
   --mount type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly \
   --mount type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly \
   -e DARKTRACE_URL=https://darktrace.example.internal \
   -e DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token \
   -e DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token \
   -e DARKTRACE_PROFILES=read -e DARKTRACE_SENSITIVE_READ=false \
-  darktrace-mcp:local --check-config
+  "$image_id" --check-config
 ```
 
-Use a nonzero runtime UID; mounted files must be owned by that effective UID and retain owner-only permissions as seen inside the container. Docker Desktop ownership translations must be verified; never weaken file modes to work around them. The image defaults to nonroot UID 1000. Do not use Docker `--env-file` containing tokens, embed secrets in build args/layers, or publish this local image. Docker reads its env file outside the server; its owner, mode, symlinks and size are not server-validated either. An approved private CA can be mounted read-only with `NODE_EXTRA_CA_CERTS` pointing to it. Remove `--check-config` only when configuring an authorized host to own the stdio process; use `-i` without a TTY. Provider eligibility applies equally to container deployments.
+For a stdio MCP client, use Docker as the command and pin the image to the exact ID from `docker image inspect --format '{{.Id}}' darktrace-mcp:local`; see the [Docker client example](../examples/docker.mcp.json). Use `--pull=never`, an absolute Docker executable path, `-i` without a TTY, `--log-driver=none`, and do not publish ports. Disabling the daemon log driver prevents Docker from persisting the container's stdio; it does not stop the MCP host from forwarding results to its provider. Use the safe local `--check-config` diagnostic for setup; do not inspect or persist raw MCP stdout through `docker logs` or another logging sink. Prefer user-scoped MCP configuration; only enable project-shared configuration after reviewing every command, argument, environment value and host preload it can launch. The bridge network in the client example is only a transport default: outbound appliance access must be constrained by deployment network policy. Do not use `--network host`. Do not use Docker `--env-file`, place token values in environment variables, embed secrets in build args/layers, or publish this local image. Before distributing a derived image, review the Apache-2.0 project license and production dependency license/notice obligations in the runtime image. An approved private CA can be mounted read-only with `NODE_EXTRA_CA_CERTS` pointing to it. Remove `--check-config` from the MCP host command after the preflight check. Provider eligibility applies equally to container deployments.
 
 ## Output and destination boundaries
 
-Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Advanced Search omits `@message` and `@fields` content. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
+Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
 
-The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. Actual private-network pinning and appliance behavior remain unvalidated.
+The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. The coordinator’s bounded native/Docker checks validate only their recorded selectors and snapshots; broader private-network and appliance behavior remain unvalidated.

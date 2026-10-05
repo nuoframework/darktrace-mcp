@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parse } from 'yaml';
-import { compileResponseView } from '../src/api/response-view.js';
+import { applyResponseViewOverrides, compileResponseView, type ResponseView } from '../src/api/response-view.js';
 
 // Build-time only: shipped runtime never parses mutable YAML or documentation.
 const spec = parse(readFileSync('openapi/darktrace-threat-visualizer.yaml', 'utf8'));
@@ -8,7 +8,7 @@ const inventory = JSON.parse(readFileSync('docs/operation-inventory.json', 'utf8
 const mapping = JSON.parse(readFileSync('src/api/tool-groups.json', 'utf8')) as Record<string,string|null>;
 const assignments = new Map(Object.entries(mapping));
 const outputFields = JSON.parse(readFileSync('src/api/response-fields.json','utf8')) as Record<string,string[]>;
-const responseViews: Record<string,unknown> = {};
+const responseViews: Record<string,ResponseView> = {};
 const rows: any[] = [];
 for (const [pathTemplate, item] of Object.entries(spec.paths) as [string, any][]) {
   for (const method of ['get','post','delete']) {
@@ -34,6 +34,7 @@ for (const [pathTemplate, item] of Object.entries(spec.paths) as [string, any][]
       documentedIn:'6.1', validatedOn:[], requiredProfiles:status!=='implemented'?[]:[risk.risk_tier==='read'?'read':'write',...(risk.risk_tier==='critical'?['writeCritical']:[]),...(pathTemplate.startsWith('/advancedsearch/')?['sensitiveRead']:[])]});
   }
 }
+applyResponseViewOverrides(responseViews,spec.components?.schemas??{});
 rows.sort((a,b)=>a.operationId.localeCompare(b.operationId));
 if (Object.keys(mapping).length !== 79 || Object.keys(mapping).some(id=>!rows.some(row=>row.operationId===id))) throw new Error('Tool mapping must match all inventory operations');
 if (rows.length !== 79 || new Set(rows.map(r=>r.operationId)).size !== 79 || inventory.operations.length !== 79) throw new Error('Coverage must contain exactly 79 unique operations');

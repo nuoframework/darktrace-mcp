@@ -1,0 +1,2736 @@
+{
+  "canonicalization": "Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON",
+  "releaseCapability": {
+    "write": false,
+    "writeCritical": false,
+    "sensitiveRead": "operator opt-in; cannot expand the validated consultation ceiling"
+  },
+  "alphaFixtureSha256": "37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72",
+  "rejectedProfiles": {
+    "read+write": {
+      "profiles": {
+        "write": true
+      },
+      "errorClass": "ConfigValidationError",
+      "beforeSdk": true,
+      "beforeNetwork": true
+    },
+    "read+writeCritical": {
+      "profiles": {
+        "write": true,
+        "writeCritical": true
+      },
+      "errorClass": "ConfigValidationError",
+      "beforeSdk": true,
+      "beforeNetwork": true
+    },
+    "critical-without-write": {
+      "profiles": {
+        "writeCritical": true
+      },
+      "errorClass": "ConfigValidationError",
+      "beforeSdk": true,
+      "beforeNetwork": true
+    }
+  },
+  "contracts": {
+    "read": {
+      "sha256": "cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3",
+      "tools": [
+        {
+          "name": "darktrace_list_ai_analyst_incidents",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_groups, get_aianalyst_incidentevents. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_aianalyst_groups"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "includeacknowledged": {
+                        "type": "boolean"
+                      },
+                      "includeallpinned": {
+                        "type": "boolean"
+                      },
+                      "includeonlypinned": {
+                        "type": "boolean"
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "locale": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "includegroupurl": {
+                        "type": "boolean"
+                      },
+                      "compliance": {
+                        "type": "boolean"
+                      },
+                      "suspicious": {
+                        "type": "boolean"
+                      },
+                      "critical": {
+                        "type": "boolean"
+                      },
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludedid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "sid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "master": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludesid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "saasonly": {
+                        "type": "boolean"
+                      },
+                      "maxscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "minscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "groupid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_aianalyst_incidentevents"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "includeacknowledged": {
+                        "type": "boolean"
+                      },
+                      "includeallpinned": {
+                        "type": "boolean"
+                      },
+                      "includeonlypinned": {
+                        "type": "boolean"
+                      },
+                      "includeincidenteventurl": {
+                        "type": "boolean"
+                      },
+                      "locale": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groupcompliance": {
+                        "type": "boolean"
+                      },
+                      "groupsuspicious": {
+                        "type": "boolean"
+                      },
+                      "groupcritical": {
+                        "type": "boolean"
+                      },
+                      "maxscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "minscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "maxgroupscore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "mingroupscore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludedid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "sid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludesid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "master": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "saasonly": {
+                        "type": "boolean"
+                      },
+                      "groupid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_ai_analyst_investigations",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_investigations. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_aianalyst_investigations",
+                "type": "string",
+                "const": "get_aianalyst_investigations"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "investigationId": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responseData": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_ai_analyst_stats",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_stats. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_aianalyst_stats",
+                "type": "string",
+                "const": "get_aianalyst_stats"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_antigena_actions",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_antigena, get_antigena_summary. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_antigena"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      },
+                      "includecleared": {
+                        "type": "boolean"
+                      },
+                      "includehistory": {
+                        "type": "boolean"
+                      },
+                      "needconfirming": {
+                        "type": "boolean"
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "from": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192,
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "to": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192,
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                      },
+                      "includeconnections": {
+                        "type": "boolean"
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "pbid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_antigena_summary"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_connection_details",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_details. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_details",
+                "type": "string",
+                "const": "get_details"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "applicationprotocol": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "ddid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "deduplicate": {
+                    "type": "boolean"
+                  },
+                  "destinationport": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "eventtype": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "externalhostname": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "from": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "fulldevicedetails": {
+                    "type": "boolean"
+                  },
+                  "intext": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "msg": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "odid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sourceport": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "uid": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "blockedconnections": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_devices. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_devices",
+                "type": "string",
+                "const": "get_devices"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "ip": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "iptime": {
+                    "not": {}
+                  },
+                  "mac": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "includetags": {
+                    "type": "boolean"
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "cloudsecurity": {
+                    "type": "boolean"
+                  },
+                  "saasfilter": {
+                    "minItems": 0,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 8192
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_search_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_devicesearch. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_devicesearch",
+                "type": "string",
+                "const": "get_devicesearch"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "orderBy": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "order": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "query": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_endpoint_details",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_endpointdetails. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_endpointdetails",
+                "type": "string",
+                "const": "get_endpointdetails"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "additionalinfo": {
+                    "type": "boolean"
+                  },
+                  "devices": {
+                    "type": "boolean"
+                  },
+                  "score": {
+                    "type": "boolean"
+                  },
+                  "hostname": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "ip": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_intel_feed",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_intelfeed. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_intelfeed",
+                "type": "string",
+                "const": "get_intelfeed"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 63
+                  },
+                  "sources": {
+                    "type": "boolean"
+                  },
+                  "fulldetails": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_model_breach_comments",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_mbcomments. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_mbcomments",
+                "type": "string",
+                "const": "get_mbcomments"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_model_breaches",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_modelbreaches. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_modelbreaches",
+                "type": "string",
+                "const": "get_modelbreaches"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "deviceattop": {
+                    "type": "boolean"
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "expandenums": {
+                    "type": "boolean"
+                  },
+                  "from": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "historicmodelonly": {
+                    "type": "boolean"
+                  },
+                  "includeacknowledged": {
+                    "type": "boolean"
+                  },
+                  "includebreachurl": {
+                    "type": "boolean"
+                  },
+                  "minimal": {
+                    "type": "boolean"
+                  },
+                  "minscore": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "pid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "saasonly": {
+                    "type": "boolean"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "includesuppressed": {
+                    "type": "boolean"
+                  },
+                  "saasfilter": {
+                    "minItems": 0,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 8192
+                    }
+                  },
+                  "creationtime": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_similar_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_similardevices. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_similardevices",
+                "type": "string",
+                "const": "get_similardevices"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "fulldevicedetails": {
+                    "type": "boolean"
+                  },
+                  "token": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "did"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_status",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_status. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_status",
+                "type": "string",
+                "const": "get_status"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "includechildren": {
+                    "type": "boolean"
+                  },
+                  "fast": {
+                    "type": "boolean"
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_subnets",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_subnets. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_subnets",
+                "type": "string",
+                "const": "get_subnets"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_tags",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_tags_entities, get_tags_tid, get_tags_tid_entities. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_entities"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "tag": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_tid"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {
+                      "tid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "tid"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation",
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_tid_entities"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {
+                      "tid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "tid"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation",
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        }
+      ]
+    },
+    "read+sensitive": {
+      "sha256": "cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3",
+      "tools": [
+        {
+          "name": "darktrace_list_ai_analyst_incidents",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_groups, get_aianalyst_incidentevents. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_aianalyst_groups"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "includeacknowledged": {
+                        "type": "boolean"
+                      },
+                      "includeallpinned": {
+                        "type": "boolean"
+                      },
+                      "includeonlypinned": {
+                        "type": "boolean"
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "locale": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "includegroupurl": {
+                        "type": "boolean"
+                      },
+                      "compliance": {
+                        "type": "boolean"
+                      },
+                      "suspicious": {
+                        "type": "boolean"
+                      },
+                      "critical": {
+                        "type": "boolean"
+                      },
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludedid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "sid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "master": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludesid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "saasonly": {
+                        "type": "boolean"
+                      },
+                      "maxscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "minscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "groupid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_aianalyst_incidentevents"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "includeacknowledged": {
+                        "type": "boolean"
+                      },
+                      "includeallpinned": {
+                        "type": "boolean"
+                      },
+                      "includeonlypinned": {
+                        "type": "boolean"
+                      },
+                      "includeincidenteventurl": {
+                        "type": "boolean"
+                      },
+                      "locale": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groupcompliance": {
+                        "type": "boolean"
+                      },
+                      "groupsuspicious": {
+                        "type": "boolean"
+                      },
+                      "groupcritical": {
+                        "type": "boolean"
+                      },
+                      "maxscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "minscore": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "maxgroupscore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "mingroupscore": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludedid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "sid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "excludesid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "master": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "saasonly": {
+                        "type": "boolean"
+                      },
+                      "groupid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_ai_analyst_investigations",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_investigations. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_aianalyst_investigations",
+                "type": "string",
+                "const": "get_aianalyst_investigations"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "investigationId": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responseData": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_ai_analyst_stats",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_aianalyst_stats. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_aianalyst_stats",
+                "type": "string",
+                "const": "get_aianalyst_stats"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_antigena_actions",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_antigena, get_antigena_summary. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_antigena"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      },
+                      "includecleared": {
+                        "type": "boolean"
+                      },
+                      "includehistory": {
+                        "type": "boolean"
+                      },
+                      "needconfirming": {
+                        "type": "boolean"
+                      },
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "from": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192,
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "to": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192,
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                      },
+                      "includeconnections": {
+                        "type": "boolean"
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "pbid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_antigena_summary"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "endtime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "starttime": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_connection_details",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_details. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_details",
+                "type": "string",
+                "const": "get_details"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "applicationprotocol": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "ddid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "deduplicate": {
+                    "type": "boolean"
+                  },
+                  "destinationport": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "eventtype": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "externalhostname": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "from": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "fulldevicedetails": {
+                    "type": "boolean"
+                  },
+                  "intext": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "msg": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "odid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sourceport": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "uid": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "blockedconnections": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_devices. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_devices",
+                "type": "string",
+                "const": "get_devices"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "ip": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "iptime": {
+                    "not": {}
+                  },
+                  "mac": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "includetags": {
+                    "type": "boolean"
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "cloudsecurity": {
+                    "type": "boolean"
+                  },
+                  "saasfilter": {
+                    "minItems": 0,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 8192
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_search_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_devicesearch. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_devicesearch",
+                "type": "string",
+                "const": "get_devicesearch"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "orderBy": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "order": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "query": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_endpoint_details",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_endpointdetails. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_endpointdetails",
+                "type": "string",
+                "const": "get_endpointdetails"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "additionalinfo": {
+                    "type": "boolean"
+                  },
+                  "devices": {
+                    "type": "boolean"
+                  },
+                  "score": {
+                    "type": "boolean"
+                  },
+                  "hostname": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "ip": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_intel_feed",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_intelfeed. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_intelfeed",
+                "type": "string",
+                "const": "get_intelfeed"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 63
+                  },
+                  "sources": {
+                    "type": "boolean"
+                  },
+                  "fulldetails": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_model_breach_comments",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_mbcomments. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_mbcomments",
+                "type": "string",
+                "const": "get_mbcomments"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_model_breaches",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_modelbreaches. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_modelbreaches",
+                "type": "string",
+                "const": "get_modelbreaches"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "deviceattop": {
+                    "type": "boolean"
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "endtime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "expandenums": {
+                    "type": "boolean"
+                  },
+                  "from": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "historicmodelonly": {
+                    "type": "boolean"
+                  },
+                  "includeacknowledged": {
+                    "type": "boolean"
+                  },
+                  "includebreachurl": {
+                    "type": "boolean"
+                  },
+                  "minimal": {
+                    "type": "boolean"
+                  },
+                  "minscore": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "pbid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "pid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "starttime": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192,
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "saasonly": {
+                    "type": "boolean"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "includesuppressed": {
+                    "type": "boolean"
+                  },
+                  "saasfilter": {
+                    "minItems": 0,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 0,
+                      "maxLength": 8192
+                    }
+                  },
+                  "creationtime": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_similar_devices",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_similardevices. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_similardevices",
+                "type": "string",
+                "const": "get_similardevices"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "fulldevicedetails": {
+                    "type": "boolean"
+                  },
+                  "token": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "did": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "did"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_get_status",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_status. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_status",
+                "type": "string",
+                "const": "get_status"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "includechildren": {
+                    "type": "boolean"
+                  },
+                  "fast": {
+                    "type": "boolean"
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_subnets",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_subnets. Path/query follow the advertised strict schema. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "default": "get_subnets",
+                "type": "string",
+                "const": "get_subnets"
+              },
+              "path": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "query": {
+                "type": "object",
+                "properties": {
+                  "seensince": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  },
+                  "sid": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "responsedata": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 8192
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "darktrace_list_tags",
+          "description": "Validated Darktrace API 6.1 consultation operations for this release: get_tags_entities, get_tags_tid, get_tags_tid_entities. Select operation; path/query follow the advertised strict schemas. This release exposes only the reviewed consultation selectors; write actions are unavailable. Live compatibility is limited to the published validation recipes; other parameter combinations are not validated.",
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_entities"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "did": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      },
+                      "tag": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_tid"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {
+                      "tid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "tid"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation",
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "const": "get_tags_tid_entities"
+                  },
+                  "path": {
+                    "type": "object",
+                    "properties": {
+                      "tid": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "tid"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "responsedata": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 8192
+                      },
+                      "fulldevicedetails": {
+                        "type": "boolean"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "operation",
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        }
+      ]
+    }
+  }
+}

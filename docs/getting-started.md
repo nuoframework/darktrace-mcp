@@ -4,7 +4,7 @@
 
 ## 1. Review deployment eligibility
 
-For every deployment, decide whether appliance data may be processed by the selected host/model provider, including its retention, residency and onward forwarding. Read-only access still transmits potentially sensitive data. Advanced Search needs additional approval before operator opt-in. Use appliance API credentials with the least privilege needed; never reuse lab credentials without explicit authorization.
+The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. The source contract is API 6.1; lab 7.1.0 passed the 19 selected recipes on native MCP and Docker, not every API variant. [Lab limits](security/validated-consultations-lab-checkpoint.md). No npm or public image publication.
 
 ## 2. Install a reviewed version or build the private source
 
@@ -37,7 +37,7 @@ export DARKTRACE_SENSITIVE_READ='false'
 node dist/src/index.js --check-config
 ```
 
-This check is offline. A successful result does not prove appliance token ACLs, DNS/TLS reachability, appliance compatibility or provider eligibility. `doctor` is an equivalent local configuration check. The source contract is API 6.1; the 7.1 lab target is **NOT VALIDATED**.
+This check is offline. A successful result does not prove appliance token ACLs, DNS/TLS reachability, appliance compatibility or provider eligibility. `doctor` is an equivalent local configuration check. The source contract is API 6.1; lab 7.1.0 has bounded native/Docker evidence for all 19 permitted selectors only. See [lab validation](lab-validation.md) and [stable-readiness gates](stable-readiness.md); full compatibility is not established.
 
 For a private JSON configuration, copy [operator.config.json](../examples/operator.config.json) outside the checkout, edit the origin/token-file paths, and make it runtime-user-owned before loading:
 
@@ -90,10 +90,10 @@ Compare actual installed runtime package paths, versions and resolved integrity 
 
 ## Optional local container
 
-A local Dockerfile is provided only as a private build recipe; no image is published. See [configuration](configuration.md#container-secret-mounts). Docker build/run verification must be performed on an approved host before use; the documentation does not assert that this image has been built or validated.
+A local Dockerfile is provided as a private build recipe; no image is published. The accepted source/image has exact 15-tool SDK checks and all 19 permitted bounded lab recipes PASS. Its component binding uses dated scans and does not claim a fresh scan or final suite completion. OpenSSL 3.5.8 / CVE-2026-35189 still blocks stable publication. See the [Docker checkpoint](security/validated-consultations-docker-checkpoint.md). For Docker stdio setup, token-file ownership checks, and a client configuration example, see [container secret mounts](configuration.md#container-secret-mounts) and [MCP clients](clients.md#docker-stdio-client). Use an absolute Docker path, `-i` without a TTY, `--log-driver=none`, nonroot runtime, read-only token mounts and the documented runtime restrictions. Disabling Docker daemon stdout logging does not prevent the MCP host from forwarding results to its provider. Constrain outbound appliance access through deployment network policy; do not use host networking. Docker Desktop bind-mount ownership must pass `--check-config` without relaxing file checks. Use a dedicated MCP host/profile where supported, review other configured MCP servers' commands, environment and mounts, and review project/dependency license obligations before distributing a derived image.
 
 ## Output and destination boundaries
 
-Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Advanced Search omits `@message` and `@fields` content. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
+Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
 
 The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. Actual private-network pinning and appliance behavior remain unvalidated.

@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--init",
+        "--pull=never",
+        "--log-driver=none",
+        "--read-only",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges",
+        "--pids-limit=64",
+        "--memory=256m",
+        "--user",
+        "1000:1000",
+        "--network=bridge",
+        "--mount",
+        "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
+        "--mount",
+        "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
+        "-e",
+        "DARKTRACE_URL=https://darktrace.example.internal",
+        "-e",
+        "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
+        "-e",
+        "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
+        "-e",
+        "DARKTRACE_PROFILES=read",
+        "-e",
+        "DARKTRACE_SENSITIVE_READ=false",
+        "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
+      ]
+    }
+  }
+}

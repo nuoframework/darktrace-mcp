@@ -22,20 +22,17 @@ test('real stdio spawn lists read tools without contacting appliance and denies 
  const client=new Client({name:'spawn-test',version:'1.0.0'});
  try {
   await client.connect(transport);
-  const list=await client.listTools();assert.ok(list.tools.length>0);assert.ok(list.tools.every(t=>t.annotations?.readOnlyHint));
+  const list=await client.listTools();assert.ok(list.tools.length>0);assert.ok(list.tools.every((t: {annotations?:{readOnlyHint?:boolean}})=>t.annotations?.readOnlyHint));
   const denied=await client.callTool({name:'darktrace_antigena_action',arguments:{body:{codeid:1},confirm:true}});
   assert.equal(denied.isError,true);assert.equal(stderr.includes('SECRET'),false);
  } finally {await client.close();}
 });
-test('real stdio critical preview has no DNS/network and cannot leak values',{timeout:15000},async()=>{
- const transport=new StdioClientTransport({command:process.execPath,args:[cli],env:{...env,DARKTRACE_PROFILES:'read,write',DARKTRACE_WRITE_CRITICAL:'true'},stderr:'pipe'});
- let stderr='';transport.stderr?.on('data',chunk=>{stderr+=String(chunk);});
- const client=new Client({name:'preview-test',version:'1.0.0'});
- try {
-  await client.connect(transport);const list=await client.listTools();assert.ok(list.tools.some(t=>t.name==='darktrace_antigena_manual_action'));
-  const result=await client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:42,action:'quarantine',duration:5,reason:'PRIVATE_SECRET'},dryRun:false}});
-  assert.equal((result.structuredContent as any)?.dryRun,true);assert.equal(JSON.stringify(result).includes('SECRET'),false);assert.equal(stderr.includes('SECRET'),false);
- } finally {await client.close();}
+test('real stdio write grants reject before SDK, DNS, network or signing and never expose values',{timeout:15000},()=>{
+ for(const extra of [{DARKTRACE_PROFILES:'read,write'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'read,write',DARKTRACE_WRITE_CRITICAL:'true'}])for(const mode of [[],['doctor'],['--check-config']]){
+  const run=spawnSync(process.execPath,['--import','./test/security/diagnostic-guard.mjs',cli,...mode],{env:{...env,...extra},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});
+  assert.equal(run.error,undefined);assert.equal(run.status,1);assert.equal(run.stdout,'');assert.equal(run.stderr.includes('SECRET'),false);assert.equal(run.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'),false);
+  const error=JSON.parse(run.stderr);assert.equal(error.event,'startup_error');assert.equal(error.variable,extra.DARKTRACE_PROFILES?'DARKTRACE_PROFILES':undefined);assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);
+ }
 });
 test('stdio buffer is finite and process exits on EOF',{timeout:10000},async()=>{
  const child=spawn(process.execPath,[cli],{env,stdio:['pipe','pipe','pipe']});

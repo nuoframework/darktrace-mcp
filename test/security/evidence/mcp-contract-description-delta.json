@@ -1,0 +1,28 @@
+{
+  "authorization": "msg_648506340a9e",
+  "oldDescriptionFragment": "No live 7.1 validation. ",
+  "newDescriptionFragment": "Live compatibility is operation- and release-specific; consult the published validation evidence. ",
+  "profiles": {
+    "read": {
+      "oldSha256": "6a4270130686e36ac7c4577b942382f1c2edd8caf506d0f979509f01548e7f08",
+      "newSha256": "49e37f629592026c68ad3ab2389a855bf702827cb887bce66d1d5ed3747b5052",
+      "changedDescriptions": 27
+    },
+    "read+sensitive": {
+      "oldSha256": "d18a37be8124903f7136c57612eea94935fc951394e0ea3883fc62669cafe6a4",
+      "newSha256": "71de9e47636e0f421b1aaaf137bfd0c0e97479cc7ac07edeba7970f3bdb84c1f",
+      "changedDescriptions": 28
+    },
+    "read+write": {
+      "oldSha256": "3ffb42ec12d2c593983b10a0aea586953099e9a8549643ce060589128d905d24",
+      "newSha256": "baaaf4a7ae6bd522201acae1ee7bd3df503373363098390b8794388cf12a142f",
+      "changedDescriptions": 36
+    },
+    "read+writeCritical": {
+      "oldSha256": "3d570bbc8a82468b0b2723e4d476d21b53f64da7b0431e27d95dd43f746d9c1a",
+      "newSha256": "36d8db13f56644c2083039c47a0bb777bbe3b44a6eb7b907e4ad3ed7122350fb",
+      "changedDescriptions": 41
+    }
+  },
+  "totalDescriptionsChanged": 132
+}

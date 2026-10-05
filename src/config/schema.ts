@@ -1,3 +1,4 @@
+import { RELEASE_CAPABILITY } from '../policy/release-capability.js';
 import { canonicalIpAddress } from './address.js';
 
 export type DateFormat = 'compact' | 'spaced';
@@ -123,9 +124,13 @@ export function assertSafeNetworkEnvironment(
   const proxyNames = ['HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY', 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy'];
   const ambientProxy = proxyNames.find((name) => env[name] !== undefined);
   if (ambientProxy !== undefined) throw new ConfigValidationError(`${ambientProxy} is unsupported for the fixed appliance origin`);
+  const trustOverride = ['SSL_CERT_FILE', 'SSL_CERT_DIR', 'OPENSSL_CONF', 'NODE_USE_SYSTEM_CA'].find(name => env[name] !== undefined);
+  if (trustOverride !== undefined) throw new ConfigValidationError(`${trustOverride} is unsupported; private CAs use NODE_EXTRA_CA_CERTS`);
   const knownBypass = new Set([
     '--use-env-proxy', '--tls-min-v1.0', '--tls-min-v1.1', '--tls-max-v1.0', '--tls-max-v1.1',
     '--tls-keylog', '--insecure-http-parser',
+    '--use-openssl-ca', '--use-system-ca', '--openssl-config', '--openssl-legacy-provider',
+    '--tls-cipher-list', '--tls-cipher-suites',
   ]);
   const hasBypass = (value: string) => {
     const flag = value.split('=', 1)[0];
@@ -163,6 +168,13 @@ function boolean(value: unknown, fallback: boolean, label: string): boolean {
   if (value === undefined) return fallback;
   if (typeof value !== 'boolean') throw new ConfigValidationError(`${label} must be a boolean`);
   return value;
+}
+
+/** Also used before file/environment overlays, so unsupported file grants cannot be hidden. */
+export function assertReleaseProfiles(value:unknown):void {
+  const profiles=record(value,'profiles');
+  if(boolean(profiles.write,false,'profiles.write')&&!RELEASE_CAPABILITY.write) throw new ConfigValidationError('profiles.write is unavailable in this read-only release');
+  if(boolean(profiles.writeCritical,false,'profiles.writeCritical')&&!RELEASE_CAPABILITY.writeCritical) throw new ConfigValidationError('profiles.writeCritical is unavailable in this read-only release');
 }
 
 function requiredToken(value: unknown, label: string): string {
@@ -266,6 +278,7 @@ export function parseConfig(source: unknown): Config {
   if (transport.http !== undefined) throw new ConfigValidationError('HTTP transport is not supported');
   if (compat.assumeVersion !== undefined) throw new ConfigValidationError('compatibility overrides are not production configuration');
 
+  assertReleaseProfiles(profiles);
   const baseUrl = httpsOrigin(instance.baseUrl);
   const publicToken = requiredToken(auth.publicToken, 'auth.publicToken');
   const privateToken = requiredToken(auth.privateToken, 'auth.privateToken');
@@ -280,6 +293,7 @@ export function parseConfig(source: unknown): Config {
   if (!read) throw new ConfigValidationError('profiles.read must remain enabled');
   const write = boolean(profiles.write, false, 'profiles.write');
   const sensitiveRead = boolean(profiles.sensitiveRead, false, 'profiles.sensitiveRead');
+  if (sensitiveRead && write) throw new ConfigValidationError('profiles.sensitiveRead and profiles.write cannot be enabled together');
   const writeCritical = boolean(profiles.writeCritical, false, 'profiles.writeCritical');
   if (writeCritical && !write) throw new ConfigValidationError('profiles.writeCritical requires profiles.write');
 

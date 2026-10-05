@@ -11,11 +11,20 @@ test('status projection preserves known untrusted version and drops unlisted fie
   for(const canary of ['EXTRA_CANARY','BODY_CANARY','SHAPE_CANARY','credentials'])assert.equal(JSON.stringify(result).includes(canary),false);
   assert.equal(result.structuredContent?.minimized,true);
 });
-test('Advanced Search strips unknown top-level/nested fields, dynamic maps and raw telemetry regardless of requested fields',async()=>{
+test('approved device projection strips unknown top-level and nested fields',async()=>{
+  let calls=0;
+  const result=await callTool('darktrace_get_devices',{}, {cfg,client:{async request(){calls++;return {json:[{did:1,hostname:'device.example',ip:'192.0.2.1',ips:[{ip:'192.0.2.1',timems:1791198000000,time:'2026-10-05 11:00:00',sid:4,rawMailBody:'NESTED_CANARY'}],unexpectedField:'TOP_CANARY',rawMailBody:'BODY_CANARY'}]};}}});
+  assert.equal(calls,1);assert.equal(result.isError,undefined);
+  assert.deepEqual(JSON.parse(JSON.stringify(result.structuredContent?.data)),[{did:1,hostname:'device.example',ip:'192.0.2.1',ips:[{ip:'192.0.2.1',timems:1791198000000,time:'2026-10-05 11:00:00',sid:4}]}]);
+  for(const canary of ['TOP_CANARY','BODY_CANARY','NESTED_CANARY'])assert.equal(JSON.stringify(result).includes(canary),false);
+});
+test('excluded Advanced Search selector is denied before preview, audit, or network effects',async()=>{
   const hash=Buffer.from(JSON.stringify({search:'x',fields:['unexpectedField','@message','rawMailBody'],timeframe:'3600'})).toString('base64');
-  const result=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash}},{cfg,client:{async request(){return {json:{took:1,timed_out:false,unexpectedField:'TOP_CANARY',rawMailBody:'MAIL_CANARY',hits:{total:1,extra:'HITS_CANARY',hits:[{_id:'id',_source:{'@type':'dns','@timestamp':'2026-10-05','@message':'RAW_CANARY','@fields':{rawMailBody:'MAP_CANARY'},unexpectedField:'NEST_CANARY'}}]}}};}}});
-  assert.equal(result.isError,undefined);for(const canary of ['TOP_CANARY','MAIL_CANARY','HITS_CANARY','RAW_CANARY','MAP_CANARY','NEST_CANARY'])assert.equal(JSON.stringify(result).includes(canary),false);
-  assert.equal((result.structuredContent?.data as any).hits.hits[0]._source['@type'],'dns');
+  const effects={calls:0,audits:0};
+  const result=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash},dryRun:true,sensitiveRead:true,providerEligible:true},{cfg,client:{async request(){effects.calls++;return {json:{}};}},audit:{async record(){effects.audits++;}}});
+  assert.equal(result.isError,true);assert.equal(effects.calls,0);assert.equal(effects.audits,0);
+  assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.preview,undefined);assert.equal(result.structuredContent?.outcome,undefined);
+  assert.equal(JSON.stringify(result).includes(hash),false);
 });
 test('unmodeled roots/maps and shape mismatches yield fixed summaries without values or inferred keys',()=>{
   for(const schema of [{type:'object',additionalProperties:true},{},undefined]) {

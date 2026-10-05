@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "historicalOnly": true,
+  "purpose": "Preserve exact pre-migration active test bytes for the validated-only 19-selector release scope; archived files are never active tests or an oracle.",
+  "sourceState": "shared worktree on main immediately before test migration; files were working-tree inputs, not a new committed baseline",
+  "files": [
+    {
+      "originalPath": "test/contract/read-summary-compatibility.test.ts",
+      "archivePath": "test/historical/validated-scope-predecessor/read-summary-compatibility.test.ts.txt",
+      "originalSha256": "9715e5aeacfd12801d15e895c1473cee026624b6433cda83a96c9f792c84122d",
+      "archiveSha256": "9715e5aeacfd12801d15e895c1473cee026624b6433cda83a96c9f792c84122d",
+      "byteLength": 8381
+    },
+    {
+      "originalPath": "test/contract/response-view.test.ts",
+      "archivePath": "test/historical/validated-scope-predecessor/response-view.test.ts.txt",
+      "originalSha256": "ca2b068777b1b8d1f7e0587e55f5e38aa44ddc618e873e9444cbfbb877c8ace9",
+      "archiveSha256": "ca2b068777b1b8d1f7e0587e55f5e38aa44ddc618e873e9444cbfbb877c8ace9",
+      "byteLength": 3248
+    },
+    {
+      "originalPath": "test/security/mcp-defense.test.mjs",
+      "archivePath": "test/historical/validated-scope-predecessor/mcp-defense.test.mjs.txt",
+      "originalSha256": "7a76844072b679c429ebcc5288355691fb844198c1b87d8e31803ce90e548725",
+      "archiveSha256": "7a76844072b679c429ebcc5288355691fb844198c1b87d8e31803ce90e548725",
+      "byteLength": 31756
+    },
+    {
+      "originalPath": "test/security/policy-sinks.test.mjs",
+      "archivePath": "test/historical/validated-scope-predecessor/policy-sinks.test.mjs.txt",
+      "originalSha256": "14ba5a0756fd3f886d1e15bf3d52b7c75e8d3a1b15460ce53105e2da0efc9420",
+      "archiveSha256": "14ba5a0756fd3f886d1e15bf3d52b7c75e8d3a1b15460ce53105e2da0efc9420",
+      "byteLength": 10609
+    }
+  ]
+}

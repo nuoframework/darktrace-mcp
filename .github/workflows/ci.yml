@@ -23,3 +23,157 @@ jobs:
       # release:prepare runs clean npm ci, typecheck, standard tests,
       # test:security, two builds, pack/install/SRI checks and example parsing.
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
+  docker:
+    needs: offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Build local private image
+        run: docker build --pull --tag darktrace-mcp:ci .
+      - name: Pin the just-built image ID for offline runtime checks
+        run: echo "DARKTRACE_IMAGE_ID=$(docker image inspect --format '{{.Id}}' darktrace-mcp:ci)" >> "$GITHUB_ENV"
+      - name: Check image configuration has no ports or operator secrets
+        run: |
+          config_json="$(docker image inspect --format '{{json .Config}}' darktrace-mcp:ci)"
+          node -e 'const assert=require("node:assert/strict");const c=JSON.parse(process.argv[1]);assert.equal(c.User,"1000:1000");assert.deepEqual(c.Entrypoint,["/nodejs/bin/node","/app/dist/src/index.js"]);assert.equal(c.ExposedPorts,undefined);const env=c.Env??[];assert.ok(!env.some(x=>/DARKTRACE_|TOKEN|PROXY|TLS_REJECT|SSL_CERT|OPENSSL_CONF/i.test(x)),"operator secrets or proxy/TLS overrides must not be baked into the image")' "$config_json"
+      - name: Check help and version without network
+        run: |
+          docker run --pull=never --rm --log-driver=none --network=none --read-only \
+            --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=64 --memory=256m "$DARKTRACE_IMAGE_ID" --help
+          expected_version="$(node -p 'require("./package.json").version')"
+          actual_version="$(docker run --pull=never --rm --log-driver=none --network=none --read-only \
+            --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=64 --memory=256m "$DARKTRACE_IMAGE_ID" --version)"
+          test "$actual_version" = "$expected_version"
+      - name: Verify nonroot root-owned runtime inventory
+        run: |
+          docker run --pull=never --rm --log-driver=none --network=none --read-only \
+            --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=64 --memory=256m --entrypoint node "$DARKTRACE_IMAGE_ID" \
+            -e 'const assert=require("node:assert/strict");const fs=require("node:fs");assert.equal(process.getuid(),1000);const root="/app";assert.deepEqual(fs.readdirSync(root).sort(),["LICENSE","dist","node_modules","package.json"]);const pending=[root];while(pending.length){const p=pending.pop();const s=fs.lstatSync(p);assert.equal(s.uid,0,`${p} must be root-owned`);if(s.isDirectory())for(const n of fs.readdirSync(p))pending.push(`${p}/${n}`)}for(const p of ["/app/test","/app/src","/app/scripts","/app/docs","/app/openapi","/app/README.md","/app/SECURITY.md","/app/.env"])assert.equal(fs.existsSync(p),false,`${p} must not ship`);assert.equal(fs.statSync("/app/dist/src/index.js").uid,0)'
+      - name: Check synthetic protected token files offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          token_dir="$(mktemp -d)"
+          trap 'rm -rf "$token_dir"' EXIT
+          printf '%s\n' 'synthetic-public-token' > "$token_dir/public-token"
+          printf '%s\n' 'synthetic-private-token' > "$token_dir/private-token"
+          chmod 600 "$token_dir/public-token" "$token_dir/private-token"
+          uid="$(id -u)"
+          gid="$(id -g)"
+          test "$uid" -ne 0
+          docker run --pull=never --rm --log-driver=none --network=none --read-only \
+            --cap-drop=ALL --security-opt=no-new-privileges \
+            --pids-limit=64 --memory=256m --user "$uid:$gid" \
+            --mount "type=bind,src=$token_dir/public-token,dst=/run/secrets/public-token,readonly" \
+            --mount "type=bind,src=$token_dir/private-token,dst=/run/secrets/private-token,readonly" \
+            --env DARKTRACE_URL=https://darktrace.example.invalid \
+            --env DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token \
+            --env DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token \
+            --env DARKTRACE_PROFILES=read --env DARKTRACE_SENSITIVE_READ=false \
+            "$DARKTRACE_IMAGE_ID" --check-config > "$RUNNER_TEMP/darktrace-check-config.json"
+          node -e 'const assert=require("node:assert/strict");const fs=require("node:fs");const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));assert.equal(x.ok,true);assert.equal(x.transport,"stdio");assert.equal(x.criticalExecution,false);assert.equal(x.email,false);assert.equal(x.pcapExport,false);assert.equal(x.labValidated,false)' "$RUNNER_TEMP/darktrace-check-config.json"
+          rm -f "$RUNNER_TEMP/darktrace-check-config.json"
+      - name: Verify SDK initialize and tool listing without network
+        shell: bash
+        run: |
+          set -euo pipefail
+          token_dir="$(mktemp -d)"
+          smoke_dir="$RUNNER_TEMP/darktrace-docker-sdk-smoke"
+          trap 'rm -rf "$token_dir" "$smoke_dir"' EXIT
+          printf '%s\n' 'synthetic-public-token' > "$token_dir/public-token"
+          printf '%s\n' 'synthetic-private-token' > "$token_dir/private-token"
+          chmod 600 "$token_dir/public-token" "$token_dir/private-token"
+          uid="$(id -u)"
+          test "$uid" -ne 0
+          mkdir -p "$smoke_dir"
+          cp package.json package-lock.json npm-shrinkwrap.json "$smoke_dir/"
+          (
+            cd "$smoke_dir"
+            npm ci --ignore-scripts --no-audit --no-fund
+          node --input-type=module <<'NODE'
+            import assert from 'node:assert/strict';
+            import { randomUUID } from 'node:crypto';
+            import { spawnSync } from 'node:child_process';
+            import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+            import { tmpdir } from 'node:os';
+            import { join } from 'node:path';
+            import { Client } from '@modelcontextprotocol/client';
+            import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
+
+            const uid = process.getuid();
+            const gid = process.getgid();
+            assert.ok(uid > 0, 'Docker smoke must run as a nonroot host user');
+            assert.ok(process.env.DARKTRACE_IMAGE_ID, 'built Docker image ID must be set');
+            const tokenDir = mkdtempSync(join(tmpdir(), 'darktrace-docker-sdk-'));
+            const containerName = `darktrace-sdk-smoke-${randomUUID()}`;
+            const dockerArgs = [
+              'run', '--pull=never', '--rm', '--name', containerName, '--log-driver=none',
+              '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges',
+              '--pids-limit=64', '--memory=256m', '--user', `${uid}:${gid}`, '--init', '-i',
+              '--mount', `type=bind,src=${join(tokenDir, 'public-token')},dst=/run/secrets/public-token,readonly`,
+              '--mount', `type=bind,src=${join(tokenDir, 'private-token')},dst=/run/secrets/private-token,readonly`,
+              '--env', 'DARKTRACE_URL=https://darktrace.example.invalid',
+              '--env', 'DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token',
+              '--env', 'DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token',
+              '--env', 'DARKTRACE_PROFILES=read', '--env', 'DARKTRACE_SENSITIVE_READ=false',
+              process.env.DARKTRACE_IMAGE_ID,
+            ];
+            const client = new Client({ name: 'darktrace-docker-smoke', version: '1.0.0' });
+            const transport = new StdioClientTransport({
+              command: 'docker',
+              args: dockerArgs,
+              env: { PATH: process.env.PATH ?? '/usr/bin:/bin' },
+              stderr: 'ignore',
+              cwd: process.cwd(),
+            });
+            let deadline;
+
+            function exactContainerExists() {
+              const result = spawnSync('docker', ['ps', '-aq', '--filter', `name=^/${containerName}$`], { encoding: 'utf8' });
+              assert.equal(result.status, 0, result.stderr);
+              return result.stdout.trim().length > 0;
+            }
+
+            try {
+              for (const [name, value] of [['public-token', 'synthetic-public-token'], ['private-token', 'synthetic-private-token']]) {
+                const file = join(tokenDir, name);
+                writeFileSync(file, `${value}\n`, { mode: 0o600 });
+                chmodSync(file, 0o600);
+              }
+
+              const timeout = new Promise((_, reject) => {
+                deadline = setTimeout(() => reject(new Error('SDK Docker smoke timed out')), 30000);
+                deadline.unref();
+              });
+              const listing = client.connect(transport).then(() => client.listTools());
+              const { tools } = await Promise.race([listing, timeout]);
+              assert.ok(Array.isArray(tools), 'SDK listTools must return an array');
+              assert.ok(tools.length > 0, 'read profile must expose tools');
+              console.log(`SDK initialized; ${tools.length} read tools listed`);
+            } finally {
+              clearTimeout(deadline);
+              try { await client.close(); } catch {}
+              try { await transport.close(); } catch {}
+              try {
+                if (exactContainerExists()) {
+                  const removed = spawnSync('docker', ['rm', '--force', containerName], { encoding: 'utf8' });
+                  assert.equal(removed.status, 0, removed.stderr);
+                  throw new Error('SDK smoke left its exact test container behind; it was removed');
+                }
+              } finally {
+                rmSync(tokenDir, { recursive: true, force: true });
+              }
+            }
+          NODE
+          )

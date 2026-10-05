@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "historicalOnly": true,
+  "sourceTreeSha256": "aa08c260847c0fc206253f2de3cb1a872f89d2f9d85f5618b88ffd0f5c681e8e",
+  "originalPath": "test/security/fixtures/mcp-tool-contracts-first-stable.json",
+  "archivedPath": "test/historical/validated-contract-predecessor/mcp-tool-contracts-first-stable.json.txt",
+  "fixtureSha256": "ea31d70a484c0d0353cb8651edc4b6a4ab13798c096056e8cdcf68e78324707f",
+  "profileHashes": {
+    "read": "6ce22e568592b27281d14b1fd7361f80da1e0daf7bb2888c892458cc9f532e68",
+    "read+sensitive": "def9a8db53e2fc4d000257d865a2da5c2453c30285e6fb61244ce02c57434a6b"
+  },
+  "alphaFixtureSha256": "37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72",
+  "purpose": "Preserve accepted full read27/sensitive28 contract before validated-only19 migration; never an active oracle or fallback"
+}
