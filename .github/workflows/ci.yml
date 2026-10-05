@@ -25,8 +25,16 @@ jobs:
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
   docker:
     needs: offline
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
     permissions:
       contents: read
     steps:
@@ -35,9 +43,39 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
+          node-version: '24'
+      - name: Fetch and authenticate immutable archived runtime inputs
+        run: node scripts/prepare-docker-runtime.mjs "$RUNNER_TEMP/runtime-inputs" "${{ matrix.arch }}" > "$RUNNER_TEMP/runtime-inputs-fetch.log" 2>&1
       - name: Build local private image
-        run: docker build --pull --tag darktrace-mcp:ci .
+        run: docker buildx build --platform "linux/${{ matrix.arch }}" --build-context "runtime-apks=$RUNNER_TEMP/runtime-inputs/${{ matrix.arch }}" --load --tag darktrace-mcp:ci .
+      - name: Full vendor Node 24 Linux gates (native architecture)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker buildx build --platform "linux/${{ matrix.arch }}" --build-context "runtime-apks=$RUNNER_TEMP/runtime-inputs/${{ matrix.arch }}" --target vendor-checks --load --tag darktrace-mcp:vendor-checks .
+          mkdir -p "$RUNNER_TEMP/vendor-results"
+          chmod 777 "$RUNNER_TEMP/vendor-results"
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --tmpfs /scratch:rw,exec,uid=1000,gid=1000,mode=700 --tmpfs /tmp:rw,exec,uid=1000,gid=1000,mode=1777 \
+            --mount "type=bind,src=$RUNNER_TEMP/vendor-results,dst=/results" \
+            --entrypoint /bin/sh darktrace-mcp:vendor-checks -ec '
+              cp -R /work/. /scratch/
+              cd /scratch
+              trap "cp -R test/security/evidence /results/security-evidence 2>/dev/null || true" EXIT
+              node -p "JSON.stringify({node:process.versions.node,openssl:process.versions.openssl,shared:process.config.variables.node_shared_openssl,arch:process.arch})" > /results/runtime.json
+              npm run typecheck > /results/typecheck.log 2>&1
+              npm test > /results/functional.log 2>&1
+              npm run test:security > /results/security.log 2>&1
+            '
+          node --input-type=commonjs <<'NODE'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          for(const [name,count] of [['functional',130],['security',325]]){
+            const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
+            const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
+            for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])
+              assert.ok(lines.includes(`ℹ ${key} ${value}`)||lines.includes(`# ${key} ${value}`),`${name}: ${key} ${value} required`);
+          }
+          NODE
       - name: Pin the just-built image ID for offline runtime checks
         run: echo "DARKTRACE_IMAGE_ID=$(docker image inspect --format '{{.Id}}' darktrace-mcp:ci)" >> "$GITHUB_ENV"
       - name: Check image configuration has no ports or operator secrets
@@ -54,6 +92,10 @@ jobs:
             --cap-drop=ALL --security-opt=no-new-privileges \
             --pids-limit=64 --memory=256m "$DARKTRACE_IMAGE_ID" --version)"
           test "$actual_version" = "$expected_version"
+      - name: Fail closed on actual shared OpenSSL and vendor Node
+        run: |
+          docker run --pull=never --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --entrypoint node "$DARKTRACE_IMAGE_ID" \
+            -e 'const a=require("node:assert/strict");a.equal(process.versions.node,"24.18.1");a.equal(process.config.variables.node_shared_openssl,true);const [major,minor,patch]=process.versions.openssl.split(".").map(Number);a.equal(major,3);a.equal(minor,5);a.ok(patch>=9);console.log(JSON.stringify({node:process.versions.node,openssl:process.versions.openssl,shared:process.config.variables.node_shared_openssl}))' > "$RUNNER_TEMP/vendor-results/final-runtime.json"
       - name: Verify nonroot root-owned runtime inventory
         run: |
           docker run --pull=never --rm --log-driver=none --network=none --read-only \
@@ -98,14 +140,17 @@ jobs:
           test "$uid" -ne 0
           mkdir -p "$smoke_dir"
           cp package.json package-lock.json npm-shrinkwrap.json "$smoke_dir/"
+          cp test/security/fixtures/mcp-tool-contracts-first-stable.json "$smoke_dir/contract.json"
           (
             cd "$smoke_dir"
             npm ci --ignore-scripts --no-audit --no-fund
+          for sensitive in false true; do
+          export DARKTRACE_SMOKE_SENSITIVE="$sensitive"
           node --input-type=module <<'NODE'
             import assert from 'node:assert/strict';
-            import { randomUUID } from 'node:crypto';
+            import { randomUUID, createHash } from 'node:crypto';
             import { spawnSync } from 'node:child_process';
-            import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+            import { chmodSync, mkdtempSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
             import { tmpdir } from 'node:os';
             import { join } from 'node:path';
             import { Client } from '@modelcontextprotocol/client';
@@ -126,7 +171,7 @@ jobs:
               '--env', 'DARKTRACE_URL=https://darktrace.example.invalid',
               '--env', 'DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token',
               '--env', 'DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token',
-              '--env', 'DARKTRACE_PROFILES=read', '--env', 'DARKTRACE_SENSITIVE_READ=false',
+              '--env', 'DARKTRACE_PROFILES=read', '--env', `DARKTRACE_SENSITIVE_READ=${process.env.DARKTRACE_SMOKE_SENSITIVE}`,
               process.env.DARKTRACE_IMAGE_ID,
             ];
             const client = new Client({ name: 'darktrace-docker-smoke', version: '1.0.0' });
@@ -159,8 +204,31 @@ jobs:
               const listing = client.connect(transport).then(() => client.listTools());
               const { tools } = await Promise.race([listing, timeout]);
               assert.ok(Array.isArray(tools), 'SDK listTools must return an array');
-              assert.ok(tools.length > 0, 'read profile must expose tools');
-              console.log(`SDK initialized; ${tools.length} read tools listed`);
+              assert.equal(tools.length, 15);
+              const fixtureBytes=readFileSync('contract.json');
+              assert.equal(createHash('sha256').update(fixtureBytes).digest('hex'),'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
+              const fixture=JSON.parse(fixtureBytes);
+              const profile=process.env.DARKTRACE_SMOKE_SENSITIVE==='true'?'read+sensitive':'read';
+              const captured=tools.map(({name,description,inputSchema,annotations})=>({name,description,inputSchema,annotations}));
+              assert.deepEqual(captured,fixture.contracts[profile].tools);
+              function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
+              const hash=createHash('sha256').update(JSON.stringify(canonical(captured))).digest('hex');
+              assert.equal(hash,'cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3');
+              if(profile==='read'){
+                const denials=[];
+                for(const extra of [['DARKTRACE_PROFILES=read,write'],['DARKTRACE_PROFILES=read,write','DARKTRACE_WRITE_CRITICAL=true'],['DARKTRACE_WRITE_CRITICAL=true']])for(const mode of [[],['doctor'],['--check-config']]){
+                  const args=dockerArgs.slice(0,-1);
+                  args.splice(args.indexOf('--name'),2);
+                  args.push(...extra.flatMap(x=>['--env',x]),process.env.DARKTRACE_IMAGE_ID,...mode);
+                  const r=spawnSync('docker',args,{encoding:'utf8',timeout:30000});
+                  assert.equal(r.error,undefined);assert.equal(r.status,1);assert.equal(r.stdout,'');
+                  assert.equal(JSON.parse(r.stderr).event,'startup_error');
+                  assert.ok(!/synthetic-public-token|synthetic-private-token/.test(r.stderr));
+                  denials.push({extra,mode,exit:r.status});
+                }
+                writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/write-refusals.json`,JSON.stringify(denials,null,2));
+              }
+              writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/sdk-${profile}.json`,JSON.stringify({image:process.env.DARKTRACE_IMAGE_ID,profile,tools:15,contractHash:hash,exactFixture:true,noApiCalls:true}));
             } finally {
               clearTimeout(deadline);
               try { await client.close(); } catch {}
@@ -176,4 +244,31 @@ jobs:
               }
             }
           NODE
+          done
           )
+      - name: Bind final production bytes to vendor gate build
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --pull=never --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --entrypoint node "$DARKTRACE_IMAGE_ID" \
+            -e 'const f=require("node:fs"),c=require("node:crypto");function hashes(d,p=""){const out={};for(const e of f.readdirSync(d,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const n=p+e.name;if(e.isDirectory())Object.assign(out,hashes(d+"/"+e.name,n+"/"));else if(e.isFile())out[n]=c.createHash("sha256").update(f.readFileSync(d+"/"+e.name)).digest("hex")}return out}console.log(JSON.stringify(hashes("/app/dist/src")))' > "$RUNNER_TEMP/vendor-results/final-runtime-hashes.json"
+          node --input-type=commonjs <<'NODE'
+          const a=require('node:assert/strict'),f=require('node:fs'),c=require('node:crypto'),p=`${process.env.RUNNER_TEMP}/vendor-results`;
+          const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
+          const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names.sort().at(-1)}`));
+          a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,325);
+          const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
+          a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,49);
+          f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:49,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
+          NODE
+      - name: Archive signed inputs and complete native gate receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: patched-runtime-${{ matrix.arch }}-${{ github.sha }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/runtime-inputs
+            ${{ runner.temp }}/runtime-inputs-fetch.log
+            ${{ runner.temp }}/vendor-results

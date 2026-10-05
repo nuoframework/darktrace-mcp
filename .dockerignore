@@ -14,3 +14,13 @@
 !docs/
 !docs/operation-inventory.json
 !LICENSE
+!test/
+!test/**
+test/security/evidence/**
+!examples/
+!examples/**
+!docs/**
+!scripts/**
+!README.md
+!README.es.md
+!SECURITY.md
