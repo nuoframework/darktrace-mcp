@@ -1,0 +1,5239 @@
+{
+  "source_spec": "openapi/darktrace-threat-visualizer.yaml",
+  "spec_version": "6.1",
+  "generated": "2026-10-05",
+  "total_operations": 79,
+  "counts": {
+    "read": 57,
+    "write": 22,
+    "read_via_post": 2,
+    "by_risk": {
+      "read": 57,
+      "medium": 9,
+      "high": 7,
+      "critical": 6
+    },
+    "high_data_sensitivity": 11,
+    "deprecated": 1,
+    "not_in_sdk": 3,
+    "agemail": 14
+  },
+  "classification_legend": {
+    "risk_tier": {
+      "read": "no state change",
+      "medium": "reversible triage state change (ack/pin/comment/investigate)",
+      "high": "configuration or data-producing change",
+      "critical": "can block traffic, disable monitoring, destroy config, or act on mail"
+    },
+    "data_sensitivity": {
+      "low": "metadata/config",
+      "medium": "device/user identifiers, hostnames, IPs",
+      "high": "raw traffic, email content, logs, audit, free-text comments"
+    }
+  },
+  "operations": [
+    {
+      "operationId": "get_advancedsearch_api_search_query",
+      "method": "GET",
+      "path": "/advancedsearch/api/search/{query}",
+      "tag": "advancedsearch",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "query",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 66,
+        "operation_line": 67
+      },
+      "notes": "Base64 query in path; non url-safe base64 can contain / + =.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "base64 in path segment: signed vs sent encoding ambiguous"
+      ],
+      "open_questions": [
+        "Must base64 be url-safe or percent-encoded in path? How does signing treat encoded path?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "post_advancedsearch_api_search",
+      "method": "POST",
+      "path": "/advancedsearch/api/search",
+      "tag": "advancedsearch",
+      "classification": "read",
+      "read_via_post": true,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "hash"
+        ],
+        "required": [
+          "hash"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 120,
+        "operation_line": 121
+      },
+      "notes": "Read via POST: raw log/metadata search (Advanced Search).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Signature format for POST JSON body (\"?{json}\")."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_advancedsearch_api_analyze_field_analysis_query",
+      "method": "GET",
+      "path": "/advancedsearch/api/analyze/{field}/{analysis}/{query}",
+      "tag": "advancedsearch",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "field",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "analysis",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "query",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 180,
+        "operation_line": 181
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "base64 in path segment: signed vs sent encoding ambiguous"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_advancedsearch_api_graph_graphmode_interval_query",
+      "method": "GET",
+      "path": "/advancedsearch/api/graph/{graphmode}/{interval}/{query}",
+      "tag": "advancedsearch",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "graphmode",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "query",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 250,
+        "operation_line": 251
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "base64 in path segment: signed vs sent encoding ambiguous"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_groups",
+      "method": "GET",
+      "path": "/aianalyst/groups",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "includeacknowledged",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeallpinned",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeonlypinned",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "locale",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includegroupurl",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "compliance",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "suspicious",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "critical",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "excludedid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "master",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "excludesid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "maxscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "groupid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 323,
+        "operation_line": 324
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_incidentevents",
+      "method": "GET",
+      "path": "/aianalyst/incidentevents",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "includeacknowledged",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeallpinned",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeonlypinned",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeincidenteventurl",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "locale",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "groupcompliance",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "groupsuspicious",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "groupcritical",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "maxscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "maxgroupscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "mingroupscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "excludedid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "excludesid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "master",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "groupid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 516,
+        "operation_line": 517
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_acknowledge",
+      "method": "POST",
+      "path": "/aianalyst/acknowledge",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "uuid"
+        ],
+        "required": [
+          "uuid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 721,
+        "operation_line": 722
+      },
+      "notes": "Acknowledges AI Analyst incident (state change, reversible via unacknowledge).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_unacknowledge",
+      "method": "POST",
+      "path": "/aianalyst/unacknowledge",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "uuid"
+        ],
+        "required": [
+          "uuid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 774,
+        "operation_line": 775
+      },
+      "notes": "Reverts acknowledge.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_pin",
+      "method": "POST",
+      "path": "/aianalyst/pin",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "uuid"
+        ],
+        "required": [
+          "uuid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 827,
+        "operation_line": 828
+      },
+      "notes": "Pins incident.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_unpin",
+      "method": "POST",
+      "path": "/aianalyst/unpin",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "uuid"
+        ],
+        "required": [
+          "uuid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 880,
+        "operation_line": 881
+      },
+      "notes": "Unpins incident.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_incident_comments",
+      "method": "GET",
+      "path": "/aianalyst/incident/comments",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "incident_id",
+          "in": "query",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 933,
+        "operation_line": 934
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_incident_comments",
+      "method": "POST",
+      "path": "/aianalyst/incident/comments",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "incident_id",
+          "message"
+        ],
+        "required": [
+          "incident_id",
+          "message"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 933,
+        "operation_line": 981
+      },
+      "notes": "Adds comment; append-only, not deletable via API. SDK reports SUCCESS-but-not-saved on 7.0.42.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Is comment persistence broken on 7.x?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_stats",
+      "method": "GET",
+      "path": "/aianalyst/stats",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1035,
+        "operation_line": 1036
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_investigations",
+      "method": "GET",
+      "path": "/aianalyst/investigations",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "investigationId",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responseData",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1085,
+        "operation_line": 1086
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_aianalyst_investigations",
+      "method": "POST",
+      "path": "/aianalyst/investigations",
+      "tag": "aianalyst",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "investigateTime",
+          "did"
+        ],
+        "required": [
+          "investigateTime",
+          "did"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1085,
+        "operation_line": 1165
+      },
+      "notes": "Starts an AI Analyst investigation (consumes analysis capacity).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "investigateTime format (epoch s vs ms)."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_aianalyst_incidents",
+      "method": "GET",
+      "path": "/aianalyst/incidents",
+      "tag": "aianalyst",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": true,
+      "in_sdk": false,
+      "query_or_path_params": [
+        {
+          "name": "includeacknowledged",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "locale",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "mergeEvents",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeallpinned",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeincidenturl",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1237,
+        "operation_line": 1238
+      },
+      "notes": "Deprecated since 5.2; replaced by /aianalyst/incidentevents.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "not implemented in LegendEvent/darktrace-sdk (DIFF doc)"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_antigena",
+      "method": "GET",
+      "path": "/antigena",
+      "tag": "antigena",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includecleared",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includehistory",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "needconfirming",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeconnections",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pbid",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1350,
+        "operation_line": 1351
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_antigena",
+      "method": "POST",
+      "path": "/antigena",
+      "tag": "antigena",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "codeid",
+          "activate",
+          "clear",
+          "reason",
+          "duration"
+        ],
+        "required": [
+          "codeid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1350,
+        "operation_line": 1480
+      },
+      "notes": "Activates/extends/clears Darktrace RESPOND (Antigena) actions; can block live network traffic.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Is clear reversible and does it require codeid of a still-active action?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "post_antigena_manual",
+      "method": "POST",
+      "path": "/antigena/manual",
+      "tag": "antigena",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "did",
+          "action",
+          "duration",
+          "reason",
+          "connections"
+        ],
+        "required": [
+          "did",
+          "action",
+          "duration"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1564,
+        "operation_line": 1565
+      },
+      "notes": "Creates manual RESPOND action (quarantine/block) against a device; immediate business impact.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Allowed action enum per version; does duration=0 mean indefinite?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_antigena_summary",
+      "method": "GET",
+      "path": "/antigena/summary",
+      "tag": "antigena",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1652,
+        "operation_line": 1653
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_components",
+      "method": "GET",
+      "path": "/components",
+      "tag": "components",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1718,
+        "operation_line": 1719
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_components_cid",
+      "method": "GET",
+      "path": "/components/{cid}",
+      "tag": "components",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "cid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1760,
+        "operation_line": 1761
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_cves",
+      "method": "GET",
+      "path": "/cves",
+      "tag": "cves",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1807,
+        "operation_line": 1808
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_details",
+      "method": "GET",
+      "path": "/details",
+      "tag": "details",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "applicationprotocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "count",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "ddid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "deduplicate",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "destinationport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "eventtype",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "externalhostname",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "intext",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "msg",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "odid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pbid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "port",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "protocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sourceport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "blockedconnections",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 1856,
+        "operation_line": 1857
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_deviceinfo",
+      "method": "GET",
+      "path": "/deviceinfo",
+      "tag": "deviceinfo",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "datatype",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": true
+        },
+        {
+          "name": "externaldomain",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "odid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "showallgraphdata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "similardevices",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "port",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "intervalhours",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2070,
+        "operation_line": 2071
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_devices",
+      "method": "GET",
+      "path": "/devices",
+      "tag": "devices",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "ip",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "iptime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "mac",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "seensince",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "count",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includetags",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "cloudsecurity",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasfilter",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2175,
+        "operation_line": 2176
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_devices",
+      "method": "POST",
+      "path": "/devices",
+      "tag": "devices",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json",
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "did",
+          "label",
+          "priority",
+          "type"
+        ],
+        "required": [
+          "did"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2175,
+        "operation_line": 2307
+      },
+      "notes": "Changes device label/priority/type; affects scoring and triage.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_devicesearch",
+      "method": "GET",
+      "path": "/devicesearch",
+      "tag": "devicesearch",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "count",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "orderBy",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "query",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "seensince",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2410,
+        "operation_line": 2411
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_devicesummary",
+      "method": "GET",
+      "path": "/devicesummary",
+      "tag": "devicesummary",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "did",
+          "in": "query",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2505,
+        "operation_line": 2506
+      },
+      "notes": "SDK issue #37: HTTP 500 with API tokens.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [
+        "Does /devicesummary work with API tokens at all?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_endpointdetails",
+      "method": "GET",
+      "path": "/endpointdetails",
+      "tag": "endpointdetails",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "additionalinfo",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "devices",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "score",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "hostname",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "ip",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2550,
+        "operation_line": 2551
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_enums",
+      "method": "GET",
+      "path": "/enums",
+      "tag": "enums",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2636,
+        "operation_line": 2637
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_filtertypes",
+      "method": "GET",
+      "path": "/filtertypes",
+      "tag": "filtertypes",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2676,
+        "operation_line": 2677
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_intelfeed",
+      "method": "GET",
+      "path": "/intelfeed",
+      "tag": "intelfeed",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "source",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sources",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldetails",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2717,
+        "operation_line": 2718
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_intelfeed",
+      "method": "POST",
+      "path": "/intelfeed",
+      "tag": "intelfeed",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json",
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "addentry",
+          "addlist",
+          "description",
+          "expiry",
+          "hostname",
+          "removeall",
+          "removeentry",
+          "source",
+          "iagn"
+        ],
+        "required": []
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2717,
+        "operation_line": 2783
+      },
+      "notes": "Modifies Watched Domains/intel feed; removeall wipes entire list; iagn can trigger RESPOND.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Does removeall require source scoping? Is there any undo?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance"
+      ]
+    },
+    {
+      "operationId": "get_mbcomments",
+      "method": "GET",
+      "path": "/mbcomments",
+      "tag": "mbcomments",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "count",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pbid",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2902,
+        "operation_line": 2903
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_metricdata",
+      "method": "GET",
+      "path": "/metricdata",
+      "tag": "metricdata",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "applicationprotocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "breachtimes",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "ddid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "destinationport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "interval",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "metric",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "odid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "port",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "protocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sourceport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 2973,
+        "operation_line": 2974
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_metrics",
+      "method": "GET",
+      "path": "/metrics",
+      "tag": "metrics",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3124,
+        "operation_line": 3125
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_metrics_mlid",
+      "method": "GET",
+      "path": "/metrics/{mlid}",
+      "tag": "metrics",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "mlid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3169,
+        "operation_line": 3170
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_models",
+      "method": "GET",
+      "path": "/models",
+      "tag": "models",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3219,
+        "operation_line": 3220
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_models_pid",
+      "method": "GET",
+      "path": "/models/{pid}",
+      "tag": "models",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": false,
+      "query_or_path_params": [
+        {
+          "name": "pid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3271,
+        "operation_line": 3272
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "not implemented in LegendEvent/darktrace-sdk (DIFF doc)"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_modelbreaches",
+      "method": "GET",
+      "path": "/modelbreaches",
+      "tag": "modelbreaches",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "deviceattop",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "expandenums",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "historicmodelonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeacknowledged",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includebreachurl",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minimal",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pbid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "group",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includesuppressed",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasfilter",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "creationtime",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3322,
+        "operation_line": 3323
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_modelbreaches_pbid",
+      "method": "GET",
+      "path": "/modelbreaches/{pbid}",
+      "tag": "modelbreaches",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": false,
+      "query_or_path_params": [
+        {
+          "name": "pbid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "deviceattop",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "expandenums",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "historicmodelonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includeacknowledged",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includebreachurl",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minimal",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "minscore",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pbid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "pid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "uuid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasonly",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "group",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "includesuppressed",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "saasfilter",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "creationtime",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3538,
+        "operation_line": 3539
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "not implemented in LegendEvent/darktrace-sdk (DIFF doc)"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_modelbreaches_pbid_comments",
+      "method": "GET",
+      "path": "/modelbreaches/{pbid}/comments",
+      "tag": "modelbreaches",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "pbid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3759,
+        "operation_line": 3760
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_modelbreaches_pbid_comments",
+      "method": "POST",
+      "path": "/modelbreaches/{pbid}/comments",
+      "tag": "modelbreaches",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "pbid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "message"
+        ],
+        "required": [
+          "message"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3759,
+        "operation_line": 3809
+      },
+      "notes": "Adds model breach comment (append-only).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "post_modelbreaches_pbid_acknowledge",
+      "method": "POST",
+      "path": "/modelbreaches/{pbid}/acknowledge",
+      "tag": "modelbreaches",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "pbid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": {
+        "content_types": [
+          "application/json",
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "acknowledge"
+        ],
+        "required": [
+          "acknowledge"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3863,
+        "operation_line": 3864
+      },
+      "notes": "Acknowledges breach.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "post_modelbreaches_pbid_unacknowledge",
+      "method": "POST",
+      "path": "/modelbreaches/{pbid}/unacknowledge",
+      "tag": "modelbreaches",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "medium",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "pbid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": {
+        "content_types": [
+          "application/json",
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "unacknowledge"
+        ],
+        "required": [
+          "unacknowledge"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3930,
+        "operation_line": 3931
+      },
+      "notes": "Unacknowledges breach.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_network",
+      "method": "GET",
+      "path": "/network",
+      "tag": "network",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "applicationprotocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "destinationport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "from",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "intext",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "ip",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "metric",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "port",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "protocol",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sourceport",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "starttime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "viewsubnet",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 3997,
+        "operation_line": 3998
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_pcaps",
+      "method": "GET",
+      "path": "/pcaps",
+      "tag": "pcaps",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4148,
+        "operation_line": 4149
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_pcaps",
+      "method": "POST",
+      "path": "/pcaps",
+      "tag": "pcaps",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "ip1",
+          "ip2",
+          "port1",
+          "port2",
+          "start",
+          "end",
+          "protocol"
+        ],
+        "required": [
+          "ip1",
+          "start",
+          "end"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4148,
+        "operation_line": 4181
+      },
+      "notes": "Triggers a packet capture; produces payload data and consumes appliance resources.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Max capture window/size; is capture asynchronous and how is completion signalled?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_pcaps_filename",
+      "method": "GET",
+      "path": "/pcaps/{filename}",
+      "tag": "pcaps",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "filename",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json",
+        "application/vnd.tcpdump.pcap"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4247,
+        "operation_line": 4248
+      },
+      "notes": "Returns raw packet capture (binary, may contain credentials/PII).",
+      "schema_gaps": [
+        "200 application/vnd.tcpdump.pcap schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [],
+      "open_questions": [
+        "Binary response: how should an MCP tool surface it (size limits, no inline)?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_similardevices",
+      "method": "GET",
+      "path": "/similardevices",
+      "tag": "similardevices",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "count",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "token",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "did",
+          "in": "query",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4286,
+        "operation_line": 4287
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_status",
+      "method": "GET",
+      "path": "/status",
+      "tag": "status",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "includechildren",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fast",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4357,
+        "operation_line": 4358
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_subnets",
+      "method": "GET",
+      "path": "/subnets",
+      "tag": "subnets",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "seensince",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "sid",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4418,
+        "operation_line": 4419
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_subnets",
+      "method": "POST",
+      "path": "/subnets",
+      "tag": "subnets",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json",
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "sid",
+          "label",
+          "network",
+          "longitude",
+          "latitude",
+          "dhcp",
+          "uniqueUsernames",
+          "uniqueHostnames",
+          "excluded",
+          "modelExcluded"
+        ],
+        "required": [
+          "sid"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4418,
+        "operation_line": 4484
+      },
+      "notes": "Edits subnet config; excluded/modelExcluded can silently disable monitoring/model coverage.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Partial update semantics: are omitted fields left unchanged or reset?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance"
+      ]
+    },
+    {
+      "operationId": "get_summarystatistics",
+      "method": "GET",
+      "path": "/summarystatistics",
+      "tag": "summarystatistics",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "eventtype",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "endtime",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "to",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "hours",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "csensor",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "mitreTactics",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4613,
+        "operation_line": 4614
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_tags",
+      "method": "GET",
+      "path": "/tags",
+      "tag": "tags",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tag",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4713,
+        "operation_line": 4714
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_tags",
+      "method": "POST",
+      "path": "/tags",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "name",
+          "data"
+        ],
+        "required": [
+          "name",
+          "data"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4713,
+        "operation_line": 4768
+      },
+      "notes": "Creates tag.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_tags_tid",
+      "method": "GET",
+      "path": "/tags/{tid}",
+      "tag": "tags",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4832,
+        "operation_line": 4833
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "delete_tags_tid",
+      "method": "DELETE",
+      "path": "/tags/{tid}",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4832,
+        "operation_line": 4886
+      },
+      "notes": "Deletes a tag definition; tags may drive model/RESPOND scoping.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "DELETE signing with query params not explicitly described in docs"
+      ],
+      "open_questions": [
+        "Does deleting a tag cascade to entity assignments?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance"
+      ]
+    },
+    {
+      "operationId": "get_tags_entities",
+      "method": "GET",
+      "path": "/tags/entities",
+      "tag": "tags",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "did",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "tag",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4936,
+        "operation_line": 4937
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_tags_entities",
+      "method": "POST",
+      "path": "/tags/entities",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/x-www-form-urlencoded"
+        ],
+        "properties": [
+          "did",
+          "duration",
+          "tag"
+        ],
+        "required": [
+          "did",
+          "tag"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4936,
+        "operation_line": 5001
+      },
+      "notes": "Applies tag to device; tags can gate RESPOND/models.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "duration units (seconds?) and default expiry."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "delete_tags_entities",
+      "method": "DELETE",
+      "path": "/tags/entities",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "did",
+          "in": "query",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "in": "query",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 4936,
+        "operation_line": 5057
+      },
+      "notes": "Removes tag from device; DELETE with query params (did, tag).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "DELETE signing with query params not explicitly described in docs"
+      ],
+      "open_questions": [
+        "Is tag the name or tid?"
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_tags_tid_entities",
+      "method": "GET",
+      "path": "/tags/{tid}/entities",
+      "tag": "tags",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "responsedata",
+          "in": "query",
+          "required": false
+        },
+        {
+          "name": "fulldevicedetails",
+          "in": "query",
+          "required": false
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5105,
+        "operation_line": 5106
+      },
+      "notes": "",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "query must be signed unencoded but sent percent-encoded; parameter ordering must match"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_tags_tid_entities",
+      "method": "POST",
+      "path": "/tags/{tid}/entities",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [
+          "entityType",
+          "entityValue",
+          "expiryDuration"
+        ],
+        "required": [
+          "entityType",
+          "entityValue"
+        ]
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5105,
+        "operation_line": 5170
+      },
+      "notes": "Adds tag to entity (device/credential).",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "delete_tags_tid_entities_teid",
+      "method": "DELETE",
+      "path": "/tags/{tid}/entities/{teid}",
+      "tag": "tags",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "high",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "tid",
+          "in": "path",
+          "required": true
+        },
+        {
+          "name": "teid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5240,
+        "operation_line": 5241
+      },
+      "notes": "Removes tag-entity assignment.",
+      "schema_gaps": [
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema"
+      ],
+      "signing_concerns": [
+        "DELETE signing with query params not explicitly described in docs"
+      ],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_admin_decode_link",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/admin/decode_link",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "medium",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5295,
+        "operation_line": 5296
+      },
+      "notes": "Decodes rewritten links; may reveal user-clicked URLs.",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [
+        "Parameter name (link?) only in instance spec."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_dash_action_summary",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/dash/action_summary",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5320,
+        "operation_line": 5321
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_dash_dash_stats",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/dash/dash_stats",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5345,
+        "operation_line": 5346
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_dash_data_loss",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/dash/data_loss",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5370,
+        "operation_line": 5371
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_dash_user_anomaly",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/dash/user_anomaly",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5395,
+        "operation_line": 5396
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "post_agemail_api_ep_api_v1_0_emails_uuid_action",
+      "method": "POST",
+      "path": "/agemail/api/ep/api/v1.0/emails/{uuid}/action",
+      "tag": "agemail",
+      "classification": "write",
+      "read_via_post": false,
+      "risk_tier": "critical",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [],
+        "required": []
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5420,
+        "operation_line": 5421
+      },
+      "notes": "Applies email action (e.g. hold/release/delete) in Darktrace/EMAIL; body schema undefined in portal docs.",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "request body schema empty",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Action enum and body schema only in instance /agemail/api/api-docs."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "safety: requires explicit confirm/dry-run flag; disabled by default",
+        "audit: log intent without secrets",
+        "safety: blocked unless allow-critical policy set; integration test only on lab instance",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_emails_uuid",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/emails/{uuid}",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5459,
+        "operation_line": 5460
+      },
+      "notes": "Email metadata/content.",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_emails_uuid_download",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/emails/{uuid}/download",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [
+        {
+          "name": "uuid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5491,
+        "operation_line": 5492
+      },
+      "notes": "Downloads raw email (content, attachments, headers).",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [
+        "Response media type (message/rfc822?) undocumented."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "post_agemail_api_ep_api_v1_0_emails_search",
+      "method": "POST",
+      "path": "/agemail/api/ep/api/v1.0/emails/search",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": true,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": {
+        "content_types": [
+          "application/json"
+        ],
+        "properties": [],
+        "required": []
+      },
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5523,
+        "operation_line": 5524
+      },
+      "notes": "Read via POST: email search.",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "request body schema empty",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [
+        "POST body must be appended to signed string as ?a=b&... or ?{json}; exact JSON serialization (key order, spaces) must match bytes sent"
+      ],
+      "open_questions": [
+        "Body schema only in instance spec."
+      ],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_resources_tags",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/resources/tags",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5555,
+        "operation_line": 5556
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_resources_actions",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/resources/actions",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5580,
+        "operation_line": 5581
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_resources_filters",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/resources/filters",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5605,
+        "operation_line": 5606
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_system_audit_eventTypes",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/system/audit/eventTypes",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "low",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5630,
+        "operation_line": 5631
+      },
+      "notes": "",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures"
+      ]
+    },
+    {
+      "operationId": "get_agemail_api_ep_api_v1_0_system_audit_events",
+      "method": "GET",
+      "path": "/agemail/api/ep/api/v1.0/system/audit/events",
+      "tag": "agemail",
+      "classification": "read",
+      "read_via_post": false,
+      "risk_tier": "read",
+      "data_sensitivity": "high",
+      "deprecated": false,
+      "in_sdk": true,
+      "query_or_path_params": [],
+      "request_body": null,
+      "response_codes": [
+        "200",
+        "400",
+        "401",
+        "403"
+      ],
+      "response_content_types": [
+        "application/json"
+      ],
+      "evidence": {
+        "file": "openapi/darktrace-threat-visualizer.yaml",
+        "path_line": 5655,
+        "operation_line": 5656
+      },
+      "notes": "Audit log (user identities, admin actions).",
+      "schema_gaps": [
+        "200 application/json schema is open/untyped",
+        "no 404/429/500 response documented (spec documents only 200,400,401,403)",
+        "401 documented without response body schema",
+        "403 documented without response body schema",
+        "parameters undocumented in portal; see instance /agemail/api/api-docs"
+      ],
+      "signing_concerns": [],
+      "open_questions": [],
+      "test_requirements": [
+        "unit: signature vector for exact request bytes",
+        "contract: request validates against spec",
+        "mock: 200 and 400 fixtures",
+        "redaction: output size cap and PII handling test"
+      ]
+    }
+  ]
+}

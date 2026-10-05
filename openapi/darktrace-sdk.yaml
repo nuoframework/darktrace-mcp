@@ -1,0 +1,4161 @@
+openapi: 3.0.3
+info:
+  title: Darktrace Threat Visualizer API (según darktrace-sdk)
+  version: 0.10.1 (darktrace/_version.py:4; CHANGELOG 2026-10-01)
+  description: 'Schema derivado del código de https://github.com/LegendEvent/darktrace-sdk (clone --depth 1) (versión 0.10.1
+    (darktrace/_version.py:4; CHANGELOG 2026-10-01)). Describe lo que el SDK envía realmente, no la documentación oficial;
+    ver darktrace-threat-visualizer.yaml y DIFF-sdk-vs-docs.md.
+
+
+    ## Firma
+
+    HMAC-SHA1(key=private_token ASCII, msg=f''{signed_path}\n{public_token}\n{date}'' UTF-8).hexdigest() (darktrace/auth.py:83-96).
+    signed_path (auth.py:47-69): request_path (sin host) + si hay params: ''?'' + ''&''.join(''k=v'') con claves ordenadas
+    alfabéticamente, valores None eliminados, bool -> ''true''/''false'', listas/tuplas -> claves repetidas (k=a&k=b) en orden;
+    valores SIN url-encoding (texto plano, p.ej. espacios literales). Si hay JSON body: se añade json.dumps(body, separators=('','','':''))
+    (compacto, orden de inserción, ensure_ascii por defecto) precedido de ''&'' si había params o ''?'' si no -> ''/modelbreaches/101/comments?{"message":"x"}''.
+    El body se envía con los mismos separadores (dt_utils.py:186). Los params normalizados (ordenados, booleans en minúscula)
+    son los que se envían (auth.py:80, ''clean or params''). Form POST (_post_form, dt_utils.py:202-235): body = urlencode(sorted(items))
+    y la firma se calcula pasando valores quote_plus(str(v)) como params -> firma ''path?k=v_urlencoded&...'' idéntica al
+    body en el cable (asimetría: GET firma valores sin codificar, form POST firma valores codificados). Para GET con path
+    dinámico (advancedsearch) el base64 forma parte del path firmado.
+
+
+    ## Cabeceras
+
+    - DTAPI-Token: <public token>
+
+    - DTAPI-Date: YYYY-MM-DD HH:MM:SS (UTC, datetime.now(timezone.utc))
+
+    - DTAPI-Signature: hex HMAC-SHA1
+
+    - Content-Type: application/json (siempre, incluso en GET/DELETE; sobrescrito a application/x-www-form-urlencoded en _post_form)'
+servers:
+- url: https://{instance}
+  variables:
+    instance:
+      default: darktrace.example.com
+security:
+- DTAPIToken: []
+  DTAPIDate: []
+  DTAPISignature: []
+tags:
+- name: advancedsearch
+- name: aianalyst
+- name: antigena
+- name: modelbreaches
+- name: components
+- name: cves
+- name: details
+- name: deviceinfo
+- name: devices
+- name: devicesearch
+- name: devicesummary
+- name: agemail
+- name: endpointdetails
+- name: enums
+- name: filtertypes
+- name: intelfeed
+- name: mbcomments
+- name: metricdata
+- name: metrics
+- name: models
+- name: network
+- name: pcaps
+- name: similardevices
+- name: status
+- name: subnets
+- name: summarystatistics
+- name: tags
+paths:
+  /advancedsearch/api/search/{query}:
+    get:
+      tags:
+      - advancedsearch
+      summary: dt_advanced_search.AdvancedSearch.search(post_request=False)
+      operationId: get_advancedsearch_api_search_query
+      description: '**Implementado en el SDK por:** `dt_advanced_search.AdvancedSearch.search(post_request=False)` (darktrace/dt_advanced_search.py:11
+        (ruta en :88))
+
+
+        **Notas:** La query se reconstruye: solo se conservan las claves search (def ''''), fields (def []), offset (def 0),
+        timeframe (def ''3600'') y time (def {''user_interval'':0}). Si la query trae from+to -> timeframe=''custom'', time={''from'',''to'',''user_interval'':''0''}
+        (string ''0''); elif interval -> timeframe=str(interval) y NO se envía ''time''; else time=query.get(''time''). En
+        GET NO se soportan starttime/endtime (sí en POST). Cualquier otra clave (p.ej. ''size'', documentada en sus propios
+        docs) se DESCARTA silenciosamente. encode_query (dt_utils.py:340) = base64.b64encode(json.dumps(query)) con separadores
+        por defecto ('', '' y '': '') y alfabeto base64 estándar (puede contener ''/'', ''+'', ''='') insertado en el path
+        sin URL-encoding. La firma se calcula sobre el path completo incluyendo el base64.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_advanced_search.py'
+      parameters:
+      - name: query
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /advancedsearch/api/search:
+    post:
+      tags:
+      - advancedsearch
+      summary: dt_advanced_search.AdvancedSearch.search(post_request=True)
+      operationId: post_advancedsearch_api_search
+      description: '**Implementado en el SDK por:** `dt_advanced_search.AdvancedSearch.search(post_request=True)` (darktrace/dt_advanced_search.py:28-63)
+
+
+        **Notas:** Body JSON {''hash'': base64(json(full_query))}. full_query = search, fields, offset, timeframe (def ''3600''),
+        time (def {''user_interval'':0}); from+to o starttime+endtime -> timeframe ''custom'' y time {''from'',''to'',''user_interval'':''0''};
+        interval -> timeframe=str(interval) (time se mantiene con default). ''size'' y otras claves se descartan. SDK lo marca
+        como 6.1+.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_advanced_search.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hash:
+                  type: string
+                  format: byte
+                  description: 'Tipo en el SDK: `str (base64 de JSON)`.'
+              required:
+              - hash
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /advancedsearch/api/analyze/{field}/{analysis}/{query}:
+    get:
+      tags:
+      - advancedsearch
+      summary: dt_advanced_search.AdvancedSearch.analyze
+      operationId: get_advancedsearch_api_analyze_field_analysis_query
+      description: '**Implementado en el SDK por:** `dt_advanced_search.AdvancedSearch.analyze` (darktrace/dt_advanced_search.py:90)
+
+
+        **Notas:** analysis_type esperado: trend|score|terms|mean (solo en docs). Query codificada tal cual (sin normalización
+        ni defaults).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_advanced_search.py'
+      parameters:
+      - name: field
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: analysis
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: query
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /advancedsearch/api/graph/{graphmode}/{interval}/{query}:
+    get:
+      tags:
+      - advancedsearch
+      summary: dt_advanced_search.AdvancedSearch.graph
+      operationId: get_advancedsearch_api_graph_graphmode_interval_query
+      description: '**Implementado en el SDK por:** `dt_advanced_search.AdvancedSearch.graph` (darktrace/dt_advanced_search.py:102)
+
+
+        **Notas:** interval int (ms según docs del SDK). Query codificada tal cual.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_advanced_search.py'
+      parameters:
+      - name: graphmode
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: interval
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: query
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/groups:
+    get:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.get_groups
+      operationId: get_aianalyst_groups
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.get_groups` (darktrace/dt_analyst.py:16)
+
+
+        **Notas:** **params pass-through: cualquier kwarg se envía sin validar; lista de params solo en docstring.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      parameters:
+      - name: includeacknowledged
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: groupcompliance
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupsuspicious
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupcritical
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludedid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludesid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: master
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: saasonly
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includeonlypinned
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: maxscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: minscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: groupid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/incidentevents:
+    get:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.get_incident_events
+      operationId: get_aianalyst_incidentevents
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.get_incident_events` (darktrace/dt_analyst.py:40)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      parameters:
+      - name: includeacknowledged
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: locale
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: groupcompliance
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupsuspicious
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupcritical
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludedid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludesid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: master
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: saasonly
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includeallpinned
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includeonlypinned
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includeincidenteventurl
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: maxscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: minscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: maxgroupscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: mingroupscore
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: groupid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: uuid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/acknowledge:
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.acknowledge
+      operationId: post_aianalyst_acknowledge
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.acknowledge` (darktrace/dt_analyst.py:69)
+
+
+        **Notas:** Form-urlencoded vía _post_form (dt_utils.py:202): lista de uuids se une con '',''; el body enviado es urlencode(sorted)
+        y la firma usa los valores quote_plus''d ('','' -> %2C). Arreglado en 0.10.1 (#59).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  description: 'Tipo en el SDK: `str (CSV si se pasa lista)`.'
+              required:
+              - uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/unacknowledge:
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.unacknowledge
+      operationId: post_aianalyst_unacknowledge
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.unacknowledge` (darktrace/dt_analyst.py:90)
+
+
+        **Notas:** Form-urlencoded vía _post_form (dt_utils.py:202): lista de uuids se une con '',''; el body enviado es urlencode(sorted)
+        y la firma usa los valores quote_plus''d ('','' -> %2C). Arreglado en 0.10.1 (#59).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  description: 'Tipo en el SDK: `str (CSV si se pasa lista)`.'
+              required:
+              - uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/pin:
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.pin
+      operationId: post_aianalyst_pin
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.pin` (darktrace/dt_analyst.py:111)
+
+
+        **Notas:** Form-urlencoded vía _post_form (dt_utils.py:202): lista de uuids se une con '',''; el body enviado es urlencode(sorted)
+        y la firma usa los valores quote_plus''d ('','' -> %2C). Arreglado en 0.10.1 (#59).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  description: 'Tipo en el SDK: `str (CSV si se pasa lista)`.'
+              required:
+              - uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/unpin:
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.unpin
+      operationId: post_aianalyst_unpin
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.unpin` (darktrace/dt_analyst.py:132)
+
+
+        **Notas:** Form-urlencoded vía _post_form (dt_utils.py:202): lista de uuids se une con '',''; el body enviado es urlencode(sorted)
+        y la firma usa los valores quote_plus''d ('','' -> %2C). Arreglado en 0.10.1 (#59).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  description: 'Tipo en el SDK: `str (CSV si se pasa lista)`.'
+              required:
+              - uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/incident/comments:
+    get:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.get_comments
+      operationId: get_aianalyst_incident_comments
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.get_comments` (darktrace/dt_analyst.py:153)
+
+
+        **Notas:** Param Python response_data -> query ''responsedata''.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      parameters:
+      - name: incident_id
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ''
+        description: 'Tipo en el SDK: `str`. arg Python renombrado response_data; solo se envía si no vacío'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.add_comment
+      operationId: post_aianalyst_incident_comments
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.add_comment` (darktrace/dt_analyst.py:171)
+
+
+        **Notas:** Según el SDK (observado en TV 7.0.42) el servidor responde SUCCESS pero NO almacena el comentario; recomiendan
+        breaches.add_comment.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                incident_id:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                message:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+              required:
+              - incident_id
+              - message
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/stats:
+    get:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.get_stats
+      operationId: get_aianalyst_stats
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.get_stats` (darktrace/dt_analyst.py:197)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      parameters:
+      - name: includeacknowledged
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int (ms)`.'
+      - name: groupcompliance
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupsuspicious
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: groupcritical
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludedid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludesid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: master
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: saasonly
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /aianalyst/investigations:
+    get:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.get_investigations
+      operationId: get_aianalyst_investigations
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.get_investigations` (darktrace/dt_analyst.py:216)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      parameters:
+      - name: includeacknowledged
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludedid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: excludesid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: pbid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: minfirstreporttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: maxfirstreporttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: minlastreporttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: maxlastreporttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: includefirstreports
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: investigationid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - aianalyst
+      summary: dt_analyst.Analyst.create_investigation
+      operationId: post_aianalyst_investigations
+      description: '**Implementado en el SDK por:** `dt_analyst.Analyst.create_investigation` (darktrace/dt_analyst.py:237)
+
+
+        **Notas:** Renombrado investigate_time -> investigateTime (camelCase).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_analyst.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                investigateTime:
+                  type: string
+                  description: 'Tipo en el SDK: `str (epoch)`. arg Python investigate_time'
+                did:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+              required:
+              - investigateTime
+              - did
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /antigena:
+    get:
+      tags:
+      - antigena
+      summary: dt_antigena.Antigena.get_actions
+      operationId: get_antigena
+      description: '**Implementado en el SDK por:** `dt_antigena.Antigena.get_actions` (darktrace/dt_antigena.py:22)
+
+
+        **Notas:** **params pass-through; from_time/to_time se renombran a from/to.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_antigena.py'
+      parameters:
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includecleared
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includehistory
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: needconfirming
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str YYYY-MM-DD HH:MM:SS`. kwarg from_time'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. kwarg to_time'
+      - name: includeconnections
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: pbid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - antigena
+      summary: dt_antigena.Antigena.activate_action
+      operationId: post_antigena
+      description: '**Implementado en el SDK por:** `dt_antigena.Antigena.activate_action` (darktrace/dt_antigena.py:98);
+        `dt_antigena.Antigena.extend_action` (darktrace/dt_antigena.py:135); `dt_antigena.Antigena.clear_action` (darktrace/dt_antigena.py:179);
+        `dt_antigena.Antigena.reactivate_action` (darktrace/dt_antigena.py:218)
+
+
+        **Notas:** Sin flag activate. Mismo body que activate_action con duration obligatorio.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_antigena.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codeid:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                activate:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`. fijo true'
+                reason:
+                  type: string
+                  description: 'Tipo en el SDK: `str`. solo si no vacío'
+                duration:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                clear:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+              required:
+              - codeid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /antigena/manual:
+    post:
+      tags:
+      - antigena
+      summary: dt_antigena.Antigena.create_manual_action
+      operationId: post_antigena_manual
+      description: '**Implementado en el SDK por:** `dt_antigena.Antigena.create_manual_action` (darktrace/dt_antigena.py:257)
+
+
+        **Notas:** Docstring dice que devuelve int codeid, pero devuelve el JSON crudo.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_antigena.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                action:
+                  type: string
+                  description: 'Tipo en el SDK: `str enum: connection|pol|gpol|quarantine|quarantineOutgoing|quarantineIncoming`.'
+                duration:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int (s)`.'
+                reason:
+                  type: string
+                  description: 'Tipo en el SDK: `str`. siempre enviado aunque vacío'
+                connections:
+                  type: array
+                  items:
+                    type: string
+                  description: 'Tipo en el SDK: `list[{src,dst,port?}]`. solo si action==''connection'''
+              required:
+              - did
+              - action
+              - duration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /antigena/summary:
+    get:
+      tags:
+      - antigena
+      summary: dt_antigena.Antigena.get_summary
+      operationId: get_antigena_summary
+      description: '**Implementado en el SDK por:** `dt_antigena.Antigena.get_summary` (darktrace/dt_antigena.py:335)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_antigena.py'
+      parameters:
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /modelbreaches:
+    get:
+      tags:
+      - modelbreaches
+      summary: dt_breaches.ModelBreaches.get
+      operationId: get_modelbreaches
+      description: '**Implementado en el SDK por:** `dt_breaches.ModelBreaches.get` (darktrace/dt_breaches.py:16)
+
+
+        **Notas:** **params pass-through; from_time/to_time -> from/to. Booleans enviados como ''true''/''false''.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_breaches.py'
+      parameters:
+      - name: deviceattop
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. kwarg from_time'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. kwarg to_time'
+      - name: expandenums
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: historicmodelonly
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includeacknowledged
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: includebreachurl
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: minimal
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: minscore
+        in: query
+        required: false
+        schema:
+          type: number
+        description: 'Tipo en el SDK: `float`.'
+      - name: pbid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: pid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: uuid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: saasonly
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: group
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: includesuppressed
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: saasfilter
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        description: 'Tipo en el SDK: `str|list (claves repetidas)`.'
+      - name: creationtime
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /modelbreaches/{pbid}/comments:
+    get:
+      tags:
+      - modelbreaches
+      summary: dt_breaches.ModelBreaches.get_comments
+      operationId: get_modelbreaches_pbid_comments
+      description: '**Implementado en el SDK por:** `dt_breaches.ModelBreaches.get_comments` (darktrace/dt_breaches.py:65)
+
+
+        **Notas:** Si pbid es lista, hace N peticiones y devuelve dict {str(pbid): resp}.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_breaches.py'
+      parameters:
+      - name: pbid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - modelbreaches
+      summary: dt_breaches.ModelBreaches.add_comment
+      operationId: post_modelbreaches_pbid_comments
+      description: '**Implementado en el SDK por:** `dt_breaches.ModelBreaches.add_comment` (darktrace/dt_breaches.py:85);
+        `dt_mbcomments.MBComments.post` (darktrace/dt_mbcomments.py:56)
+
+
+        **Notas:** **params extra se envían como query string Y se incluyen en la firma como ''path?a=1&{json}'' (caso no
+        definido en la guía según el propio SDK). Alias de breaches.add_comment.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_breaches.py'
+      parameters:
+      - name: pbid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+              required:
+              - message
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /modelbreaches/{pbid}/acknowledge:
+    post:
+      tags:
+      - modelbreaches
+      summary: dt_breaches.ModelBreaches.acknowledge
+      operationId: post_modelbreaches_pbid_acknowledge
+      description: '**Implementado en el SDK por:** `dt_breaches.ModelBreaches.acknowledge` (darktrace/dt_breaches.py:106)
+
+
+        **Notas:** Body JSON {''acknowledge'': true} (guía clásica usa form acknowledge=true; JSON requiere 6.0+). pbid lista
+        -> N peticiones. acknowledge_with_comment (:148) = acknowledge + add_comment, reenviando **params a ambas.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_breaches.py'
+      parameters:
+      - name: pbid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                acknowledge:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /modelbreaches/{pbid}/unacknowledge:
+    post:
+      tags:
+      - modelbreaches
+      summary: dt_breaches.ModelBreaches.unacknowledge
+      operationId: post_modelbreaches_pbid_unacknowledge
+      description: '**Implementado en el SDK por:** `dt_breaches.ModelBreaches.unacknowledge` (darktrace/dt_breaches.py:127)
+
+
+        **Notas:** Igual que acknowledge. unacknowledge_with_comment en :170.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_breaches.py'
+      parameters:
+      - name: pbid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                unacknowledge:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /components:
+    get:
+      tags:
+      - components
+      summary: dt_components.Components.get(cid=None)
+      operationId: get_components
+      description: '**Implementado en el SDK por:** `dt_components.Components.get(cid=None)` (darktrace/dt_components.py:9)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_components.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /components/{cid}:
+    get:
+      tags:
+      - components
+      summary: dt_components.Components.get(cid=...)
+      operationId: get_components_cid
+      description: '**Implementado en el SDK por:** `dt_components.Components.get(cid=...)` (darktrace/dt_components.py:32)
+
+
+        **Notas:** Path dinámico si cid no es None.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_components.py'
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /cves:
+    get:
+      tags:
+      - cves
+      summary: dt_cves.CVEs.get
+      operationId: get_cves
+      description: '**Implementado en el SDK por:** `dt_cves.CVEs.get` (darktrace/dt_cves.py:9)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_cves.py'
+      parameters:
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool -> ''true''/''false''`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /details:
+    get:
+      tags:
+      - details
+      summary: dt_details.Details.get
+      operationId: get_details
+      description: '**Implementado en el SDK por:** `dt_details.Details.get` (darktrace/dt_details.py:9)
+
+
+        **Notas:** Validación cliente: requiere al menos uno de did/pbid/msg/blockedconnections; pares starttime/endtime y
+        from_/to; count incompatible con rangos temporales. eventtype=''connection'' se añade por defecto. **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_details.py'
+      parameters:
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: pbid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: msg
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: blockedconnections
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - all
+          - failed
+          - 'true'
+        description: 'Tipo en el SDK: `str all|failed|true`.'
+      - name: eventtype
+        in: query
+        required: false
+        schema:
+          type: string
+          default: connection
+        description: 'Tipo en el SDK: `str`. SIEMPRE enviado (default SDK)'
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. arg from_'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: applicationprotocol
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: destinationport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sourceport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: port
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: protocol
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: ddid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: odid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: externalhostname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: intext
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - internal
+          - external
+        description: 'Tipo en el SDK: `str internal|external`.'
+      - name: uid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: deduplicate
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+        description: 'Tipo en el SDK: `bool`. solo enviado si True'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+        description: 'Tipo en el SDK: `bool`. solo si True'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /deviceinfo:
+    get:
+      tags:
+      - deviceinfo
+      summary: dt_deviceinfo.DeviceInfo.get
+      operationId: get_deviceinfo
+      description: '**Implementado en el SDK por:** `dt_deviceinfo.DeviceInfo.get` (darktrace/dt_deviceinfo.py:9)
+
+
+        **Notas:** El SDK envía SIEMPRE datatype, showallgraphdata, fulldevicedetails e intervalhours (defaults del SDK, no
+        de la API).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_deviceinfo.py'
+      parameters:
+      - name: did
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: datatype
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - co
+          - sizeout
+          - sizein
+          default: co
+        description: 'Tipo en el SDK: `str co|sizeout|sizein`. siempre enviado'
+      - name: odid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: port
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: externaldomain
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+        description: 'Tipo en el SDK: `bool`. siempre enviado ''false'''
+      - name: showallgraphdata
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: true
+        description: 'Tipo en el SDK: `bool`. siempre enviado ''true'''
+      - name: similardevices
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: intervalhours
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+          default: 1
+        description: 'Tipo en el SDK: `int`. siempre enviado'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /devices:
+    get:
+      tags:
+      - devices
+      summary: dt_devices.Devices.get
+      operationId: get_devices
+      description: '**Implementado en el SDK por:** `dt_devices.Devices.get` (darktrace/dt_devices.py:11)
+
+
+        **Notas:** Sin **params (no pass-through).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_devices.py'
+      parameters:
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: ip
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: iptime
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: mac
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: seensince
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: includetags
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: cloudsecurity
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: saasfilter
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        description: 'Tipo en el SDK: `str|list`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - devices
+      summary: dt_devices.Devices.update
+      operationId: post_devices
+      description: '**Implementado en el SDK por:** `dt_devices.Devices.update` (darktrace/dt_devices.py:74)
+
+
+        **Notas:** Body JSON.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_devices.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                label:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                priority:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int -5..5`.'
+                type:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int enum`.'
+              required:
+              - did
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /devicesearch:
+    get:
+      tags:
+      - devicesearch
+      summary: dt_devicesearch.DeviceSearch.get
+      operationId: get_devicesearch
+      description: '**Implementado en el SDK por:** `dt_devicesearch.DeviceSearch.get` (darktrace/dt_devicesearch.py:23)
+
+
+        **Notas:** Args tag/label/type/vendor/hostname/ip/mac NO se envían como params: se construye query=''tag:"x" label:"y"
+        ...'' unido por espacios. ValueError si se mezcla query con esos filtros. Helpers get_tag/get_type/get_label/get_vendor/get_hostname/get_ip/get_mac
+        (:116-254) generan query=''campo:"valor"''. **kwargs pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_devicesearch.py'
+      parameters:
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`. default API 100, max 300'
+      - name: orderBy
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: order
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+        description: 'Tipo en el SDK: `str asc|desc`.'
+      - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: seensince
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /devicesummary:
+    get:
+      tags:
+      - devicesummary
+      summary: dt_devicesummary.DeviceSummary.get
+      operationId: get_devicesummary
+      description: '**Implementado en el SDK por:** `dt_devicesummary.DeviceSummary.get` (darktrace/dt_devicesummary.py:33)
+
+
+        **Notas:** Params extra probablemente inventados (los propios docs del SDK dicen que la guía solo documenta did).
+        Known issue: HTTP 500 con token API (issue #37, TV 6.3.18).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_devicesummary.py'
+      parameters:
+      - name: did
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: device_name
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: ip_address
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: end_timestamp
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: start_timestamp
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: devicesummary_by
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: devicesummary_by_value
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: device_type
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: network_location
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: network_location_id
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: peer_id
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: source
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: status
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `str|int`. NO documentado en la guía para este endpoint'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/admin/decode_link:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.decode_link
+      operationId: get_agemail_api_ep_api_v1_0_admin_decode_link
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.decode_link` (darktrace/dt_email.py:12)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: link
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/dash/action_summary:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_action_summary
+      operationId: get_agemail_api_ep_api_v1_0_dash_action_summary
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_action_summary` (darktrace/dt_email.py:44
+        (vía _dashboard_get :29))
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/dash/dash_stats:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_dash_stats
+      operationId: get_agemail_api_ep_api_v1_0_dash_dash_stats
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_dash_stats` (darktrace/dt_email.py:65 (vía
+        _dashboard_get :29))
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/dash/data_loss:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_data_loss
+      operationId: get_agemail_api_ep_api_v1_0_dash_data_loss
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_data_loss` (darktrace/dt_email.py:86 (vía
+        _dashboard_get :29))
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/dash/user_anomaly:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_user_anomaly
+      operationId: get_agemail_api_ep_api_v1_0_dash_user_anomaly
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_user_anomaly` (darktrace/dt_email.py:107
+        (vía _dashboard_get :29))
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/emails/{uuid}/action:
+    post:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.email_action
+      operationId: post_agemail_api_ep_api_v1_0_emails_uuid_action
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.email_action` (darktrace/dt_email.py:128)
+
+
+        **Notas:** Body pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/emails/{uuid}:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_email
+      operationId: get_agemail_api_ep_api_v1_0_emails_uuid
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_email` (darktrace/dt_email.py:138)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: include_headers
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool -> ''true''/''false''`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/emails/{uuid}/download:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.download_email
+      operationId: get_agemail_api_ep_api_v1_0_emails_uuid_download
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.download_email` (darktrace/dt_email.py:163)
+
+
+        **Notas:** Devuelve bytes (MIME crudo); petición construida a mano sin params.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/emails/search:
+    post:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.search_emails
+      operationId: post_agemail_api_ep_api_v1_0_emails_search
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.search_emails` (darktrace/dt_email.py:190)
+
+
+        **Notas:** Body pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/resources/tags:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_tags
+      operationId: get_agemail_api_ep_api_v1_0_resources_tags
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_tags` (darktrace/dt_email.py:199)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/resources/actions:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_actions
+      operationId: get_agemail_api_ep_api_v1_0_resources_actions
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_actions` (darktrace/dt_email.py:214)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/resources/filters:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_filters
+      operationId: get_agemail_api_ep_api_v1_0_resources_filters
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_filters` (darktrace/dt_email.py:229)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/system/audit/eventTypes:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_event_types
+      operationId: get_agemail_api_ep_api_v1_0_system_audit_eventTypes
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_event_types` (darktrace/dt_email.py:244)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /agemail/api/ep/api/v1.0/system/audit/events:
+    get:
+      tags:
+      - agemail
+      summary: dt_email.DarktraceEmail.get_audit_events
+      operationId: get_agemail_api_ep_api_v1_0_system_audit_events
+      description: '**Implementado en el SDK por:** `dt_email.DarktraceEmail.get_audit_events` (darktrace/dt_email.py:259)
+
+
+        **Notas:** event_type -> eventType.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_email.py'
+      parameters:
+      - name: eventType
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. arg event_type'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /endpointdetails:
+    get:
+      tags:
+      - endpointdetails
+      summary: dt_endpointdetails.EndpointDetails.get
+      operationId: get_endpointdetails
+      description: '**Implementado en el SDK por:** `dt_endpointdetails.EndpointDetails.get` (darktrace/dt_endpointdetails.py:9)
+
+
+        **Notas:** Sin pass-through; ninguno marcado obligatorio aunque la API necesita ip o hostname.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_endpointdetails.py'
+      parameters:
+      - name: ip
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: hostname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: additionalinfo
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: devices
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: score
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /enums:
+    get:
+      tags:
+      - enums
+      summary: dt_enums.Enums.get
+      operationId: get_enums
+      description: '**Implementado en el SDK por:** `dt_enums.Enums.get` (darktrace/dt_enums.py:15)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_enums.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /filtertypes:
+    get:
+      tags:
+      - filtertypes
+      summary: dt_filtertypes.FilterTypes.get
+      operationId: get_filtertypes
+      description: '**Implementado en el SDK por:** `dt_filtertypes.FilterTypes.get` (darktrace/dt_filtertypes.py:26)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_filtertypes.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /intelfeed:
+    get:
+      tags:
+      - intelfeed
+      summary: dt_intelfeed.IntelFeed.get
+      operationId: get_intelfeed
+      description: '**Implementado en el SDK por:** `dt_intelfeed.IntelFeed.get` (darktrace/dt_intelfeed.py:29)
+
+
+        **Notas:** Helpers get_sources/get_by_source/get_with_details (:64-74). **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_intelfeed.py'
+      parameters:
+      - name: sources
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool -> ''true''/''false''`.'
+      - name: source
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: fulldetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`. solo se envía ''true'' si True'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - intelfeed
+      summary: dt_intelfeed.IntelFeed.update
+      operationId: post_intelfeed
+      description: '**Implementado en el SDK por:** `dt_intelfeed.IntelFeed.update` (darktrace/dt_intelfeed.py:76)
+
+
+        **Notas:** Body JSON (no form). Args renombrados a snake_case en Python.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_intelfeed.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                addentry:
+                  type: string
+                  description: 'Tipo en el SDK: `str`. arg add_entry'
+                addlist:
+                  type: string
+                  description: 'Tipo en el SDK: `str CSV`. arg add_list; lista unida con '','''
+                removeentry:
+                  type: string
+                  description: 'Tipo en el SDK: `str`. arg remove_entry'
+                removeall:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`. arg remove_all'
+                description:
+                  type: string
+                  description: 'Tipo en el SDK: `str <256`.'
+                source:
+                  type: string
+                  description: 'Tipo en el SDK: `str <64`.'
+                expiry:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                hostname:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`. arg is_hostname'
+                iagn:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`. arg enable_antigena'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /mbcomments:
+    get:
+      tags:
+      - mbcomments
+      summary: dt_mbcomments.MBComments.get
+      operationId: get_mbcomments
+      description: '**Implementado en el SDK por:** `dt_mbcomments.MBComments.get` (darktrace/dt_mbcomments.py:9)
+
+
+        **Notas:** comment_id -> ValueError (no existe /mbcomments/<id>). **params pass-through. MBComments.post (:56) NO
+        usa /mbcomments: hace POST /modelbreaches/{breach_id}/comments {''message'': comment} e ignora **params.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_mbcomments.py'
+      parameters:
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`. default API 100'
+      - name: pbid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /metricdata:
+    get:
+      tags:
+      - metricdata
+      summary: dt_metricdata.MetricData.get
+      operationId: get_metricdata
+      description: '**Implementado en el SDK por:** `dt_metricdata.MetricData.get` (darktrace/dt_metricdata.py:9)
+
+
+        **Notas:** Pares de tiempo validados en cliente. **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_metricdata.py'
+      parameters:
+      - name: metric
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: metric1..metricN
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. arg metrics=list -> metric1=,metric2=,...'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: ddid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: odid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: port
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: sourceport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: destinationport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: protocol
+        in: query
+        required: false
+        schema:
+          oneOf:
+          - type: string
+          - type: integer
+        description: 'Tipo en el SDK: `int|str`.'
+      - name: applicationprotocol
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. arg from_'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: interval
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int s`.'
+      - name: breachtimes
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /metrics:
+    get:
+      tags:
+      - metrics
+      summary: dt_metrics.Metrics.get(metric_id=None)
+      operationId: get_metrics
+      description: '**Implementado en el SDK por:** `dt_metrics.Metrics.get(metric_id=None)` (darktrace/dt_metrics.py:9)
+
+
+        **Notas:** **params pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_metrics.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /metrics/{mlid}:
+    get:
+      tags:
+      - metrics
+      summary: dt_metrics.Metrics.get(metric_id=...)
+      operationId: get_metrics_mlid
+      description: '**Implementado en el SDK por:** `dt_metrics.Metrics.get(metric_id=...)` (darktrace/dt_metrics.py:32)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_metrics.py'
+      parameters:
+      - name: mlid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /models:
+    get:
+      tags:
+      - models
+      summary: dt_models.Models.get
+      operationId: get_models
+      description: '**Implementado en el SDK por:** `dt_models.Models.get` (darktrace/dt_models.py:9)
+
+
+        **Notas:** Sin pass-through; no soporta /models/{uuid} ni otros params.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_models.py'
+      parameters:
+      - name: uuid
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /network:
+    get:
+      tags:
+      - network
+      summary: dt_network.Network.get
+      operationId: get_network
+      description: '**Implementado en el SDK por:** `dt_network.Network.get` (darktrace/dt_network.py:9)
+
+
+        **Notas:** Sin pass-through; sin validación de pares temporales.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_network.py'
+      parameters:
+      - name: applicationprotocol
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: destinationport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: starttime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`. arg from_'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: intext
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: ip
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: metric
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: port
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: protocol
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: sourceport
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: viewsubnet
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /pcaps:
+    get:
+      tags:
+      - pcaps
+      summary: dt_pcaps.PCAPs.get(pcap_id=None)
+      operationId: get_pcaps
+      description: '**Implementado en el SDK por:** `dt_pcaps.PCAPs.get(pcap_id=None)` (darktrace/dt_pcaps.py:10)
+
+
+        **Notas:** Devuelve JSON si Content-Type application/json, si no bytes.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_pcaps.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - pcaps
+      summary: dt_pcaps.PCAPs.create
+      operationId: post_pcaps
+      description: '**Implementado en el SDK por:** `dt_pcaps.PCAPs.create` (darktrace/dt_pcaps.py:48)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_pcaps.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ip1:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                start:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int epoch s`.'
+                end:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int epoch s`.'
+                ip2:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                port1:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                port2:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                protocol:
+                  type: string
+                  enum:
+                  - tcp
+                  - udp
+                  description: 'Tipo en el SDK: `str tcp|udp`.'
+              required:
+              - ip1
+              - start
+              - end
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /pcaps/{filename}:
+    get:
+      tags:
+      - pcaps
+      summary: dt_pcaps.PCAPs.get(pcap_id=...)
+      operationId: get_pcaps_filename
+      description: '**Implementado en el SDK por:** `dt_pcaps.PCAPs.get(pcap_id=...)` (darktrace/dt_pcaps.py:26-28)
+
+
+        **Notas:** Prefijo ''/tm/'' eliminado del filename. Devuelve bytes del pcap.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_pcaps.py'
+      parameters:
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.tcpdump.pcap:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /similardevices:
+    get:
+      tags:
+      - similardevices
+      summary: dt_similardevices.SimilarDevices.get
+      operationId: get_similardevices
+      description: '**Implementado en el SDK por:** `dt_similardevices.SimilarDevices.get` (darktrace/dt_similardevices.py:9)
+
+
+        **Notas:** device_id -> did (antes usaba /similardevices/<id>). **kwargs pass-through.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_similardevices.py'
+      parameters:
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`. arg device_id'
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: token
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /status:
+    get:
+      tags:
+      - status
+      summary: dt_status.Status.get
+      operationId: get_status
+      description: '**Implementado en el SDK por:** `dt_status.Status.get` (darktrace/dt_status.py:9)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_status.py'
+      parameters:
+      - name: includechildren
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: fast
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /subnets:
+    get:
+      tags:
+      - subnets
+      summary: dt_subnets.Subnets.get
+      operationId: get_subnets
+      description: '**Implementado en el SDK por:** `dt_subnets.Subnets.get` (darktrace/dt_subnets.py:9)
+
+
+        **Notas:** subnet_id -> sid query (no existe /subnets/<id>).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_subnets.py'
+      parameters:
+      - name: seensince
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: sid
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`. alias subnet_id'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - subnets
+      summary: dt_subnets.Subnets.post
+      operationId: post_subnets
+      description: '**Implementado en el SDK por:** `dt_subnets.Subnets.post` (darktrace/dt_subnets.py:46)
+
+
+        **Notas:** responsedata va dentro del body JSON (probablemente ignorado por la API).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_subnets.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sid:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                label:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                network:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                longitude:
+                  type: number
+                  description: 'Tipo en el SDK: `float`.'
+                latitude:
+                  type: number
+                  description: 'Tipo en el SDK: `float`.'
+                dhcp:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+                uniqueUsernames:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+                uniqueHostnames:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+                excluded:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+                modelExcluded:
+                  type: boolean
+                  description: 'Tipo en el SDK: `bool`.'
+                responsedata:
+                  type: string
+                  description: 'Tipo en el SDK: `str`. metido en el BODY, no en query'
+              required:
+              - sid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /summarystatistics:
+    get:
+      tags:
+      - summarystatistics
+      summary: dt_summarystatistics.SummaryStatistics.get
+      operationId: get_summarystatistics
+      description: '**Implementado en el SDK por:** `dt_summarystatistics.SummaryStatistics.get` (darktrace/dt_summarystatistics.py:9)
+
+
+        **Notas:** ValueError si >1 de eventtype/csensor/mitreTactics, o endtime/to/hours sin eventtype. SDK observa que ''hours''
+        da INPUT ERROR 400 en TV 7.0.42.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_summarystatistics.py'
+      parameters:
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: eventtype
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: endtime
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: csensor
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      - name: mitreTactics
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /tags:
+    get:
+      tags:
+      - tags
+      summary: dt_tags.Tags.get(tag_id=None)
+      operationId: get_tags
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.get(tag_id=None)` (darktrace/dt_tags.py:12)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tag
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - tags
+      summary: dt_tags.Tags.create
+      operationId: post_tags
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.create` (darktrace/dt_tags.py:41)
+
+
+        **Notas:** color/description anidados en ''data''.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                data:
+                  type: object
+                  description: 'Tipo en el SDK: `object`. {color:int hue, description:str}'
+              required:
+              - name
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /tags/{tid}:
+    get:
+      tags:
+      - tags
+      summary: dt_tags.Tags.get(tag_id=...)
+      operationId: get_tags_tid
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.get(tag_id=...)` (darktrace/dt_tags.py:31)
+
+
+        **Notas:** tag_id falsy (p.ej. 0) cae a /tags.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: tag
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    delete:
+      tags:
+      - tags
+      summary: dt_tags.Tags.delete
+      operationId: delete_tags_tid
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.delete` (darktrace/dt_tags.py:68)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /tags/entities:
+    get:
+      tags:
+      - tags
+      summary: dt_tags.Tags.get_entities
+      operationId: get_tags_entities
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.get_entities` (darktrace/dt_tags.py:83)
+
+
+        **Notas:** ValueError si no hay did ni tag.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: did
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: tag
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - tags
+      summary: dt_tags.Tags.post_entities
+      operationId: post_tags_entities
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.post_entities` (darktrace/dt_tags.py:117)
+
+
+        **Notas:** Form-urlencoded (_post_form).
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int`.'
+                tag:
+                  type: string
+                  description: 'Tipo en el SDK: `str`.'
+                duration:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int s`.'
+              required:
+              - did
+              - tag
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    delete:
+      tags:
+      - tags
+      summary: dt_tags.Tags.delete_entities
+      operationId: delete_tags_entities
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.delete_entities` (darktrace/dt_tags.py:141)
+
+
+        **Notas:** Parámetros en query string.
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: did
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: tag
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /tags/{tid}/entities:
+    get:
+      tags:
+      - tags
+      summary: dt_tags.Tags.get_tag_entities
+      operationId: get_tags_tid_entities
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.get_tag_entities` (darktrace/dt_tags.py:161)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: responsedata
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'Tipo en el SDK: `str`.'
+      - name: fulldevicedetails
+        in: query
+        required: false
+        schema:
+          type: boolean
+        description: 'Tipo en el SDK: `bool`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+    post:
+      tags:
+      - tags
+      summary: dt_tags.Tags.post_tag_entities
+      operationId: post_tags_tid_entities
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.post_tag_entities` (darktrace/dt_tags.py:187)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entityType:
+                  type: string
+                  enum:
+                  - device
+                  - credential
+                  description: 'Tipo en el SDK: `str Device|Credential`.'
+                entityValue:
+                  oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+                  description: 'Tipo en el SDK: `str|list[str]`. did convertidos a string'
+                expiryDuration:
+                  type: integer
+                  format: int64
+                  description: 'Tipo en el SDK: `int s`.'
+              required:
+              - entityType
+              - entityValue
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+  /tags/{tid}/entities/{teid}:
+    delete:
+      tags:
+      - tags
+      summary: dt_tags.Tags.delete_tag_entity
+      operationId: delete_tags_tid_entities_teid
+      description: '**Implementado en el SDK por:** `dt_tags.Tags.delete_tag_entity` (darktrace/dt_tags.py:218)
+
+
+        Código: https://github.com/LegendEvent/darktrace-sdk/blob/main/darktrace/dt_tags.py'
+      parameters:
+      - name: tid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      - name: teid
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: 'Tipo en el SDK: `int`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: El SDK devuelve el JSON de la respuesta sin modelar.
+        default:
+          description: Error HTTP (el SDK lanza requests.HTTPError)
+components:
+  securitySchemes:
+    DTAPIToken:
+      type: apiKey
+      in: header
+      name: DTAPI-Token
+    DTAPIDate:
+      type: apiKey
+      in: header
+      name: DTAPI-Date
+    DTAPISignature:
+      type: apiKey
+      in: header
+      name: DTAPI-Signature
+x-sdk-suspected-bugs:
+- AdvancedSearch.search descarta silenciosamente 'size' y cualquier clave distinta de search/fields/offset/timeframe/time
+  (dt_advanced_search.py:32-38, 66-71) -> imposible paginar con size != 50 por defecto.
+- AdvancedSearch.search GET ignora starttime/endtime (solo el POST los mapea) y con 'interval' no envía 'time'; time.user_interval
+  es int 0 por defecto pero string '0' en rangos custom.
+- Base64 estándar (con '/', '+', '=') en el path GET sin url-safe ni url-encoding (dt_utils.py:349-350); '/' en el base64
+  rompería el routing del path; json.dumps con espacios por defecto.
+- 'Firma GET con valores sin codificar mientras requests los url-encodea en el cable (espacios en from/to, saasfilter con
+  ''*'', query de devicesearch con comillas): depende de que el servidor decodifique antes de verificar; en form POST se hace
+  lo contrario (firma codificada).'
+- JSON POST con query params firma 'path?a=1&{json}', combinación no documentada (breaches.add_comment/acknowledge con **params).
+- Subnets.post mete responsedata en el body JSON en lugar de la query.
+- Details.get envía siempre eventtype=connection y DeviceInfo.get siempre datatype/showallgraphdata/fulldevicedetails/intervalhours.
+- DeviceSummary.get expone 13 params no documentados.
+- Antigena.create_manual_action docstring promete int codeid pero devuelve JSON crudo; reason siempre enviado aunque vacío.
+- Tags.get(tag_id=0) y PCAPs.get(pcap_id='') caen al listado por chequeo de truthiness.
+- 'Content-Type: application/json se envía también en GET/DELETE.'
+- README menciona /aianalyst incidents no implementado.
+x-sdk-noop-or-composite-methods:
+- sdk_function: dt_antigena.Antigena.approve_action
+  source: darktrace/dt_antigena.py:71
+  notes: 'Deprecated no-op: NO hace petición, emite DeprecationWarning y devuelve dict ficticio {''success'': True,...}.'
+- sdk_function: dt_breaches.ModelBreaches.acknowledge_with_comment / unacknowledge_with_comment
+  source: darktrace/dt_breaches.py:148,170
+  notes: 2 peticiones (ack/unack + add_comment).
+- sdk_function: dt_devicesearch.DeviceSearch.get_tag/get_type/get_label/get_vendor/get_hostname/get_ip/get_mac
+  source: darktrace/dt_devicesearch.py:116-254
+  notes: Wrappers de /devicesearch con query construida.
+- sdk_function: dt_intelfeed.IntelFeed.get_sources/get_by_source/get_with_details
+  source: darktrace/dt_intelfeed.py:64-74
+  notes: Wrappers de GET /intelfeed.
