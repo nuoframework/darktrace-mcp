@@ -102,6 +102,7 @@ interface EncodedForm {
 }
 
 const RETRY_STATUSES = new Set([429, 502, 503, 504]);
+const DARKTRACE_USER_AGENT = 'darktrace-mcp';
 const TRANSIENT_PRE_RESPONSE_CODES = new Set([
   'ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE', 'ECONNABORTED', 'ENETUNREACH', 'EHOSTUNREACH',
 ]);
@@ -607,6 +608,7 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
             }
             const headers: Record<string, string> = {
               ...signed.headers,
+              'User-Agent': DARKTRACE_USER_AGENT,
               Accept: accept === 'json' ? 'application/json' : 'application/octet-stream, application/vnd.tcpdump.pcap',
               'Accept-Encoding': 'identity',
               ...(signed.bodyBytes === undefined ? {} : { 'Content-Length': String(signed.bodyBytes.byteLength) }),

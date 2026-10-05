@@ -3,7 +3,7 @@ import test from 'node:test';
 import { parseConfig } from '../../src/config/schema.js';
 import { createHttpClient, type TrustedOperation } from '../../src/client/httpClient.js';
 import { DarktraceApiError } from '../../src/client/errors.js';
-import { createSigner } from '../../src/client/signer.js';
+import { createSigner, formatApiDate } from '../../src/client/signer.js';
 import { redactJsonString, redactSecrets, redactString } from '../../src/shape/redact.js';
 import { redactValue } from '../../src/observability/redact.js';
 
@@ -132,6 +132,63 @@ test('requests use the configured HTTPS origin, repeated query keys, and exact J
   assert.ok(fetchedSignatures.every((signature) => /^[a-f0-9]{40}$/.test(signature)));
   assert.deepEqual((response as { json: unknown }).json, { ok: true });
   assert.equal((response as { truncated: boolean }).truncated, false);
+});
+
+test('outgoing connector requests add a fixed User-Agent without changing signed headers or canonical body bytes', async () => {
+  type Connector = NonNullable<Parameters<typeof createHttpClient>[1]['connector']>;
+  type OutgoingRequest = Parameters<Connector['request']>[0];
+  const cfg = makeConfig();
+  const fixedNow = Date.parse('2026-10-05T11:00:00.000Z');
+  const signer = createSigner(cfg.auth.publicToken, cfg.auth.privateToken, {
+    encodeQueryInSignature: cfg.auth.querySignatureEncoding === 'encoded',
+  });
+  const bodyBytes = new TextEncoder().encode('{"comment":"signed bytes"}');
+  const signed = signer.sign({
+    method: 'POST',
+    path: '/comments',
+    body: { kind: 'json', bytes: bodyBytes },
+    date: formatApiDate(new Date(fixedNow), cfg.auth.dateFormat),
+  });
+  let outgoing: OutgoingRequest | undefined;
+  let connectorClosed = false;
+  const connector: Connector = {
+    async initialize() {},
+    async request(request) {
+      outgoing = request;
+      return { status: 200, headers: { get() { return null; } }, body: null };
+    },
+    close() { connectorClosed = true; },
+  };
+  const client = createHttpClient(cfg, {
+    testOnly: true,
+    operations,
+    signer,
+    connector,
+    now: () => fixedNow,
+  });
+
+  try {
+    const response = await client.request({
+      operationId: 'post_comment',
+      body: { comment: 'signed bytes' },
+      contentType: 'application/json',
+    });
+    assert.equal(response.status, 200);
+    assert.ok(outgoing);
+    assert.equal(outgoing.headers['User-Agent'], 'darktrace-mcp');
+    const { 'User-Agent': _userAgent, ...headersWithoutUserAgent } = outgoing.headers;
+    assert.deepEqual(headersWithoutUserAgent, {
+      ...signed.headers,
+      Accept: 'application/json',
+      'Accept-Encoding': 'identity',
+      'Content-Length': String(signed.bodyBytes?.byteLength),
+    });
+    assert.equal(outgoing.url.href, new URL(signed.url, cfg.instance.baseUrl).href);
+    assert.deepEqual(outgoing.body, signed.bodyBytes);
+  } finally {
+    client.close();
+  }
+  assert.equal(connectorClosed, true);
 });
 
 test('JSON request values are serialized once before signing and transport', async () => {
