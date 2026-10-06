@@ -23,38 +23,38 @@ Use the Darktrace Threat Visualizer API from Claude, Codex, Cursor, VS Code and 
 
 ## Quick start
 
-You need: the HTTPS address of your Darktrace appliance, a **public** and a **private** API token, and access to this private GitHub repository.
+You need: the HTTPS address of your Darktrace appliance, a **public** and a **private** API token, and Node.js 22 or later.
 
-### 1. Installer and setup wizard (macOS, Linux)
+### 1. Setup wizard (macOS, Linux, Windows)
 
 ```sh
-gh auth login
-gh api -H 'Accept: application/vnd.github.raw' \
-  repos/nuoframework/darktrace-mcp/contents/scripts/install.sh > install.sh
-less install.sh
-bash install.sh
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 ```
 
-The installer clones the repository, builds it and starts `darktrace-mcp setup`. The wizard asks for the URL and tokens (typed hidden), saves the tokens to files only you can read, and configures the clients it finds. Windows: use `scripts/install.ps1` ([details](docs/getting-started.md#windows)).
+The wizard asks for the URL and tokens (typed hidden), saves the tokens to files only you can read, copies the package to `~/.local/share/darktrace-mcp/1.1.0/` and configures the clients it finds with absolute paths, so clients never start the server through `npx`. Windows cannot protect token files: prefer the `.mcpb` extension, Docker or WSL ([details](docs/getting-started.md#windows)).
 
 ### 2. Claude Desktop extension (.mcpb)
 
-```sh
-gh repo clone nuoframework/darktrace-mcp && cd darktrace-mcp
-npm ci --ignore-scripts && npm run build
-npm run pack:mcpb
-```
+Download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and double-click it. Claude Desktop asks for the URL and tokens and keeps the tokens in your OS keychain.
 
-Double-click the `.mcpb` file. Claude Desktop asks for the URL and tokens and keeps the tokens in your OS keychain.
-
-### 3. Docker
+### 3. Docker (ghcr.io)
 
 ```sh
-docker load --input darktrace-mcp-<version>-linux-arm64.tar.gz
-docker image inspect --format '{{.Id}}' darktrace-mcp:<version>-arm64
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
-Get the archive from a private release or build it yourself, then add the hardened client snippet. See the [Docker guide](docs/docker.md).
+The image is built for linux/amd64 and linux/arm64. Pin the digest, never the tag. See the [Docker guide](docs/docker.md).
+
+### Fallback: build from source
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
+less install.sh && sh install.sh
+```
+
+`install.sh` clones this repository, builds it and starts the same wizard. Windows: `scripts/install.ps1`.
 
 ### Check it works
 
@@ -63,7 +63,7 @@ darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-`--check-config` checks your settings offline. `test` makes one real call (`GET /status`) to your appliance.
+`--check-config` checks your settings offline. `test` makes one real call (`GET /status`) to your appliance. Without a global install, run these as `npx -y @nuoframework/darktrace-mcp@1.1.0 test`.
 
 ## Supported clients
 
@@ -79,7 +79,8 @@ darktrace-mcp test
 | Windsurf | `setup` | [Windsurf](docs/clients.md#windsurf) |
 | OpenCode | `setup` | [OpenCode](docs/clients.md#opencode) |
 | Gemini CLI | `setup` | [Gemini CLI](docs/clients.md#gemini-cli) |
-| Any client, via Docker | manual | [Docker](docs/clients.md#docker) |
+| Any client, via Docker | `setup --runtime docker` | [Docker](docs/clients.md#docker) |
+| One-line per client | `claude mcp add`, `codex mcp add`, `code --add-mcp`, `gemini mcp add`, Cursor link | [One-liners](docs/clients.md#one-line-install-per-client) |
 
 ## What it can do
 
@@ -145,7 +146,7 @@ More: [security overview](docs/security.md) · [security policy](SECURITY.md).
 
 ## Project status
 
-Private repository. Nothing is published to npm or a public registry. Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+Public repository. Published as [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance), as `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry, and described for the MCP Registry as `io.github.nuoframework/darktrace-mcp` ([releases](docs/releases.md)). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Trademarks, logo and contact
 

@@ -1,6 +1,6 @@
 # Contributing
 
-Work in the authorized private repository. Changes must preserve the fixed operation inventory, strict HTTPS/stdio boundaries and default previews; expanding a blocked operation requires a separate reviewed design and evidence. Never commit secrets, appliance responses or lab tokens. Do not publish packages or images.
+Work in the public repository. Changes must preserve the fixed operation inventory, strict HTTPS/stdio boundaries and default previews; expanding a blocked operation requires a separate reviewed design and evidence. Never commit secrets, appliance responses or lab tokens. Never publish packages or images by hand: publication happens only from `.github/workflows/release.yml` on a reviewed tag (see `docs/releases.md`).
 
 ```sh
 npm ci --ignore-scripts

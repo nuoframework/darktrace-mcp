@@ -1,6 +1,6 @@
 # Easy installation: commands, client formats and sources
 
-Change notes for the documentation owner. This file describes the installer added in
+Change notes for the documentation owner. Superseded in part by [CHANGES-dist.md](CHANGES-dist.md): the package is now published as `@nuoframework/darktrace-mcp`, `setup` bootstraps through `npx` and installs a fixed copy, and `install.sh` clones into `~/.local/share/darktrace-mcp/source` (existing clones one level up are still detected). This file describes the installer added in
 `src/cli/`, the Claude Desktop extension bundle, the install scripts and the updated examples.
 README/docs pages were intentionally not edited.
 

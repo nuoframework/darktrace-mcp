@@ -23,38 +23,38 @@ Usa la API de Darktrace Threat Visualizer desde Claude, Codex, Cursor, VS Code y
 
 ## Inicio rápido
 
-Necesitas: la dirección HTTPS de tu appliance Darktrace, un token de API **público** y uno **privado**, y acceso a este repositorio privado de GitHub.
+Necesitas: la dirección HTTPS de tu appliance Darktrace, un token de API **público** y uno **privado**, y Node.js 22 o posterior.
 
-### 1. Instalador y asistente (macOS, Linux)
+### 1. Asistente de configuración (macOS, Linux, Windows)
 
 ```sh
-gh auth login
-gh api -H 'Accept: application/vnd.github.raw' \
-  repos/nuoframework/darktrace-mcp/contents/scripts/install.sh > install.sh
-less install.sh
-bash install.sh
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 ```
 
-El instalador clona el repositorio, lo compila y lanza `darktrace-mcp setup`. El asistente pide la URL y los tokens (sin mostrarlos), guarda los tokens en archivos que solo tú puedes leer y configura los clientes que encuentra. Windows: usa `scripts/install.ps1` ([detalles](docs/es/getting-started.md#windows)).
+El asistente pide la URL y los tokens (sin mostrarlos), guarda los tokens en archivos que solo tú puedes leer, copia el paquete a `~/.local/share/darktrace-mcp/1.1.0/` y configura los clientes que encuentra con rutas absolutas, de modo que los clientes nunca arrancan el servidor a través de `npx`. Windows no puede proteger los archivos de token: prefiere la extensión `.mcpb`, Docker o WSL ([detalles](docs/es/getting-started.md#windows)).
 
 ### 2. Extensión de Claude Desktop (.mcpb)
 
-```sh
-gh repo clone nuoframework/darktrace-mcp && cd darktrace-mcp
-npm ci --ignore-scripts && npm run build
-npm run pack:mcpb
-```
+Descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y haz doble clic. Claude Desktop pide la URL y los tokens y guarda los tokens en el llavero del sistema.
 
-Haz doble clic en el archivo `.mcpb`. Claude Desktop pide la URL y los tokens y guarda los tokens en el llavero del sistema.
-
-### 3. Docker
+### 3. Docker (ghcr.io)
 
 ```sh
-docker load --input darktrace-mcp-<version>-linux-arm64.tar.gz
-docker image inspect --format '{{.Id}}' darktrace-mcp:<version>-arm64
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
-Descarga el archivo de una release privada o constrúyelo tú, y añade la configuración endurecida del cliente. Consulta la [guía de Docker](docs/docker.md) (inglés).
+La imagen se publica para linux/amd64 y linux/arm64. Fija el digest, nunca la etiqueta. Consulta la [guía de Docker](docs/docker.md) (inglés).
+
+### Alternativa: compilar desde el código fuente
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
+less install.sh && sh install.sh
+```
+
+`install.sh` clona este repositorio, lo compila y lanza el mismo asistente. Windows: `scripts/install.ps1`.
 
 ### Comprobar que funciona
 
@@ -63,7 +63,7 @@ darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-`--check-config` revisa la configuración sin conexión. `test` hace una llamada real (`GET /status`) a tu appliance.
+`--check-config` revisa la configuración sin conexión. `test` hace una llamada real (`GET /status`) a tu appliance. Sin instalación global, ejecútalos como `npx -y @nuoframework/darktrace-mcp@1.1.0 test`.
 
 ## Clientes compatibles
 
@@ -79,7 +79,8 @@ darktrace-mcp test
 | Windsurf | `setup` | [Windsurf](docs/es/clients.md#windsurf) |
 | OpenCode | `setup` | [OpenCode](docs/es/clients.md#opencode) |
 | Gemini CLI | `setup` | [Gemini CLI](docs/es/clients.md#gemini-cli) |
-| Cualquier cliente, con Docker | manual | [Docker](docs/es/clients.md#docker) |
+| Cualquier cliente, con Docker | `setup --runtime docker` | [Docker](docs/es/clients.md#docker) |
+| Una línea por cliente | `claude mcp add`, `codex mcp add`, `code --add-mcp`, `gemini mcp add`, enlace de Cursor | [Una línea por cliente](docs/es/clients.md#una-línea-por-cliente) |
 
 ## Qué puede hacer
 
@@ -145,7 +146,7 @@ Más: [resumen de seguridad](docs/security.md) (inglés) · [política de seguri
 
 ## Estado del proyecto
 
-Repositorio privado. No se publica nada en npm ni en registros públicos. Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
+Repositorio público. Publicado como [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia), como `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry y descrito para el MCP Registry como `io.github.nuoframework/darktrace-mcp` ([releases](docs/releases.md), inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Marcas, logotipo y contacto
 

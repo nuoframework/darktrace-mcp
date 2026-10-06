@@ -14,54 +14,57 @@ Necesitas:
 |---|---|
 | Dirección del appliance Darktrace | Por ejemplo `https://darktrace.example.internal`. Solo HTTPS |
 | Token de API público y token de API privado | Darktrace Threat Visualizer: **System Config → Settings → API Token**. Pídeselo a tu administrador de Darktrace |
-| GitHub CLI (`gh`) con acceso a `nuoframework/darktrace-mcp` | `gh auth login` |
-| Node.js 22 o posterior, npm, git | [nodejs.org](https://nodejs.org) o tu gestor de paquetes |
+| Node.js 22 o posterior (npm y `npx` vienen incluidos) | [nodejs.org](https://nodejs.org) o tu gestor de paquetes |
 | Aprobación para enviar datos de Darktrace a tu proveedor del modelo | Tu equipo de seguridad o cumplimiento |
 
 Da al token solo los permisos de Darktrace que quieras que tenga el modelo. El servidor nunca puede hacer más de lo que el token permite.
 
-## Paso 1. Instalar
+## Paso 1. Instalar y lanzar el asistente
 
-### macOS y Linux
-
-Descarga el instalador, léelo y ejecútalo:
+### macOS, Linux y Windows
 
 ```sh
-gh auth login
-gh api -H 'Accept: application/vnd.github.raw' \
-  repos/nuoframework/darktrace-mcp/contents/scripts/install.sh > install.sh
-less install.sh
-bash install.sh
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 ```
 
-El instalador:
+`npx` descarga la versión publicada exacta `1.1.0` (npm comprueba su integridad) y lanza el asistente (paso 2). Como la caché de `npx` es temporal, el asistente copia primero el paquete y sus tres dependencias fijadas a un directorio estable y registra esa ruta absoluta en tus clientes:
 
-1. Clona el repositorio privado con `gh`.
-2. Ejecuta `npm ci --ignore-scripts` y `npm run build`.
-3. Lanza el asistente de configuración (paso 2).
+| Sistema | Copia fija |
+|---|---|
+| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.0/` (o `$XDG_DATA_HOME/darktrace-mcp/1.1.0/`) |
+| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.0\` |
+
+Los clientes arrancan el servidor como `/ruta/absoluta/a/node …/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`; nunca ejecutan `npx` ni vuelven a necesitar el registro. Repetir el comando reutiliza la copia.
+
+Si quieres un comando `darktrace-mcp` en tu `PATH` (opcional), instálalo globalmente con la misma versión fijada:
+
+```sh
+npm install -g @nuoframework/darktrace-mcp@1.1.0
+```
+
+Si no, donde esta guía diga `darktrace-mcp …`, ejecuta `npx -y @nuoframework/darktrace-mcp@1.1.0 …`.
 
 ### Windows
 
-```powershell
-gh auth login
-gh api -H "Accept: application/vnd.github.raw" repos/nuoframework/darktrace-mcp/contents/scripts/install.ps1 > install.ps1
-Get-Content .\install.ps1
-powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
+El mismo comando `npx` funciona en PowerShell. Windows nativo no puede garantizar archivos de token legibles solo por su dueño, así que el servidor los rechaza; el asistente pide consentimiento explícito antes de escribir los valores de los tokens en la configuración de los clientes. Prefiere la [extensión de Claude Desktop](clients.md#claude-desktop), [Docker](../docker.md) (inglés) o WSL con el comando de Linux. Consulta [solución de problemas](troubleshooting.md#permisos-de-los-archivos-de-token).
 
-Si el servidor rechaza tus archivos de token en Windows nativo, ejecútalo dentro de WSL. Consulta [solución de problemas](troubleshooting.md#permisos-de-los-archivos-de-token).
-
-### Instalación manual
+### Alternativa: compilar desde el código fuente
 
 ```sh
-gh repo clone nuoframework/darktrace-mcp
+curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
+less install.sh
+sh install.sh
+```
+
+El script clona este repositorio en `~/.local/share/darktrace-mcp/source`, ejecuta `npm ci --ignore-scripts` y `npm run build`, y lanza el asistente. Windows: `scripts/install.ps1`. Equivalente manual:
+
+```sh
+git clone https://github.com/nuoframework/darktrace-mcp.git
 cd darktrace-mcp
 npm ci --ignore-scripts
 npm run build
 node dist/src/index.js setup
 ```
-
-Si `darktrace-mcp` no está en tu `PATH`, usa `node /ruta/absoluta/a/darktrace-mcp/dist/src/index.js` donde esta guía diga `darktrace-mcp`.
 
 ## Paso 2. Ejecutar el asistente
 
@@ -133,10 +136,11 @@ Quita la entrada `darktrace` de los clientes que configuró el asistente. Borra 
 
 | Método | Guía |
 |---|---|
-| Extensión de Claude Desktop (`.mcpb`) | [Clientes: Claude Desktop](clients.md#claude-desktop) |
-| Docker | [Guía de Docker](../docker.md) (inglés) y [Clientes: Docker](clients.md#docker) |
+| Extensión de Claude Desktop (`.mcpb`, desde la release de GitHub) | [Clientes: Claude Desktop](clients.md#claude-desktop) |
+| Imagen Docker `ghcr.io/nuoframework/darktrace-mcp` | [Guía de Docker](../docker.md) (inglés) y [Clientes: Docker](clients.md#docker) |
+| Una línea por cliente | [Clientes: una línea por cliente](clients.md#una-línea-por-cliente) |
 | Configuración manual de un cliente | [Clientes](clients.md) |
-| Archivo de release (`.tgz`) | [Releases](../releases.md) (inglés) |
+| Archivos de la release (`.tgz`, `.mcpb`, `SHA256SUMS`) | [Releases](../releases.md) (inglés) |
 
 ## Instalación nativa y OpenSSL
 
