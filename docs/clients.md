@@ -281,13 +281,13 @@ Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool cal
 
 ## Docker
 
-Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Pull the published image ([Docker guide](docker.md)), then let the wizard write the hardened entry pinned to its digest:
+Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). With Docker installed and running, run the wizard and choose `2) docker`:
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
+
+The wizard checks that the Docker daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (the package version), offers to pull it when it is missing, and writes the hardened entry with the local image ID and `--pull=never`. It prints the image ID and the registry digest and keeps both in `~/.config/darktrace-mcp/setup.json`; compare the digest with the release notes. Without prompts: `setup --yes --runtime docker --pull --url https://… --tokens-from-stdin`. `--image` also accepts another tag, a `name@sha256:…` digest or a local `sha256:…` image ID. `darktrace-mcp config <client>` reuses the saved image ID, and `darktrace-mcp test` first runs `--check-config` in the container with the same mounts and user (no network), then checks the appliance from the host. Details: [Docker guide](docker.md#install).
 
 **Manual.** Get the image ID (or use the `name@sha256:…` digest above):
 
@@ -322,6 +322,14 @@ Replace the last argument with that `sha256:…` ID and `command` with the full 
 ```
 
 The token files must be owned by UID 1000 (or change `--user` to match their owner) and have mode `0600`. Keep `-i`, never add `-t`. Do not publish ports or use `--network host`.
+
+## Uninstall
+
+```sh
+darktrace-mcp uninstall
+```
+
+It shows a plan and asks once (`--yes` skips the question, `--dry-run` only prints the plan). It removes the `darktrace` entry from every client (config files are backed up first), deletes the stored tokens, `setup.json` and `~/.config/darktrace-mcp`, and deletes the fixed copies in `~/.local/share/darktrace-mcp/<version>/` (`--keep-copies` keeps them). With the Docker runtime, `--docker` also removes the one image ID that setup recorded, never other images. When the package is installed globally it prints the `npm uninstall -g @nuoframework/darktrace-mcp` command for you to run. Symbolic links and unknown files are never touched. `remove --all` is the same command. Without a global install, run it as `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall`.
 
 ## Several clients, one setup
 

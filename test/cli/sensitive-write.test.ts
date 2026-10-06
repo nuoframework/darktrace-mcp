@@ -82,6 +82,7 @@ test('--yes --acknowledge-sensitive-write emits the acknowledgement everywhere a
 test('docker runtime passes the acknowledgement as a container environment variable', async () => {
   const box = sandbox('linux', ['docker']);
   const image = 'sha256:' + 'c'.repeat(64);
+  box.docker.local.push({ id: image, tags: [], repoDigests: [] });
   const { out, io: setupIo } = io(box, stdinFrom(`${PUBLIC}\n${PRIVATE}\n`));
   assert.equal(await runSetup({ ...base, yes: true, url: 'https://dt.example.com', runtime: 'docker', image, profiles: 'all', acknowledgeSensitiveWrite: true,
     clients: ['cursor'], tokensFromStdin: true }, setupIo), 0, out.text());

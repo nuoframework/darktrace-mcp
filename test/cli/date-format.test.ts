@@ -81,6 +81,7 @@ test('setup: compact 400 -> spaced accepted; spaced lands in every emitted entry
   const docker = sandbox('linux', ['docker'], COMPACT_400);
   const d = io(docker);
   const image = 'sha256:' + 'b'.repeat(64);
+  docker.docker.local.push({ id: image, tags: [], repoDigests: [] });
   assert.equal(await runSetup(args({ runtime: 'docker', image }), d.io), 0, d.out.text());
   const dargs: string[] = gemini(docker.home).args;
   assert.equal(dargs[dargs.indexOf('DARKTRACE_DATE_FORMAT=spaced') - 1], '-e');

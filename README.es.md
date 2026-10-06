@@ -54,6 +54,14 @@ npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
 
 Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.0`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).
 
+### Desinstalar
+
+```sh
+npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall
+```
+
+Muestra un plan y pregunta una vez; después quita la entrada `darktrace` de todos los clientes (con copias de seguridad), los tokens y ajustes guardados y las copias fijas. `--dry-run` solo muestra el plan; `--docker` borra también el ID de imagen que fijó setup. [Detalles](docs/es/clients.md#desinstalar).
+
 ## Mira cómo funciona
 
 Tres grabaciones con un **mock HTTPS sintético**, tokens de prueba y ningún dato de producción. Demuestran el flujo, no la compatibilidad con un appliance real. [Fuentes, transcripciones y guía para volver a grabar](scripts/demo/README.md).

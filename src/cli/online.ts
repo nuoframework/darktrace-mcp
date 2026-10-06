@@ -6,6 +6,9 @@ import { createHttpClient } from '../client/httpClient.js';
 import { DarktraceApiError, type ApiErrorKind } from '../client/errors.js';
 import { readSavedSetup, tokenPaths } from './state.js';
 import type { CliContext } from './clients.js';
+import { buildServerEntry } from './entry.js';
+import { findOnPath } from './fsutil.js';
+import { dockerDetail, dockerInstallHelp } from './docker.js';
 
 const STATUS_OPERATION = Object.freeze({ operationId: 'get_status', method: 'GET', pathTemplate: '/status' } as const);
 
@@ -135,11 +138,52 @@ export function describeProbeFailure(o: Exclude<ProbeOutcome, { ok: true }>): st
 }
 const failLine = (o: Exclude<ProbeOutcome, { ok: true }>): string => (o.kind === 'unknown' ? 'FAIL: the request could not be completed.' : `FAIL ${describeProbeFailure(o)}`);
 
+export interface OnlineTestOptions { readonly uid?: number; readonly gid?: number }
+type OnlineContext = Pick<CliContext, 'home' | 'env' | 'probeStatus'> & Partial<Pick<CliContext, 'run' | 'runDocker' | 'platform'>>;
+
+/**
+ * Docker runtime saved by setup: run the image's offline `--check-config` with exactly the client entry's mounts, user and
+ * hardening flags, but `--network=none`. This proves the container can read the token files. Returns an exit code on
+ * failure, undefined when it passed or does not apply. The signed GET /status that follows runs from this host.
+ */
+function containerCheck(ctx: OnlineContext, out: Writable, options: OnlineTestOptions): number | undefined {
+  if (['DARKTRACE_URL', 'DARKTRACE_BASE_URL', 'DARKTRACE_CONFIG_FILE'].some((k) => ctx.env[k] !== undefined)) return undefined;
+  const saved = readSavedSetup(ctx);
+  if (saved?.runtime !== 'docker' || saved.image === undefined || saved.tokenMode !== 'file' || ctx.run === undefined) return undefined;
+  const platform = ctx.platform ?? process.platform;
+  const dockerPath = findOnPath('docker', ctx.env, platform);
+  if (dockerPath === undefined) { out.write(`FAIL ${dockerInstallHelp(platform).replace(/\. Nothing was written$/, '')}.\n`); return 1; }
+  if (options.uid === undefined || options.gid === undefined || options.uid === 0) {
+    out.write('FAIL the docker runtime needs a regular (non-root) POSIX user.\n');
+    return 1;
+  }
+  const entry = buildServerEntry({
+    url: saved.url, profiles: saved.profiles, runtime: 'docker', tokenMode: 'file', ...tokenPaths(ctx), nodePath: '', entryPath: '',
+    dockerPath, image: saved.image, uid: options.uid, gid: options.gid, hostPlatform: platform,
+    acknowledgeSensitiveWrite: saved.acknowledgeSensitiveWrite === true, ...(saved.dateFormat ? { dateFormat: saved.dateFormat } : {}),
+  });
+  const args = entry.args.map((a) => (a === '--network=bridge' ? '--network=none' : a));
+  const run = ctx.runDocker ?? ((command: string, argv: readonly string[]) => (ctx.run as CliContext['run'])(command, argv));
+  const result = run(entry.command, [...args, '--check-config']);
+  let ok: boolean;
+  try { ok = result.status === 0 && (JSON.parse(result.stdout.trim()) as { ok?: unknown }).ok === true; } catch { ok = false; }
+  if (!ok) {
+    out.write(`FAIL container --check-config with image ${saved.image}${dockerDetail(result)}. ` +
+      'Check that the image is present (`docker image inspect`), that the token files are owner-only (0600) and rerun `darktrace-mcp setup`.\n');
+    return 1;
+  }
+  out.write(`OK container --check-config (image ${saved.image}, token mounts readable, no network).\n` +
+    'The signed GET /status below runs from this host with the same URL and token files.\n');
+  return undefined;
+}
+
 /**
  * One signed GET /status through the production client. When the appliance answers HTTP 400 and no date format was
  * chosen explicitly, the other format is tried once and recommended. Prints OK or an actionable error; never prints secrets.
  */
-export async function runOnlineTest(ctx: Pick<CliContext, 'home' | 'env' | 'probeStatus'>, out: Writable): Promise<number> {
+export async function runOnlineTest(ctx: OnlineContext, out: Writable, options: OnlineTestOptions = {}): Promise<number> {
+  const container = containerCheck(ctx, out, options);
+  if (container !== undefined) return container;
   const env = onlineTestEnv(ctx);
   const prober = ctx.probeStatus ?? probeStatus;
   const first = await prober(env);

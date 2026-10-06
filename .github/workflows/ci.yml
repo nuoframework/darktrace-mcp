@@ -70,7 +70,7 @@ jobs:
           # Totals for the full-API release; recompute after merging branches that add tests.
           node --input-type=commonjs <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');
-          for(const [name,count] of [['functional',230],['security',1150]]){
+          for(const [name,count] of [['functional',245],['security',1150]]){
             const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
             const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
             for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])
@@ -303,14 +303,14 @@ jobs:
           const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
-          a.equal(r.sourceTreeSha256,'b4b5d68c4fe26b4c4db52b5ed1b8863d6228fa182970779e2e07bea6fe8a7eb3');
+          a.equal(r.sourceTreeSha256,'98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad');
           a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,1150);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
-          a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,91);
-          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'6fa8d03ebf3e95003ca63213c074605248bfb691c8d3e76898f4e6fb75823972');
+          a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,95);
+          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'3eb5f9740d4c995849d736160bbdfed98c90433bdfda42f47cc6877e511e38ad');
           a.equal(r.fixtureHashes['mcp-tool-contracts-full-api.json'],'86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6');
           a.equal(r.fixtureHashes['mcp-tool-contracts-first-stable.json'],'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
-          f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:91,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-full-api.json'],historicalFirstStableFixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
+          f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:95,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-full-api.json'],historicalFirstStableFixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
           NODE
       - name: Archive signed inputs and complete native gate receipts
         if: always()

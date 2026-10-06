@@ -14,6 +14,7 @@ import { PromptAbortedError } from './prompt.js';
 import { printResults, runSetup } from './setup.js';
 import { purgeSetup, readSavedSetup, tokenPaths } from './state.js';
 import { isDateFormat, runOnlineTest } from './online.js';
+import { runUninstall } from './uninstall.js';
 import type { DateFormat } from '../config/schema.js';
 
 export class UsageError extends Error {
@@ -23,12 +24,13 @@ export class UsageError extends Error {
 interface Parsed { readonly command: string; readonly positional: string[]; readonly flags: Map<string, string[]> }
 
 const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image', '--date-format']);
-const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online', '--offline']);
+const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online', '--offline', '--pull', '--all', '--keep-copies', '--docker']);
 const ALLOWED: Readonly<Record<string, readonly string[]>> = {
-  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write',
+  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--pull', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write',
     '--date-format', '--offline'],
   config: ['--url', '--profiles', '--runtime', '--image', '--insiders', '--acknowledge-sensitive-write', '--date-format'],
-  remove: ['--client', '--dry-run', '--yes', '-y', '--purge'],
+  remove: ['--client', '--dry-run', '--yes', '-y', '--purge', '--all', '--keep-copies', '--docker'],
+  uninstall: ['--dry-run', '--yes', '-y', '--keep-copies', '--docker'],
   test: [],
   doctor: ['--online'],
 };
@@ -108,6 +110,14 @@ export function defaultCliIo(): CliIo {
         const r = spawnSync(command, [...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 60_000, shell: false });
         return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
       },
+      runDocker: (command, args, options) => {
+        // docker pull streams its progress to the terminal and may take minutes on a slow link.
+        const stream = options?.stream === true;
+        const r = spawnSync(command, [...args], {
+          encoding: 'utf8', stdio: stream ? ['ignore', 'inherit', 'inherit'] : ['ignore', 'pipe', 'pipe'], timeout: stream ? 30 * 60_000 : 60_000, shell: false,
+        });
+        return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
+      },
     },
     stdin: process.stdin, stdout: process.stdout, stderr: process.stderr, execPath: process.execPath,
     entryPath: defaultEntryPath(import.meta.url),
@@ -146,7 +156,7 @@ function configCommand(p: Parsed, io: CliIo): number {
     entryPath: fixedEntry ?? io.entryPath,
     ...(runtime === 'docker' ? {
       dockerPath: findOnPath('docker', io.ctx.env, io.ctx.platform) ?? '/absolute/path/to/docker',
-      image: imageFlag !== undefined ? validateImage(imageFlag) : saved?.image ?? 'REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT',
+      image: imageFlag !== undefined ? validateImage(imageFlag) : saved?.image ?? 'REPLACE_WITH_IMAGE_ID_FROM_DARKTRACE_MCP_SETUP',
       uid: io.uid && io.uid > 0 ? io.uid : 1000, gid: io.gid && io.gid > 0 ? io.gid : 1000, hostPlatform: io.ctx.platform,
     } : {}),
   };
@@ -156,6 +166,14 @@ function configCommand(p: Parsed, io: CliIo): number {
   if (saved === undefined && one(p, '--url') === undefined) out.write('# No saved setup: replace the placeholder URL, and create the token files (see `darktrace-mcp setup`).\n');
   if (transient && fixedEntry === undefined) out.write('# Running from the npx cache: the path below is temporary. Run `darktrace-mcp setup` once to install a fixed copy.\n');
   if (needsSensitiveWriteAck(profiles)) out.write(SENSITIVE_WRITE_NOTICE.split('\n').map((line) => `# ${line}\n`).join('') + '# Acknowledged: the entry sets DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true.\n');
+  if (runtime === 'docker') {
+    if (imageFlag === undefined && saved?.image !== undefined) {
+      out.write(`# Docker image ID saved by setup: ${saved.image}${saved.imageReference ? ` (from ${saved.imageReference})` : ''}\n`);
+      if (saved.imageDigest) out.write(`# Registry digest: ${saved.imageDigest} (compare with the GitHub Release notes)\n`);
+    } else if (imageFlag === undefined) {
+      out.write('# No saved image: run `darktrace-mcp setup --runtime docker` to pull the image and record its ID, or pass --image sha256:<ID>.\n');
+    }
+  }
   if (settings.tokenMode === 'inline') out.write('# Windows: replace <public token>/<private token>; anyone able to read this config can use the tokens.\n');
   out.write(clientSnippet(client, entry, io.ctx));
   if (client === 'vscode' && runtime === 'node') {
@@ -197,18 +215,27 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
         if (p.positional.length > 0) throw new UsageError('setup takes no positional arguments');
         return await runSetup({
           dryRun: bool(p, '--dry-run'), yes: bool(p, '--yes', '-y'), clients: clientsFlag(p), url: one(p, '--url'),
-          profiles: one(p, '--profiles'), runtime: runtimeFlag(p), image: one(p, '--image'),
+          profiles: one(p, '--profiles'), runtime: runtimeFlag(p), image: one(p, '--image'), pull: bool(p, '--pull'),
           tokensFromStdin: bool(p, '--tokens-from-stdin'), inlineTokens: bool(p, '--inline-tokens-windows'),
           acknowledgeSensitiveWrite: bool(p, '--acknowledge-sensitive-write'),
           dateFormat: dateFormatFlag(p), offline: bool(p, '--offline'),
         }, io);
       }
       case 'config': return configCommand(p, io);
-      case 'remove': return removeCommand(p, io);
+      case 'remove':
+        if (!bool(p, '--all')) {
+          if (bool(p, '--keep-copies', '--docker')) throw new UsageError('--keep-copies and --docker belong to `remove --all` (or `uninstall`)');
+          return removeCommand(p, io);
+        }
+        if (p.flags.has('--client') || bool(p, '--purge')) throw new UsageError('remove --all already covers every client and the stored tokens');
+      // falls through: `remove --all` is `uninstall`
+      case 'uninstall':
+        if (p.positional.length > 0) throw new UsageError(`${p.command} takes no positional arguments`);
+        return await runUninstall({ dryRun: bool(p, '--dry-run'), yes: bool(p, '--yes', '-y'), keepCopies: bool(p, '--keep-copies'), docker: bool(p, '--docker') }, io);
       case 'test':
       case 'doctor':
         if (p.positional.length > 0) throw new UsageError(`${p.command} takes no positional arguments`);
-        return await runOnlineTest(io.ctx, io.stdout);
+        return await runOnlineTest(io.ctx, io.stdout, { uid: io.uid, gid: io.gid });
       default: throw new UsageError('unknown command');
     }
   } catch (error) {

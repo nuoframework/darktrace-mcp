@@ -14,7 +14,8 @@ stdio server path, `--check-config` and offline `doctor` are unchanged.
 | `darktrace-mcp setup` | Interactive wizard (URL, runtime, tokens, profile preset, clients). |
 | `darktrace-mcp config <client>` | Print a ready-to-paste snippet for one client (no secrets). VS Code and Cursor also get one-click links. |
 | `darktrace-mcp remove [--client <name>]... [--dry-run] [--purge]` | Remove the `darktrace` entry from client configs (with backups). `--purge` also deletes the stored token files and `setup.json`. |
-| `darktrace-mcp test` / `darktrace-mcp doctor --online` | Load the configuration and send one signed `GET /status` through the production client. |
+| `darktrace-mcp uninstall [--dry-run] [--yes] [--keep-copies] [--docker]` (alias `remove --all`) | Show a plan, ask once, then remove every client entry (with backups), the stored tokens, `setup.json` and the installer directory, and the fixed copies; `--docker` removes the image ID recorded by setup. Prints `npm uninstall -g` when the package is installed globally. |
+| `darktrace-mcp test` / `darktrace-mcp doctor --online` | Load the configuration and send one signed `GET /status` through the production client. With the docker runtime saved, first run `--check-config` in a container. |
 
 Clients: `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, `windsurf`, `opencode`, `gemini`
 (`--client all` selects every client).
@@ -29,7 +30,8 @@ Clients: `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, `windsurf
 | `--url <https-origin>` | Appliance origin (validated with the server's own origin rules). |
 | `--profiles <p>` | Preset `read` (default), `read-write`, `all`, or a comma list of `read`, `write`, `critical`, `sensitive`, `all`. |
 | `--runtime node\|docker` | `node` = this checkout (default); `docker` = reviewed image. |
-| `--image <id>` | Docker image ID (`sha256:<64 hex>`) or `name@sha256:<digest>`; mutable tags are refused. |
+| `--image <ref>` | Docker image: tag reference (default `ghcr.io/nuoframework/darktrace-mcp:<package version>`), `name@sha256:<digest>` or local image ID `sha256:<64 hex>`. Always resolved to the local image ID, which is what client entries start. |
+| `--pull` | Docker: consent to `docker pull` the image when it is missing (needed with `--yes`). |
 | `--tokens-from-stdin` | Read two lines from stdin: public token, then private token. |
 | `--inline-tokens-windows` | Windows only: explicit consent to place token values in client configs. |
 | `--date-format compact\|spaced` | Use this signature date format and skip the appliance probe (see below). |
@@ -89,6 +91,24 @@ Docker runtime: the hardened launch from the README (`run --rm -i --init --pull=
 Instead of requiring the files to be owned by UID 1000, setup passes `--user <uid>:<gid>` of the
 invoking user (root is refused), so the container user owns the `0600` files. On Docker Desktop
 (macOS/Windows) bind-mount ownership translation may differ; this is listed as an open risk.
+
+## Docker runtime (self-service, Unreleased)
+
+`setup` with the docker runtime no longer asks for an image ID. In order, and before anything is written:
+
+1. Resolve the absolute `docker` path (`findOnPath`); if missing, explain what to install (Linux: `sudo apt install docker.io` and the `docker` group; macOS/Windows: Docker Desktop) and stop.
+2. `docker version --format '{{.Server.Os}}/{{.Server.Arch}}'`: the daemon must answer and run Linux containers; otherwise explain how to start it and stop.
+3. Ask for the image (default `ghcr.io/nuoframework/darktrace-mcp:<version>`, read from the running `package.json`). References are validated strictly: tag (explicit `:tag`), `name@sha256:<64 hex>` or `sha256:<64 hex>`; nothing that could be read as an option reaches docker.
+4. `docker image inspect --format '{{.Id}} {{json .RepoDigests}}' <ref>`. When missing: ask `Pull it now? [Y/n]` (non-interactive needs `--pull`), run `docker pull <ref>` with its progress on the terminal, and inspect again. A raw ID cannot be pulled.
+5. Client entries use the image **ID** with `--pull=never` (unchanged hardening, UID:GID, read-only token mounts; `DARKTRACE_TOKEN_FILE_OWNER=root-or-current` only on macOS/Windows). `setup.json` records `image` (ID), `imageReference` and `imageDigest`; the summary prints the ID and digest for comparison with the GitHub Release notes.
+
+`--dry-run` inspects but never pulls. `config <client>` reuses the saved ID and prints the digest as a comment. `test` / `doctor --online` with the saved docker runtime first runs the client entry's `docker run` with `--network=none` and `--check-config` (proves the container can read the token files), then the signed `GET /status` from the host.
+
+The URL prompt never shows or reuses a saved appliance URL: it reads `Darktrace appliance URL (https://...): ` and an empty answer is refused. `--url` and the saved value for `--yes` reruns are unchanged.
+
+## Uninstall (Unreleased)
+
+`uninstall` (alias `remove --all`) reads `setup.json` first, prints a plan and asks once (`--yes` skips, `--dry-run` only prints). Then: (1) `removeClient` for every client with an entry (CLI removal for Claude Code/Codex, JSON/TOML edits with backups); (2) delete `public-token`, `private-token` and `setup.json` when they are regular files, then the installer directory when empty; (3) delete `<data>/darktrace-mcp/<version>/` directories that hold `@nuoframework/darktrace-mcp`, then the parent when empty (`--keep-copies` keeps them); (4) with `--docker`, `docker image rm <recorded image ID>` only; (5) `npm ls -g @nuoframework/darktrace-mcp --depth=0 --json` and, when installed, print `npm uninstall -g @nuoframework/darktrace-mcp` without running it; (6) summary with the backups kept. Symbolic links and unknown entries are reported and never touched.
 
 ## Per-client behaviour
 

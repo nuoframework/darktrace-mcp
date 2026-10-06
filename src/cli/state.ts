@@ -3,6 +3,7 @@ import path from 'node:path';
 import { atomicWrite, ensurePrivateDir, lstatOrUndefined, readTextIfExists } from './fsutil.js';
 import { needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, IMAGE_PATTERN, type Runtime, type TokenMode } from './entry.js';
 import type { CliContext } from './clients.js';
+import { isDigestReference, parseImageReference } from './docker.js';
 import type { DateFormat } from '../config/schema.js';
 
 /** Installer state: non-secret choices remembered between `setup`, `config`, `remove` and `test`. */
@@ -12,7 +13,12 @@ export interface SavedSetup {
   readonly profiles: string;
   readonly runtime: Runtime;
   readonly tokenMode: TokenMode;
+  /** Immutable image the client entries start: a local image ID (or, from older setups, name@sha256:digest). */
   readonly image?: string;
+  /** Reference the operator chose in setup (tag, digest or ID), for display and reruns. */
+  readonly imageReference?: string;
+  /** Registry digest of the image (name@sha256:...), to compare with the GitHub Release notes. */
+  readonly imageDigest?: string;
   /** Recorded only after the operator explicitly accepted the sensitive-read + write risk notice. */
   readonly acknowledgeSensitiveWrite?: true;
   /** Signature date format the appliance accepted during `setup` (or chosen with --date-format). */
@@ -29,6 +35,10 @@ export const tokenPaths = (ctx: Pick<CliContext, 'home' | 'env'>): { publicToken
 });
 const setupFile = (ctx: Pick<CliContext, 'home' | 'env'>): string => path.join(setupDir(ctx), 'setup.json');
 
+function validReference(value: string): boolean {
+  try { parseImageReference(value); return true; } catch { return false; }
+}
+
 export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetup | undefined {
   const file = setupFile(ctx);
   if (lstatOrUndefined(file)?.isFile() !== true) return undefined;
@@ -38,10 +48,13 @@ export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetu
     const runtime: Runtime = raw.runtime === 'docker' ? 'docker' : 'node';
     const tokenMode: TokenMode = raw.tokenMode === 'inline' ? 'inline' : 'file';
     const image = typeof raw.image === 'string' && IMAGE_PATTERN.test(raw.image) ? raw.image : undefined;
+    const imageReference = typeof raw.imageReference === 'string' && validReference(raw.imageReference) ? raw.imageReference : undefined;
+    const imageDigest = typeof raw.imageDigest === 'string' && isDigestReference(raw.imageDigest) ? raw.imageDigest : undefined;
     const profiles = normalizeProfiles(raw.profiles);
     const acknowledged = raw.acknowledgeSensitiveWrite === true && needsSensitiveWriteAck(profiles);
     const dateFormat = raw.dateFormat === 'compact' || raw.dateFormat === 'spaced' ? raw.dateFormat : undefined;
-    return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}),
+    return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}),
+      ...(image && imageReference ? { imageReference } : {}), ...(image && imageDigest ? { imageDigest } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}),
       ...(dateFormat ? { dateFormat } : {}) };
   } catch {
     return undefined;

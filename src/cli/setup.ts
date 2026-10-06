@@ -3,10 +3,13 @@ import {
   CLIENT_IDS, clientLabel, detectClients, installClient, isClientId, type CliContext, type ClientId, type ClientResult,
 } from './clients.js';
 import {
-  PROFILE_PRESETS, SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, validateImage, validateToken,
+  PROFILE_PRESETS, SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, validateToken,
   type InstallSettings, type Runtime, type TokenMode,
 } from './entry.js';
 import { findOnPath } from './fsutil.js';
+import {
+  checkDockerDaemon, defaultImageReference, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ImageReference, type ResolvedImage,
+} from './docker.js';
 import { installFixedCopy, isTransientInstall } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
@@ -20,7 +23,10 @@ export interface SetupArgs {
   readonly url?: string;
   readonly profiles?: string;
   readonly runtime?: Runtime;
+  /** Docker image: tag reference, digest reference or local image ID. Defaults to ghcr.io/nuoframework/darktrace-mcp:<package version>. */
   readonly image?: string;
+  /** Consent to `docker pull` the image when it is not present locally (required with --yes or piped input). */
+  readonly pull?: boolean;
   readonly tokensFromStdin: boolean;
   /** Windows only: explicit consent to place token values in client configuration. */
   readonly inlineTokens: boolean;
@@ -143,27 +149,57 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     // 1. Appliance URL
     let url: string;
     if (args.url !== undefined) url = normalizeUrl(args.url);
-    else if (interactive && prompter) url = await askUntilValid(prompter, `Darktrace appliance URL${saved ? ` [${saved.url}]` : ' (https://...)'}: `, saved?.url, normalizeUrl, io);
+    // Never prefill or print a saved appliance address: the operator types it every time.
+    else if (interactive && prompter) url = await askUntilValid(prompter, 'Darktrace appliance URL (https://...): ', undefined, normalizeUrl, io);
     else if (saved) url = saved.url;
     else throw new SetupInputError('--url is required for non-interactive setup');
 
     // 2. Runtime
     let runtime: Runtime = args.runtime ?? saved?.runtime ?? 'node';
     if (args.runtime === undefined && interactive && prompter) {
-      write(io, '\nHow should clients start the server?\n  1) node (this checkout)  [default]\n  2) docker (reviewed image ID)\n');
+      write(io, '\nHow should clients start the server?\n  1) node (this checkout)  [default]\n  2) docker (setup pulls and pins the image)\n');
       runtime = await askUntilValid(prompter, `Choice [${runtime === 'docker' ? 2 : 1}]: `, runtime === 'docker' ? '2' : '1',
         (v) => { if (v === '1' || v === 'node') return 'node' as const; if (v === '2' || v === 'docker') return 'docker' as const; throw new SetupInputError('choose 1 or 2'); }, io);
     }
     let image: string | undefined;
     let dockerPath: string | undefined;
+    let resolved: ResolvedImage | undefined;
     if (runtime === 'docker') {
-      if (args.image !== undefined) image = validateImage(args.image);
-      else if (interactive && prompter) image = await askUntilValid(prompter, `Image ID (docker image inspect --format '{{.Id}}' <image>)${saved?.image ? ` [${saved.image}]` : ''}: `, saved?.image, validateImage, io);
-      else if (saved?.image) image = saved.image;
-      else throw new SetupInputError('--image is required for the docker runtime');
-      dockerPath = findOnPath('docker', ctx.env, ctx.platform);
-      if (dockerPath === undefined) throw new SetupInputError('docker is not on PATH');
+      // Preflight before any question about the image and before anything is written.
       if (io.uid === undefined || io.gid === undefined || io.uid === 0) throw new SetupInputError('docker runtime needs a regular (non-root) POSIX user');
+      dockerPath = findOnPath('docker', ctx.env, ctx.platform);
+      if (dockerPath === undefined) throw new SetupInputError(dockerInstallHelp(ctx.platform));
+      const server = checkDockerDaemon(ctx, dockerPath);
+      write(io, `\nDocker: ${dockerPath} (daemon answers, ${server}).\n`);
+      const suggested = defaultImageReference(io.entryPath) ?? saved?.imageReference ?? saved?.image;
+      let ref: ImageReference;
+      if (args.image !== undefined) ref = parseImageReference(args.image);
+      else if (interactive && prompter) {
+        ref = await askUntilValid(prompter, `Image (tag, name@sha256:digest or sha256:ID)${suggested ? ` [${suggested}]` : ''}: `, suggested, parseImageReference, io);
+      } else if (suggested !== undefined) ref = parseImageReference(suggested);
+      else throw new SetupInputError('--image is required for the docker runtime (the package version could not be read)');
+      resolved = inspectImage(ctx, dockerPath, ref);
+      if (resolved === undefined) {
+        if (ref.kind === 'id') throw new SetupInputError(`image ${ref.value} is not present locally; give its tag or digest reference so setup can pull it. Nothing was written`);
+        if (args.dryRun) {
+          write(io, `Image ${ref.value} is not present locally. Would run: docker pull ${ref.value}\n`);
+        } else {
+          const consent = args.pull === true ||
+            (interactive && prompter ? await askYesNo(prompter, `Image ${ref.value} is not present locally. Pull it now?`, true) : false);
+          if (!consent) {
+            throw new SetupInputError(interactive
+              ? `image ${ref.value} was not pulled. Run \`docker pull ${ref.value}\` or rerun setup and answer yes. Nothing was written`
+              : `image ${ref.value} is not present locally; rerun with --pull to download it, or run \`docker pull ${ref.value}\` first. Nothing was written`);
+          }
+          write(io, `Pulling ${ref.value}...\n`);
+          pullImage(ctx, dockerPath, ref);
+          resolved = inspectImage(ctx, dockerPath, ref);
+          if (resolved === undefined) throw new SetupInputError(`docker pull finished but ${ref.value} is still not present locally. Nothing was written`);
+        }
+      }
+      // Client entries start the immutable local image ID with --pull=never; the digest is recorded for verification.
+      image = resolved?.id ?? 'sha256:<image ID after docker pull>';
+      if (resolved !== undefined) write(io, describeImage(resolved));
     }
 
     // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path.
@@ -267,6 +303,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     } else {
       if (tokens && tokenMode === 'file') writeTokenFiles(ctx, tokens.publicToken, tokens.privateToken);
       writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}),
+        ...(resolved ? { imageReference: resolved.reference, ...(resolved.digest ? { imageDigest: resolved.digest } : {}) } : {}),
         ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}), dateFormat });
       write(io, `\nSaved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`);
     }
@@ -294,12 +331,21 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
         (ctx.platform === 'darwin' || ctx.platform === 'win32'
           ? ' Docker Desktop shows bind mounts as root-owned,\nso the launcher sets DARKTRACE_TOKEN_FILE_OWNER=root-or-current (mode checks still apply; see docs/docker.md).\n'
           : '\n'));
+      if (resolved !== undefined) write(io, describeImage(resolved));
     }
     write(io, `\nNext: run \`darktrace-mcp test\` to check URL, TLS and tokens, then restart your AI clients.\n`);
     return results.some((r) => r.status === 'failed') ? 1 : 0;
   } finally {
     if (owned) prompter?.close();
   }
+}
+
+/** Image summary: the ID every client entry starts and the registry digest to compare with the GitHub Release notes. */
+function describeImage(image: ResolvedImage): string {
+  return `Image ${image.reference}\n  image ID: ${image.id}  (client entries start this local image with --pull=never)\n` +
+    (image.digest
+      ? `  digest:   ${image.digest}  (compare with the digest in the GitHub Release notes)\n`
+      : '  digest:   none (locally built image; no registry digest to compare)\n');
 }
 
 export function printResults(io: Pick<SetupIo, 'stdout'>, results: readonly ClientResult[]): void {
