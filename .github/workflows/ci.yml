@@ -70,7 +70,7 @@ jobs:
           # Totals for the full-API release; recompute after merging branches that add tests.
           node --input-type=commonjs <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');
-          for(const [name,count] of [['functional',245],['security',1150]]){
+          for(const [name,count] of [['functional',267],['security',1150]]){
             const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
             const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
             for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])

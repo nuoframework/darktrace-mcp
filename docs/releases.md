@@ -24,7 +24,7 @@ The ghcr index digest is `sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b
 |---|---|---|
 | npm (public) | [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp), exact versions only | `publish-npm` job: publishes the byte-verified `release:prepare` tarball with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, `id-token: write`) and `--provenance --access public` |
 | GitHub Container Registry (public) | `ghcr.io/nuoframework/darktrace-mcp:<version>`, linux/amd64 + linux/arm64, pin by digest | `publish-ghcr` (one native build per architecture, pushed by digest) and `publish-ghcr-manifest` (one `<version>` tag; no `latest` tag is ever moved) |
-| GitHub Release assets | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM, evidence | owner, from the `darktrace-mcp-release-candidate` workflow artifact |
+| GitHub Release assets | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM, evidence; from the first release after 1.1.1 also one `<asset>.sigstore.json` signature per asset, `darktrace-mcp-<version>.intoto.jsonl` and `darktrace-mcp-<version>.provenance.sigstore.json` | `github-release` job: cosign keyless signatures and SLSA provenance over the verified bytes ([verification](#verifying-release-signatures-and-provenance)) |
 | MCP Registry | `io.github.nuoframework/darktrace-mcp` ([`server.json`](../server.json), `mcpName` in `package.json`) | owner, with `mcp-publisher` (below) |
 
 The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
@@ -58,6 +58,42 @@ A vulnerability scan of the 1.1.0 runtime is still not recorded here. CI is evid
 ### Release naming
 
 Use one convention for every GitHub Release: tag `vX.Y.Z` and title `Darktrace MCP vX.Y.Z` (for example, tag `v1.1.1`, title `Darktrace MCP v1.1.1`). Pre-release tags include their version suffix, such as `v1.2.0-rc.1`; only pre-release titles may append ` — short subtitle`. The `github-release` job derives `VERSION` from the tag by removing its leading `v` and passes `--title "Darktrace MCP v${VERSION}"`. Existing releases already follow this convention.
+
+### Verifying release signatures and provenance
+
+From the first release after 1.1.1, the `github-release` job signs every asset and attests its build provenance before it creates the release ([how it works](security/supply-chain-checks.md#release-signing-and-provenance)):
+
+- `<asset>.sigstore.json`: a keyless [Sigstore](https://www.sigstore.dev/) bundle written by `cosign sign-blob` (certificate, signature and transparency-log entry), one per asset including `SHA256SUMS`. The certificate identity is `https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version>`.
+- `darktrace-mcp-<version>.intoto.jsonl`: the SLSA v1 build provenance statement that lists every asset as a subject (in-toto DSSE envelope, one line).
+- `darktrace-mcp-<version>.provenance.sigstore.json`: the same statement with its verification material, as `actions/attest` wrote it and as the GitHub attestations API stores it.
+
+Download the asset and its signature or the provenance file, then:
+
+```sh
+# Provenance (GitHub CLI 2.49 or newer): built by release.yml in this repository, from the tag
+gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
+  --signer-workflow nuoframework/darktrace-mcp/.github/workflows/release.yml --source-ref refs/tags/v<version>
+# Same check from the downloaded bundle instead of the attestations API
+gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
+  --bundle darktrace-mcp-<version>.provenance.sigstore.json
+# Signature (cosign 3.x): the bundle, the exact workflow identity and the GitHub OIDC issuer
+cosign verify-blob --bundle nuoframework-darktrace-mcp-<version>.tgz.sigstore.json \
+  --certificate-identity https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version> \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  nuoframework-darktrace-mcp-<version>.tgz
+# The provenance statement itself (subjects, builder, source commit)
+jq -r .payload darktrace-mcp-<version>.intoto.jsonl | base64 -d | jq .
+```
+
+`--certificate-identity-regexp '^https://github.com/nuoframework/darktrace-mcp/\.github/workflows/release\.yml@refs/tags/v'` accepts any tag of this workflow. Both tools check the Sigstore certificate chain and the transparency log; `sha256sum -c SHA256SUMS` still checks that the downloaded bytes match, and verifying `SHA256SUMS.sigstore.json` proves the checksum file itself.
+
+Releases published before this change (`v0.1.0-alpha.0`, `v1.0.0`, `v1.1.0`, `v1.1.1`) receive signatures after the fact through `sign-release.yml` (next section). Their bundles have the identity `.../.github/workflows/sign-release.yml@refs/heads/main`, state that the published bytes were signed on that date, and carry no provenance.
+
+### Signing a release published before 1.1.2 (owner, once per tag)
+
+1. Actions → **Sign an existing release** → *Run workflow* with the tag, for example `v1.1.1`; or `gh workflow run sign-release.yml -f tag=v1.1.1`.
+2. The run downloads the assets, verifies them with the release's `SHA256SUMS`, signs every asset that has no bundle yet, verifies the bundles and uploads only the new `<asset>.sigstore.json` files. Existing assets and the release notes are never changed, so re-running is safe.
+3. Repeat for `v1.1.0`, `v1.0.0` and `v0.1.0-alpha.0`. Scorecard's Signed-Releases check averages the last five releases with assets, so all four need signatures for the full effect ([status](security/supply-chain-checks.md#status-and-accepted-gaps-score-67-at-0e4d64f-2026-10-06)).
 
 ### Publishing a version (owner)
 
@@ -166,7 +202,7 @@ gh release create v0.1.0-alpha.0 --repo nuoframework/darktrace-mcp \
   runtime-files.sha256.json source-files.sha256.json build-evidence.json verification.json security-receipt.json release-notes.md mcp-tool-contracts.json
 ```
 
-Inspect the draft's assets and checksums before manually removing draft status. No workflow has `contents:write`, registry credentials, `id-token:write` or release publication rights. [GitHub CLI `--verify-tag`](https://cli.github.com/manual/gh_release_create) rejects a missing tag instead of creating one. [Environment required reviewers in private repositories](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) require an eligible GitHub plan; entitlement and remote protections have not been verified. Do not assume merely naming an environment would enforce approval. Artifact attestations are not produced or claimed.
+Inspect the draft's assets and checksums before manually removing draft status. No workflow has `contents:write`, registry credentials, `id-token:write` or release publication rights. [GitHub CLI `--verify-tag`](https://cli.github.com/manual/gh_release_create) rejects a missing tag instead of creating one. [Environment required reviewers in private repositories](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) require an eligible GitHub plan; entitlement and remote protections have not been verified. Do not assume merely naming an environment would enforce approval. Artifact attestations are not produced or claimed. (Historical: signatures and provenance start with the `github-release` job, see [verification](#verifying-release-signatures-and-provenance); earlier releases can be signed afterwards with `sign-release.yml`.)
 
 ## Version 1.0.0
 

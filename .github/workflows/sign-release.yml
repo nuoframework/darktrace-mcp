@@ -1,0 +1,77 @@
+name: Sign an existing release (Sigstore bundles for already published assets)
+# Adds keyless cosign signatures (`<asset>.sigstore.json`) to the assets of a release that was
+# published before release.yml signed releases (v0.1.0-alpha.0, v1.0.0, v1.1.0, v1.1.1). It never
+# replaces or edits an existing asset, skips assets that already have a bundle, and checks every
+# asset against the release's SHA256SUMS before signing. It does not generate SLSA provenance:
+# provenance states which build produced the bytes, and this workflow did not build them.
+# Verification and the owner procedure: docs/releases.md.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to sign (for example v1.1.1)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: sign-release-${{ inputs.tag }}
+  cancel-in-progress: false
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # upload the signature bundles as release assets
+      id-token: write # Sigstore keyless signing with this workflow's identity
+    steps:
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - name: Download the release assets and verify them against SHA256SUMS
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "::error::tag must look like vX.Y.Z or vX.Y.Z-suffix" >&2; exit 1 ;; esac
+          test "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = false
+          mkdir -p "$RUNNER_TEMP/assets"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/assets"
+          cd "$RUNNER_TEMP/assets"
+          test -f SHA256SUMS
+          sha256sum -c SHA256SUMS
+          for f in *; do
+            case "$f" in SHA256SUMS|*.sigstore.json|*.intoto.jsonl) continue ;; esac
+            grep -qF "  $f" SHA256SUMS || echo "::warning::$f is a published asset that SHA256SUMS does not list; it is signed as published"
+          done
+      - name: Sign each asset without a bundle (cosign keyless) and verify every new bundle
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/assets"
+          identity="https://github.com/$GITHUB_REPOSITORY/.github/workflows/sign-release.yml@$GITHUB_REF"
+          : > "$RUNNER_TEMP/new-bundles"
+          for f in *; do
+            case "$f" in *.sigstore.json|*.intoto.jsonl) continue ;; esac
+            if [ -f "$f.sigstore.json" ]; then echo "$f already has a signature bundle; skipped"; continue; fi
+            cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"
+            cosign verify-blob --bundle "$f.sigstore.json" --certificate-identity "$identity" \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com "$f"
+            echo "$f.sigstore.json" >> "$RUNNER_TEMP/new-bundles"
+          done
+          if [ ! -s "$RUNNER_TEMP/new-bundles" ]; then echo "::notice::every asset already has a signature bundle; nothing to upload"; fi
+      - name: Upload the new bundles as release assets (existing assets are never replaced)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/assets"
+          if [ ! -s "$RUNNER_TEMP/new-bundles" ]; then exit 0; fi
+          mapfile -t bundles < "$RUNNER_TEMP/new-bundles"
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" "${bundles[@]}"
+          {
+            echo "## Signed $TAG (${#bundles[@]} bundles)"
+            echo '```'
+            printf '%s\n' "${bundles[@]}"
+            echo '```'
+            echo "Verify: cosign verify-blob --bundle <asset>.sigstore.json --certificate-identity https://github.com/$GITHUB_REPOSITORY/.github/workflows/sign-release.yml@$GITHUB_REF --certificate-oidc-issuer https://token.actions.githubusercontent.com <asset>"
+          } >> "$GITHUB_STEP_SUMMARY"
