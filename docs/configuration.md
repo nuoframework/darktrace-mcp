@@ -119,7 +119,7 @@ If the client declares no form dialog (for example no `elicitation`, or URL-only
 
 ### Older variables
 
-These still work and map onto profiles:
+These still work and map onto profiles. When `DARKTRACE_PROFILES` is also set, they may only agree with it or narrow it: `DARKTRACE_SENSITIVE_READ=true` or `DARKTRACE_WRITE_CRITICAL=true` for a profile that is not in the list stops startup with `... conflicts with DARKTRACE_PROFILES`.
 
 | Old setting | Same as |
 |---|---|

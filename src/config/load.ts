@@ -243,10 +243,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   };
 
   applyProfiles(merged, env.DARKTRACE_PROFILES);
-  const sensitiveRead = envBoolean(env.DARKTRACE_SENSITIVE_READ, 'DARKTRACE_SENSITIVE_READ');
-  if (sensitiveRead !== undefined) merged.profiles = { ...asObject(merged.profiles), sensitiveRead };
-  const critical = envBoolean(env.DARKTRACE_WRITE_CRITICAL, 'DARKTRACE_WRITE_CRITICAL');
-  if (critical !== undefined) merged.profiles = { ...asObject(merged.profiles), writeCritical: critical };
+  // DR-W-16: once DARKTRACE_PROFILES is set, the legacy booleans may only agree or narrow; widening is a startup error.
+  const listed = env.DARKTRACE_PROFILES === undefined ? undefined : parseProfilesVariable(env.DARKTRACE_PROFILES);
+  for (const [variable, key] of [['DARKTRACE_SENSITIVE_READ', 'sensitiveRead'], ['DARKTRACE_WRITE_CRITICAL', 'writeCritical']] as const) {
+    const value = envBoolean(env[variable], variable);
+    if (value === undefined) continue;
+    if (listed !== undefined && value && !listed[key]) throw new ConfigValidationError(`${variable}=true conflicts with DARKTRACE_PROFILES`);
+    merged.profiles = { ...asObject(merged.profiles), [key]: value };
+  }
   for (const [variable, key] of [['DARKTRACE_CRITICAL_APPROVAL', 'criticalApproval'], ['DARKTRACE_WRITE_APPROVAL', 'writeApproval']] as const) {
     const value = env[variable];
     if (value === undefined) continue;

@@ -115,7 +115,6 @@ test('loadConfig supports token files, the base URL alias, lower-only env limits
       DARKTRACE_BASE_URL: 'https://darktrace.example:8443/',
       DARKTRACE_PUBLIC_TOKEN_FILE: publicFile,
       DARKTRACE_PRIVATE_TOKEN_FILE: privateFile,
-      DARKTRACE_PROFILES: 'read',
       DARKTRACE_SENSITIVE_READ: 'true',
       DARKTRACE_QUERY_SIGNATURE_ENCODING: 'encoded',
       DARKTRACE_DESTINATION_ALLOWLIST: '10.0.0.4,fd12::1',
@@ -321,4 +320,35 @@ test('config validation errors never echo token values', () => {
     assert.equal(error.message.includes(secret), false);
     return true;
   });
+});
+
+test('DR-W-16 legacy booleans may only agree with or narrow DARKTRACE_PROFILES; widening is a startup error', () => {
+  const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'public-value', DARKTRACE_PRIVATE_TOKEN: 'private-value' };
+  const ack = { DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE: 'true' };
+  const lists = ['read', 'read,sensitive', 'read,write', 'read,sensitive,write', 'write,critical', 'read,sensitive,write,critical', 'all'];
+  for (const list of lists) {
+    const listed = { sensitiveRead: list === 'all' || list.includes('sensitive'), writeCritical: list === 'all' || list.includes('critical') };
+    for (const sensitive of [undefined, 'true', 'false'] as const) for (const critical of [undefined, 'true', 'false'] as const) {
+      const env: Record<string, string> = { ...base, ...ack, DARKTRACE_PROFILES: list };
+      if (sensitive !== undefined) env.DARKTRACE_SENSITIVE_READ = sensitive;
+      if (critical !== undefined) env.DARKTRACE_WRITE_CRITICAL = critical;
+      const widensSensitive = sensitive === 'true' && !listed.sensitiveRead;
+      const widensCritical = critical === 'true' && !listed.writeCritical;
+      if (widensSensitive || widensCritical) {
+        assert.throws(() => loadConfig(env), (error: Error) => error instanceof ConfigValidationError &&
+          new RegExp(`^${widensSensitive ? 'DARKTRACE_SENSITIVE_READ' : 'DARKTRACE_WRITE_CRITICAL'}=true conflicts with DARKTRACE_PROFILES$`).test(error.message), `${list} ${sensitive} ${critical}`);
+        continue;
+      }
+      const loaded = loadConfig(env).profiles;
+      assert.equal(loaded.sensitiveRead, sensitive === 'false' ? false : listed.sensitiveRead, `${list} ${sensitive} ${critical}`);
+      assert.equal(loaded.writeCritical, critical === 'false' ? false : listed.writeCritical, `${list} ${sensitive} ${critical}`);
+      assert.equal(loaded.write, list === 'all' || list.includes('write'));
+    }
+  }
+  // The DR-W-16 reproduction from the design review: narrowing promise holds.
+  assert.throws(() => loadConfig({ ...base, ...ack, DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' }), /DARKTRACE_SENSITIVE_READ=true conflicts with DARKTRACE_PROFILES/);
+  // Legacy-only configurations keep working unchanged.
+  assert.deepEqual(loadConfig({ ...base, DARKTRACE_SENSITIVE_READ: 'true' }).profiles, { read: true, write: false, sensitiveRead: true, writeCritical: false });
+  assert.deepEqual(loadConfig({ ...base, DARKTRACE_SENSITIVE_READ: 'false', DARKTRACE_WRITE_CRITICAL: 'false' }).profiles, { read: true, write: false, sensitiveRead: false, writeCritical: false });
+  assert.throws(() => loadConfig({ ...base, DARKTRACE_WRITE_CRITICAL: 'true' }), /requires profiles\.write/);
 });
