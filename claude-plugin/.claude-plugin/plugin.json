@@ -1,0 +1,65 @@
+{
+  "name": "darktrace-mcp",
+  "displayName": "Darktrace MCP",
+  "version": "1.1.1",
+  "description": "Investigate alerts, devices and incidents on your own Darktrace Threat Visualizer appliance through a local MCP server: read-only by default, previews for every change and human approval for critical actions.",
+  "author": {
+    "name": "Pablo Arrabal",
+    "url": "https://github.com/nuoframework"
+  },
+  "homepage": "https://github.com/nuoframework/darktrace-mcp#readme",
+  "repository": "https://github.com/nuoframework/darktrace-mcp",
+  "license": "Apache-2.0",
+  "keywords": [
+    "darktrace",
+    "threat-visualizer",
+    "mcp",
+    "security",
+    "soc",
+    "incident-response",
+    "network-detection"
+  ],
+  "documentationUrl": "https://github.com/nuoframework/darktrace-mcp/blob/main/docs/getting-started.md",
+  "supportUrl": "https://github.com/nuoframework/darktrace-mcp/issues",
+  "privacyPolicyUrl": "https://github.com/nuoframework/darktrace-mcp/blob/main/SECURITY.md",
+  "userConfig": {
+    "appliance_url": {
+      "type": "string",
+      "title": "Appliance URL",
+      "description": "https://… of your Darktrace Threat Visualizer. The server connects only to this host, over TLS, with HMAC-signed requests.",
+      "required": true
+    },
+    "public_token": {
+      "type": "string",
+      "title": "Public API token",
+      "description": "Public half of the API token pair (Darktrace: System Config → Settings → API Token). Kept in your operating system's credential store and sent only to the appliance.",
+      "required": true,
+      "sensitive": true
+    },
+    "private_token": {
+      "type": "string",
+      "title": "Private API token",
+      "description": "Private half of the API token pair. It signs every request and never leaves your machine except as a signature. Kept in your operating system's credential store.",
+      "required": true,
+      "sensitive": true
+    },
+    "profiles": {
+      "type": "string",
+      "title": "Profiles",
+      "description": "Comma list of read, sensitive, write, critical, or the word all. read: normal reads (default). sensitive: reads that can return raw traffic, email content or audit data. write: reversible changes, each with a dryRun preview. critical: Antigena actions, Watched Domains, subnets and tag deletion, each only after a preview, confirm:true and your approval dialog. Start with read.",
+      "default": "read"
+    },
+    "acknowledge_sensitive_write": {
+      "type": "string",
+      "title": "Acknowledge sensitive and write together",
+      "description": "Set to true only when profiles contains both sensitive and write (or all). Appliance content could then flow into free-text fields of writes, so the server refuses to start with that combination unless you acknowledge it here. Leave false otherwise.",
+      "default": "false"
+    },
+    "date_format": {
+      "type": "string",
+      "title": "Signature date format",
+      "description": "compact (default) or spaced. Change it to spaced only if the appliance answers HTTP 400 to every signed request; the setup wizard of the npm package detects the right value.",
+      "default": "compact"
+    }
+  }
+}

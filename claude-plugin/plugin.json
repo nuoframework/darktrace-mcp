@@ -1,0 +1,42 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "darktrace-mcp",
+  "version": "1.1.1",
+  "description": "Investigate alerts, devices and incidents on your own Darktrace Threat Visualizer appliance through a local MCP server: read-only by default, previews for every change and human approval for critical actions.",
+  "author": {
+    "name": "Pablo Arrabal",
+    "url": "https://github.com/nuoframework"
+  },
+  "homepage": "https://github.com/nuoframework/darktrace-mcp#readme",
+  "repository": "https://github.com/nuoframework/darktrace-mcp",
+  "license": "Apache-2.0",
+  "keywords": [
+    "darktrace",
+    "threat-visualizer",
+    "mcp",
+    "security",
+    "soc",
+    "incident-response",
+    "network-detection"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Darktrace MCP",
+        "shortDescription": "Investigate Darktrace alerts",
+        "longDescription": "Tools for security analysts who run a Darktrace Threat Visualizer appliance. The plugin starts a local MCP server (the npm package @nuoframework/darktrace-mcp, pinned to one version) that signs every request with your API token pair and talks only to your appliance over HTTPS. 50 tools cover model breaches, AI Analyst incidents, devices and connections, Autonomous Response (Antigena), tags, Watched Domains, subnets, packet captures and Advanced Search. The default profile is read-only. Writes need a dryRun preview, and critical actions such as blocking traffic need a preview, an explicit confirm and a human approval dialog. Limitations: the server runs on your machine, so it needs Node.js 22 or later and network access to the appliance; Codex does not prompt for credentials, so configure the connection with the package's setup wizard; the Darktrace/Email action is not available.",
+        "developerName": "Pablo Arrabal",
+        "category": "Developer Tools",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://github.com/nuoframework/darktrace-mcp",
+        "supportURL": "https://github.com/nuoframework/darktrace-mcp/issues",
+        "privacyPolicyURL": "https://github.com/nuoframework/darktrace-mcp/blob/main/SECURITY.md",
+        "defaultPrompt": [
+          "Summarise the unacknowledged Darktrace model breaches from the last 24 hours and rank them by score.",
+          "Show me the AI Analyst incidents from this week and which devices they involve.",
+          "Which active Autonomous Response actions are in place right now, and when do they expire?"
+        ]
+      }
+    }
+  }
+}
