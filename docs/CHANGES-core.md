@@ -484,3 +484,15 @@ UX key `appliedDefaults` was added to MR2's envelope allowlist.
 - **DR-W-12 not changed.** `validatedOn` is a version-string array with no per-action/response scope, so
   operations whose live result was partial (e.g. DELETE answered non-2xx, `clear`/`label`/`responsedata`
   qualifications in §6) cannot be distinguished without a catalogue data-model change. Left as-is.
+
+## 9. Darktrace/EMAIL observed shapes (2026-10-06, analysis only)
+
+- New `scripts/analysis/har-email-summary.mjs` prints a schema-only summary of a browser HAR capture of the
+  email console (templated paths, parameter/header names, key paths with value types; never values).
+- New `docs/security/email-api-observed.md` records the result. The console authenticates with a session
+  cookie and a per-session anti-forgery header on its own hostname and never uses DTAPI HMAC headers. The
+  instance documents the public prefix `/agemail/api/ep/api/v1.0/*` and requires the "Email Logs"
+  permission for every endpoint, which explains the S9 403 (permission and/or separate email host). All 14
+  catalogue email operations exist on the instance under the same paths; 25 more are listed there. Message
+  ids are `<uuid>.<n>`. View, parameter and schema-digest changes are recommendations only; `src/` and
+  `test/` are unchanged until the lab confirms them.
