@@ -161,7 +161,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
         "sensitive"
@@ -215,7 +217,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
         "sensitive"
@@ -246,7 +250,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
         "sensitive"
@@ -877,7 +883,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1514,7 +1522,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1553,7 +1563,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1937,7 +1949,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2182,7 +2196,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2287,7 +2303,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2609,7 +2627,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2638,7 +2658,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2677,7 +2699,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3125,7 +3149,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3164,7 +3190,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3202,7 +3230,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3241,7 +3271,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3412,7 +3444,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3431,7 +3465,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3460,7 +3496,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
         "sensitive"
@@ -3714,7 +3752,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3752,7 +3792,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3938,7 +3980,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
         "sensitive"
@@ -4040,7 +4084,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4080,7 +4126,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4156,7 +4204,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4191,7 +4241,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4226,7 +4278,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4279,7 +4333,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
         "critical"
@@ -4360,7 +4416,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
         "critical"
@@ -4549,7 +4607,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
         "critical"
@@ -4615,7 +4675,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4660,7 +4722,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4725,7 +4789,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4914,7 +4980,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
         "critical"
@@ -4970,7 +5038,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -5016,7 +5086,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -5084,7 +5156,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]

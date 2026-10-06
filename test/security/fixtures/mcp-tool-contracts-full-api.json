@@ -3,7 +3,7 @@
   "canonicalization": "Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON",
   "contracts": {
     "read": {
-      "sha256": "ec799aeb9c01a5eb839b9cc0bc257a90cc778469ce5e77b630559609ea3af04f",
+      "sha256": "afeb056eb4e1830462256436948ceaa706601d14ade6ebc7f36ab00cda011964",
       "tools": [
         {
           "name": "darktrace_list_ai_analyst_incidents",
@@ -249,7 +249,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_incident_comments",
-          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only. Not lab-validated.",
+          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -520,7 +520,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"): get_components = components; get_components_cid = one component. Read-only. Not lab-validated.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -529,6 +529,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_components",
                     "type": "string",
                     "const": "get_components"
                   },
@@ -549,9 +550,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -791,7 +789,7 @@
         },
         {
           "name": "darktrace_get_device_info",
-          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only. Not lab-validated.",
+          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1029,7 +1027,7 @@
         },
         {
           "name": "darktrace_get_device_summary",
-          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only. Not lab-validated.",
+          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1130,7 +1128,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1248,7 +1246,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid_comments.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1257,6 +1255,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_mbcomments",
                     "type": "string",
                     "const": "get_mbcomments"
                   },
@@ -1297,9 +1296,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -1352,7 +1348,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1463,7 +1459,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only. Not lab-validated.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1472,6 +1468,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_metrics",
                     "type": "string",
                     "const": "get_metrics"
                   },
@@ -1492,9 +1489,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -1547,7 +1541,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1556,6 +1550,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_modelbreaches",
                     "type": "string",
                     "const": "get_modelbreaches"
                   },
@@ -1665,9 +1660,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -1809,7 +1801,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"): get_models = models; get_models_pid = one model. Read-only. Not lab-validated.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1818,6 +1810,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_models",
                     "type": "string",
                     "const": "get_models"
                   },
@@ -1843,9 +1836,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -1898,7 +1888,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2011,7 +2001,7 @@
         },
         {
           "name": "darktrace_list_pcaps",
-          "description": "List packet captures and their status. Operation: get_pcaps. Read-only. Not lab-validated.",
+          "description": "List packet captures and their status. Operation: get_pcaps. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2197,7 +2187,7 @@
         },
         {
           "name": "darktrace_get_summary_statistics",
-          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only. Not lab-validated.",
+          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -2262,7 +2252,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only. Not lab-validated: get_tags.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2436,11 +2426,11 @@
       ]
     },
     "read+sensitive": {
-      "sha256": "3db6c76a837a86f33ba86fd0190fbaf21dae0fa669882e25522d6a3ac5e540e3",
+      "sha256": "ca4ebd6b4d640aae3571ad3d68e18bd489ae39f02b980188a554dfb989462d6a",
       "tools": [
         {
           "name": "darktrace_advanced_search",
-          "description": "Advanced Search (log/event search) plus analyze/graph views. query/hash = standard base64 of JSON {\"search\":\"<query>\",\"fields\":[],\"timeframe\":\"3600\"} (timeframe seconds, max 604800; optional offset, size). Operations (set \"operation\"): get_advancedsearch_api_analyze_field_analysis_query = field analysis; get_advancedsearch_api_graph_graphmode_interval_query = time graph; get_advancedsearch_api_search_query = search (GET, base64 in path); post_advancedsearch_api_search = search (POST {hash}; preferred). Read-only; returns sensitive data (operator profile \"sensitive\"). Not lab-validated.",
+          "description": "Advanced Search (log/event search) plus analyze/graph. query/hash = base64 of JSON {\"search\":\"<query>\",\"fields\":[],\"timeframe\":\"3600\"} (seconds, max 604800). Operations (set \"operation\"; default post_advancedsearch_api_search): get_advancedsearch_api_analyze_field_analysis_query = field stats; get_advancedsearch_api_graph_graphmode_interval_query = time graph; get_advancedsearch_api_search_query = search via GET; post_advancedsearch_api_search = search via POST {hash} (preferred). Read-only; returns sensitive data (operator profile \"sensitive\").",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2594,6 +2584,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "post_advancedsearch_api_search",
                     "type": "string",
                     "const": "post_advancedsearch_api_search"
                   },
@@ -2629,7 +2620,6 @@
                   }
                 },
                 "required": [
-                  "operation",
                   "body"
                 ],
                 "additionalProperties": false
@@ -3331,7 +3321,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_incident_comments",
-          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only. Not lab-validated.",
+          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3602,7 +3592,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"): get_components = components; get_components_cid = one component. Read-only. Not lab-validated.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3611,6 +3601,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_components",
                     "type": "string",
                     "const": "get_components"
                   },
@@ -3631,9 +3622,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -3873,7 +3861,7 @@
         },
         {
           "name": "darktrace_get_device_info",
-          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only. Not lab-validated.",
+          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4111,7 +4099,7 @@
         },
         {
           "name": "darktrace_get_device_summary",
-          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only. Not lab-validated.",
+          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4212,7 +4200,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4330,7 +4318,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid_comments.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4339,6 +4327,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_mbcomments",
                     "type": "string",
                     "const": "get_mbcomments"
                   },
@@ -4379,9 +4368,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -4434,7 +4420,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4545,7 +4531,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only. Not lab-validated.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4554,6 +4540,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_metrics",
                     "type": "string",
                     "const": "get_metrics"
                   },
@@ -4574,9 +4561,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -4629,7 +4613,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4638,6 +4622,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_modelbreaches",
                     "type": "string",
                     "const": "get_modelbreaches"
                   },
@@ -4747,9 +4732,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -4891,7 +4873,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"): get_models = models; get_models_pid = one model. Read-only. Not lab-validated.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4900,6 +4882,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_models",
                     "type": "string",
                     "const": "get_models"
                   },
@@ -4925,9 +4908,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -4980,7 +4960,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5093,7 +5073,7 @@
         },
         {
           "name": "darktrace_list_pcaps",
-          "description": "List packet captures and their status. Operation: get_pcaps. Read-only. Not lab-validated.",
+          "description": "List packet captures and their status. Operation: get_pcaps. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5125,7 +5105,7 @@
         },
         {
           "name": "darktrace_download_pcap",
-          "description": "Download a finished packet capture file (base64, size-bounded, never written to disk). Operation: get_pcaps_filename. Read-only; returns sensitive data (operator profile \"sensitive\"). Not lab-validated.",
+          "description": "Download a finished packet capture file (base64, size-bounded, never written to disk). Operation: get_pcaps_filename. Read-only; returns sensitive data (operator profile \"sensitive\").",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5323,7 +5303,7 @@
         },
         {
           "name": "darktrace_get_summary_statistics",
-          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only. Not lab-validated.",
+          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -5388,7 +5368,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only. Not lab-validated: get_tags.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5653,11 +5633,11 @@
       ]
     },
     "read+write": {
-      "sha256": "3c86163f899f4094352d99503e17c29eab4ebfb88942450b88837d6b4ffcda39",
+      "sha256": "9d55533f6fff2982f3aa0414687a259c1d042cc7aa267a0106126a4ea7d4e39b",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5698,6 +5678,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -5742,6 +5727,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -5816,6 +5806,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -5876,6 +5871,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -5966,6 +5966,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -6228,7 +6233,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_incident_comments",
-          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only. Not lab-validated.",
+          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -6499,7 +6504,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"): get_components = components; get_components_cid = one component. Read-only. Not lab-validated.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -6508,6 +6513,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_components",
                     "type": "string",
                     "const": "get_components"
                   },
@@ -6528,9 +6534,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -6770,7 +6773,7 @@
         },
         {
           "name": "darktrace_get_device_info",
-          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only. Not lab-validated.",
+          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7008,7 +7011,7 @@
         },
         {
           "name": "darktrace_get_device_summary",
-          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only. Not lab-validated.",
+          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7109,7 +7112,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7227,7 +7230,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid_comments.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7236,6 +7239,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_mbcomments",
                     "type": "string",
                     "const": "get_mbcomments"
                   },
@@ -7276,9 +7280,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -7331,7 +7332,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7442,7 +7443,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only. Not lab-validated.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7451,6 +7452,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_metrics",
                     "type": "string",
                     "const": "get_metrics"
                   },
@@ -7471,9 +7473,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -7526,7 +7525,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7535,6 +7534,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_modelbreaches",
                     "type": "string",
                     "const": "get_modelbreaches"
                   },
@@ -7644,9 +7644,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -7788,7 +7785,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"): get_models = models; get_models_pid = one model. Read-only. Not lab-validated.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7797,6 +7794,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_models",
                     "type": "string",
                     "const": "get_models"
                   },
@@ -7822,9 +7820,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -7877,7 +7872,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7990,7 +7985,7 @@
         },
         {
           "name": "darktrace_list_pcaps",
-          "description": "List packet captures and their status. Operation: get_pcaps. Read-only. Not lab-validated.",
+          "description": "List packet captures and their status. Operation: get_pcaps. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8176,7 +8171,7 @@
         },
         {
           "name": "darktrace_get_summary_statistics",
-          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only. Not lab-validated.",
+          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8241,7 +8236,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only. Not lab-validated: get_tags.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8414,7 +8409,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8460,6 +8455,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -8509,6 +8509,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -8528,7 +8533,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8577,6 +8582,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -8644,6 +8654,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -8661,7 +8676,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8707,6 +8722,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -8756,6 +8776,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -8867,6 +8892,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -8884,7 +8914,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8964,6 +8994,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9048,6 +9083,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9068,7 +9108,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -9120,6 +9160,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -9213,6 +9258,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -9231,11 +9281,11 @@
       ]
     },
     "read+write+critical": {
-      "sha256": "556e7cc69a821517749b3fc64d50da001df46bf871a882bd27e3790063dbf056",
+      "sha256": "f22cee1aefb944c8be6b683f251951a965d9d94dd0b9ff872a5c06cc69bd062b",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -9276,6 +9326,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9320,6 +9375,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9394,6 +9454,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9454,6 +9519,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9544,6 +9614,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -9564,7 +9639,7 @@
         },
         {
           "name": "darktrace_delete_tag",
-          "description": "Delete a tag definition. Operation: delete_tags_tid. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Delete a tag definition. Operation: delete_tags_tid. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -9596,6 +9671,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
@@ -9860,7 +9940,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_incident_comments",
-          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only. Not lab-validated.",
+          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10131,7 +10211,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"): get_components = components; get_components_cid = one component. Read-only. Not lab-validated.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10140,6 +10220,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_components",
                     "type": "string",
                     "const": "get_components"
                   },
@@ -10160,9 +10241,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -10402,7 +10480,7 @@
         },
         {
           "name": "darktrace_get_device_info",
-          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only. Not lab-validated.",
+          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10640,7 +10718,7 @@
         },
         {
           "name": "darktrace_get_device_summary",
-          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only. Not lab-validated.",
+          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10741,7 +10819,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10859,7 +10937,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid_comments.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10868,6 +10946,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_mbcomments",
                     "type": "string",
                     "const": "get_mbcomments"
                   },
@@ -10908,9 +10987,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -10963,7 +11039,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11074,7 +11150,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only. Not lab-validated.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11083,6 +11159,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_metrics",
                     "type": "string",
                     "const": "get_metrics"
                   },
@@ -11103,9 +11180,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -11158,7 +11232,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11167,6 +11241,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_modelbreaches",
                     "type": "string",
                     "const": "get_modelbreaches"
                   },
@@ -11276,9 +11351,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -11420,7 +11492,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"): get_models = models; get_models_pid = one model. Read-only. Not lab-validated.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11429,6 +11501,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_models",
                     "type": "string",
                     "const": "get_models"
                   },
@@ -11454,9 +11527,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -11509,7 +11579,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11622,7 +11692,7 @@
         },
         {
           "name": "darktrace_list_pcaps",
-          "description": "List packet captures and their status. Operation: get_pcaps. Read-only. Not lab-validated.",
+          "description": "List packet captures and their status. Operation: get_pcaps. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11808,7 +11878,7 @@
         },
         {
           "name": "darktrace_get_summary_statistics",
-          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only. Not lab-validated.",
+          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11873,7 +11943,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only. Not lab-validated: get_tags.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12046,7 +12116,7 @@
         },
         {
           "name": "darktrace_email_action",
-          "description": "Darktrace/EMAIL: perform an action (e.g. release, hold) on one email. Operation: post_agemail_api_ep_api_v1_0_emails_uuid_action. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Darktrace/EMAIL: perform an action (e.g. release, hold) on one email. Operation: post_agemail_api_ep_api_v1_0_emails_uuid_action. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12096,6 +12166,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
@@ -12157,7 +12232,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12203,6 +12278,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -12252,6 +12332,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -12271,7 +12356,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12320,6 +12405,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -12387,6 +12477,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -12404,7 +12499,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12450,6 +12545,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -12499,6 +12599,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -12518,7 +12623,7 @@
         },
         {
           "name": "darktrace_antigena_action",
-          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12578,6 +12683,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -12599,7 +12709,7 @@
         },
         {
           "name": "darktrace_antigena_manual_action",
-          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12712,6 +12822,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
@@ -12826,6 +12941,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -12843,7 +12963,7 @@
         },
         {
           "name": "darktrace_update_intel_feed",
-          "description": "Add or remove watched domains in the intel feed (removeall wipes the list). Operation: post_intelfeed. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Add or remove watched domains in the intel feed (removeall wipes the list). Operation: post_intelfeed. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12970,6 +13090,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -12991,7 +13116,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -13071,6 +13196,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13155,6 +13285,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13175,7 +13310,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13227,6 +13362,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -13320,6 +13460,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -13337,7 +13482,7 @@
         },
         {
           "name": "darktrace_update_subnet",
-          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13470,6 +13615,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -13492,11 +13642,11 @@
       ]
     },
     "all": {
-      "sha256": "1532491978f4bbbb148a1814e6acd8198e226770769a36e8cdcf0228e57b929b",
+      "sha256": "b377eac60a2eed8233d8481b0b69074e79eac6a537b8e1b4ec1e47a5b2abf859",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -13537,6 +13687,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13581,6 +13736,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13655,6 +13815,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13715,6 +13880,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13805,6 +13975,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -13825,7 +14000,7 @@
         },
         {
           "name": "darktrace_delete_tag",
-          "description": "Delete a tag definition. Operation: delete_tags_tid. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Delete a tag definition. Operation: delete_tags_tid. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13858,6 +14033,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -13879,7 +14059,7 @@
         },
         {
           "name": "darktrace_advanced_search",
-          "description": "Advanced Search (log/event search) plus analyze/graph views. query/hash = standard base64 of JSON {\"search\":\"<query>\",\"fields\":[],\"timeframe\":\"3600\"} (timeframe seconds, max 604800; optional offset, size). Operations (set \"operation\"): get_advancedsearch_api_analyze_field_analysis_query = field analysis; get_advancedsearch_api_graph_graphmode_interval_query = time graph; get_advancedsearch_api_search_query = search (GET, base64 in path); post_advancedsearch_api_search = search (POST {hash}; preferred). Read-only; returns sensitive data (operator profile \"sensitive\"). Not lab-validated.",
+          "description": "Advanced Search (log/event search) plus analyze/graph. query/hash = base64 of JSON {\"search\":\"<query>\",\"fields\":[],\"timeframe\":\"3600\"} (seconds, max 604800). Operations (set \"operation\"; default post_advancedsearch_api_search): get_advancedsearch_api_analyze_field_analysis_query = field stats; get_advancedsearch_api_graph_graphmode_interval_query = time graph; get_advancedsearch_api_search_query = search via GET; post_advancedsearch_api_search = search via POST {hash} (preferred). Read-only; returns sensitive data (operator profile \"sensitive\").",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -14033,6 +14213,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "post_advancedsearch_api_search",
                     "type": "string",
                     "const": "post_advancedsearch_api_search"
                   },
@@ -14068,7 +14249,6 @@
                   }
                 },
                 "required": [
-                  "operation",
                   "body"
                 ],
                 "additionalProperties": false
@@ -14770,7 +14950,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_incident_comments",
-          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only. Not lab-validated.",
+          "description": "Read comments on a Cyber AI Analyst incident. Operation: get_aianalyst_incident_comments. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15041,7 +15221,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"): get_components = components; get_components_cid = one component. Read-only. Not lab-validated.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15050,6 +15230,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_components",
                     "type": "string",
                     "const": "get_components"
                   },
@@ -15070,9 +15251,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -15312,7 +15490,7 @@
         },
         {
           "name": "darktrace_get_device_info",
-          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only. Not lab-validated.",
+          "description": "Detailed connection/traffic profile for one device. Operation: get_deviceinfo. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15550,7 +15728,7 @@
         },
         {
           "name": "darktrace_get_device_summary",
-          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only. Not lab-validated.",
+          "description": "Contextual summary for one device. Operation: get_devicesummary. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15651,7 +15829,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15769,7 +15947,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid_comments.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15778,6 +15956,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_mbcomments",
                     "type": "string",
                     "const": "get_mbcomments"
                   },
@@ -15818,9 +15997,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -15873,7 +16049,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15984,7 +16160,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only. Not lab-validated.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15993,6 +16169,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_metrics",
                     "type": "string",
                     "const": "get_metrics"
                   },
@@ -16013,9 +16190,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -16068,7 +16242,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated: get_modelbreaches_pbid.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16077,6 +16251,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_modelbreaches",
                     "type": "string",
                     "const": "get_modelbreaches"
                   },
@@ -16186,9 +16361,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -16330,7 +16502,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"): get_models = models; get_models_pid = one model. Read-only. Not lab-validated.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16339,6 +16511,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_models",
                     "type": "string",
                     "const": "get_models"
                   },
@@ -16364,9 +16537,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -16419,7 +16589,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only. Not lab-validated.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16532,7 +16702,7 @@
         },
         {
           "name": "darktrace_list_pcaps",
-          "description": "List packet captures and their status. Operation: get_pcaps. Read-only. Not lab-validated.",
+          "description": "List packet captures and their status. Operation: get_pcaps. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16564,7 +16734,7 @@
         },
         {
           "name": "darktrace_download_pcap",
-          "description": "Download a finished packet capture file (base64, size-bounded, never written to disk). Operation: get_pcaps_filename. Read-only; returns sensitive data (operator profile \"sensitive\"). Not lab-validated.",
+          "description": "Download a finished packet capture file (base64, size-bounded, never written to disk). Operation: get_pcaps_filename. Read-only; returns sensitive data (operator profile \"sensitive\").",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16762,7 +16932,7 @@
         },
         {
           "name": "darktrace_get_summary_statistics",
-          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only. Not lab-validated.",
+          "description": "High-level summary statistics (bandwidth, device counts, patterns). Operation: get_summarystatistics. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16827,7 +16997,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only. Not lab-validated: get_tags.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17091,7 +17261,7 @@
         },
         {
           "name": "darktrace_email_action",
-          "description": "Darktrace/EMAIL: perform an action (e.g. release, hold) on one email. Operation: post_agemail_api_ep_api_v1_0_emails_uuid_action. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Darktrace/EMAIL: perform an action (e.g. release, hold) on one email. Operation: post_agemail_api_ep_api_v1_0_emails_uuid_action. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17141,6 +17311,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
@@ -17202,7 +17377,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17248,6 +17423,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -17297,6 +17477,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -17316,7 +17501,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17365,6 +17550,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -17432,6 +17622,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -17449,7 +17644,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17495,6 +17690,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -17544,6 +17744,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -17563,7 +17768,7 @@
         },
         {
           "name": "darktrace_antigena_action",
-          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17623,6 +17828,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -17644,7 +17854,7 @@
         },
         {
           "name": "darktrace_antigena_manual_action",
-          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17757,6 +17967,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
@@ -17871,6 +18086,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -17888,7 +18108,7 @@
         },
         {
           "name": "darktrace_update_intel_feed",
-          "description": "Add or remove watched domains in the intel feed (removeall wipes the list). Operation: post_intelfeed. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Add or remove watched domains in the intel feed (removeall wipes the list). Operation: post_intelfeed. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18015,6 +18235,11 @@
                 "default": false,
                 "type": "boolean"
               },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",
                 "default": false,
@@ -18036,7 +18261,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -18116,6 +18341,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -18200,6 +18430,11 @@
                     "description": "true = preview only; nothing is sent.",
                     "default": false,
                     "type": "boolean"
+                  },
+                  "previewId": {
+                    "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{32}$"
                   }
                 },
                 "required": [
@@ -18220,7 +18455,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18272,6 +18507,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -18365,6 +18605,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Optional: binds execution to an earlier preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": [
@@ -18382,7 +18627,7 @@
         },
         {
           "name": "darktrace_update_subnet",
-          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews. Not lab-validated.",
+          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18514,6 +18759,11 @@
                 "description": "true = preview only; nothing is sent.",
                 "default": false,
                 "type": "boolean"
+              },
+              "previewId": {
+                "description": "Required with confirm:true: the previewId returned by the preview of these exact arguments.",
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               },
               "confirm": {
                 "description": "Must be true, after explicit user approval, to execute this critical action.",

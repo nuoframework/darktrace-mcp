@@ -31,12 +31,25 @@ function emailParameters(pathTemplate: string, method: string, documented: any[]
     });
   return [...documented, ...extra];
 }
-// Bounded lab recipes on Darktrace 7.1 (docs/security/validated-consultations-lab-checkpoint.md).
-// Every other operation is offline-tested only and is marked "not lab-validated" in its tool description.
+// Lab evidence on Darktrace 7.1: the 19 bounded consultation recipes
+// (docs/security/validated-consultations-lab-checkpoint.md) plus the 2026-10-06 full-API live run through the
+// production MCP stdio path (docs/CHANGES-core.md "Live lab validation"). Only clean 2xx results with a verified
+// effect count; operations that failed, were forbidden for the lab token, answered non-2xx after applying the
+// change, or were not executed stay "not lab-validated".
 const LAB_VALIDATED_71 = new Set(['get_status','get_devices','get_subnets','get_aianalyst_stats','get_intelfeed',
   'get_modelbreaches','get_devicesearch','get_similardevices','get_aianalyst_groups','get_aianalyst_incidentevents',
   'get_aianalyst_investigations','get_mbcomments','get_details','get_tags_entities','get_tags_tid','get_tags_tid_entities',
-  'get_endpointdetails','get_antigena','get_antigena_summary']);
+  'get_endpointdetails','get_antigena','get_antigena_summary',
+  // 2026-10-06 live run
+  'get_modelbreaches_pbid','get_modelbreaches_pbid_comments','get_metrics','get_metrics_mlid','get_models','get_models_pid',
+  'get_components','get_components_cid','get_deviceinfo','get_devicesummary','get_network','get_metricdata','get_enums',
+  'get_summarystatistics','get_aianalyst_incident_comments','get_tags','get_pcaps','get_pcaps_filename',
+  'post_advancedsearch_api_search','get_advancedsearch_api_search_query','get_advancedsearch_api_analyze_field_analysis_query',
+  'get_advancedsearch_api_graph_graphmode_interval_query',
+  'post_tags','post_tags_entities','post_tags_tid_entities','post_aianalyst_acknowledge','post_aianalyst_unacknowledge',
+  'post_aianalyst_pin','post_aianalyst_unpin','post_modelbreaches_pbid_acknowledge','post_modelbreaches_pbid_unacknowledge',
+  'post_modelbreaches_pbid_comments','post_aianalyst_incident_comments',
+  'post_antigena_manual','post_antigena','post_intelfeed','post_subnets']);
 const inventory = JSON.parse(readFileSync('docs/operation-inventory.json', 'utf8'));
 const mapping = JSON.parse(readFileSync('src/api/tool-groups.json', 'utf8')) as Record<string,string|null>;
 const assignments = new Map(Object.entries(mapping));

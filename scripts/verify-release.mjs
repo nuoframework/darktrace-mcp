@@ -12,7 +12,7 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const canonical=value=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value&&typeof value==='object'?'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}':JSON.stringify(value);
 // Full-API oracle: complete tools/list contracts for every supported operator profile combination.
 const fixturePath='test/security/fixtures/mcp-tool-contracts-full-api.json';
-const fixtureSha256='__FULL_API_FIXTURE_SHA256__'; // Generated for the full-API release; requires independent review before shared application.
+const fixtureSha256='c95104ced1955b7a1bdc72a6e19bc79c3d1a3e0ee39114e7eabf7fa71545fd3b'; // Generated for the full-API release; requires independent review before shared application.
 // Historical oracles stay byte-pinned provenance; they no longer describe the shipped surface.
 const firstStableFixturePath='test/security/fixtures/mcp-tool-contracts-first-stable.json';
 const firstStableFixtureSha256='6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c';
@@ -21,7 +21,7 @@ const alphaFixtureSha256='37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518
 const capabilityPath='src/policy/release-capability.ts';
 const capabilityValue=Object.freeze({read:true,sensitiveRead:true,write:true,writeCritical:true});
 const fixtureCapability=Object.freeze({...capabilityValue,grantedBy:'operator profiles only; model arguments cannot grant or escalate'});
-const profileHashes=Object.freeze(__PROFILE_HASHES__);
+const profileHashes=Object.freeze({read:'afeb056eb4e1830462256436948ceaa706601d14ade6ebc7f36ab00cda011964',"read+sensitive":'ca4ebd6b4d640aae3571ad3d68e18bd489ae39f02b980188a554dfb989462d6a',"read+write":'9d55533f6fff2982f3aa0414687a259c1d042cc7aa267a0106126a4ea7d4e39b',"read+write+critical":'f22cee1aefb944c8be6b683f251951a965d9d94dd0b9ff872a5c06cc69bd062b',all:'b377eac60a2eed8233d8481b0b69074e79eac6a537b8e1b4ec1e47a5b2abf859'});
 // Independent oracle from the owner request: tools/operations per profile and the six critical operations.
 const profileShape=Object.freeze({read:[27,38],'read+sensitive':[36,56],'read+write':[36,54],'read+write+critical':[42,60],all:[51,78]});
 const criticalOperations=Object.freeze(['delete_tags_tid','post_agemail_api_ep_api_v1_0_emails_uuid_action','post_antigena','post_antigena_manual','post_intelfeed','post_subnets']);

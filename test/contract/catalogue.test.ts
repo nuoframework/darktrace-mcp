@@ -16,9 +16,11 @@ test('all 79 spec/inventory operations map exactly once to truthful statuses',()
  assert.deepEqual((email.find(r=>r.tier==='critical') as any).requiredProfiles,['write','critical']);
  assert.equal(operationDescriptors.length,78);assert.ok(operationDescriptors.every(op=>operations[op.operationId].status==='implemented'));
  assert.equal(report.labValidated,false);
- // Lab evidence exists only for the 19 bounded 7.1 consultation recipes; everything else is offline-tested only.
- assert.equal(report.operations.filter(r=>r.validatedOn.length>0).length,19);
- assert.ok(report.operations.every(r=>r.validatedOn.length===0||(r.tier==='read'&&r.validatedOn.join()==='7.1')));
+ // Lab evidence (Darktrace 7.1): 19 bounded consultation recipes plus the 2026-10-06 live run; critical writes
+ // were executed only with human approval and reverted. Email (403 for the lab token) and DELETE routes are not validated.
+ assert.equal(report.operations.filter(r=>r.validatedOn.length>0).length,56);
+ assert.ok(report.operations.every(r=>r.validatedOn.length===0||r.validatedOn.join()==='7.1'));
+ assert.ok(report.operations.filter(r=>r.pathTemplate.startsWith('/agemail/')||r.method==='DELETE').every(r=>r.validatedOn.length===0));
 });
 test('required OpenAPI fields and form-only bodies enforced',()=>{
  assert.throws(()=>validateOperation(operations.get_devicesummary,{}));
