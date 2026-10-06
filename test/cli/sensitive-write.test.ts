@@ -95,7 +95,7 @@ test('docker runtime passes the acknowledgement as a container environment varia
 
 test('interactive wizard: all shows the notice and a yes emits the acknowledgement', async () => {
   const box = sandbox('linux');
-  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, ALL, 'yes', GEMINI];
+  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, ALL, 'yes', '1', GEMINI];
   const { out, io: setupIo } = io(box, stdinFrom(''), createLinePrompter(answers));
   assert.equal(await runSetup({ ...base, yes: false }, setupIo), 0, out.text());
   assert.ok(out.text().includes(SENSITIVE_WRITE_NOTICE));
@@ -107,7 +107,7 @@ test('interactive wizard: all shows the notice and a yes emits the acknowledgeme
 for (const [choice, expected] of [['1', 'read,write'], ['2', 'read,sensitive'], ['', 'read,write']] as const) {
   test(`interactive wizard: declining falls back to ${expected} without the acknowledgement (answer "${choice}")`, async () => {
     const box = sandbox('linux');
-    const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, ALL, 'n', choice, GEMINI];
+    const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, ALL, 'n', choice, '1', GEMINI];
     const { out, io: setupIo } = io(box, stdinFrom(''), createLinePrompter(answers));
     assert.equal(await runSetup({ ...base, yes: false }, setupIo), 0, out.text());
     const env = readJson(join(box.home, '.gemini/settings.json')).mcpServers.darktrace.env;
@@ -119,7 +119,7 @@ for (const [choice, expected] of [['1', 'read,write'], ['2', 'read,sensitive'], 
 
 test('interactive wizard: an empty answer to the risk question is a no', async () => {
   const box = sandbox('linux');
-  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, 'read,sensitive,write', '', '2', GEMINI];
+  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, 'read,sensitive,write', '', '2', '1', GEMINI];
   const { out, io: setupIo } = io(box, stdinFrom(''), createLinePrompter(answers));
   assert.equal(await runSetup({ ...base, yes: false }, setupIo), 0, out.text());
   assert.equal(readJson(join(box.home, '.gemini/settings.json')).mcpServers.darktrace.env.DARKTRACE_PROFILES, 'read,sensitive');

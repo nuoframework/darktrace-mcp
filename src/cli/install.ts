@@ -15,6 +15,8 @@ import type { CliContext } from './clients.js';
  * directory and registers that absolute path instead. No network access, no lifecycle scripts.
  */
 export const PACKAGE_NAME = '@nuoframework/darktrace-mcp';
+/** Exact package version (`1.2.3`, optionally with a pre-release suffix): the only form fixed-copy directories and `update --version` accept. */
+export const isPackageVersion = (value: string): boolean => /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(value);
 
 export interface PackageLayout {
   readonly name: string;
@@ -30,7 +32,7 @@ export function describeEntry(entryPath: string): PackageLayout | undefined {
   const packageRoot = path.resolve(path.dirname(entryPath), '..', '..');
   let pkg: { name?: unknown; version?: unknown };
   try { pkg = JSON.parse(readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as typeof pkg; } catch { return undefined; }
-  if (typeof pkg.name !== 'string' || typeof pkg.version !== 'string' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(pkg.version)) return undefined;
+  if (typeof pkg.name !== 'string' || typeof pkg.version !== 'string' || !isPackageVersion(pkg.version)) return undefined;
   const scopeDir = path.dirname(packageRoot);
   const modulesDir = path.dirname(scopeDir);
   const installed = path.basename(packageRoot) === 'darktrace-mcp' && path.basename(scopeDir) === '@nuoframework' && path.basename(modulesDir) === 'node_modules';
@@ -72,7 +74,7 @@ export function isTransientInstall(entryPath: string, ctx: Pick<CliContext, 'hom
 
 /** Where fixed copies live: `$XDG_DATA_HOME/darktrace-mcp/<version>` (POSIX) or `%LOCALAPPDATA%\darktrace-mcp\<version>` (Windows). */
 export function fixedCopyDir(ctx: Pick<CliContext, 'home' | 'env' | 'platform'>, version: string): string {
-  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) throw new InstallerFileError('invalid package version');
+  if (!isPackageVersion(version)) throw new InstallerFileError('invalid package version');
   const base = ctx.platform === 'win32'
     ? (ctx.env.LOCALAPPDATA && path.isAbsolute(ctx.env.LOCALAPPDATA) ? ctx.env.LOCALAPPDATA : path.join(ctx.home, 'AppData', 'Local'))
     : (ctx.env.XDG_DATA_HOME && path.isAbsolute(ctx.env.XDG_DATA_HOME) ? ctx.env.XDG_DATA_HOME : path.join(ctx.home, '.local', 'share'));
@@ -99,17 +101,17 @@ export interface FixedCopyResult {
 
 /**
  * Copy the running package tree to its fixed per-version directory and return the new entry path.
- * Idempotent: an existing valid copy is reused. Symbolic links and `.bin` shims are never copied.
- * With `dryRun`, nothing is written and the planned path is returned.
+ * Idempotent: an existing valid copy is reused unless `replace` is set (`update` always installs the tree it just
+ * verified). Symbolic links and `.bin` shims are never copied. With `dryRun`, nothing is written and the planned path is returned.
  */
-export function installFixedCopy(entryPath: string, ctx: Pick<CliContext, 'home' | 'env' | 'platform'>, dryRun = false): FixedCopyResult {
+export function installFixedCopy(entryPath: string, ctx: Pick<CliContext, 'home' | 'env' | 'platform'>, dryRun = false, replace = false): FixedCopyResult {
   const layout = describeEntry(entryPath);
   if (layout === undefined || layout.name !== PACKAGE_NAME || layout.installRoot === undefined) {
     throw new InstallerFileError('cannot locate the installed package tree next to ' + entryPath);
   }
   const dir = fixedCopyDir(ctx, layout.version);
   const target = fixedCopyEntry(dir);
-  if (usableFixedCopy(dir, layout.version)) return { entryPath: target, dir, status: 'reused' };
+  if (!replace && usableFixedCopy(dir, layout.version)) return { entryPath: target, dir, status: 'reused' };
   if (dryRun) return { entryPath: target, dir, status: 'planned' };
   const parent = path.dirname(dir);
   const parentStat = lstatOrUndefined(parent);

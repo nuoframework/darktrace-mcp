@@ -12,8 +12,9 @@ import { VERSION } from '../server/createServer.js';
 
 /**
  * `darktrace-mcp uninstall` (alias `remove --all`): undo everything `setup` created, and nothing else.
- * Known paths only: client entries named "darktrace", the installer directory, the per-version fixed copies and,
- * with --docker, the one pinned image ID recorded by setup. Symbolic links are never followed or removed.
+ * Known paths only: client entries named "darktrace", the installer directory, the per-version fixed copies
+ * (including those installed by `update`) and, with --docker, the pinned image ID recorded by setup plus the
+ * previous image kept by `update`. Symbolic links are never followed or removed.
  */
 export interface UninstallArgs {
   readonly dryRun: boolean;
@@ -102,6 +103,9 @@ export async function runUninstall(args: UninstallArgs, io: UninstallIo): Promis
   // Read the saved setup first: it names the pinned image and disappears in step 2.
   const saved = readSavedSetup(ctx);
   const image = saved?.runtime === 'docker' && saved.image !== undefined && isImageId(saved.image) ? saved.image : undefined;
+  // The image kept by `update` for --rollback, when it differs from the current one.
+  const previousImage = image !== undefined && saved?.previousImage !== undefined && isImageId(saved.previousImage) && saved.previousImage !== image ? saved.previousImage : undefined;
+  const images = image === undefined ? [] : [image, ...(previousImage ? [previousImage] : [])];
 
   const clientPlan = CLIENT_IDS.map((id) => {
     try { return removeClient(id, ctx, { dryRun: true }); } catch (error) {
@@ -120,8 +124,8 @@ export async function runUninstall(args: UninstallArgs, io: UninstallIo): Promis
   if (args.keepCopies) write(io, '  3) Fixed copies: kept (--keep-copies)\n');
   else write(io, `  3) Fixed copies in ${copies.base}:\n${copies.remove.length === 0 ? '    none found\n' : bullet(copies.remove)}`);
   if (image === undefined) write(io, '  4) Docker image: none recorded by setup\n');
-  else if (args.docker) write(io, `  4) Docker image: docker image rm ${image}\n`);
-  else write(io, `  4) Docker image ${image}: kept (add --docker to remove exactly this image)\n`);
+  else if (args.docker) write(io, `  4) Docker image${images.length > 1 ? 's' : ''}: ${images.map((i) => `docker image rm ${i}`).join('; ')}\n`);
+  else write(io, `  4) Docker image${images.length > 1 ? 's' : ''} ${images.join(', ')}: kept (add --docker to remove exactly ${images.length > 1 ? 'these images' : 'this image'})\n`);
   const skipped = [...state.skipped, ...copies.skipped];
   if (skipped.length > 0) write(io, `  Not touched:\n${bullet(skipped)}`);
 
@@ -172,15 +176,19 @@ export async function runUninstall(args: UninstallArgs, io: UninstallIo): Promis
     if (copies.baseUsable) removedFromDir(copies.base);
   }
 
-  // 4. The pinned image ID only; never tags, digests or other images.
-  let imageLine = image === undefined ? 'none recorded' : `kept ${image}`;
+  // 4. The pinned image ID (and the previous one kept by update) only; never tags, digests or other images.
+  let imageLine = image === undefined ? 'none recorded' : `kept ${images.join(', ')}`;
   if (image !== undefined && args.docker) {
     const docker = findOnPath('docker', ctx.env, ctx.platform);
-    if (docker === undefined) { imageLine = `not removed: docker is not on PATH (run: docker image rm ${image})`; failed = true; } else {
+    if (docker === undefined) { imageLine = `not removed: docker is not on PATH (run: ${images.map((i) => `docker image rm ${i}`).join('; ')})`; failed = true; } else {
       const run = ctx.runDocker ?? ((command: string, argv: readonly string[]) => ctx.run(command, argv));
-      const result = run(docker, ['image', 'rm', image]);
-      if (result.status === 0) imageLine = `removed ${image}`;
-      else { imageLine = `not removed (in use or already gone): docker image rm ${image}`; failed = true; }
+      const lines: string[] = [];
+      for (const id of images) {
+        const result = run(docker, ['image', 'rm', id]);
+        if (result.status === 0) lines.push(`removed ${id}`);
+        else { lines.push(`not removed (in use or already gone): docker image rm ${id}`); failed = true; }
+      }
+      imageLine = lines.join('; ');
     }
   }
 

@@ -28,9 +28,17 @@ export interface CliContext {
   readonly run: (command: string, args: readonly string[]) => RunResult;
   /** Runs docker (argument vector, never a shell); `stream` shows docker's own progress output. Defaults to `run`. */
   readonly runDocker?: (command: string, args: readonly string[], options?: { readonly stream?: boolean }) => RunResult;
+  /**
+   * Runs npm and the new package's `--check-config` for `update`: a working directory, a controlled environment and a
+   * longer timeout (downloads). Argument vector, never a shell. Tests inject a fake; production uses spawnSync.
+   */
+  readonly exec?: (command: string, args: readonly string[], options?: ExecOptions) => RunResult;
+  /** Fetches one HTTPS text document (GitHub release notes for `update --check`). Undefined when offline. */
+  readonly fetchText?: (url: string) => Promise<string | undefined>;
   /** Signed GET /status used by `test` and the `setup` date-format probe. Defaults to the production client. */
   readonly probeStatus?: StatusProber;
 }
+export interface ExecOptions { readonly cwd?: string; readonly env?: NodeJS.ProcessEnv; readonly timeoutMs?: number }
 
 export type ResultStatus = 'written' | 'unchanged' | 'command' | 'manual' | 'dry-run' | 'failed' | 'absent';
 export interface ClientResult {
@@ -338,6 +346,29 @@ function applyYamlFile(id: ClientId, def: YamlClientDef, entry: ServerEntry | un
   const backup = text === undefined ? undefined : backupFile(file, ctx.now());
   atomicWrite(file, plan.text, mode);
   return { client: id, status: 'written', file, ...(backup ? { backup } : {}), detail: entry === undefined ? `removed darktrace from ${file}` : `${text === undefined ? 'created' : 'updated'} ${file}` };
+}
+
+/**
+ * True when the client currently carries a "darktrace" entry: the one `update` and `update --rollback` rewrite.
+ * File clients are inspected without writing; Claude Code is asked through `claude mcp get`; paste-only clients are
+ * never detectable (the operator pastes the printed snippet).
+ */
+export function hasClientEntry(id: ClientId, ctx: CliContext): boolean {
+  if (id === 'claude-code') {
+    const claude = findOnPath('claude', ctx.env, ctx.platform);
+    return claude !== undefined && ctx.run(claude, ['mcp', 'get', SERVER_NAME]).status === 0;
+  }
+  if (PASTE_ONLY[id] !== undefined) return false;
+  let text: string | undefined;
+  try { text = readTextIfExists(id === 'codex' ? codexFile(ctx) : (JSON_CLIENTS[id]?.file(ctx) ?? YAML_CLIENTS[id]?.file(ctx) ?? '')); } catch { return false; }
+  if (text === undefined) return false;
+  if (id === 'codex') { const plan = removeCodexServer(text, SERVER_NAME); return plan.ok && plan.changed; }
+  const yaml = YAML_CLIENTS[id];
+  if (yaml !== undefined) { const plan = removeYamlBlock(text, yaml.options); return plan.ok && plan.changed; }
+  const def = JSON_CLIENTS[id];
+  if (def === undefined) return false;
+  const plan = planJsonEntry(text, def.rootKey, SERVER_NAME, undefined);
+  return plan.ok ? plan.changed : text.includes(`"${SERVER_NAME}"`);
 }
 
 export function removeClient(id: ClientId, ctx: CliContext, opts: Pick<ApplyOptions, 'dryRun'>): ClientResult {

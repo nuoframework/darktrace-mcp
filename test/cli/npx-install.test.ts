@@ -139,7 +139,8 @@ test('entry origin names the running package honestly: checkout, fixed copy, npx
 
   // The runtime question and the confirmation line use the label of the running origin, never "this checkout" from a fixed copy.
   const out = collector();
-  const prompter = createLinePrompter(['https://dt.example.com', '1', PUBLIC, PRIVATE, '1', 'none']);
+  // URL, runtime, both tokens, profile, update mode (pinned), clients.
+  const prompter = createLinePrompter(['https://dt.example.com', '1', PUBLIC, PRIVATE, '1', '1', 'none']);
   const io = { ctx: box.ctx, stdin: stdinFrom(''), stdout: out.stream, stderr: out.stream, execPath: '/opt/node/bin/node', entryPath: copy.entryPath, uid: 501, gid: 20, prompter };
   assert.equal(await runSetup({ dryRun: true, yes: false, tokensFromStdin: false, inlineTokens: false }, io), 0, out.text());
   assert.match(out.text(), /1\) node \(the fixed copy installed by setup\)  \[default\]/);

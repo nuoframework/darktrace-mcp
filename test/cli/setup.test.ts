@@ -40,7 +40,8 @@ test('non-interactive setup with --tokens-from-stdin stores private token files 
   assert.equal(readFileSync(join(dir, 'public-token'), 'utf8'), PUBLIC + '\n');
   assert.equal(readFileSync(join(dir, 'private-token'), 'utf8'), PRIVATE + '\n');
   assert.equal(mode(join(dir, 'setup.json')), 0o600);
-  assert.deepEqual(readSavedSetup(box.ctx), { version: 1, url: 'https://darktrace.example.internal', profiles: 'read', runtime: 'node', tokenMode: 'file', dateFormat: 'compact' });
+  // entryPath is what `update` rewrites later; no installedVersion because the test entry has no package.json next to it.
+  assert.deepEqual(readSavedSetup(box.ctx), { version: 1, url: 'https://darktrace.example.internal', profiles: 'read', runtime: 'node', tokenMode: 'file', dateFormat: 'compact', entryPath: ENTRY });
   const desktop = readJson(join(box.home, 'Library/Application Support/Claude/claude_desktop_config.json')).mcpServers.darktrace;
   assert.deepEqual(desktop, {
     command: '/opt/node/bin/node', args: [ENTRY],
@@ -66,7 +67,8 @@ test('non-interactive setup with --tokens-from-stdin stores private token files 
 
 test('interactive wizard: answers via prompter, hidden tokens, read+write preset, chosen client only', async () => {
   const box = sandbox('linux');
-  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, '2', String(CLIENT_IDS.indexOf('gemini') + 1)];
+  // URL, runtime, both tokens, profile preset, update mode (pinned), client.
+  const answers = ['https://dt.example.com', '1', PUBLIC, PRIVATE, '2', '1', String(CLIENT_IDS.indexOf('gemini') + 1)];
   const { out, io: setupIo } = io(box, stdinFrom(''), createLinePrompter(answers));
   assert.equal(await runSetup({ dryRun: false, yes: false, tokensFromStdin: false, inlineTokens: false }, setupIo), 0, out.text());
   const gemini = readJson(join(box.home, '.gemini/settings.json')).mcpServers.darktrace;

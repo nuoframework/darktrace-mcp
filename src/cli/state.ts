@@ -4,6 +4,7 @@ import { atomicWrite, ensurePrivateDir, lstatOrUndefined, readTextIfExists } fro
 import { needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, IMAGE_PATTERN, type Runtime, type TokenMode } from './entry.js';
 import type { CliContext } from './clients.js';
 import { isDigestReference, parseImageReference } from './docker.js';
+import { isPackageVersion } from './install.js';
 import type { DateFormat } from '../config/schema.js';
 
 /** Installer state: non-secret choices remembered between `setup`, `config`, `remove` and `test`. */
@@ -23,7 +24,25 @@ export interface SavedSetup {
   readonly acknowledgeSensitiveWrite?: true;
   /** Signature date format the appliance accepted during `setup` (or chosen with --date-format). */
   readonly dateFormat?: DateFormat;
+  /** How new releases reach the clients: `pinned` (default; `update` moves the entries) or `npx-latest` launchers. */
+  readonly updateMode?: UpdateMode;
+  /** Package version the client entries start (node: the fixed copy or checkout; docker: the image tag), when known. */
+  readonly installedVersion?: string;
+  /** Node runtime: absolute `dist/src/index.js` the client entries start. `update` rewrites it. */
+  readonly entryPath?: string;
+  /** Version the entries started before the last `update` (or `update --rollback`); its copy or image is kept. */
+  readonly previousVersion?: string;
+  /** Node runtime: entry path of `previousVersion`, when its fixed copy still exists. */
+  readonly previousEntryPath?: string;
+  /** Docker runtime: local image ID the entries started before the last update, kept for `update --rollback` (version in `previousVersion` when known). */
+  readonly previousImage?: string;
+  /** Docker runtime: registry digest of `previousImage`, when known. */
+  readonly previousImageDigest?: string;
 }
+export type UpdateMode = 'pinned' | 'npx-latest';
+export const isUpdateMode = (value: unknown): value is UpdateMode => value === 'pinned' || value === 'npx-latest';
+const versionOrUndefined = (value: unknown): string | undefined => (typeof value === 'string' && isPackageVersion(value) ? value : undefined);
+const absoluteOrUndefined = (value: unknown): string | undefined => (typeof value === 'string' && path.isAbsolute(value) ? value : undefined);
 
 export function setupDir(ctx: Pick<CliContext, 'home' | 'env'>): string {
   const base = ctx.env.XDG_CONFIG_HOME && path.isAbsolute(ctx.env.XDG_CONFIG_HOME) ? ctx.env.XDG_CONFIG_HOME : path.join(ctx.home, '.config');
@@ -53,9 +72,18 @@ export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetu
     const profiles = normalizeProfiles(raw.profiles);
     const acknowledged = raw.acknowledgeSensitiveWrite === true && needsSensitiveWriteAck(profiles);
     const dateFormat = raw.dateFormat === 'compact' || raw.dateFormat === 'spaced' ? raw.dateFormat : undefined;
+    const updateMode = runtime === 'node' && isUpdateMode(raw.updateMode) && raw.updateMode !== 'pinned' ? raw.updateMode : undefined;
+    const installedVersion = versionOrUndefined(raw.installedVersion);
+    const entryPath = runtime === 'node' ? absoluteOrUndefined(raw.entryPath) : undefined;
+    const previousVersion = versionOrUndefined(raw.previousVersion);
+    const previousEntryPath = runtime === 'node' && previousVersion ? absoluteOrUndefined(raw.previousEntryPath) : undefined;
+    const previousImage = runtime === 'docker' && typeof raw.previousImage === 'string' && IMAGE_PATTERN.test(raw.previousImage) ? raw.previousImage : undefined;
+    const previousImageDigest = previousImage && typeof raw.previousImageDigest === 'string' && isDigestReference(raw.previousImageDigest) ? raw.previousImageDigest : undefined;
     return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}),
       ...(image && imageReference ? { imageReference } : {}), ...(image && imageDigest ? { imageDigest } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}),
-      ...(dateFormat ? { dateFormat } : {}) };
+      ...(dateFormat ? { dateFormat } : {}), ...(updateMode ? { updateMode } : {}), ...(installedVersion ? { installedVersion } : {}), ...(entryPath ? { entryPath } : {}),
+      ...(previousVersion ? { previousVersion } : {}), ...(previousEntryPath ? { previousEntryPath } : {}), ...(previousImage ? { previousImage } : {}),
+      ...(previousImageDigest ? { previousImageDigest } : {}) };
   } catch {
     return undefined;
   }

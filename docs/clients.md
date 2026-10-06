@@ -2,7 +2,7 @@
 
 # Client setup
 
-[README](../README.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+[README](../README.md) · [Getting started](getting-started.md) · [Update](update.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
 
 Every client can be set up two ways:
 
@@ -80,6 +80,8 @@ Never put `npx` in a client config: every launch would depend on the registry an
 
 **Automatic.** Either run `darktrace-mcp setup`, or install the extension: download `darktrace-mcp-1.1.2.mcpb` from the [v1.1.2 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2) (or build it from a checkout with `npm run pack:mcpb`) and double-click it. Claude Desktop asks for the URL, tokens and profile. It stores the tokens in your OS keychain.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). Installed from the `.mcpb` instead: open the new `.mcpb` from the release; the keychain tokens are kept. [Update guide](update.md).
+
 **Manual.** Settings → Developer → Edit Config. Merge this into `mcpServers`, keeping your other servers:
 
 ```json
@@ -105,6 +107,8 @@ Quit Claude Desktop completely and open it again.
 ## Claude Code
 
 **Automatic.** `darktrace-mcp setup` adds a user-scoped server.
+
+**Update.** `darktrace-mcp update` re-registers the server with `claude mcp add --scope user` on the verified new path. Plugin install: `claude plugin update darktrace-mcp@darktrace-mcp`. [Update guide](update.md).
 
 **Plugin.** Two commands, then answer the prompts (appliance URL, both tokens, profile). Nothing else to run:
 
@@ -139,6 +143,8 @@ Use `/mcp` inside Claude Code to see the server. Prefer `--scope user`. A projec
 
 **Automatic.** `darktrace-mcp setup`.
 
+**Update.** `darktrace-mcp update` rewrites `mcp_servers.darktrace` (backup kept) or re-runs `codex mcp add`. Plugin install: `codex plugin marketplace upgrade darktrace-mcp`. [Update guide](update.md).
+
 **Plugin.** Three commands: install the plugin, then run the wizard once for the connection:
 
 ```sh
@@ -168,6 +174,8 @@ Check it with `codex mcp list`.
 ## Cursor
 
 **Automatic.** `darktrace-mcp setup`, or get a one-click install link:
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 ```sh
 darktrace-mcp config cursor
@@ -200,6 +208,8 @@ Check it under Cursor Settings → MCP.
 ## VS Code
 
 **Automatic.** `darktrace-mcp setup`, or get a one-click install link:
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 ```sh
 darktrace-mcp config vscode
@@ -234,6 +244,8 @@ Use **MCP: List Servers** to start or inspect it. Prefer the user configuration 
 
 Windsurf's documentation now lives under Devin Desktop and reads `~/.config/devin/mcp_config.json` (Windows `%APPDATA%\devin\mcp_config.json`); the wizard writes the legacy `~/.codeium/windsurf/mcp_config.json` only when that directory still exists.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Automatic.** `darktrace-mcp setup`.
 
 **Manual.** Add to `~/.config/devin/mcp_config.json` (or the legacy file above):
@@ -262,6 +274,8 @@ Refresh the MCP list in Windsurf's Cascade panel.
 
 **Automatic.** `darktrace-mcp setup`.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Add to `~/.config/opencode/opencode.json`:
 
 ```json
@@ -286,6 +300,8 @@ Refresh the MCP list in Windsurf's Cascade panel.
 ## Gemini CLI
 
 **Automatic.** `darktrace-mcp setup`.
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** Either use the CLI:
 
@@ -325,6 +341,8 @@ Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool cal
 
 **Automatic.** `darktrace-mcp setup --client zed`. Zed's `settings.json` is JSONC; when the file contains comments the wizard prints the snippet instead of rewriting it.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Add to `~/.config/zed/settings.json` (or Settings → AI → MCP Servers → Add Local Server):
 
 ```json
@@ -349,6 +367,8 @@ Verify: the server appears under Settings → AI → MCP Servers.
 ## Cline
 
 **Automatic.** `darktrace-mcp setup --client cline` writes `cline_mcp_settings.json` in Cline's VS Code storage (see the table above). Cline reloads the file on change.
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** Cline panel → MCP Servers → Configure → Configure MCP Servers, then add under `mcpServers`:
 
@@ -377,6 +397,8 @@ Keep `autoApprove` empty so Cline asks before each tool call. The Cline CLI uses
 
 **Automatic.** `darktrace-mcp setup --client roo` writes the global `mcp_settings.json` (table above).
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Roo Code → MCP Servers → Edit Global MCP, then add under `mcpServers`:
 
 ```json
@@ -404,6 +426,8 @@ A project `.roo/mcp.json` overrides the global entry; review it as you would any
 
 **Automatic.** `darktrace-mcp setup --client continue` inserts a marker-delimited item at the top of the `mcpServers` list in `~/.continue/config.yaml` (Windows `%USERPROFILE%\.continue\config.yaml`) and never touches the rest of the file. If the file already defines a `darktrace` server, or `mcpServers` is not a plain list, the wizard prints the snippet instead.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Add to `config.yaml`:
 
 ```yaml
@@ -425,6 +449,8 @@ MCP tools are available in Continue's agent mode. Verify with the tools icon in 
 ## Kiro
 
 **Automatic.** `darktrace-mcp setup --client kiro` writes `~/.kiro/settings/mcp.json`. `darktrace-mcp config kiro` also prints a `https://kiro.dev/launch/mcp/add?…` link; Kiro shows a confirmation dialog before writing.
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** Add to `~/.kiro/settings/mcp.json`:
 
@@ -453,6 +479,8 @@ Kiro reloads the file on save; the server shows in the MCP Servers view.
 
 **Automatic.** `darktrace-mcp setup --client amp` writes `~/.config/amp/settings.json` (a `.jsonc` twin is used when it is the only file; comments are never rewritten).
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Add to `~/.config/amp/settings.json`:
 
 ```json
@@ -477,6 +505,8 @@ Verify with `amp mcp list`.
 ## GitHub Copilot CLI
 
 **Automatic.** `darktrace-mcp setup --client copilot-cli` writes `~/.copilot/mcp-config.json` (`COPILOT_HOME` is honoured).
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** Either `/mcp add` inside Copilot CLI, or add to `~/.copilot/mcp-config.json`:
 
@@ -505,6 +535,8 @@ Copilot CLI passes only the variables listed in `env` to the server (plus `PATH`
 
 **Automatic.** `darktrace-mcp setup --client warp` writes `~/.warp/.mcp.json`.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Settings → Agents → MCP servers → add a CLI server and paste, or add to `~/.warp/.mcp.json`:
 
 ```json
@@ -529,6 +561,8 @@ Start the server from the same settings page.
 ## Goose
 
 **Automatic.** `darktrace-mcp setup --client goose` inserts a marker-delimited `darktrace` entry under `extensions` in `~/.config/goose/config.yaml` (Windows `%APPDATA%\Block\goose\config\config.yaml`) and leaves the rest untouched. An existing unmanaged `darktrace` entry is never rewritten; the snippet is printed instead.
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** `goose configure` → Add Extension → Command-line Extension, or add under `extensions:`:
 
@@ -555,6 +589,8 @@ Goose's `goose://extension` links accept only `npx`, `uvx`, `jbang`, `goosed` or
 
 **Automatic.** `darktrace-mcp setup --client lmstudio` writes `~/.lmstudio/mcp.json`. `darktrace-mcp config lmstudio` also prints an `lmstudio://add_mcp?…` link (LM Studio 0.3.17 or later).
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Program → Install → Edit mcp.json, then add under `mcpServers` (Cursor notation):
 
 ```json
@@ -579,6 +615,8 @@ Saving the file loads the server. Local models have smaller context windows than
 ## Antigravity
 
 **Automatic.** `darktrace-mcp setup --client antigravity` writes `~/.gemini/config/mcp_config.json`.
+
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
 
 **Manual.** Agent panel → … → MCP Servers → Manage MCP Servers → View raw config, then add:
 
@@ -605,6 +643,8 @@ Tools default to Ask mode in Antigravity; keep it that way for write profiles.
 
 **Automatic.** `darktrace-mcp setup --client junie` writes `~/.junie/mcp/mcp.json`, shared by the Junie plugin and the Junie CLI. A project `.junie/mcp/mcp.json` is also read.
 
+**Update.** `darktrace-mcp update` rewrites this entry after verifying the new version (file backed up; `update --rollback` restores the previous one). [Update guide](update.md).
+
 **Manual.** Settings → Tools → Junie → MCP Settings → Add (opens the same file), then add:
 
 ```json
@@ -628,11 +668,15 @@ Tools default to Ask mode in Antigravity; keep it that way for write profiles.
 
 JetBrains documents no configuration file for AI Assistant, so the wizard prints the JSON to paste.
 
+**Update.** No file to rewrite: after `darktrace-mcp update`, run `darktrace-mcp config jetbrains` again and paste the new JSON. [Update guide](update.md).
+
 **Paste.** `darktrace-mcp config jetbrains`, then Settings | Tools | AI Assistant | Model Context Protocol (MCP) → Add → STDIO, paste the printed JSON (same shape as [Junie](#jetbrains-junie)) and Apply; the server starts immediately. If `setup` already configured Claude Desktop on this machine, **Import from Claude** on the same page reuses that entry.
 
 ## Docker
 
 Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). With Docker installed and running, run the wizard and choose `2) docker`:
+
+**Update.** `darktrace-mcp update` pulls the new release tag, runs the container `--check-config` with the same mounts and user, rewrites the image ID in every entry and keeps the previous image for `update --rollback`. [Update guide](update.md).
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 setup
@@ -674,13 +718,32 @@ Replace the last argument with that `sha256:…` ID and `command` with the full 
 
 The token files must be owned by UID 1000 (or change `--user` to match their owner) and have mode `0600`. Keep `-i`, never add `-t`. Do not publish ports or use `--network host`.
 
+## Update
+
+```sh
+darktrace-mcp update --check
+darktrace-mcp update
+```
+
+`update` reads the settings `setup` stored, resolves the newest published version on registry.npmjs.org (or `--version X.Y.Z`; downgrades need `--allow-downgrade`), installs it with npm into a private temporary directory, requires `npm audit signatures` to verify the registry signatures and the provenance attestation, copies the tree to `~/.local/share/darktrace-mcp/<new>/`, runs the new copy's `--check-config` with your settings and one signed `GET /status`, and only then rewrites the `darktrace` entry in every client that has one (backups kept). The previous copy stays for `update --rollback`. With the Docker runtime it pulls the release tag, runs the container `--check-config` and rewrites the image ID, keeping the old one. `--dry-run` prints the plan, `--yes` skips the question, `--json` prints one summary. Per client:
+
+| Client | What `update` does | Client-managed path |
+|---|---|---|
+| File clients (Claude Desktop, Cursor, VS Code, Windsurf, OpenCode, Gemini CLI, Zed, Cline, Roo Code, Continue, Kiro, Amp, Copilot CLI, Warp, Goose, LM Studio, Antigravity, Junie) | Rewrites the entry in the file listed in each section below, after a backup | Claude Desktop `.mcpb`: open the new `.mcpb` from the release or the Directory; keychain tokens are kept |
+| Claude Code | Re-runs `claude mcp add --scope user` with the new path (detected with `claude mcp get darktrace`) | Plugin: `claude plugin update darktrace-mcp@darktrace-mcp` |
+| Codex | Rewrites `mcp_servers.darktrace` in `config.toml` (or re-runs `codex mcp add`) | Plugin: `codex plugin marketplace upgrade darktrace-mcp` |
+| JetBrains AI Assistant | Nothing (no documented file): run `darktrace-mcp config jetbrains` and paste the new JSON | — |
+| Docker runtime | Pulls `ghcr.io/nuoframework/darktrace-mcp:<new>`, container `--check-config`, rewrites the image ID, keeps the old one | Hand-pinned digests: pull the digest from the release notes and edit the entry |
+
+`setup` offers an "always latest" mode (`--update-mode npx-latest`) whose entries start `npx` with the `@latest` tag at every client start, unverified; the default (pinned) is the one every section below assumes. Full description, verification table and exit codes: [Update guide](update.md).
+
 ## Uninstall
 
 ```sh
 darktrace-mcp uninstall
 ```
 
-It shows a plan and asks once (`--yes` skips the question, `--dry-run` only prints the plan). It removes the `darktrace` entry from every client (config files are backed up first), deletes the stored tokens, `setup.json` and `~/.config/darktrace-mcp`, and deletes the fixed copies in `~/.local/share/darktrace-mcp/<version>/` (`--keep-copies` keeps them). With the Docker runtime, `--docker` also removes the one image ID that setup recorded, never other images. When the package is installed globally it prints the `npm uninstall -g @nuoframework/darktrace-mcp` command for you to run. Symbolic links and unknown files are never touched. `remove --all` is the same command. Without a global install, run it as `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`.
+It shows a plan and asks once (`--yes` skips the question, `--dry-run` only prints the plan). It removes the `darktrace` entry from every client (config files are backed up first), deletes the stored tokens, `setup.json` and `~/.config/darktrace-mcp`, and deletes the fixed copies in `~/.local/share/darktrace-mcp/<version>/`, including the ones `update` installed and the previous copy kept for rollback (`--keep-copies` keeps them). With the Docker runtime, `--docker` also removes the image ID that setup recorded and the previous one kept by `update`, never other images. When the package is installed globally it prints the `npm uninstall -g @nuoframework/darktrace-mcp` command for you to run. Symbolic links and unknown files are never touched. `remove --all` is the same command. Without a global install, run it as `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`.
 
 ## Several clients, one setup
 

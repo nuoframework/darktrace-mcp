@@ -1,5 +1,5 @@
 /** Installer subcommands. Kept dependency-free so the stdio entrypoint can import it cheaply. */
-export const CLI_COMMANDS = Object.freeze(['setup', 'config', 'remove', 'uninstall', 'test'] as const);
+export const CLI_COMMANDS = Object.freeze(['setup', 'config', 'remove', 'uninstall', 'update', 'test'] as const);
 
 export function isCliCommand(args: readonly string[]): boolean {
   if (args.length === 0) return false;
@@ -12,7 +12,7 @@ Installer commands:
   setup [--dry-run] [--yes] [--client <name>]... [--url <https-origin>]
         [--profiles read|read-write|read-sensitive|all|<list>] [--acknowledge-sensitive-write]
         [--runtime node|docker] [--image <ref>] [--pull] [--tokens-from-stdin] [--inline-tokens-windows]
-        [--date-format compact|spaced] [--offline]
+        [--date-format compact|spaced] [--offline] [--update-mode pinned|npx-latest]
       Interactive wizard: stores tokens in ~/.config/darktrace-mcp (0700/0600) and registers the server
       in detected AI clients. Tokens are read with hidden input or as two stdin lines, never as flags.
       Started through npx (npx -y @nuoframework/darktrace-mcp@<version> setup), it first copies the package
@@ -23,6 +23,9 @@ Installer commands:
       Before writing anything, setup sends a signed GET /status (compact date format; on HTTP 400 once more with
       spaced) and records the accepted format as DARKTRACE_DATE_FORMAT in every client entry. If neither works it
       stops. --date-format skips the check; --offline and --dry-run skip it and use the saved format or compact.
+      Updates (node runtime): pinned (default) keeps the registered version until \`update\` moves it, with
+      verification and rollback; npx-latest registers \`npx -y @nuoframework/darktrace-mcp@latest\` launchers that
+      fetch the newest release at every client start, unverified and network-dependent. Docker is always pinned.
       Docker runtime: checks that the daemon answers, defaults the image to ghcr.io/nuoframework/darktrace-mcp:<version>
       (or --image <name:tag | name@sha256:digest | sha256:ID>), offers to pull it when missing (--pull with --yes),
       then writes the local image ID (--pull=never) and records the ID and registry digest in setup.json.
@@ -31,12 +34,25 @@ Installer commands:
       Print a ready-to-paste snippet (no secrets). VS Code, Cursor, LM Studio and Kiro also get one-click install links.
       Reuses the date format saved by setup. Docker runtime: reuses the image ID and digest saved by setup.
       Reuses an acknowledgement saved by setup; otherwise sensitive + write profiles need the flag.
+  update [--check] [--rollback] [--version X.Y.Z] [--allow-downgrade] [--dry-run] [--yes] [--json]
+      Move every client entry to the newest published version (or --version) with the saved settings. Always queries
+      registry.npmjs.org (not configurable) and refuses downgrades without --allow-downgrade. Node runtime: npm installs
+      the exact version into a temporary directory (locked dependencies, no scripts), \`npm audit signatures\` verifies
+      the registry signatures and the provenance attestation, the tree is copied to ~/.local/share/darktrace-mcp/<new>/,
+      the new copy runs --check-config with the stored settings and one signed GET /status is sent; only then are the
+      client entries rewritten (backups kept) and the previous version recorded. Docker runtime: pulls
+      ghcr.io/nuoframework/darktrace-mcp:<new>, records its ID and digest and runs the container --check-config first.
+      The previous copy or image is kept. --check only prints installed vs latest with the release notes (exit 1 when
+      an update exists, 0 when up to date, 2 when the registry could not be reached). --rollback points the entries
+      back at the previous version when its copy or image is still present. --json prints one JSON summary.
+      \`test\` and \`doctor --online\` print one "Update available" line when a newer version exists; the server never checks.
   remove [--client <name>]... [--dry-run] [--purge]
       Remove the darktrace entry from client configs (backups kept); --purge also deletes stored tokens.
   uninstall [--dry-run] [--yes] [--keep-copies] [--docker]      (alias: remove --all)
       Show a plan, ask once, then remove the darktrace entry from every client (backups kept), delete the stored
       tokens, setup.json and ~/.config/darktrace-mcp, and delete the fixed copies in ~/.local/share/darktrace-mcp
-      (unless --keep-copies). --docker also runs docker image rm on the image ID recorded by setup (only that one).
+      (unless --keep-copies), including those installed by update. --docker also runs docker image rm on the image ID
+      recorded by setup and on the previous image kept by update (only those).
       Prints the npm uninstall -g command when the package is installed globally; never runs it.
   test | doctor --online
       Load the configuration and perform one signed GET /status to verify URL, TLS and tokens. On HTTP 400 with
