@@ -40,14 +40,14 @@ La publicación de 1.1.1 está en curso a fecha de **2026-10-06**. [Estado de la
 
 ### Plugin para Claude Code y Codex
 
-El repositorio es también un marketplace de plugins. El plugin de `claude-plugin/` arranca el paquete npm fijado a una versión y, al activarlo, Claude Code pide la URL del appliance, los dos tokens y el perfil (los tokens van al almacén de credenciales del sistema):
+Claude Code: dos comandos y responder a las preguntas (URL, tokens, perfil). No hay que ejecutar nada más.
 
 ```sh
 claude plugin marketplace add nuoframework/darktrace-mcp
 claude plugin install darktrace-mcp@darktrace-mcp
 ```
 
-Codex instala la misma carpeta desde el marketplace del repositorio (`codex plugin marketplace add nuoframework/darktrace-mcp`), pero no pide configuración; ejecuta el asistente de arriba para la conexión. [Guía del plugin (EN)](docs/plugin-distribution.md) · [Claude Code](docs/es/clients.md#claude-code) · [Codex](docs/es/clients.md#codex).
+Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp` y después el asistente de arriba una vez para la conexión. El plugin de `claude-plugin/` arranca el paquete npm fijado a una versión; los tokens van al almacén de credenciales del sistema. [Guía del plugin (EN)](docs/plugin-distribution.md) · [Claude Code](docs/es/clients.md#claude-code) · [Codex](docs/es/clients.md#codex).
 
 ### Claude Desktop
 
