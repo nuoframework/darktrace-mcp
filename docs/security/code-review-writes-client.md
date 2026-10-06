@@ -4,7 +4,7 @@
 
 ## 1. Scope, snapshot and method
 
-**Exact source HEAD reviewed:** `705f2ce350eb90922f72d5b2c9173a4f153d9ce7` (`nuoframework/review-crypto-luna`). This is the source snapshot before adding this report.
+**Exact source HEAD reviewed:** `705f2ce350eb90922f72d5b2c9173a4f153d9ce7` (`nuoframework/review-crypto-<worker>`). This is the source snapshot before adding this report.
 
 **In scope:** `src/client/{signer,httpClient,httpsConnector}.ts`, `src/config/{schema,load,address}.ts`, `src/policy/*`, `src/tools/*`, `src/server/*`, `src/api/{operations,validation,response-view}.ts`, `src/shape/*`, and `src/observability/*`. I read the requested change rationale, write threat model and test plan, design decisions, SDK comparison, and the two prior code audits. I also inspected the related signer, approval, policy, shaping, and client tests.
 

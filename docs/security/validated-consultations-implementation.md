@@ -24,7 +24,7 @@ Existing authorization remains before input validation/preview/dispatch and imme
 
 `src/coverage/report.generated.json` was copied from the isolated reproducible build under the coordinator's explicit coverage ownership extension (`msg_1b891452e606`). Its `releaseEligible` set is exactly the 19 IDs. Historical catalogue implementation status and the original operation inventory remain intact. `src/coverage/report.ts` itself required no edit because it already uses the release predicate.
 
-`test/contract/validated-consultations.test.ts` adds an independent literal ID/tool-name oracle, descriptor mutation negatives, exact schema/description selector checks, all-excluded direct-call denials and real SDK listing/call coverage. `test/contract/read-only-release.test.ts` updates only its production descriptor expectation from 39 semantic reads including one POST to 19 GETs; existing frozen write-ceiling and zero-effect checks remain. The four expressly reserved Luna baseline files were not edited.
+`test/contract/validated-consultations.test.ts` adds an independent literal ID/tool-name oracle, descriptor mutation negatives, exact schema/description selector checks, all-excluded direct-call denials and real SDK listing/call coverage. `test/contract/read-only-release.test.ts` updates only its production descriptor expectation from 39 semantic reads including one POST to 19 GETs; existing frozen write-ceiling and zero-effect checks remain. The four expressly reserved the second worker baseline files were not edited.
 
 The complete modified-file list for this task is:
 

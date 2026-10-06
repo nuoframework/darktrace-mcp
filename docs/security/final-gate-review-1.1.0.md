@@ -10,7 +10,7 @@
 |---|---|
 | Date | 2026-10-06 |
 | Reviewer | Independent final gate reviewer. I wrote none of the changes under review. |
-| Branch | `nuoframework/final-gate-opus` (this file is my only commit) |
+| Branch | `nuoframework/final-gate-<reviewer>` (this file is my only commit) |
 | Format | follows [final-stable-gate-review.md](final-stable-gate-review.md) and [first-stable-coordinator-decision.md](first-stable-coordinator-decision.md) |
 
 Evidence labels:

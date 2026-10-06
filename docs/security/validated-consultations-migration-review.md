@@ -1,6 +1,6 @@
 # Validated consultations — independent helper and test-migration review
 
-Task `task_a0e5ec1aea18`, dispatch `ctx_5d729af9564d`, 2026-10-06 (Europe/Madrid). This review is independent of the helper owner Sol (`ctx_3ca977fbff79`) and of the test owner Luna (`ctx_713964029b89`). It follows my accepted source review, [validated-consultations-independent-review.md](validated-consultations-independent-review.md), for source `9e7c7070…`.
+Task `task_a0e5ec1aea18`, dispatch `ctx_5d729af9564d`, 2026-10-06 (Europe/Madrid). This review is independent of the helper owner (implementation worker) (`ctx_3ca977fbff79`) and of the test owner (second worker) (`ctx_713964029b89`). It follows my accepted source review, [validated-consultations-independent-review.md](validated-consultations-independent-review.md), for source `9e7c7070…`.
 
 The only file written in the repository is this document. No source, test, helper, fixture, package, Docker, Git, API or credential change was made, and no shared build was run. Every execution ran in a private copy of the current shared bytes (`…/scratchpad/mig`, node_modules symlinked) whose `src/` tree still hashes to `9e7c7070298ef592a1a10cdcb7ca481420a377e25e4a93c863ca33c31921d7f2`.
 
@@ -19,7 +19,7 @@ The only file written in the repository is this document. No source, test, helpe
 | `test/historical/validated-contract-predecessor/provenance.json` | — | `7390a234bc73fa52f8922196771e9c5e38ef155f976f0da60a8a331d8358f878` |
 | alpha fixture `test/security/fixtures/mcp-tool-contracts.json` | `37b5af95…` | unchanged |
 
-**Patch fidelity.** I applied Sol's `prepare-release.mjs.patch` and `verify-release.mjs.patch` to the pre-migration bytes (`3a7d…`/`e4a2…`, taken from the frozen owner snapshot). The result is **byte-identical** to the current shared helpers, so the shared tree contains no unreviewed helper edit. In Sol's external snapshot, the only `scripts/`, `src/` and `test/` difference from shared is one line in `test/contract/validated-consultations.test.ts`, which is not part of the helper scope. Shared still has the source owner's `b2ddca99…` bytes.
+**Patch fidelity.** I applied the implementation worker's `prepare-release.mjs.patch` and `verify-release.mjs.patch` to the pre-migration bytes (`3a7d…`/`e4a2…`, taken from the frozen owner snapshot). The result is **byte-identical** to the current shared helpers, so the shared tree contains no unreviewed helper edit. In the implementation worker's external snapshot, the only `scripts/`, `src/` and `test/` difference from shared is one line in `test/contract/validated-consultations.test.ts`, which is not part of the helper scope. Shared still has the source owner's `b2ddca99…` bytes.
 
 **Provenance content.** The predecessor manifest says `historicalOnly:true`. It binds:
 - aa08 source `aa08c260…`
@@ -28,7 +28,7 @@ The only file written in the repository is this document. No source, test, helpe
 - the historical read/sensitive profile hashes `6ce22e56…`/`def9a8db…`
 - alpha `37b5…`
 
-Its stated purpose is "never an active oracle or fallback". Its path is distinct from the pending Luna test archive `test/historical/validated-scope-predecessor`.
+Its stated purpose is "never an active oracle or fallback". Its path is distinct from the pending second-worker test archive `test/historical/validated-scope-predecessor`.
 
 ### Code review of the helper diff
 
@@ -119,16 +119,16 @@ Negatives:
 
 A single-layer removal is accepted because the other layer still produces the identical contract. Source-level tampering of either file is caught separately: `src/policy/guard.ts` and `src/tools/index.ts` are byte-bound in the source evidence, and `dist` is rebuilt from bound source by the release pipeline. This is defense-in-depth layering, not a gap (informational M-1).
 
-**Owner harnesses replayed on the applied shared bytes.** Sol's own `helper-tamper.mjs` and `evidence-tamper.mjs` exit 0 in my copy, reproducing **18** contract-tamper refusals and **12** recomputed-checksum evidence-tamper refusals. The evidence harness is synthetic unit evidence only; it does not prove package, installation, image or security-receipt readiness.
+**Owner harnesses replayed on the applied shared bytes.** The implementation worker's own `helper-tamper.mjs` and `evidence-tamper.mjs` exit 0 in my copy, reproducing **18** contract-tamper refusals and **12** recomputed-checksum evidence-tamper refusals. The evidence harness is synthetic unit evidence only; it does not prove package, installation, image or security-receipt readiness.
 
-### A2 — final helper integration of the Luna scope history (msg_5b5351634279): **ACCEPT**
+### A2 — final helper integration of second-worker scope history (msg_5b5351634279): **ACCEPT**
 
 Final shared bytes:
 - `scripts/prepare-release.mjs` `ae93d8fff6fddc04537616cf75eef07dbcb167278e72dca5f58eb51e2a4ce22a`, unchanged since A
 - `scripts/verify-release.mjs` **`286d674f6efc18c5db8ca68cf25db5bb2e1fb493299b2b60bc53cf0ff3e5861f`**
 - `src/` still `9e7c7070…`, fixture still `6ddda205…`
 
-These match Sol's `final-code-hashes.json` and the root message.
+These match the implementation worker's `final-code-hashes.json` and the root message.
 
 The full diff from `83af29df…` to `286d674f…` is narrow:
 - **New `historicalBytes`.** It requires regular, non-symlink files with mode exactly `0644`. Both predecessor archives now read through it.
@@ -156,7 +156,7 @@ All archive files and both provenance files are `0644`.
 - Provenance: `historicalOnly:false`, a dropped row in otherwise consistent JSON, a whitespace-only change, and mode `0600`.
 - Contract-predecessor provenance at mode `0755`.
 
-Sol reports 21 contract/history and 14 source/evidence tamper refusals; I did not re-run those. Mine cover the new scope paths independently.
+The implementation worker reports 21 contract/history and 14 source/evidence tamper refusals; I did not re-run those. Mine cover the new scope paths independently.
 
 Note: the strict `0644` check depends on the release snapshot copy preserving modes. `cpSync` does, and the archives are `0644` in the shared tree.
 
@@ -167,9 +167,9 @@ Note: the strict `0644` check depends on the release snapshot copy preserving mo
 | Functional | **129 tests, 127 PASS, 2 FAIL** | `read-summary-compatibility` (`get_summarystatistics`) and `response-view` (Advanced Search) |
 | Security (`run-isolated.mjs`) | **325 tests, 318 PASS, 4 FAIL, 3 SKIP** | MR-01 and IR-01 (Advanced Search tool output), ST-09 SENSITIVE and MINIMIZATION |
 
-With the new pin applied, MR-04 read and read+sensitive now **PASS** against the 6ddda fixture, which brings the security failures down from 6 to 4. All six remaining failures are historical Advanced Search or summary positives owned by the pending Luna migration. They are not claimed as PASS.
+With the new pin applied, MR-04 read and read+sensitive now **PASS** against the 6ddda fixture, which brings the security failures down from 6 to 4. All six remaining failures are historical Advanced Search or summary positives owned by the pending the second worker migration. They are not claimed as PASS.
 
-## Part B — active-test migration (Luna `ctx_713964029b89`): **ACCEPT** (scoped)
+## Part B — active-test migration (second worker `ctx_713964029b89`): **ACCEPT** (scoped)
 
 Reviewed bytes: the four files listed in the owner report [validated-consultations-test-migration.md](validated-consultations-test-migration.md). They are identical in the shared tree and in my isolated run copy.
 
@@ -218,7 +218,7 @@ Every displaced positive therefore has either an approved GET positive carrying 
 
 The 3 skips are the documented macOS `2600` special-bit fixtures (`ST-02.FILE` ×2 and `ST-02.POLICY`), where the OS discards the bits.
 
-My security receipt `2026-10-05T22-44-45-149Z.json` has SHA-256 `8ff3efa07b7e4f70957950fc28317ec86d13900f2bf630e0c5d18e08f39bad97`. It shows `receiptComplete:true`, `sourceTreeSha256` `9e7c7070…`, fixture hashes 6ddda/37b5, and Node v24.14.1 on darwin/arm64. It is independent of Luna's `aebac98f…`.
+My security receipt `2026-10-05T22-44-45-149Z.json` has SHA-256 `8ff3efa07b7e4f70957950fc28317ec86d13900f2bf630e0c5d18e08f39bad97`. It shows `receiptComplete:true`, `sourceTreeSha256` `9e7c7070…`, fixture hashes 6ddda/37b5, and Node v24.14.1 on darwin/arm64. It is independent of the second worker's `aebac98f…`.
 
 `captureReviewedContracts` plus `verifyValidatedPredecessorArchives` on the final bytes returns:
 - contract bytes `6ddda205…`
@@ -228,7 +228,7 @@ My security receipt `2026-10-05T22-44-45-149Z.json` has SHA-256 `8ff3efa07b7e4f7
 
 **Remaining (not reviewed here):**
 - Linux Node 22/24 full-suite runs
-- the package preparation/installed-archive verification delegated to Sol
+- the package preparation/installed-archive verification delegated to the implementation worker
 - final docs sync (see [validated-consultations-documentation-checkpoint.md](validated-consultations-documentation-checkpoint.md); I did not review it)
 
 ## Part C — proposed endpoint discovery recipe (msg_0a10f5f56f2f): **CONDITIONAL ACCEPT, review only**
@@ -257,7 +257,7 @@ The proposal is to replace the inventory `get_devicesearch` discovery `count:1` 
 
 Root authorized exactly `inventoryRecipes.get_devicesearch = Object.freeze({query:{count:10,offset:0}})`, without `seensince`. That resolves my correction.
 
-- **Bytes.** Shared `scripts/lab-read-smoke.mjs` is `5d2a9fefa682bd41852e7fc1e2333180384cc2f76e0e23becb5827315b802e23`. It is byte-identical to Sol's `lab-read-smoke-before.mjs` (`789c0a11…`) plus `lab-discovery.patch`: one frozen recipe line plus help text, a 7-line diff. That `before` hash also equals the harness in my earlier isolated copy, so it is the genuine prior shared file.
+- **Bytes.** Shared `scripts/lab-read-smoke.mjs` is `5d2a9fefa682bd41852e7fc1e2333180384cc2f76e0e23becb5827315b802e23`. It is byte-identical to the implementation worker's `lab-read-smoke-before.mjs` (`789c0a11…`) plus `lab-discovery.patch`: one frozen recipe line plus help text, a 7-line diff. That `before` hash also equals the harness in my earlier isolated copy, so it is the genuine prior shared file.
 - **Independent extraction.** I loaded a copy with only the `main()` call replaced by an export.
   - `validationPolicySha256` is `ed55eb308bb748c22494047367f114598614e399b7c6ffb115d969bb41412ac9` before and **`3060d0a25c9d156501ade8d053183cc04a70946171926bdda0de1f17508c6996`** after, matching the root receipt.
   - The only changed policy key is `inventoryRecipes`, and within it only `get_devicesearch`.

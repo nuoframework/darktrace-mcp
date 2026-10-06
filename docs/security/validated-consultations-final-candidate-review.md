@@ -132,11 +132,11 @@ The three Darwin mode-2600 skips do **not** occur on Linux: all 325 security cas
 
 The logs, `env.txt`, `status.txt`, receipts and `run.sh` are preserved read-only in `/private/tmp/darktrace-final-candidate-review-ctx_3573b223885d/`. Their `SHA256SUMS` is `5fffecfead9544f6744d58b716ddb8f84ee76593c18bb285e50884e46e672f4d`.
 
-**Input purity.** The bound input copy contained exactly the 214 frozen-manifest files: 0 extra, 0 missing, 0 byte mismatches and **0 AppleDouble `._*` files**. It was created with `cp -R`, not BSD tar. This rules out the contamination cause root diagnosed in Luna's first Node 22 attempt.
+**Input purity.** The bound input copy contained exactly the 214 frozen-manifest files: 0 extra, 0 missing, 0 byte mismatches and **0 AppleDouble `._*` files**. It was created with `cp -R`, not BSD tar. This rules out the contamination cause root diagnosed in the second worker's first Node 22 attempt.
 
-**Limits.** The runs are linux/arm64 only; I did not run linux/amd64. They use the slim images' bundled Node and OpenSSL 3.5.x and exercise no TLS against a real appliance. They are independent execution and do not replace Luna's report or remote CI.
+**Limits.** The runs are linux/arm64 only; I did not run linux/amd64. They use the slim images' bundled Node and OpenSSL 3.5.x and exercise no TLS against a real appliance. They are independent execution and do not replace the second worker's report or remote CI.
 
-### 3b. Luna platform evidence (`ctx_4391c2c0d51b`): **settled, consistent**
+### 3b. Second-worker platform evidence (`ctx_4391c2c0d51b`): **settled, consistent**
 
 External root: `/private/tmp/darktrace-validated19-platform-gates.UC5K3S`.
 
@@ -156,14 +156,14 @@ External root: `/private/tmp/darktrace-validated19-platform-gates.UC5K3S`.
 - **Non-final attempts, recorded separately and not relabelled as passes.**
   1. The first Node 22 extraction exited `97` before any gate ran (non-root read-only extraction). No gate logs exist for it, which is the lost-log limitation root noted.
   2. The AppleDouble-contaminated Node 22 run produced security 332 tests, 324 pass, 8 fail, 0 skip. Its receipt `3fdd59c6…` is bound to contaminated source `80c4fef6…`.
-- **Final-run filtering.** Luna's final runs dropped only the generated `._*` entries at unpack. The resulting receipts bind the clean `9e7c7070…`, so that filtering did not alter source bytes.
+- **Final-run filtering.** The second worker's final runs dropped only the generated `._*` entries at unpack. The resulting receipts bind the clean `9e7c7070…`, so that filtering did not alter source bytes.
 
 ## Findings
 
 - **No blocking defect** in the documentation, package or platform evidence for the accepted 19-GET/15-tool scope.
 - **DOC-1 (informational).** There is stale "not a new endpoint PASS" wording in the trailing historical endpoint-readiness section of `docs/lab-validation.md`. The current sections are correct.
 - **PKG-1 (informational).** The package freeze contains an intermediate copy (`d145b58f…`) of the migration review document. It is not shipped and not source-bound; it is disclosed and has no effect on the package bytes.
-- **PLAT-1 (process).** Luna's two non-final Node 22 attempts (exit 97 with no logs; AppleDouble-contaminated `80c4fef6…` with 8 failures) remain failures. Platform acceptance rests on the clean `9e7c7070…` runs: mine (3a) and Luna's final runs (3b), which agree exactly.
+- **PLAT-1 (process).** The second worker's two non-final Node 22 attempts (exit 97 with no logs; AppleDouble-contaminated `80c4fef6…` with 8 failures) remain failures. Platform acceptance rests on the clean `9e7c7070…` runs: mine (3a) and the second worker's final runs (3b), which agree exactly.
 - **Scope limits.** Linux evidence is arm64 only, with no amd64 run. Remote CI and branch protections were not reviewed here. Lab evidence is bounded recipe and shape coverage only.
 
 ## Decision
@@ -185,11 +185,11 @@ Supporting evidence:
 - The documentation checkpoint (`30223749…`).
 - The package checkpoint (`44fddd49…`), which I verified independently.
 - The macOS suites: 130/130 functional and 322/0/3 security, the 3 skips being platform-blocked mode-2600 fixtures.
-- **Linux arm64 Node 22.23.3 and 24.21.0: 130/130 and 325/325 with zero skips**, in my own runs and in Luna's.
+- **Linux arm64 Node 22.23.3 and 24.21.0: 130/130 and 325/325 with zero skips**, in my own runs and in the second worker's.
 
 ### Stable publication: **NOT approved**
 
-- **OpenSSL 3.5.8 / CVE-2026-35189.** The CVE remains an **open stable-publication blocker**. It applies to the TLS certificate/CRLDP path and is fixed in OpenSSL 3.5.9. Every examined runtime still bundles 3.5.8: the Docker image, and both Linux test images per Luna's `runtime.txt`. No waiver is granted or implied.
+- **OpenSSL 3.5.8 / CVE-2026-35189.** The CVE remains an **open stable-publication blocker**. It applies to the TLS certificate/CRLDP path and is fixed in OpenSSL 3.5.9. Every examined runtime still bundles 3.5.8: the Docker image, and both Linux test images per the second worker's `runtime.txt`. No waiver is granted or implied.
 - **Residual scanner findings.** The dated findings remain as recorded and are not re-scanned here. On the unchanged OS component closure:
   - Trivy 0.74.0 (DB 2026-10-05): 23 MEDIUM, 8 LOW
   - Grype 0.118.0 (DB 2026-10-05): **11 High**, 10 Medium, 3 Low, 7 Negligible

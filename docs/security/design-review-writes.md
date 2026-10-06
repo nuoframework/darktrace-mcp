@@ -8,7 +8,7 @@
 
 ## 1. Scope and method
 
-Base commit: `705f2ce` (branch `nuoframework/review-design-opus`, based on `feat/full-api-easy-install`). SHA-256 values are truncated to 12 hex characters.
+Base commit: `705f2ce` (branch `nuoframework/review-design-<reviewer>`, based on `feat/full-api-easy-install`). SHA-256 values are truncated to 12 hex characters.
 
 | Input | SHA-256 (12) |
 |---|---|

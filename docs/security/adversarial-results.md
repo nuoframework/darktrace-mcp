@@ -1,6 +1,6 @@
 # Independent offline adversarial campaign
 
-Date: 2026-10-05. Worker: `task_494affcf68d7`, dispatch `ctx_1430070fd6a1`; requested GPT-6.1 Sol/high configuration supplied by coordinator. Runtime observed: Node v24.14.1, macOS arm64. **Campaign evidence, not security approval. No complete ST row is certified by these tests.**
+Date: 2026-10-05. Worker: `task_494affcf68d7`, dispatch `ctx_1430070fd6a1`; requested independent-tester configuration supplied by coordinator. Runtime observed: Node v24.14.1, macOS arm64. **Campaign evidence, not security approval. No complete ST row is certified by these tests.**
 
 **Final 13:13 snapshot: 238 named cases, 235 PASSED, zero FAIL, three BLOCKED OS fixtures; 4,434 assertion invocations.** The coordinator execution used real loopback TLS. Three medium findings (AD-01–03) were independently reproduced, corrected by source owners and passed the regressions. Twenty added FR-01 translated/transition IPv6 regressions also pass after the source owner's correction. Subcases outside the executed campaign remain NOTRUN below; this is not the separate final code/release review.
 
