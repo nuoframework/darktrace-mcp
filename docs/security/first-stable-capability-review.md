@@ -44,7 +44,7 @@ Que el root fije el contrato y ejecute las gates completas (suites funcional y d
 | Rechazo al arranque (11 variantes) | `write:true` en archivo; `writeCritical` solo; los dos juntos; **`write:true` en archivo oculto por `DARKTRACE_PROFILES=read`**; `DARKTRACE_PROFILES=read,write` y `=write`; `DARKTRACE_WRITE_CRITICAL=true`; `write:"true"`; `write:1`; `writeCritical:true` en archivo con el entorno a `false`; y `--check-config` con `write:true`. Todas salen con exit 1, sin respuesta MCP ni `tools/list` y sin efectos según el guard. **Total de las dos últimas filas: 84/84.** |
 | Configuración falsificada en proceso (`forged-probe.mjs` con guard) | `parseConfig` devuelve `write` y `writeCritical` a `false` en un objeto congelado; `RELEASE_CAPABILITY` no se puede mutar. Con `profiles` falsificados (`write`, `writeCritical`, `export` y `email` a `true`), `eligibleTools` publica 28 herramientas solo de lectura, o 27 sin `sensitiveRead`. Para las **22 operaciones no lectoras** (9 medium, 7 high, 6 critical), `isEligible` es `false` y `authorize` lanza error. Por cada herramienta, con `dryRun` ausente, `true` o `false`, y con `confirm`/`hostApproval`: siempre `isError`, sin `dryRun` ni `parameterNames` y sin canarios. **0 peticiones y 0 auditorías.** |
 | Techo del cliente de producción | Los descriptores son de solo lectura, están congelados y su número coincide con las operaciones permitidas (39: 38 GET y 1 POST de Advanced Search). `createHttpClient(base,{operations:productionOperationDescriptors})` rechaza los 22 `operationId` no lectores, sin DNS, HMAC ni socket según el guard. **163/163.** |
-| Tests dirigidos de Sol en mi snapshot | 7 archivos: **45/45** correctos, 0 fallos y 0 omitidos |
+| Tests dirigidos del worker de implementación en mi snapshot | 7 archivos: **45/45** correctos, 0 fallos y 0 omitidos |
 | Archivo alfa (`test/historical/alpha-read-write`) | Los 10 archivos de `provenance.json` coinciden byte a byte en tres puntos: SHA registrado, copia `.txt` y original en el snapshot exacto de `4f6ef96`. Están fuera de la detección activa (`.txt`). La procedencia registra la fuente `4f6ef96c…` y el fixture `37b5af95…`. |
 | Denegaciones activas más estrictas | Comparé cada archivo activo con su copia alfa. Las aserciones eliminadas son exactamente las positivas de escritura (ejecución, IDs de auditoría, content-type de formularios, preview). Se sustituyen por bucles que exigen error, ausencia de `dryRun`, 0 peticiones y 0 auditorías con perfiles falsificados. Los recuentos de tests se mantienen (por ejemplo, `mcp-defense` pasa de 173 a 176 aserciones y `policy-sinks` queda en 64). `test/contract/read-only-release.test.ts` (`93050ec9…`) cubre de forma exhaustiva las 22 operaciones denegadas, el techo de descriptores y la cobertura. |
 
@@ -59,7 +59,7 @@ Que el root fije el contrato y ejecute las gates completas (suites funcional y d
 ## 5. Pendiente
 
 - El root fija el fixture estable y actualiza MR04 en una tarea aparte.
-- Faltan las suites funcional y de seguridad completas sobre `7104f8c4`, así como Linux Node22/24, Docker (imagen reconstruida), paquete y evidencia de release (owner de Luna o del packaging).
+- Faltan las suites funcional y de seguridad completas sobre `7104f8c4`, así como Linux Node22/24, Docker (imagen reconstruida), paquete y evidencia de release (owner del segundo worker o del packaging).
 - Falta la campaña de lectura del root con el harness `72e13efd…` y un manifiesto nuevo.
 
 No se acepta ningún riesgo de forma genérica.

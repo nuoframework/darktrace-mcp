@@ -1,6 +1,6 @@
 # Investigación de ataques MCP — ronda 2 (MR2) y hallazgos AD2
 
-**Estado:** investigación, pruebas sintéticas y hallazgos. Fecha: 2026-10-06. Rama `nuoframework/adversarial-round2-opus`.
+**Estado:** investigación, pruebas sintéticas y hallazgos. Fecha: 2026-10-06. Rama `nuoframework/adversarial-round2-<tester>`.
 Continúa la [ronda 1](mcp-attack-research.md) (MR-01..08, fuentes S1–S16). Se lee junto al [modelo de amenazas](threat-model.md), su [suplemento de escrituras](threat-model-writes.md) y el [plan de pruebas de escrituras](security-test-plan-writes.md).
 
 **Alcance.**
@@ -17,7 +17,7 @@ Continúa la [ronda 1](mcp-attack-research.md) (MR-01..08, fuentes S1–S16). Se
 
 ## 1. Fuentes (ronda 2)
 
-La recopilación web la hizo un subagente de investigación (Sonnet 5.5) el 2026-10-06. Yo no volví a abrir cada URL.
+La recopilación web la hizo un subagente de investigación (asistente de investigación) el 2026-10-06. Yo no volví a abrir cada URL.
 - **Verificada** significa que el subagente leyó la página.
 - **No verificada** significa que el dato viene de un fragmento de búsqueda, de una fuente secundaria o de memoria. No apoyo ninguna conclusión solo en una fuente no verificada.
 

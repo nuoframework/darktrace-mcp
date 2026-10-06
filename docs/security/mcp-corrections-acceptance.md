@@ -12,7 +12,7 @@
 - **IR-02:** cerrado.
 - **IR-03:** cerrado tras un hallazgo bloqueante de esta ronda. El primer freeze vinculaba 4 paquetes; la traza mostró 9 más en el proceso padre. El owner lo corrigió y ahora vincula 14, que revalidé.
 - **UG-01, UG-02 y MR-08:** cerrados en su alcance documental.
-- **Abierto:** solo información residual (§5). La imagen Docker **no** queda aceptada (el escaneo de vulnerabilidades está en remediación por Luna).
+- **Abierto:** solo información residual (§5). La imagen Docker **no** queda aceptada (el escaneo de vulnerabilidades está en remediación por el segundo worker).
 - No se acepta ningún riesgo ni se afirma resistencia universal a la inyección de prompts.
 
 ## 1. Snapshot congelado y evidencia

@@ -81,4 +81,4 @@ El root debe:
 4. Ejecutar la campaña.
 5. Destruir el volumen.
 
-Los cambios de CI corresponden a Luna, que no ha recibido ninguna modificación de este trabajo.
+Los cambios de CI corresponden al segundo worker, que no ha recibido ninguna modificación de este trabajo.

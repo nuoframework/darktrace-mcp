@@ -1,6 +1,6 @@
 # Correcciones IR-01 e IR-02: invisibles y CA ambiental
 
-Fecha: 2026-10-05. Tarea `task_25aac7de75bd`, dispatch `ctx_1918d2f8589e`. Respuesta a [la revisión independiente Opus](mcp-defense-independent-review.md) de la fuente anterior `d72e89282f7369e382ea2b40fc3d665d584721723e148540b7fcb38eb6023430`. **Implementadas y probadas offline; pendiente segunda aceptación independiente sobre este freeze.** No es certificación ni autorización de versión estable.
+Fecha: 2026-10-05. Tarea `task_25aac7de75bd`, dispatch `ctx_1918d2f8589e`. Respuesta a [la revisión independiente](mcp-defense-independent-review.md) de la fuente anterior `d72e89282f7369e382ea2b40fc3d665d584721723e148540b7fcb38eb6023430`. **Implementadas y probadas offline; pendiente segunda aceptación independiente sobre este freeze.** No es certificación ni autorización de versión estable.
 
 ## Cambios y subcasos
 

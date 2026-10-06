@@ -73,7 +73,7 @@ An initial summary probe stopped at the actual pairing rejection before projecti
 
 ## Handoff and gates
 
-Root alone prepares/reviews a new clean manifest, obtains Opus acceptance and chooses bounded native/Docker batches. Historical 11-selector native successes remain historical; root reports devicesummary blocked after recent discovery and cves uncalled. Inventory does not guarantee IDs, metric availability, resource-variant compatibility or closure of all 37 selectors. Known size/shape refusals and filtertypes redirect remain explicit.
+Root alone prepares/reviews a new clean manifest, obtains independent-reviewer acceptance and chooses bounded native/Docker batches. Historical 11-selector native successes remain historical; root reports devicesummary blocked after recent discovery and cves uncalled. Inventory does not guarantee IDs, metric availability, resource-variant compatibility or closure of all 37 selectors. Known size/shape refusals and filtertypes redirect remain explicit.
 
 Project source/security/artifact/CI/Docker/live-MCP advertised-scope gates remain distinct from each operator's host/provider processing, credentials and ACL prerequisites. No universal provider approval, stable version decision or publication occurs in this task. The final release pipeline waits for production/Docker/design/version inputs to freeze; release helpers, README, Docker files, historical audits/tests and package versions were not changed.
 
