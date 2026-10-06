@@ -17,6 +17,8 @@ export interface CliContext {
   readonly now: () => Date;
   /** Runs an external client CLI with an argument vector (never a shell). */
   readonly run: (command: string, args: readonly string[]) => RunResult;
+  /** Runs docker (argument vector, never a shell); `stream` shows docker's own progress output. Defaults to `run`. */
+  readonly runDocker?: (command: string, args: readonly string[], options?: { readonly stream?: boolean }) => RunResult;
   /** Signed GET /status used by `test` and the `setup` date-format probe. Defaults to the production client. */
   readonly probeStatus?: StatusProber;
 }

@@ -90,6 +90,7 @@ test('setup validates URL and tokens and supports --dry-run without writing anyt
 test('docker runtime emits hardened arguments with the caller UID:GID and token-file mounts', async () => {
   const box = sandbox('linux', ['docker']);
   const image = 'sha256:' + 'a'.repeat(64);
+  box.docker.local.push({ id: image, tags: [], repoDigests: [] });
   const { out, io: setupIo } = io(box, stdinFrom(`${PUBLIC}\n${PRIVATE}\n`));
   assert.equal(await runSetup({ dryRun: false, yes: true, url: 'https://dt.example.com', runtime: 'docker', image, clients: ['cursor'], tokensFromStdin: true, inlineTokens: false }, setupIo), 0, out.text());
   const server = readJson(join(box.home, '.cursor/mcp.json')).mcpServers.darktrace;
@@ -100,12 +101,13 @@ test('docker runtime emits hardened arguments with the caller UID:GID and token-
   assert.ok(server.args.some((a: string) => a.includes('dst=/run/secrets/private-token,readonly')));
   assert.equal(server.env, undefined);
   assert.equal(server.args.some((a: string) => a.startsWith('DARKTRACE_TOKEN_FILE_OWNER=')), false, 'Linux keeps the strict owner rule');
-  await assert.rejects(runSetup({ dryRun: true, yes: true, url: 'https://dt.example.com', runtime: 'docker', image: 'darktrace-mcp:latest', tokensFromStdin: false, inlineTokens: false }, io(box).io), /immutable/);
+  await assert.rejects(runSetup({ dryRun: true, yes: true, url: 'https://dt.example.com', runtime: 'docker', image: 'Darktrace-MCP:latest', tokensFromStdin: false, inlineTokens: false }, io(box).io), /tag reference/);
 });
 
 test('docker runtime on macOS (Docker Desktop) opts into root-or-current token-file ownership only', async () => {
   const box = sandbox('darwin', ['docker']);
   const image = 'sha256:' + 'b'.repeat(64);
+  box.docker.local.push({ id: image, tags: [], repoDigests: [] });
   const { out, io: setupIo } = io(box, stdinFrom(`${PUBLIC}\n${PRIVATE}\n`));
   assert.equal(await runSetup({ dryRun: false, yes: true, url: 'https://dt.example.com', runtime: 'docker', image, clients: ['cursor'], tokensFromStdin: true, inlineTokens: false }, setupIo), 0, out.text());
   const args: string[] = readJson(join(box.home, '.cursor/mcp.json')).mcpServers.darktrace.args;

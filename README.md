@@ -54,6 +54,14 @@ npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
 
 Multi-arch image (linux/amd64, linux/arm64), pinned by its index digest. Use the digest, not the mutable `1.1.1` tag, in client configuration. [Docker guide](docs/docker.md).
 
+### Uninstall
+
+```sh
+npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall
+```
+
+Shows a plan and asks once, then removes the `darktrace` entry from every client (backups kept), the stored tokens and settings, and the fixed copies. `--dry-run` only prints the plan; `--docker` also removes the image ID that setup pinned. [Details](docs/clients.md#uninstall).
+
 ## See it work
 
 Three recordings against a **synthetic HTTPS mock**, with dummy tokens and no production data. These demonstrate the workflow, not appliance compatibility. [Sources, transcripts and re-recording guide](scripts/demo/README.md).

@@ -8,11 +8,30 @@ The image exposes the same tools as a native install. Profiles work the same way
 
 > **Release archives.** The v1.0.0 image archives contain the earlier read-only build (15 tools). For the full API surface, build the image from the current checkout ([Build](#build)) or use the 1.1.0 image once it is published.
 
-## Quick steps
+## Install
 
-1. Pull, load or build the image ([Install options](#install-options)).
-2. Run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)).
-3. Add the client snippet from [Clients: Docker](clients.md#docker), with the image ID.
+Two commands. First install Docker and start it:
+
+- Linux: `sudo apt install docker.io` (or Docker Engine from docs.docker.com), then `sudo usermod -aG docker $USER` and log out and back in.
+- macOS and Windows: install Docker Desktop and start it.
+
+Then run the wizard and choose `2) docker` when it asks how clients should start the server:
+
+```sh
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+```
+
+The wizard:
+
+1. Resolves the absolute `docker` path and checks that the daemon answers (`docker version`). If Docker is missing or stopped it says what to install or start, and stops before writing anything.
+2. Proposes `ghcr.io/nuoframework/darktrace-mcp:<package version>`. You can instead give another tag, a `name@sha256:<digest>` reference or a local `sha256:<image ID>`; anything else is rejected.
+3. If the image is not present locally, asks `Pull it now? [Y/n]` and runs `docker pull` with its progress on screen. With `--yes` (no prompts) pass `--pull`; otherwise setup stops with a clear message.
+4. Reads the image ID and the registry digest. Client entries start the **image ID** with `--pull=never`, so they only ever run those inspected bytes. Both the ID and the `ghcr.io/nuoframework/darktrace-mcp@sha256:…` digest are printed and kept in `~/.config/darktrace-mcp/setup.json`. Compare the digest with the GitHub Release notes.
+5. Writes the hardened `docker run` entry: your UID:GID, read-only token mounts, and on macOS and Windows `DARKTRACE_TOKEN_FILE_OWNER=root-or-current` ([why](#mcp-client-configuration)); Linux keeps the strict owner check.
+
+Afterwards `darktrace-mcp config <client>` prints the same entry from the saved image ID, and `darktrace-mcp test` runs the image's `--check-config` in a container with the client entry's mounts and user (no network), then performs the signed `GET /status` from the host. `darktrace-mcp uninstall --docker` removes the entries, the stored tokens and exactly that image ID.
+
+Manual alternative: pull, load or build the image ([Install options](#install-options)), run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)), and add the client snippet from [Clients: Docker](clients.md#docker) with the image ID.
 
 ## 1.1.0 image verification status
 
@@ -49,12 +68,10 @@ This is not a zero-CVE claim, and it is not stable-release approval.
 1. **Public image on GitHub Container Registry (easiest; v1.1.0 and later).** Built by `.github/workflows/release.yml` on the reviewed tag, natively on amd64 and arm64 runners, and combined into one tag. The manifest digest is recorded in the workflow summary and in the release notes.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker
 ```
 
-   Compare the digest with the release notes before using it. The wizard writes the hardened `docker run` entry with `--pull=never` and the `name@sha256:…` reference, so clients only ever start the inspected bytes; a tag is mutable, a digest is not. For a manual snippet use the local image ID (`docker image inspect --format '{{.Id}}'`) as shown under [MCP client configuration](#mcp-client-configuration).
+   The wizard pulls the image when needed and resolves it ([Install](#install)). Compare the digest it prints with the release notes. Client entries use the local image ID with `--pull=never`, so clients only ever start the inspected bytes; a tag is mutable, an ID is not. To pin a digest you checked beforehand, pass `--image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>`. For a manual snippet use the local image ID (`docker image inspect --format '{{.Id}}'`) as shown under [MCP client configuration](#mcp-client-configuration).
 2. **GitHub Release image archive (v1.0.0, previous release).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`.
 
 ```sh
