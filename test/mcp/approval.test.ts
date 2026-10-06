@@ -6,6 +6,9 @@ import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { parseConfig } from '../../src/config/schema.js';
 import { loadConfig } from '../../src/config/load.js';
 import { createServer } from '../../src/server/createServer.js';
+import { runStdio } from '../../src/server/stdio.js';
+import { PassThrough } from 'node:stream';
+import { EventEmitter } from 'node:events';
 import { callTool } from '../../src/tools/index.js';
 import type { ApiRequest } from '../../src/api/operations.js';
 
@@ -89,4 +92,42 @@ test('approval mode is operator-only: model arguments cannot set it; config/env 
   const env={DARKTRACE_URL:base.instance.baseUrl,DARKTRACE_PUBLIC_TOKEN:'PUBLIC_SECRET',DARKTRACE_PRIVATE_TOKEN:'PRIVATE_SECRET'};
   assert.deepEqual({...loadConfig({...env,DARKTRACE_PROFILES:'all',DARKTRACE_CRITICAL_APPROVAL:'host',DARKTRACE_WRITE_APPROVAL:'elicitation'}).approval},{critical:'host',write:'elicitation'});
   assert.throws(()=>loadConfig({...env,DARKTRACE_CRITICAL_APPROVAL:'auto'}),/DARKTRACE_CRITICAL_APPROVAL must be/);
+});
+/** A 2026-07-28 SDK client (server/discover, per-request envelope, no initialize) over the real stdio serving entry. */
+async function modernSession(answer:Answer,capabilities:Record<string,unknown>={elicitation:{form:{}}}) {
+  const requests:ApiRequest[]=[],prompts:any[]=[],inbound:any[]=[],outbound:any[]=[];
+  const stdin=new PassThrough(),stdout=new PassThrough();
+  const handle=runStdio(config(),{testOnly:true,stdin,stdout,signals:new EventEmitter(),client:{async request(req:ApiRequest){requests.push(req);return {json:{}};},close(){}}});
+  let buffer='';
+  const transport:any={async start(){stdout.on('data',chunk=>{buffer+=chunk;let end;while((end=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,end);buffer=buffer.slice(end+1);const frame=JSON.parse(line);inbound.push(frame);transport.onmessage?.(frame);}});},
+    async send(message:unknown){outbound.push(message);stdin.write(JSON.stringify(message)+'\n');},async close(){transport.onclose?.();}};
+  const client=new Client({name:'claude-code',version:'2.1.289'},{capabilities:capabilities as any,versionNegotiation:{mode:{pin:'2026-07-28'}}} as any);
+  if(answer!=='none') client.setRequestHandler('elicitation/create',async(request:any)=>{prompts.push(request.params);if(answer==='throw')throw new Error('user closed');return answer as any;});
+  await client.connect(transport);
+  return {client,requests,prompts,inbound,outbound,async close(){await client.close();await handle.close();}};
+}
+test('2026-07-28 client advertising elicitation in its _meta envelope: approval is asked via input_required and honored',async()=>{
+  const accepted=await modernSession({action:'accept'});
+  try{
+    const r=await execute(accepted.client,'darktrace_antigena_manual_action',manual);
+    assert.equal(r.isError,undefined,JSON.stringify(r));assert.equal(accepted.requests.length,1);assert.equal(accepted.prompts.length,1);
+    assert.match(String(accepted.prompts[0].message),/CRITICAL action/);assert.doesNotMatch(String(accepted.prompts[0].message),/PRIVATE_SECRET|PUBLIC_SECRET/);
+    // Really the 2026-07-28 wire: no initialize, no server-to-client request; the prompt travelled as input_required.
+    assert.equal(accepted.client.getNegotiatedProtocolVersion(),'2026-07-28');
+    assert.equal(accepted.outbound.some(frame=>frame.method==='initialize'),false);assert.equal(accepted.inbound.some(frame=>frame.method!==undefined),false);
+    assert.equal(accepted.inbound.filter(frame=>frame.result?.resultType==='input_required').length,1);
+    assert.equal(accepted.outbound.filter(frame=>frame.params?.inputResponses?.darktrace_approval?.action==='accept'&&typeof frame.params.requestState==='string').length,1);
+  }finally{await accepted.close();}
+  for(const answer of [{action:'decline'},{action:'cancel'}] as Answer[]){
+    const s=await modernSession(answer);
+    try{
+      const out=(await execute(s.client,'darktrace_delete_tag',{path:{tid:9}})).structuredContent as any;
+      assert.equal(out.executed,false);assert.equal(out.approval,(answer as any).action);assert.equal(s.requests.length,0);assert.equal(s.prompts.length,1);
+    }finally{await s.close();}
+  }
+  const none=await modernSession('none',{});
+  try{
+    const out=(await execute(none.client,'darktrace_delete_tag',{path:{tid:9}})).structuredContent as any;
+    assert.equal(out.approval,'unsupported');assert.match(out.hint,/DARKTRACE_CRITICAL_APPROVAL=host/);assert.equal(none.requests.length,0);
+  }finally{await none.close();}
 });

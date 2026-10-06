@@ -14,9 +14,23 @@ import { neutralizeToolValue } from '../shape/output.js';
 import { requiredProfiles } from '../policy/profiles.js';
 import { OPERATION_PURPOSES, TOOL_SUMMARIES } from './descriptions.js';
 export type ApprovalDecision='accept'|'decline'|'cancel'|'unsupported';
+/**
+ * Protocol 2026-07-28 has no server-to-client request channel: the server asks for approval by returning an
+ * input-required result, and the client retries the identical call with the human's answer. `pending` is that
+ * result, returned to the client unchanged (see APPROVAL_PENDING).
+ */
+export interface ApprovalPending { pending:Record<string,unknown>; }
 /** Human approval channel supplied by the MCP server layer (MCP elicitation). Never reachable from model arguments. */
-export type Approver=(message:string)=>Promise<ApprovalDecision>;
-export interface ToolContext { cfg:Config; client:OperationClient; audit?:Audit; shape?:(value:unknown)=>unknown; approve?:Approver; }
+export type Approver=(message:string)=>Promise<ApprovalDecision|ApprovalPending>;
+/** Symbol key on a ToolResult carrying an input-required result for the server layer; never serialized. */
+export const APPROVAL_PENDING:unique symbol=Symbol('darktrace.approvalPending');
+export interface ToolContext { cfg:Config; client:OperationClient; audit?:Audit; shape?:(value:unknown)=>unknown; approve?:Approver;
+  /**
+   * Set only by the server layer when this call is the client's retry of an approval request it issued: the
+   * request carries this server's own integrity-protected, single-use, argument-bound approval state. The preview
+   * was consumed when that approval was requested, so it is not consumed again; `approve` returns the human's answer.
+   */
+  approvalResumed?:boolean; }
 export interface ToolDefinition {name:string; operations:Operation[]; inputSchema:z.ZodType<any>; description:string; annotations:{readOnlyHint:boolean;destructiveHint:boolean;idempotentHint:boolean;openWorldHint:boolean};}
 export interface ToolResult { [key:string]:unknown;content:Array<{type:'text';text:string}>;structuredContent?:Record<string,unknown>;isError?:boolean;}
 export function allTools():ToolDefinition[] {
@@ -177,14 +191,20 @@ export async function callTool(name:string,raw:unknown,ctx:ToolContext,signal?:A
     if (!op) return result({error:'Invalid operation selection.'},true);
     authorize(op,ctx.cfg);
     const args=validateOperation(op,raw,ctx.cfg.limits);
-    if (requiresPreview(op,args)) return result(preview(op,args));
-    if (invalidOptionalPreview(op,args)) return result({error:'previewId is unknown, expired, already used or does not match these arguments. Request a new preview.'},true);
-    if (approvalMode(op,ctx.cfg)==='elicitation') {
+    const humanApproval=approvalMode(op,ctx.cfg)==='elicitation';
+    // A resumed approval continues a call that already passed (and consumed) its preview check.
+    const resumed=humanApproval&&ctx.approvalResumed===true&&args.dryRun!==true&&(op.tier!=='critical'||args.confirm===true);
+    if (!resumed&&requiresPreview(op,args)) return result(preview(op,args));
+    if (!resumed&&invalidOptionalPreview(op,args)) return result({error:'previewId is unknown, expired, already used or does not match these arguments. Request a new preview.'},true);
+    if (humanApproval) {
       // Human-in-the-loop: the user (not the model) must accept a code-owned summary before anything is sent.
       let decision:ApprovalDecision='unsupported';
       if (ctx.approve) {
         const message=approvalMessage(op,args,[ctx.cfg.auth.publicToken,ctx.cfg.auth.privateToken]);
-        try {decision=await ctx.approve(message);} catch {decision='cancel';}
+        let outcome:ApprovalDecision|ApprovalPending;
+        try {outcome=await ctx.approve(message);} catch {outcome='cancel';}
+        if (typeof outcome==='object'&&outcome!==null) return Object.assign(result({approval:'pending'}),{[APPROVAL_PENDING]:outcome.pending});
+        decision=outcome;
       }
       if (decision!=='accept') return result(approvalRefusal(op,args,decision,ctx.cfg));
       authorize(op,ctx.cfg);

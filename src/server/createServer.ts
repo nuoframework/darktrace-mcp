@@ -1,6 +1,7 @@
-import { CLIENT_CAPABILITIES_META_KEY, CLIENT_INFO_META_KEY, McpServer, PROTOCOL_VERSION_META_KEY, ProtocolError, ProtocolErrorCode } from '@modelcontextprotocol/server';
+import { CLIENT_CAPABILITIES_META_KEY, CLIENT_INFO_META_KEY, McpServer, PROTOCOL_VERSION_META_KEY, ProtocolError, ProtocolErrorCode, createRequestStateCodec, inputRequired, inputResponse } from '@modelcontextprotocol/server';
+import { createHash, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { callTool, eligibleTools, type Approver, type ToolContext } from '../tools/index.js';
+import { APPROVAL_PENDING, callTool, eligibleTools, type ApprovalDecision, type Approver, type ToolContext } from '../tools/index.js';
 /** A human has two minutes to answer a confirmation dialog; silence means no. */
 export const APPROVAL_TIMEOUT_MS=120_000;
 export const VERSION='1.1.0';
@@ -24,6 +25,29 @@ export function clientIdentified(handshake:{capabilities:unknown;clientInfo:unkn
   return typeof version==='string'&&ENVELOPE_PROTOCOL_VERSIONS.includes(version)&&plainObject(envelope[CLIENT_CAPABILITIES_META_KEY])
     &&(info===undefined||plainObject(info));
 }
+/** inputRequests key of the approval dialog on protocol 2026-07-28. */
+export const APPROVAL_INPUT_KEY='darktrace_approval';
+/** Whether an `elicitation` capability value allows a form dialog (a bare 2025-06 `{}` means form; URL-only does not). */
+function formElicitation(capabilities:unknown):boolean {
+  if(!plainObject(capabilities)) return false;
+  const elicitation=capabilities.elicitation;
+  if(!plainObject(elicitation)) return false;
+  return elicitation.form!==undefined||elicitation.url===undefined;
+}
+/**
+ * How this request can reach a human for approval. Only protocol-level client declarations count, in order:
+ * 1. capabilities recorded by a completed 2025-era `initialize` → a server-to-client `elicitation/create` request;
+ * 2. otherwise, on an instance serving 2026-07-28, this request's validated `_meta` envelope capabilities → an
+ *    input-required result (that revision has no server-to-client requests; the client asks the human and retries).
+ * Tool arguments (`params.arguments`) are model-controlled and are never consulted.
+ */
+export function approvalChannel(initialized:unknown,negotiatedVersion:unknown,envelope:unknown):'push'|'input-required'|'none' {
+  if(initialized!==undefined) return formElicitation(initialized)?'push':'none';
+  if(typeof negotiatedVersion!=='string'||!ENVELOPE_PROTOCOL_VERSIONS.includes(negotiatedVersion)||!plainObject(envelope)) return 'none';
+  const version=envelope[PROTOCOL_VERSION_META_KEY];
+  if(typeof version!=='string'||!ENVELOPE_PROTOCOL_VERSIONS.includes(version)) return 'none';
+  return formElicitation(envelope[CLIENT_CAPABILITIES_META_KEY])?'input-required':'none';
+}
 export function createServer(ctx:ToolContext):McpServer {
   const server=new McpServer({name:'darktrace-mcp',version:VERSION},{capabilities:{tools:{listChanged:false}},maxToolInputElements:Math.min(ctx.cfg.limits.maxToolInputElements,5000)});
   function requireInitialization(envelope:unknown):void {
@@ -34,22 +58,52 @@ export function createServer(ctx:ToolContext):McpServer {
     inputSchema:{...z.toJSONSchema(tool.inputSchema,{io:'input'}),type:'object'} as {type:'object';[key:string]:any}}));
   // Low-level dispatch keeps validation errors fixed and sanitized; Zod still validates every operation.
   server.server.setRequestHandler('tools/list',async(_request,extra)=>{requireInitialization(extra.mcpReq.envelope);return {tools};});
+  // Approval state for the 2026-07-28 retry: HMAC under a per-instance key, bound to the exact tool call, short-lived
+  // and single use. It only proves that this server asked; the decision itself is the client's answer.
+  const approvalState=createRequestStateCodec<{n:string;d:string}>({key:randomBytes(32),ttlSeconds:APPROVAL_TIMEOUT_MS/1000});
+  const usedApprovals=new Map<string,number>();
+  const callDigest=(name:unknown,args:unknown)=>createHash('sha256').update(JSON.stringify([name,args])).digest('hex');
+  async function resumedApproval(state:unknown,digest:string,responses:unknown,requestCtx:Parameters<typeof approvalState.verify>[1]):Promise<ApprovalDecision|undefined> {
+    if(typeof state!=='string') return undefined;
+    let payload:{n?:unknown;d?:unknown};
+    try {payload=await approvalState.verify(state,requestCtx) as typeof payload;} catch {return undefined;}
+    if(!plainObject(payload)||typeof payload.n!=='string'||payload.d!==digest) return undefined;
+    const now=Date.now();
+    for(const [nonce,expires] of usedApprovals) if(expires<=now) usedApprovals.delete(nonce);
+    if(usedApprovals.has(payload.n)) return undefined;
+    usedApprovals.set(payload.n,now+APPROVAL_TIMEOUT_MS+60_000);
+    const answer=inputResponse(responses as Record<string,unknown>|undefined,APPROVAL_INPUT_KEY);
+    return answer.kind==='elicit'?answer.action:'cancel';
+  }
   server.server.setRequestHandler('tools/call',async(params,extra)=>{
-    requireInitialization(extra.mcpReq.envelope);
+    const envelope=extra.mcpReq.envelope;
+    requireInitialization(envelope);
+    const name=params.params.name,args=params.params.arguments??{};
+    const channel=approvalChannel(server.server.getClientCapabilities(),server.server.getNegotiatedProtocolVersion(),envelope);
+    const digest=callDigest(name,args);
+    const resumed=channel==='input-required'?await resumedApproval(extra.mcpReq.requestState(),digest,extra.mcpReq.inputResponses,extra):undefined;
     const approve:Approver=async message=>{
-      // Fail closed: no elicitation capability, a URL-only client or any transport error means no approval.
-      const elicitation=server.server.getClientCapabilities()?.elicitation as {form?:unknown;url?:unknown}|undefined;
-      if (!elicitation||typeof elicitation!=='object') return 'unsupported';
+      // Fail closed: no form elicitation capability, a URL-only client or any transport error means no approval.
+      if (channel==='none') return 'unsupported';
       const request={mode:'form' as const,message,requestedSchema:{type:'object' as const,properties:{}}};
+      if (channel==='input-required') {
+        if (resumed!==undefined) return resumed;
+        const requestState=await approvalState.mint({n:randomBytes(16).toString('hex'),d:digest});
+        return {pending:inputRequired({inputRequests:{[APPROVAL_INPUT_KEY]:inputRequired.elicit(request)},requestState}) as unknown as Record<string,unknown>};
+      }
+      const elicitation=server.server.getClientCapabilities()?.elicitation as {form?:unknown;url?:unknown};
       const options={signal:extra.mcpReq.signal,timeout:APPROVAL_TIMEOUT_MS};
       let answer:{action?:unknown};
       if (elicitation.form!==undefined) answer=await extra.mcpReq.elicitInput(request,options);
       // A bare 2025-06 'elicitation: {}' declaration means form support (the pre-mode rule).
-      else if (elicitation.url===undefined) answer=await (server.server as unknown as {request(r:unknown,o:unknown):Promise<{action?:unknown}>}).request({method:'elicitation/create',params:request},options);
-      else return 'unsupported';
+      else answer=await (server.server as unknown as {request(r:unknown,o:unknown):Promise<{action?:unknown}>}).request({method:'elicitation/create',params:request},options);
       return answer?.action==='accept'?'accept':answer?.action==='decline'?'decline':'cancel';
     };
-    return server.server.projectCallToolResult(await callTool(params.params.name,params.params.arguments??{},{...ctx,approve:ctx.approve??approve},extra.mcpReq.signal),undefined);
+    const toolCtx:ToolContext={...ctx,approve:ctx.approve??approve,...(resumed!==undefined&&!ctx.approve?{approvalResumed:true}:{})};
+    const output=await callTool(name,args,toolCtx,extra.mcpReq.signal);
+    const pending=(output as {[APPROVAL_PENDING]?:Record<string,unknown>})[APPROVAL_PENDING];
+    if (pending!==undefined) return pending as never;
+    return server.server.projectCallToolResult(output,undefined);
   });
   server.server.onerror=()=>{};
   return server;
