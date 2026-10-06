@@ -25,17 +25,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
       - name: Require tag to match package version exactly
         run: node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json')); if(process.env.GITHUB_REF!=='refs/tags/v'+p.version) throw Error('Release tag/version mismatch');"
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
       - name: Retain the verified candidate (tgz, checksums, evidence)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: |
@@ -94,7 +94,7 @@ jobs:
             echo "### Docker gates (ci.yml at $GITHUB_SHA)"
             jq -r '"- CI run: \(.ciRun.html_url)", (.dockerJobs[] | "- \(.name): \(.conclusion) \(.html_url)")' "$RUNNER_TEMP/docker-gates.json"
           } | tee "$RUNNER_TEMP/docker-gates.md" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docker-gates
           path: |
@@ -111,10 +111,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts --no-audit --no-fund
@@ -127,7 +127,7 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           test -f "release/darktrace-mcp-$version.mcpb"
           echo "MCPB=$PWD/release/darktrace-mcp-$version.mcpb" >> "$GITHUB_ENV"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/candidate
@@ -154,7 +154,7 @@ jobs:
           cd "$RUNNER_TEMP/mcpb"
           sha256sum -- *.mcpb | tee mcpb.sha256
           echo "mcpb: $(cat mcpb.sha256)" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: darktrace-mcp-mcpb
           path: |
@@ -172,7 +172,7 @@ jobs:
       contents: read
       id-token: write # npm trusted publishing (OIDC) and provenance; no long-lived npm token
     steps:
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
       - name: Require npm 11.5.1 or newer (trusted publishing)
@@ -186,7 +186,7 @@ jobs:
             npm install -g npm@^11 --no-audit --no-fund
             npm --version
           fi
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/candidate
@@ -251,10 +251,10 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
       - name: Fetch and authenticate immutable archived runtime inputs
@@ -281,7 +281,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/digests"
           printf '%s\n' "$digest" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
           echo "linux/${{ matrix.arch }}: $IMAGE@$digest" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ghcr-digest-${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/${{ matrix.arch }}
@@ -297,7 +297,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: ghcr-digest-*
           path: ${{ runner.temp }}/digests
@@ -327,7 +327,7 @@ jobs:
             echo '```'
             echo "Pin clients to the digest: darktrace-mcp setup --runtime docker --image $IMAGE@$digest"
           } | tee "$RUNNER_TEMP/ghcr-image-digest.md" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ghcr-image-digest
           path: |
@@ -346,22 +346,22 @@ jobs:
     permissions:
       contents: write # create the GitHub Release for this tag
     steps:
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/assets
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-mcpb
           path: ${{ runner.temp }}/mcpb
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ghcr-image-digest
           path: ${{ runner.temp }}/ghcr
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docker-gates
           path: ${{ runner.temp }}/gates
