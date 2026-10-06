@@ -32,7 +32,7 @@ function wired(profiles:Record<string,boolean>,respond:(url:string)=>Response=()
  return {calls,ctx:{cfg:config,client,audit:{async record(){}},approve:async()=>'accept' as const}};
 }
 test('production client registry accepts every released operation and still refuses the deprecated one',()=>{
- assert.equal(productionOperationDescriptors.length,78);
+ assert.equal(productionOperationDescriptors.length,77);assert.ok(!productionOperationDescriptors.some(op=>op.operationId==='post_agemail_api_ep_api_v1_0_emails_uuid_action'));
  assert.doesNotThrow(()=>createHttpClient(cfg(),{testOnly:true,operations:productionOperationDescriptors,fetch:async()=>new Response('{}')}));
 });
 test('S6 Advanced Search GET percent-encodes the standard Base64 document and signs the encoded path (lab evidence 7.1.0)',async()=>{
@@ -67,20 +67,21 @@ test('PCAP download reads bounded bytes; a JSON status answer is returned as dat
  const pcap=new Uint8Array([0xd4,0xc3,0xb2,0xa1,2,0,4,0]);
  const {calls,ctx}=wired({sensitiveRead:true},url=>url.endsWith('/pending.pcap')?new Response('{"state":"pending"}',{headers:{'Content-Type':'application/json'}}):new Response(pcap,{headers:{'Content-Type':'application/vnd.tcpdump.pcap'}}));
  const done=await callTool('darktrace_download_pcap',{path:{filename:'capture.pcap'}},ctx);
- const file=(done.structuredContent as any).data.file;
- assert.deepEqual([file.name,file.mediaType,file.sizeBytes,file.encoding,file.contentBase64],['capture.pcap','application/vnd.tcpdump.pcap',8,'base64',Buffer.from(pcap).toString('base64')]);
+ assert.equal(done.isError,undefined);assert.deepEqual(done.content,[{type:'text',text:'PCAP data is in structuredContent.'}]);
+ assert.deepEqual((done.structuredContent as any).data,{kind:'pcap',encoding:'base64',byteLength:8,data:Buffer.from(pcap).toString('base64')});
  assert.match(String(calls[0].headers.get('Accept')),/application\/vnd\.tcpdump\.pcap/);
  const pending=await callTool('darktrace_download_pcap',{path:{filename:'pending.pcap'}},ctx);
+ // A JSON status answer is projected through the code-owned {status,state,ready,progress} view.
  assert.deepEqual(JSON.parse(JSON.stringify((pending.structuredContent as any).data)),{state:'pending'});
  const tooBig=wired({sensitiveRead:true},()=>new Response(new Uint8Array(2_097_153)));
  const refused=await callTool('darktrace_download_pcap',{path:{filename:'capture.pcap'}},tooBig.ctx);
- assert.equal(refused.isError,true);assert.equal(refused.structuredContent?.errorCode,'too_large');
+ assert.equal(refused.isError,true);assert.equal(refused.structuredContent?.errorCode,'response_limit_exceeded');assert.deepEqual((refused.structuredContent as any).error,{code:'response_limit_exceeded',message:'Response exceeds the configured byte limit.'});
 });
 test('form write and confirmed critical write reach HTTP with SDK-compatible signatures',async()=>{
  const {calls,ctx}=wired({write:true,writeCritical:true});
  assert.equal((await callTool('darktrace_acknowledge_ai_analyst_incident',{operation:'post_aianalyst_acknowledge',body:{uuid:'fixture-uuid'}},ctx)).isError,undefined);
- const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
- assert.equal(preview.structuredContent?.confirmationRequired,true);assert.equal(calls.length,1);
+ const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},dryRun:true},ctx);
+ assert.match(String(preview.structuredContent?.previewId),/^[a-f0-9]{32}$/);assert.equal(calls.length,1);
  assert.equal((await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true,previewId:preview.structuredContent?.previewId},ctx)).isError,undefined);
  assert.deepEqual(calls.map(c=>[c.method,c.url,c.body]),[
   ['POST','https://192.0.2.10/aianalyst/acknowledge','uuid=fixture-uuid'],
