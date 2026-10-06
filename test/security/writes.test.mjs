@@ -1,6 +1,6 @@
 // Acceptance oracles: docs/security/security-test-plan-writes.md ST-17..29.
-// [AD-W-xx] marks an OPEN finding, not an expected failure or weakened oracle.
-// No production source, existing test or reviewed fixture is modified here.
+// [AD-W-xx] identifies the historical finding; current closures are recorded in the report.
+// Reconciled with CHANGES-core §8/E1–E11; no expected failures or runtime-generated contract pins.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
@@ -10,6 +10,7 @@ import { syncBuiltinESMExports } from 'node:module';
 import { PassThrough } from 'node:stream';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { parse as parseYaml } from 'yaml';
 import {
   cfg, env, PUBLIC, PRIVATE, noCanaries, operations, operationDescriptors, validateOperation, buildRequest,
   callTool, eligibleTools, createHttpClient, createSigner, createAudit, verifyAuditChain, previewBinding,
@@ -59,10 +60,12 @@ async function denied(t, id, args, code, options = {}) {
   return h;
 }
 
-test('ST-17.MANIFEST exactly 79 classified rows, 78 active, deprecated excluded', () => {
+test('ST-17.MANIFEST exactly 79 classified rows, 77 active, deprecated excluded and email action blocked (E1)', () => {
   assert.equal(all.length, 79); assert.equal(new Set(all.map(o => o.operationId)).size, 79);
-  assert.equal(all.filter(o => o.status === 'implemented').length, 78);
+  assert.equal(all.filter(o => o.status === 'implemented').length, 77);
   assert.deepEqual(all.filter(o => o.status === 'excluded').map(o => o.operationId), ['get_aianalyst_incidents']);
+  assert.deepEqual(all.filter(o => o.status === 'blocked').map(o => o.operationId), ['post_agemail_api_ep_api_v1_0_emails_uuid_action']);
+  assert.equal(operationDescriptors.some(o => o.operationId === 'post_agemail_api_ep_api_v1_0_emails_uuid_action'), false);
   for (const op of all) assert.ok(['read', 'medium', 'high', 'critical'].includes(op.tier));
 });
 for (const [name, profile] of Object.entries(profiles)) for (const op of all)
@@ -158,6 +161,15 @@ for (const [name, id, original, changed] of [
   ['empty-false', 'post_agemail_api_ep_api_v1_0_emails_uuid_action', { path: { uuid: 'synthetic' }, body: { target: '' } }, { path: { uuid: 'synthetic' }, body: { target: false } }],
   ['array-order', 'post_agemail_api_ep_api_v1_0_emails_uuid_action', { path: { uuid: 'synthetic' }, body: { target: [1, 2] } }, { path: { uuid: 'synthetic' }, body: { target: [2, 1] } }],
 ]) test(`ST-19.BINDING ${name} changed args no effects [AD-W-02]`, async t => {
+  // E1: an excluded action cannot issue a preview or validate a purported binding.
+  if (id === 'post_agemail_api_ep_api_v1_0_emails_uuid_action') {
+    const h = own(t, { approve: async () => 'accept' });
+    for (const args of [original, changed]) for (const gates of [{ dryRun: true }, { confirm: true, previewId: '0'.repeat(32) }]) {
+      const before = checkpoint(h), result = await invoke(h, id, { ...args, ...gates });
+      zero(h, before); denial(result, 'operation_denied');
+    }
+    return;
+  }
   const h = own(t, { approve: async () => 'accept' }), previewId = await previewOf(h, id, original), before = checkpoint(h);
   const result = await invoke(h, id, { ...changed, confirm: true, previewId }); zero(h, before); denial(result, 'preview_invalid');
 });
@@ -233,9 +245,15 @@ for (const op of nonGet) for (const failure of [429, 500, 503, 'reset', 'timeout
       if (typeof failure === 'string') throw Object.assign(new Error('synthetic possible acceptance'), { code: failure === 'reset' ? 'ECONNRESET' : failure === 'timeout' ? 'ETIMEDOUT' : 'ABORT_ERR' });
       return response(Buffer.from('{}'), failure, { 'retry-after': '1' });
     } });
-    const args = validArgs(op), validated = validateOperation(op, { operation: op.operationId, ...args }, h.ctx.cfg.limits);
+    const args = op.operationId === 'post_advancedsearch_api_search'
+      ? { body: { hash: Buffer.from(JSON.stringify(fixture.searchDocument)).toString('base64') }, contentType: 'application/json' }
+      : validArgs(op);
+    const validated = validateOperation(op, { operation: op.operationId, ...args }, h.ctx.cfg.limits);
     const before = checkpoint(h);
-    await assert.rejects(h.http.request(buildRequest(op, validated)));
+    const request = buildRequest(op, validated);
+    // E6: body-only JSON, with no S4 query. Preserve the one-signer/one-request negative oracle.
+    if (op.operationId === 'post_advancedsearch_api_search') assert.deepEqual(request.query, []);
+    await assert.rejects(h.http.request(request));
     assert.equal(checkpoint(h).signer - before.signer, 1); assert.equal(h.state.wires.length, 1); assert.deepEqual(h.state.waits, []);
   });
 for (const lost of [false, true]) test(`ST-20.REPLAY critical consumed after ${lost ? 'unknown' : 'success'} [AD-W-02,AD-W-08]`, async t => {
@@ -333,12 +351,31 @@ test('ST-22.CONCURRENT twenty ordinary admissions never exceed ten', async t => 
   const h = own(t, {}), results = await Promise.all(Array.from({ length: 20 }, () => invoke(h, ordinaryId, ordinaryArgs)));
   assert.equal(h.state.wires.length, 10); assert.equal(results.filter(r => !r.isError).length, 10);
 });
-test('ST-22.LOWERED two writes, previews/denials free; independent process budgets', async t => {
+test('ST-22.LOWERED two writes, ordinary preview has no handle and denials are free (E3)', async t => {
   const a = own(t, { limits: { maxWritesPerMinute: 2 } }), b = own(t, { limits: { maxWritesPerMinute: 2 } });
-  await previewOf(a, ordinaryId, ordinaryArgs);
+  const beforePreview = checkpoint(a), preview = await invoke(a, ordinaryId, { ...ordinaryArgs, dryRun: true });
+  zero(a, beforePreview); assert.equal(preview.isError, undefined);
+  assert.equal(preview.structuredContent.previewId, undefined);
+  assert.deepEqual(a.state.audits.map(row => row[1]), ['preview']);
   await invoke(a, ordinaryId, { ...ordinaryArgs, approval: 'host' });
   for (const h of [a, b]) { await invoke(h, ordinaryId, ordinaryArgs); await invoke(h, ordinaryId, ordinaryArgs);
     const before = checkpoint(h); assert.equal((await invoke(h, ordinaryId, ordinaryArgs)).isError, true); zero(h, before); assert.equal(h.state.wires.length, 2); }
+});
+test('ST-22.CLIENT_SCOPE two operation clients in one process have separate ordinary and critical budgets (E8/CR-12)', async t => {
+  const a = own(t, { approval: 'host' }), b = own(t, { approval: 'host' });
+  assert.notEqual(a.ctx.client, b.ctx.client);
+  for (const h of [a, b]) {
+    const previews = await Promise.all(Array.from({ length: 4 }, () => previewOf(h)));
+    const critical = await Promise.all(previews.map(previewId => invoke(h, criticalId, { ...criticalArgs, confirm: true, previewId })));
+    assert.equal(critical.filter(r => !r.isError).length, 3); denial(critical.find(r => r.isError), 'critical_rate_limited');
+    const ordinary = await Promise.all(Array.from({ length: 8 }, () => invoke(h, ordinaryId, ordinaryArgs)));
+    assert.equal(ordinary.filter(r => !r.isError).length, 7); denial(ordinary.find(r => r.isError), 'write_rate_limited');
+    assert.equal(h.state.wires.length, 10);
+    const before = checkpoint(h); denial(await invoke(h, ordinaryId, ordinaryArgs), 'write_rate_limited'); zero(h, before);
+  }
+  // This is intentionally 20 ordinary-window admissions and six critical admissions across two owners,
+  // not an aggregate-process limiter. runStdio's single production owner is checked in test/mcp.
+  assert.equal(a.state.wires.length + b.state.wires.length, 20);
 });
 test('ST-22.AUDIT_FAILURE admission consumes conservative execution slot', async t => {
   const h = own(t, { limits: { maxWritesPerMinute: 1 }, auditFailure: async () => { throw new Error('failed'); } });
@@ -351,8 +388,8 @@ for (const limit of [0, 1.5, 61]) test(`ST-22.CONFIG invalid ${limit} startup ze
   assert.equal(child.status, 1); assert.equal(child.stdout, ''); assert.equal(JSON.parse(child.stderr).event, 'startup_error');
   assert.equal(child.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false);
 });
-test('ST-22.CEILING plan lower-only 10 conflicts with implemented config 60 [AD-W-09]', () => {
-  assert.throws(() => cfg({ limits: { maxWritesPerMinute: 11 } }), 'normative ST-22 ceiling 10; CHANGES-core permits 60');
+test('ST-22.CEILING lower-only 10 rejects operator attempts to raise the budget [AD-W-09]', () => {
+  assert.throws(() => cfg({ limits: { maxWritesPerMinute: 11 } }), 'reviewed ST-22 ceiling is 10');
 });
 test('ST-22.BREAKER three unknowns stop next write; read remains available [AD-W-10]', async t => {
   const h = own(t, { wireResponse: () => { throw new Error('possible acceptance'); } });
@@ -386,6 +423,12 @@ const sinks = [
 ];
 for (const [id, args, field] of sinks) test(`ST-23.TOXIC ${id} ${field} authorized copy exposure; sensitive-only refuses`, async t => {
   const h = own(t, { approve: async () => 'accept' });
+  if (id === 'post_agemail_api_ep_api_v1_0_emails_uuid_action') {
+    for (const gates of [{}, { dryRun: true }, { confirm: true, previewId: '0'.repeat(32) }]) {
+      const before = checkpoint(h); denial(await invoke(h, id, { ...args, ...gates }), 'operation_denied'); zero(h, before);
+    }
+    return;
+  }
   const result = operations[id].tier === 'critical' ? await execute(h, id, args) : await invoke(h, id, args);
   assert.equal(result.isError, undefined); assert.ok(Buffer.from(h.state.wires[0].body).toString().includes(secret));
   assert.equal(h.state.lines.join('').includes(secret), false);
@@ -491,11 +534,19 @@ test('ST-25.401 no alternate signature, no retry [AD-W-08]', async t => {
 const emailOps = all.filter(o => o.pathTemplate.startsWith('/agemail/'));
 test('ST-26.EMAIL_PIN every email operation has reviewed schema digest/version provenance [AD-W-12]', () => {
   assert.equal(emailOps.length, 14);
-  for (const op of emailOps) { assert.match(op.schemaSha256 ?? '', /^[a-f0-9]{64}$/); assert.ok(op.schemaVersion); assert.ok(op.schemaProvenance); }
+  // Recompute independently from the committed SDK path item, never from generated runtime metadata.
+  const sdk = parseYaml(readFileSync(new URL('../../openapi/darktrace-sdk.yaml', import.meta.url), 'utf8'));
+  for (const op of emailOps) {
+    assert.match(op.schemaSha256 ?? '', /^[a-f0-9]{64}$/);
+    assert.equal(op.schemaSha256, sha(canonical(sdk.paths[op.pathTemplate])));
+    assert.equal(op.schemaVersion, 'darktrace-sdk ' + sdk.info.version.split(' ')[0]);
+    assert.equal(op.schemaProvenance, 'openapi/darktrace-sdk.yaml#/paths/' + op.pathTemplate.replaceAll('~', '~0').replaceAll('/', '~1'));
+  }
 });
 for (const op of emailOps) test(`ST-26.EMAIL ${op.operationId} unknown model overrides zero effects [AD-W-01]`, async t => {
   const h = own(t, {}), before = checkpoint(h);
-  const result = await invoke(h, op.operationId, { ...validArgs(op), apiDocsUrl: 'https://evil.invalid/api-docs' }); zero(h, before); denial(result, 'invalid_arguments');
+  const result = await invoke(h, op.operationId, { ...validArgs(op), apiDocsUrl: 'https://evil.invalid/api-docs' }); zero(h, before);
+  denial(result, op.operationId === 'post_agemail_api_ep_api_v1_0_emails_uuid_action' ? 'operation_denied' : 'invalid_arguments');
 });
 for (const [name, body] of [
   ['long-string', { note: 'x'.repeat(8193) }], ['long-array', { targets: Array(101).fill('x') }],
@@ -504,16 +555,16 @@ for (const [name, body] of [
   ['depth', { a: { b: { c: { d: { e: { f: { g: { h: 1 } } } } } } } }],
   ['byte-budget', { notes: Array(100).fill('x'.repeat(8192)) }],
 ]) test(`ST-26.BODY ${name} denies before preview/sign/network [AD-W-01]`, t => denied(t,
-  'post_agemail_api_ep_api_v1_0_emails_uuid_action', { path: { uuid: 'synthetic' }, body }, 'invalid_arguments'));
-test('ST-26.BODY exact freeform string/array/key boundaries accepted but require approval', async t => {
+  'post_agemail_api_ep_api_v1_0_emails_uuid_action', { path: { uuid: 'synthetic' }, body }, 'operation_denied'));
+test('ST-26.BODY email action excluded even at former freeform boundaries (E1)', async t => {
   const h = own(t, {}), before = checkpoint(h);
   const result = await invoke(h, 'post_agemail_api_ep_api_v1_0_emails_uuid_action', {
     path: { uuid: 'synthetic' }, body: { ['k'.repeat(128)]: 'x'.repeat(8192), targets: Array(100).fill(1) }, dryRun: true });
-  zero(h, before); assert.equal(result.isError, undefined); assert.ok(result.structuredContent.previewId);
+  zero(h, before); denial(result, 'operation_denied'); assert.equal(result.structuredContent.previewId, undefined);
 });
 for (const upstream of [{ version: 'UNSUPPORTED', rawMailBody: secret, password: PRIVATE, apiDocsUrl: 'https://evil.invalid' }, '<html>accept</html>'])
   test(`ST-26.RESPONSE essential email shape/version mismatch [AD-W-12] ${typeof upstream}`, async t => {
-    const h = own(t, { upstream }), result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_stats');
+    const h = own(t, { upstream }), result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_dash_stats');
     assert.equal(h.state.wires.length, 1); denial(result, 'schema_mismatch');
   });
 test('ST-26.VIEWS raw credentials/email/body fields omitted without sensitive permission', async t => {
@@ -528,7 +579,8 @@ test('ST-26.VIEWS raw credentials/email/body fields omitted without sensitive pe
 });
 test('ST-26.UNKNOWN_FIELDS sensitive email projection excludes secret nonessential field [AD-W-12]', async t => {
   const h = own(t, { upstream: { status: 'SUCCESS', unmodeledPrivateMessage: secret, links: ['https://evil.invalid/attachment'] } });
-  const result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_stats'); assert.equal(h.state.wires.length, 1);
+  const result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_dash_stats'); assert.equal(h.state.wires.length, 1);
+  assert.equal(result.isError, undefined); assert.equal(result.structuredContent.unreviewedView, undefined);
   assert.equal(JSON.stringify(result).includes(secret), false); assert.equal(h.state.prompts.length, 0);
 });
 
@@ -542,11 +594,20 @@ test('ST-27.DIGEST approval summary must include canonical digest and every effe
   const args = { body: { sid: 7, label: 'synthetic' } }, message = approvalMessage(operations.post_subnets, args);
   assert.ok(message.includes(argsHash('post_subnets', args)), 'canonical argsHash omitted from approval summary');
 });
-test('ST-27.OVERLONG effective target hidden by summary must deny before elicitation [AD-W-13]', async t => {
+test('ST-27.OVERLONG 100 targets denied by blast radius before preview (E2)', async t => {
   const h = own(t, { approve: async () => 'accept' });
   const id = 'post_intelfeed', args = { body: { addlist: Array.from({ length: 100 }, (_, i) => 'target-' + i + '.invalid').join(',') } };
+  const before = checkpoint(h), result = await invoke(h, id, { ...args, dryRun: true });
+  zero(h, before); denial(result, 'blast_radius_exceeded'); assert.equal(result.structuredContent.maxTargets, 20);
+  assert.equal(result.structuredContent.previewId, undefined);
+});
+test('ST-27.OVERLONG within-limit targets with over-budget summary deny before elicitation [AD-W-13/E2]', async t => {
+  const h = own(t, { approve: async () => 'accept' }), id = 'post_intelfeed';
+  const args = { body: { addlist: Array.from({ length: 20 }, (_, i) => 'target-' + i + '-' + 'x'.repeat(100) + '.invalid').join(',') } };
   const previewId = await previewOf(h, id, args), before = checkpoint(h);
   const result = await invoke(h, id, { ...args, confirm: true, previewId }); zero(h, before); denial(result, 'invalid_arguments');
+  assert.equal(result.structuredContent.reason, 'summary_too_large');
+  const after = checkpoint(h); denial(await invoke(h, id, { ...args, confirm: true, previewId }), 'preview_used'); zero(h, after);
 });
 
 // Real stdio entrypoint, production SDK elicitation correlation, synthetic HMAC
@@ -655,13 +716,15 @@ function watchFilesystem(t) {
   }
   syncBuiltinESMExports(); t.after(() => { for (const restore of saved.reverse()) restore(); syncBuiltinESMExports(); }); return effects;
 }
-test('ST-29.BASE64 arbitrary fixture bytes decode exactly; size/hash correct and no filesystem mutations', async t => {
+test('ST-29.BASE64 arbitrary fixture bytes decode exactly in PCAP envelope; no filesystem mutations (E6)', async t => {
   const bytes = Buffer.from(Array.from({ length: 257 }, (_, i) => i & 255)), writes = watchFilesystem(t);
   const h = own(t, { wireResponse: () => response(bytes, 200, { 'content-type': 'application/vnd.tcpdump.pcap', 'content-disposition': 'attachment; filename="../../evil.pcap"' }) });
   const result = await invoke(h, 'get_pcaps_filename', { path: { filename: 'synthetic.pcap' } });
-  const file = result.structuredContent.data.file;
-  assert.equal(file.encoding, 'base64'); assert.equal(file.sizeBytes, bytes.length); assert.equal(file.sha256, sha(bytes));
-  assert.equal(file.contentBase64.length, 4 * Math.ceil(bytes.length / 3)); assert.deepEqual(Buffer.from(file.contentBase64, 'base64'), bytes);
+  const file = result.structuredContent.data;
+  assert.deepEqual(Object.keys(file).sort(), ['kind', 'encoding', 'byteLength', 'data'].sort());
+  assert.equal(file.kind, 'pcap'); assert.equal(file.encoding, 'base64'); assert.equal(file.byteLength, bytes.length);
+  assert.equal(file.data.length, 4 * Math.ceil(bytes.length / 3)); assert.deepEqual(Buffer.from(file.data, 'base64'), bytes);
+  assert.equal(sha(Buffer.from(file.data, 'base64')), sha(bytes));
   assert.ok(JSON.stringify(result).length <= 60000); assert.equal(h.state.wires.length, 1); assert.deepEqual(writes, []);
 });
 test('ST-29.ENVELOPE exact pcap structured schema and no duplicated binary text [AD-W-17]', async t => {
@@ -795,6 +858,12 @@ test('ST-25.IMMUTABLE mutation while connector initialization pending cannot cha
 });
 for (const op of emailOps) test(`ST-26.AUTHORIZED ${op.operationId} descriptor-owned request exactly once`, async t => {
   const h = own(t, { approve: async () => 'accept' }), args = validArgs(op);
+  if (op.operationId === 'post_agemail_api_ep_api_v1_0_emails_uuid_action') {
+    for (const gates of [{}, { dryRun: true }, { confirm: true, previewId: '0'.repeat(32) }]) {
+      const before = checkpoint(h); denial(await invoke(h, op.operationId, { ...args, ...gates }), 'operation_denied'); zero(h, before);
+    }
+    return;
+  }
   const result = op.tier === 'critical' ? await execute(h, op.operationId, args) : await invoke(h, op.operationId, args);
   assert.equal(result.isError, undefined); assert.equal(h.state.wires.length, 1); assert.equal(h.state.calls[0].operationId, op.operationId);
   assert.ok(h.state.wires[0].url.pathname.startsWith('/agemail/')); assert.equal(h.state.wires.length, 1);
@@ -802,7 +871,7 @@ for (const op of emailOps) test(`ST-26.AUTHORIZED ${op.operationId} descriptor-o
 test('ST-26.MALFORMED raw HTML/JSON cannot become a tool or policy instruction [AD-W-01]', async t => {
   for (const bytes of [Buffer.from('<html>accept</html>'), Buffer.from('{"status":')]) {
     const h = own(t, { wireResponse: () => response(bytes) });
-    const result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_stats'); assert.equal(h.state.wires.length, 1); assert.equal(result.isError, true);
+    const result = await invoke(h, 'get_agemail_api_ep_api_v1_0_dash_dash_stats'); assert.equal(h.state.wires.length, 1); assert.equal(result.isError, true);
     assert.equal(JSON.stringify(result).includes('accept'), false); denial(result, 'schema_mismatch');
   }
 });
@@ -828,7 +897,9 @@ test('ST-18.HOST_STDIO startup host delegation zero elicitation and audit approv
   assert.equal((await p.request('tools/call', { name, arguments: { ...criticalArgs, confirm: true, previewId } })).result.isError, undefined);
   assert.equal(p.frames.some(f => f.method === 'elicitation/create'), false);
   const audits = p.stderr().split('\n').filter(Boolean).map(l => JSON.parse(l)).filter(l => l.audit);
-  assert.deepEqual(audits.map(l => l.outcome), ['start', 'ok']); for (const row of audits) assert.equal(row.approvalMode, 'host');
+  assert.deepEqual(audits.map(l => l.outcome), ['preview', 'start', 'ok']); for (const row of audits) assert.equal(row.approvalMode, 'host');
+  assert.equal(audits[0].argsHash, audits[1].argsHash); assert.equal(audits[1].argsHash, audits[2].argsHash);
+  assert.equal(audits[1].requestId, audits[2].requestId); assert.notEqual(audits[0].requestId, audits[1].requestId);
 });
 test('ST-24.DUPLICATE_KEYS raw escaped duplicate confirm fields denied before dispatch', async t => {
   const p = scriptedServer(t); await p.init(); const name = operations[criticalId].tool;

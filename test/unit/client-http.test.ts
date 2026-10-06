@@ -372,8 +372,37 @@ test('cumulative response cap counts discarded retry bodies and rejects compress
     compressedCalls += 1;
     return new Response('opaque bytes', { headers: { 'content-encoding': 'gzip' } });
   });
-  await assert.rejects(compressedClient.send({ operationId: 'get_status' }), isKind('invalid_response'));
+  await assert.rejects(compressedClient.send({ operationId: 'get_status' }), isKind('unsupported_encoding'));
   assert.equal(compressedCalls, 1);
+});
+
+test('unsupported encoding is a safe typed error, cancels unread bytes and never retries GET or POST', async t => {
+  for (const operationId of ['get_status', 'post_comment']) for (const encoding of ['gzip', 'br', 'deflate', 'x-untrusted-secret']) {
+    let calls = 0, reads = 0, cancelled = 0;
+    const client = createHttpClient(makeConfig(), {
+      testOnly: true, operations,
+      connector: {
+        async initialize() {},
+        async request() {
+          calls++;
+          return { status: 200, headers: new Headers({ 'content-encoding': encoding }), body: {
+            async *[Symbol.asyncIterator]() { reads++; yield Buffer.from('untrusted bytes'); },
+            async cancel() { cancelled++; },
+          } };
+        },
+        close() {},
+      },
+    });
+    t.after(() => client.close());
+    await assert.rejects(client.send({ operationId }), error => {
+      assert.ok(error instanceof DarktraceApiError);
+      assert.equal(error.kind, 'unsupported_encoding'); assert.equal(error.status, 200); assert.ok(error.requestId);
+      assert.equal(error.message, 'Darktrace returned an unsupported response encoding.');
+      assert.equal(error.safeDetail, error.message); assert.equal(error.message.includes(encoding), false);
+      return true;
+    });
+    assert.equal(calls, 1); assert.equal(reads, 0); assert.equal(cancelled, 1);
+  }
 });
 
 test('only GET operations retry transient failures, with at most three attempts', async () => {

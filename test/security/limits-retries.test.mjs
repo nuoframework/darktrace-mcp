@@ -39,7 +39,7 @@ for(const bytes of [2097152,2097153]) test('ST-11.BYTES hard boundary '+bytes,as
 });
 for(const encoding of ['gzip','br','deflate']) test('ST-11.COMPRESSION '+encoding+' rejected and cancelled',async()=>{
   let cancelled=false;const h=harness({response:()=>new Response(new ReadableStream({start(c){c.enqueue(Buffer.from('expansion'));},cancel(){cancelled=true;}}),{headers:{'content-encoding':encoding}})});
-  await assert.rejects(h.client.request({operationId:'get_status'}),kind('invalid_response'));assert.equal(cancelled,true);assert.equal(h.state.calls,1);h.client.close();
+  await assert.rejects(h.client.request({operationId:'get_status'}),kind('unsupported_encoding'));assert.equal(cancelled,true);assert.equal(h.state.calls,1);h.client.close();
 });
 test('ST-11/12.RATE 120 attempts permitted and attempt121 unsigned',async()=>{
   const h=harness();for(let i=0;i<120;i++)await h.client.request({operationId:'get_status'});await assert.rejects(h.client.request({operationId:'get_status'}),kind('rate_limited'));assert.equal(h.state.calls,120);assert.equal(h.state.signs,120);h.client.close();
