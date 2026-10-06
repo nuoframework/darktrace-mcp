@@ -38,6 +38,17 @@ Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` d
 
 La publicación de 1.1.1 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
 
+### Plugin para Claude Code y Codex
+
+El repositorio es también un marketplace de plugins. El plugin de `claude-plugin/` arranca el paquete npm fijado a una versión y, al activarlo, Claude Code pide la URL del appliance, los dos tokens y el perfil (los tokens van al almacén de credenciales del sistema):
+
+```sh
+claude plugin marketplace add nuoframework/darktrace-mcp
+claude plugin install darktrace-mcp@darktrace-mcp
+```
+
+Codex instala la misma carpeta desde el marketplace del repositorio (`codex plugin marketplace add nuoframework/darktrace-mcp`), pero no pide configuración; ejecuta el asistente de arriba para la conexión. [Guía del plugin (EN)](docs/plugin-distribution.md) · [Claude Code](docs/es/clients.md#claude-code) · [Codex](docs/es/clients.md#codex).
+
 ### Claude Desktop
 
 Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema.

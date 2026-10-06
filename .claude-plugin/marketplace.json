@@ -1,0 +1,17 @@
+{
+  "name": "darktrace-mcp",
+  "description": "Darktrace MCP plugin: a local MCP server and an investigation skill for the Darktrace Threat Visualizer.",
+  "owner": {
+    "name": "Pablo Arrabal",
+    "url": "https://github.com/nuoframework"
+  },
+  "plugins": [
+    {
+      "name": "darktrace-mcp",
+      "source": "./claude-plugin",
+      "description": "Investigate alerts, devices and incidents on your own Darktrace Threat Visualizer appliance: read-only by default, previews for every change and human approval for critical actions.",
+      "category": "security",
+      "keywords": ["darktrace", "threat-visualizer", "mcp", "security", "soc"]
+    }
+  ]
+}
