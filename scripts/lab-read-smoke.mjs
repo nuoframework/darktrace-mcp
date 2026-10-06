@@ -146,12 +146,12 @@ function dependencyTrees(){
  for(const name of dependencyNames){
   const base=resolve(root,'node_modules',name),files=Object.create(null);
   const walk=(dir,prefix='',depth=0)=>{directory(dir);if(++directories>4096||depth>32)throw new Error();
-   for(const entry of readdirSync(dir,{withFileTypes:true})){budget();const path=resolve(dir,entry.name),key=prefix+entry.name,stat=lstatSync(path);if(stat.isSymbolicLink())throw new Error();
-    if(stat.isDirectory())walk(path,key+'/',depth+1);
-    else if(stat.isFile()){if(++count>4096||stat.size>8388608||(bytes+=stat.size)>67108864)throw new Error();
-     // Empty dependency files are valid; descriptor checks still reject specials/races.
+   for(const entry of readdirSync(dir,{withFileTypes:true})){budget();const path=resolve(dir,entry.name),key=prefix+entry.name;if(entry.isSymbolicLink())throw new Error();
+    if(entry.isDirectory())walk(path,key+'/',depth+1);
+    else if(entry.isFile()){
+     // Inspect and read the same descriptor; never trust a prior path stat.
      const fd=openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
-     try{const actual=fstatSync(fd);if(!actual.isFile()||actual.size!==stat.size)throw new Error();const data=Buffer.alloc(stat.size+1);let n=0,got;while((got=readSync(fd,data,n,data.length-n,null))>0){n+=got;budget();}if(n!==stat.size)throw new Error();files[key]=hash(data.subarray(0,n));}finally{closeSync(fd);}
+     try{const actual=fstatSync(fd);if(!actual.isFile()||++count>4096||actual.size>8388608||(bytes+=actual.size)>67108864)throw new Error();const data=Buffer.alloc(actual.size+1);let n=0,got;while((got=readSync(fd,data,n,data.length-n,null))>0){n+=got;budget();}if(n!==actual.size)throw new Error();files[key]=hash(data.subarray(0,n));}finally{closeSync(fd);}
     }else throw new Error();
    }
   };walk(base);if(!Object.hasOwn(files,'package.json'))throw new Error();

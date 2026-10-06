@@ -1,7 +1,7 @@
 // Fetch immutable, signed Alpine runtime inputs; no production files are changed.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, renameSync, lstatSync, realpathSync, openSync, closeSync, writeSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, readdirSync, rmSync, renameSync, lstatSync, realpathSync, openSync, closeSync, writeSync, readSync, fstatSync, constants } from 'node:fs';
 import { resolve, join, dirname, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const base='alpine@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6';
@@ -238,14 +238,25 @@ function checkTree(dir){
  }
 }
 checkAncestors(output);
-if(existsSync(output)){
- const st=lstatSync(output);assert.equal(st.uid,uid,'Output directory must be owned by the preparing user');
- const marker=join(output,markerName),m=lstatSync(marker,{throwIfNoEntry:false});
- assert.ok(m?.isFile()&&!m.isSymbolicLink()&&m.uid===uid,'Refusing existing non-helper output directory');
- assert.equal(readFileSync(marker,'utf8'),markerBytes,'Invalid helper output marker');checkTree(output);
-}else{
- mkdirSync(output,{recursive:true,mode:0o700});assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink path');
+let created=false;
+try{mkdirSync(output,{recursive:false,mode:0o700});created=true;}
+catch(error){
+ if(error.code==='ENOENT'){
+  mkdirSync(dirname(output),{recursive:true,mode:0o700});
+  try{mkdirSync(output,{mode:0o700});created=true;}catch(error){if(error.code!=='EEXIST')throw error;}
+ }else if(error.code!=='EEXIST')throw error;
+}
+if(created){
+ assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink path');
  writeFileSync(join(output,markerName),markerBytes,{flag:'wx',mode:0o600});
+}else{
+ const st=lstatSync(output);assert.ok(st.isDirectory()&&!st.isSymbolicLink());assert.equal(st.uid,uid,'Output directory must be owned by the preparing user');
+ const fd=openSync(join(output,markerName),constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+ try{
+  const m=fstatSync(fd);assert.ok(m.isFile()&&m.uid===uid,'Refusing existing non-helper output directory');
+  assert.equal(readFileSync(fd,'utf8'),markerBytes,'Invalid helper output marker');
+ }finally{closeSync(fd);}
+ checkTree(output);
 }
 assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink path');
 const archive=join(output,arch), downloaded=join(output,'vendor-sources');
@@ -271,18 +282,33 @@ for(const [hash,name] of expected)assert.equal(createHash('sha256').update(readF
 const maximumDownloadBytes=128*1024*1024;
 async function download(url,file,hash,algorithm){
  checkAncestors(dirname(file));
- const existing=lstatSync(file,{throwIfNoEntry:false});
- if(existing){assert.ok(existing.isFile()&&!existing.isSymbolicLink());assert.equal(existing.uid,uid);assert.ok(existing.size<=maximumDownloadBytes);}
- else{
-  const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(120000)});assert.ok(r.ok,`${url}: ${r.status}`);
-  const advertised=r.headers.get('content-length');if(advertised!==null)assert.ok(Number.isSafeInteger(Number(advertised))&&Number(advertised)>=0&&Number(advertised)<=maximumDownloadBytes,'Oversized response');
-  const temporary=file+'.partial';const fd=openSync(temporary,'wx',0o600);let bytes=0;
+ let existing;
+ try{existing=openSync(file,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);}
+ catch(error){if(error.code!=='ENOENT')throw error;}
+ if(existing!==undefined){
   try{
-   for await(const chunk of r.body){bytes+=chunk.length;assert.ok(bytes<=maximumDownloadBytes,'Download byte cap exceeded');let offset=0;while(offset<chunk.length)offset+=writeSync(fd,chunk,offset,chunk.length-offset);}
-   closeSync(fd);assert.equal(createHash(algorithm).update(readFileSync(temporary)).digest('hex'),hash,file);renameSync(temporary,file);
-  }catch(error){try{closeSync(fd);}catch{}rmSync(temporary,{force:true});throw error;}
+   const st=fstatSync(existing);assert.ok(st.isFile());assert.equal(st.uid,uid);assert.ok(st.size<=maximumDownloadBytes);
+   assert.equal(createHash(algorithm).update(readFileSync(existing)).digest('hex'),hash,file);
+  }finally{closeSync(existing);}
+  return;
  }
- assert.equal(createHash(algorithm).update(readFileSync(file)).digest('hex'),hash,file);
+ const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(120000)});assert.ok(r.ok,`${url}: ${r.status}`);
+ const advertised=r.headers.get('content-length');if(advertised!==null)assert.ok(Number.isSafeInteger(Number(advertised))&&Number(advertised)>=0&&Number(advertised)<=maximumDownloadBytes,'Oversized response');
+ // Bound and authenticate the complete response before any network bytes reach disk.
+ const chunks=[];let bytes=0;
+ for await(const chunk of r.body){bytes+=chunk.length;assert.ok(bytes<=maximumDownloadBytes,'Download byte cap exceeded');chunks.push(chunk);}
+ const content=Buffer.concat(chunks,bytes);
+ assert.equal(createHash(algorithm).update(content).digest('hex'),hash,file);
+ const temporary=file+'.partial',fd=openSync(temporary,'wx+',0o600);
+ try{
+  let offset=0;while(offset<content.length)offset+=writeSync(fd,content,offset,content.length-offset);
+  const written=Buffer.alloc(content.length);let read=0;
+  while(read<written.length){const count=readSync(fd,written,read,written.length-read,read);assert.ok(count>0,'Incomplete temporary download');read+=count;}
+  assert.equal(createHash(algorithm).update(written).digest('hex'),hash,file);
+  renameSync(temporary,file);
+ }catch(error){rmSync(temporary,{force:true});throw error;}
+ finally{closeSync(fd);}
+
 }
 // Exact vendor source hashes come from the APKBUILD commits in signed .PKGINFO.
 for(const source of sources){
