@@ -53,6 +53,8 @@ The wizard uses `npx` only during installation; clients launch absolute paths or
 
 ## What the badge does
 
+GitHub removes non-HTTP schemes: buttons use the official [Cursor](https://cursor.com/en/install-mcp) and [VS Code](https://github.com/github/github-mcp-server#installation) HTTPS wrappers while preserving the encoded JSON and all input prompts exactly; Insiders adds `quality=insiders`.
+
 A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. On `main`, for 1.1.3, a server without connection settings exposes exactly one tool, `darktrace_setup_status`, which says what is missing and the one command to run:
 
 ```sh

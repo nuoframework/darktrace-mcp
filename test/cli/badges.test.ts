@@ -50,6 +50,14 @@ test('both README languages carry the badge rows generated for the current packa
     const rows = readmeBadgesHtml(version, labels).split('\n');
     const carrier = candidates.find(([, text]) => rows.every((line) => text.includes(line)));
     assert.ok(carrier, `no README carries the ${lang} badge rows for ${version} (run: node scripts/install-badges.mjs and paste them)`);
+    const hrefs = [...carrier[1].matchAll(/<a href="([^"]+)">/g)].map((match) => match[1].replaceAll('&amp;', '&')).filter((href) => /^https:\/\/(?:cursor\.com\/en\/install-mcp|(?:insiders\.)?vscode\.dev\/redirect\/mcp\/install)\?/.test(href));
+    assert.equal(hrefs.length, 3, 'exactly three official HTTPS installation buttons');
+    const encodedConfig = (href: string) => href.split('config=')[1].split('&')[0];
+    assert.equal(encodedConfig(hrefs[0]), encodedConfig(cursorBadgeLink(version)), 'Cursor encoded JSON is unchanged');
+    assert.equal(encodedConfig(hrefs[1]), vscodeBadgeLink(version).split('?')[1], 'VS Code encoded JSON is unchanged');
+    assert.equal(encodedConfig(hrefs[2]), vscodeBadgeLink(version, true).split('?')[1], 'Insiders encoded JSON is unchanged');
+    assert.equal(new URL(hrefs[2]).searchParams.get('quality'), 'insiders');
+    for (const href of hrefs.slice(1)) assert.deepEqual(JSON.parse(new URL(href).searchParams.get('inputs') as string), (vscodeBadgePayload(version) as { inputs: unknown }).inputs, 'HTTPS redirect preserves all input prompts');
   }
 });
 

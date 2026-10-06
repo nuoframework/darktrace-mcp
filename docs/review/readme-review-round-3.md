@@ -75,7 +75,7 @@ Por indicación final del propietario, ambos README separan Herramientas y Opera
 
 ## Presentación de los botones
 
-Los tres botones usan badges oscuros homogéneos de 36 px en una sola fila HTML, con textos localizados y explicación debajo. `scripts/install-badges.mjs` modifica solo su presentación; las funciones de URI siguen siendo las de #18. Se comprobó la igualdad exacta de los tres deeplinks, incluido el JSON codificado, antes y después en ambos README. La comprobación de contenido del README se adapta a las filas HTML; las pruebas del JSON y de seguridad permanecen intactas. La vista renderizada se enlaza en la PR.
+Los tres botones usan badges oscuros homogéneos de 36 px en una sola fila HTML, con textos localizados y explicación debajo. `scripts/install-badges.mjs` modifica solo su presentación; las funciones de URI siguen siendo las de #18. GitHub eliminaba los esquemas nativos también en `main`; con autorización del propietario se usan envoltorios HTTPS oficiales. El JSON codificado de `config` se conserva byte a byte. Cursor muestra la misma configuración y VS Code/Insiders devuelven HTTP 302 al esquema nativo correcto con la misma entrada y los tres campos `inputs`; no se confirmó ninguna instalación local. La comprobación de contenido del README se adapta a las filas HTML; las pruebas del JSON y de seguridad permanecen intactas. Los tres SVG tienen altura intrínseca de 36 px; la vista renderizada y la comprobación de enlaces HTTPS se enlazan en la PR.
 
 ## Descubribilidad
 

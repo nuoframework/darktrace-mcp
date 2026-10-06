@@ -53,6 +53,8 @@ El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o
 
 ## Qué hace el botón
 
+GitHub elimina los esquemas no HTTP: los botones usan los envoltorios HTTPS oficiales de [Cursor](https://cursor.com/en/install-mcp) y [VS Code](https://github.com/github/github-mcp-server#installation), conservando exactamente el JSON codificado y sus campos de entrada; Insiders añade `quality=insiders`.
+
 Un botón del README no conoce tus rutas ni tokens: añade `darktrace` con la versión npm fijada, `npx`, perfil `read` y nada más. En `main`, para 1.1.3, un servidor sin conexión expone solo `darktrace_setup_status`, que indica qué falta y el comando:
 
 ```sh
