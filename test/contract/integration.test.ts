@@ -35,15 +35,16 @@ test('production client registry accepts every released operation and still refu
  assert.equal(productionOperationDescriptors.length,78);
  assert.doesNotThrow(()=>createHttpClient(cfg(),{testOnly:true,operations:productionOperationDescriptors,fetch:async()=>new Response('{}')}));
 });
-test('S6 Advanced Search GET sends and signs the standard Base64 document verbatim in the path',async()=>{
+test('S6 Advanced Search GET percent-encodes the standard Base64 document and signs the encoded path (lab evidence 7.1.0)',async()=>{
  const {calls,ctx}=wired({sensitiveRead:true},()=>new Response('{"took":1,"timed_out":false,"hits":{"total":0,"hits":[]}}',{headers:{'Content-Type':'application/json'}}));
  // This document's Base64 contains '+', '/' and '=' (search text chosen for it).
  const doc={search:'@fields.query:"a?b>c~"',fields:[],timeframe:'3600',time:{user_interval:0}};
  const hash=Buffer.from(JSON.stringify(doc)).toString('base64');assert.match(hash,/[+/]/);
  const result=await callTool('darktrace_advanced_search',{operation:'get_advancedsearch_api_search_query',path:{query:hash}},ctx);
  assert.equal(result.isError,undefined,JSON.stringify(result));assert.equal(calls.length,1);
- assert.equal(calls[0].url,`https://192.0.2.10/advancedsearch/api/search/${hash}`);
- assert.equal(calls[0].headers.get('DTAPI-Signature'),hmac(`/advancedsearch/api/search/${hash}`));
+ const encoded=encodeURIComponent(hash);assert.notEqual(encoded,hash);
+ assert.equal(calls[0].url,`https://192.0.2.10/advancedsearch/api/search/${encoded}`);
+ assert.equal(calls[0].headers.get('DTAPI-Signature'),hmac(`/advancedsearch/api/search/${encoded}`));
  const bad=await callTool('darktrace_advanced_search',{operation:'get_advancedsearch_api_search_query',path:{query:Buffer.from('{"search":"x"}').toString('base64')}},ctx);
  assert.equal(bad.isError,true);assert.equal(calls.length,1);
 });
