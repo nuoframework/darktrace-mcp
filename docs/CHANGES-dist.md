@@ -5,6 +5,19 @@ decision during the work: the repository becomes **public** and the package is p
 **public npm registry** (the earlier GitHub Packages plan was dropped before implementation).
 Nothing was published from this branch; every publish step runs only in `release.yml` on a tag.
 
+## npm registry propagation delay (`release.yml`)
+
+In release runs 37497433270 and 37506533706, `npm publish` succeeded but the next step's immediate
+`npm view` returned E404, because the public registry had not yet exposed the new version. That step failed
+`publish-npm`, so `github-release` was skipped and the GitHub Release had to be created by hand.
+Now `publish-npm` checks the exit code of `npm publish` itself, and a failed publish still fails the job.
+After a successful publish, the job polls `npm view --registry https://registry.npmjs.org` every 30 s
+for up to 15 minutes (the job timeout is now 30 minutes). If the version is still not visible, it
+emits a warning and records the tarball shasum and integrity instead. `github-release` now runs with
+`if: always() && …` when every gate and the ghcr manifest succeeded and `publish-npm` did not fail.
+Its release body shows the npm status as `published` or as `published, pending registry
+propagation`, with the shasum.
+
 ## 1.1.0 gate closure: release workflow (blockers B7 and B9)
 
 Follow-up to the final gate review (`docs/security/final-gate-review-1.1.0.md` §5). The counts and
