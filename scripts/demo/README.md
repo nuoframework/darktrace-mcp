@@ -4,7 +4,7 @@ These are real terminal recordings of the built server against **synthetic HTTPS
 
 | Recording | Source and actual execution |
 |---|---|
-| Setup | [setup.tape](setup.tape) drives `node dist/src/index.js setup` with typed URL, hidden dummy tokens, preset 1 (`read`), and OpenCode only. [setup.cast](setup.cast) captures the terminal output. The signed probe succeeds and the results table confirms a temporary client entry. |
+| Setup | [setup.tape](setup.tape) drives `node dist/src/index.js setup` with typed URL, hidden dummy tokens, preset 1 (`read`), and OpenCode only. [setup.cast](setup.cast) captures the terminal output. The wizard shows its banner, `Step n of 5` headers, a spinner during the signed probe and an aligned summary with file modes, then the `Next:` hint. The shipped GIF predates that look and must be re-recorded with this tape. |
 | Analyst | [analyst.mjs](analyst.mjs) runs an authenticated `claude --mcp-config <tmp.json> --strict-mcp-config -p "…"` session. [analyst.cast](analyst.cast) captures the live tool events and streamed answer; [analyst.tape](analyst.tape) renders that cast with VHS. |
 | Approval | [approval.tape](approval.tape) drives [approval-client.mjs](approval-client.mjs), a real interactive Claude Code session using the built MCP server. It previews `post_antigena`, confirms the same action, displays the native “MCP server darktrace requests your input” form, selects **Decline**, and shows the refusal. |
 

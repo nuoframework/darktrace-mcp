@@ -143,3 +143,7 @@ These are local candidate hashes; `release.yml` rebuilds and re-verifies the can
 - `test/security/evidence/2026-10-06T21-20-32-905Z.json`, `test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`
 
 `claude-plugin/**` is deliberately unchanged: its exact pin moves to 1.1.2 only after the npm registry shows the version ([plugin distribution](../plugin-distribution.md#bump-the-pinned-version-at-each-release)).
+
+## After the release
+
+The next change set (PR #18, easy installation everywhere) moves the functional count, the source tree SHA-256, the runtime file count and the runtime aggregate; its measurements and the applied CI values are in [release-pins-1.1.3.md](release-pins-1.1.3.md).

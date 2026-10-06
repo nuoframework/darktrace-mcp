@@ -7,6 +7,8 @@ import { findOnPath, lstatOrUndefined } from './fsutil.js';
 import { PACKAGE_NAME, describeEntry, fixedCopyDir, fixedCopyEntry } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenPaths } from './state.js';
+import { createUi, type Ui } from './ui.js';
+import { VERSION } from '../server/createServer.js';
 
 /**
  * `darktrace-mcp uninstall` (alias `remove --all`): undo everything `setup` created, and nothing else.
@@ -26,6 +28,7 @@ export interface UninstallIo {
   readonly stdout: Writable;
   /** Test hook; production chooses a TTY or line prompter. */
   readonly prompter?: Prompter;
+  readonly ui?: Ui;
 }
 
 /** Same version rule as the fixed-copy installer: fixedCopyDir refuses anything else. */
@@ -109,7 +112,9 @@ export async function runUninstall(args: UninstallArgs, io: UninstallIo): Promis
   const copies = planCopies(ctx);
   const npmHint = globalInstallHint(ctx);
 
-  write(io, `darktrace-mcp uninstall${args.dryRun ? ' (dry run: nothing will be changed)' : ''}\n\nPlan:\n`);
+  const ui = io.ui ?? createUi();
+  write(io, ui.banner(`darktrace-mcp uninstall${args.dryRun ? ' (dry run: nothing will be changed)' : ''} · v${VERSION}`,
+    'Undoes what setup created and nothing else: client entries named "darktrace", stored tokens, settings and fixed copies.') + '\nPlan:\n');
   write(io, `  1) Client entries named "darktrace" (config files are backed up first):\n${clientPlan.length === 0 ? '    none found\n' : bullet(clientPlan.map((r) => `${clientLabel(r.client)}: ${r.detail}`))}`);
   write(io, `  2) Stored tokens and settings in ${state.dir}:\n${state.remove.length === 0 ? '    none found\n' : bullet(state.remove)}`);
   if (args.keepCopies) write(io, '  3) Fixed copies: kept (--keep-copies)\n');
@@ -180,16 +185,18 @@ export async function runUninstall(args: UninstallArgs, io: UninstallIo): Promis
   }
 
   // 6. Summary.
-  write(io, '\nRemoved:\n');
-  for (const r of clientResults) write(io, `  ${clientLabel(r.client).padEnd(15)} ${r.status.padEnd(9)} ${r.detail}\n`);
-  for (const file of removedState) write(io, `  deleted ${file}\n`);
-  if (dirRemoved) write(io, `  deleted ${state.dir}\n`);
-  for (const dir of removedCopies) write(io, `  deleted ${dir}\n`);
-  write(io, `  Docker image: ${imageLine}\n`);
+  write(io, '\n' + ui.paint('bold', 'Removed') + '\n');
+  const rows: string[][] = clientResults.map((r) => [ui.marker(r.status === 'failed' || r.status === 'manual' ? 'fail' : 'ok'), clientLabel(r.client), r.status, r.detail]);
+  for (const file of removedState) rows.push([ui.marker('ok'), 'deleted', '', file]);
+  if (dirRemoved) rows.push([ui.marker('ok'), 'deleted', '', state.dir]);
+  for (const dir of removedCopies) rows.push([ui.marker('ok'), 'deleted', '', dir]);
+  rows.push([ui.marker(imageLine.startsWith('not removed') ? 'fail' : 'info'), 'Docker image', '', imageLine]);
+  write(io, ui.table(rows));
   const backups = clientResults.flatMap((r) => (r.backup ? [r.backup] : []));
   if (backups.length > 0) write(io, `Backups kept (delete them when no longer needed):\n${bullet(backups)}`);
   for (const r of clientResults) if (r.snippet && (r.status === 'manual' || r.status === 'failed')) write(io, `\n--- ${clientLabel(r.client)}: do this by hand ---\n${r.snippet}\n`);
   // 5. Global npm install: print the command, never run npm -g.
   if (npmHint) write(io, `\nThe package is also installed globally; remove it with:\n  ${npmHint}\n`);
+  write(io, failed ? ui.fail('Some steps need your attention (see above).\n') : ui.ok('Done. Restart your AI clients so they forget the server.\n'));
   return failed ? 1 : 0;
 }

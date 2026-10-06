@@ -107,7 +107,7 @@ export function validateImage(value: string): string {
 const CONTAINER_PUBLIC = '/run/secrets/public-token';
 const CONTAINER_PRIVATE = '/run/secrets/private-token';
 
-/** Build the launcher for this checkout (node) or a reviewed image (docker). Never contains token values in file mode. */
+/** Build the launcher for the running package (node, by absolute path) or a reviewed image (docker). Never contains token values in file mode. */
 export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToken: string; privateToken: string }): ServerEntry {
   const ackEnv: Record<string, string> = {};
   if (needsSensitiveWriteAck(s.profiles)) {
@@ -175,8 +175,64 @@ export function vscodeInstallLink(entry: ServerEntry, insiders = false): string 
   return `${insiders ? 'vscode-insiders' : 'vscode'}:mcp/install?${encodeURIComponent(JSON.stringify(vscodeInstallPayload(entry)))}`;
 }
 
-/** Cursor deeplink: base64 of the server object (command/args/env). Token-file paths only, never values. */
+/** Inner server object shared by the base64 deeplinks (Cursor, LM Studio): command/args/env, never token values. */
+const serverObject = (entry: ServerEntry): Record<string, unknown> => ({ command: entry.command, args: [...entry.args], ...(Object.keys(entry.env).length ? { env: { ...entry.env } } : {}) });
+const base64Config = (entry: ServerEntry): string => encodeURIComponent(Buffer.from(JSON.stringify(serverObject(entry)), 'utf8').toString('base64'));
+
+/** Cursor deeplink (cursor.com/docs/mcp/install-links): base64 of the server object. Token-file paths only, never values. */
 export function cursorInstallLink(entry: ServerEntry): string {
-  const config = Buffer.from(JSON.stringify({ command: entry.command, args: [...entry.args], env: { ...entry.env } }), 'utf8').toString('base64');
-  return `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(SERVER_NAME)}&config=${encodeURIComponent(config)}`;
+  return `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(SERVER_NAME)}&config=${base64Config(entry)}`;
+}
+
+/** LM Studio deeplink (lmstudio.ai/docs/app/mcp/deeplink): same base64 notation as Cursor. */
+export function lmstudioInstallLink(entry: ServerEntry): string {
+  return `lmstudio://add_mcp?name=${encodeURIComponent(SERVER_NAME)}&config=${base64Config(entry)}`;
+}
+
+/** Kiro launch link (kiro.dev/docs/mcp/servers): URL-encoded JSON; Kiro shows a confirmation dialog before writing. */
+export function kiroInstallLink(entry: ServerEntry): string {
+  const config = { ...serverObject(entry), disabled: false, autoApprove: [] };
+  return `https://kiro.dev/launch/mcp/add?name=${encodeURIComponent(SERVER_NAME)}&config=${encodeURIComponent(JSON.stringify(config))}`;
+}
+
+// ---- README one-click badges ---------------------------------------------------------------
+//
+// A badge cannot know the user's absolute paths or tokens, so it installs the pinned package through npx with the
+// read profile and nothing else. The server then starts in setup mode (one `darktrace_setup_status` tool) until
+// `darktrace-mcp setup` writes the real entry: absolute node path, fixed copy, token files.
+
+export const PACKAGE_NAME = '@nuoframework/darktrace-mcp';
+
+/** The launcher a one-click badge installs: `npx -y @nuoframework/darktrace-mcp@<version>`, read profile, no secrets. */
+export function npxServerEntry(version: string): ServerEntry {
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version)) throw new SetupInputError('badge version must be an exact package version');
+  return { command: 'npx', args: ['-y', `${PACKAGE_NAME}@${version}`], env: { DARKTRACE_PROFILES: 'read' } };
+}
+
+export const VSCODE_BADGE_INPUTS = Object.freeze([
+  { type: 'promptString', id: 'darktrace-url', description: 'Darktrace appliance URL (https://...)', password: false },
+  ...VSCODE_INPUTS,
+] as const);
+
+/** VS Code badge payload: URL and both tokens are prompted by VS Code (tokens as password inputs kept in its secret storage). */
+export function vscodeBadgePayload(version: string): Record<string, unknown> {
+  const entry = npxServerEntry(version);
+  return {
+    name: SERVER_NAME, type: 'stdio', command: entry.command, args: [...entry.args],
+    env: { DARKTRACE_URL: '${input:darktrace-url}', DARKTRACE_PUBLIC_TOKEN: '${input:darktrace-public-token}', DARKTRACE_PRIVATE_TOKEN: '${input:darktrace-private-token}', DARKTRACE_PROFILES: 'read' },
+    inputs: VSCODE_BADGE_INPUTS.map((i) => ({ ...i })),
+  };
+}
+export function vscodeBadgeLink(version: string, insiders = false): string {
+  return `${insiders ? 'vscode-insiders' : 'vscode'}:mcp/install?${encodeURIComponent(JSON.stringify(vscodeBadgePayload(version)))}`;
+}
+export const cursorBadgeLink = (version: string): string => cursorInstallLink(npxServerEntry(version));
+
+/** Markdown for the README badge row (both languages share it). */
+export function installBadgesMarkdown(version: string, labels: { cursor: string; vscode: string; insiders: string }): string {
+  return [
+    `[![${labels.cursor}](https://cursor.com/deeplink/mcp-install-dark.png)](${cursorBadgeLink(version)})`,
+    `[![${labels.vscode}](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](${vscodeBadgeLink(version)})`,
+    `[![${labels.insiders}](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](${vscodeBadgeLink(version, true)})`,
+  ].join('\n');
 }

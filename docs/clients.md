@@ -11,6 +11,8 @@ Every client can be set up two ways:
 
 `setup` checks the appliance once and records the signature date format it accepts as `DARKTRACE_DATE_FORMAT` in every entry it writes (and `config` reuses it). If you write an entry by hand for an appliance that answers HTTP 400 to `darktrace-mcp test`, add `"DARKTRACE_DATE_FORMAT": "spaced"` to its `env`; see [signature date format](configuration.md#signature-date-format).
 
+Shortest path per client, in one table: [Install](install.md). Vendor documentation each entry was verified against: [install matrix](install-matrix.md).
+
 | Client | `<client>` name | Config file |
 |---|---|---|
 | [Claude Desktop](#claude-desktop) | `claude-desktop` | macOS `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows `%APPDATA%\Claude\claude_desktop_config.json` |
@@ -18,10 +20,27 @@ Every client can be set up two ways:
 | [Codex](#codex) | `codex` | `~/.codex/config.toml` |
 | [Cursor](#cursor) | `cursor` | `~/.cursor/mcp.json` |
 | [VS Code](#vs-code) | `vscode` | User `mcp.json` (**MCP: Open User Configuration**) |
-| [Windsurf](#windsurf) | `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
+| [Windsurf](#windsurf) | `windsurf` | `~/.config/devin/mcp_config.json` (legacy `~/.codeium/windsurf/mcp_config.json` when present) |
 | [OpenCode](#opencode) | `opencode` | `~/.config/opencode/opencode.json` |
 | [Gemini CLI](#gemini-cli) | `gemini` | `~/.gemini/settings.json` |
+| [Zed](#zed) | `zed` | `~/.config/zed/settings.json` (`context_servers`) |
+| [Cline](#cline) | `cline` | `<VS Code user dir>/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` |
+| [Roo Code](#roo-code) | `roo` | `<VS Code user dir>/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json` |
+| [Continue](#continue) | `continue` | `~/.continue/config.yaml` (`mcpServers` list) |
+| [Kiro](#kiro) | `kiro` | `~/.kiro/settings/mcp.json` |
+| [Amp](#amp) | `amp` | `~/.config/amp/settings.json` (`amp.mcpServers`) |
+| [GitHub Copilot CLI](#github-copilot-cli) | `copilot-cli` | `~/.copilot/mcp-config.json` |
+| [Warp](#warp) | `warp` | `~/.warp/.mcp.json` |
+| [Goose](#goose) | `goose` | `~/.config/goose/config.yaml` (`extensions` map; Windows `%APPDATA%\Block\goose\config\config.yaml`) |
+| [LM Studio](#lm-studio) | `lmstudio` | `~/.lmstudio/mcp.json` |
+| [Antigravity](#antigravity) | `antigravity` | `~/.gemini/config/mcp_config.json` |
+| [JetBrains Junie](#jetbrains-junie) | `junie` | `~/.junie/mcp/mcp.json` |
+| [JetBrains AI Assistant](#jetbrains-ai-assistant) | `jetbrains` | none: paste into Settings \| Tools \| AI Assistant \| MCP |
 | [Docker](#docker) | — | Any of the above |
+
+`<VS Code user dir>` is `~/Library/Application Support/Code/User` on macOS, `~/.config/Code/User` on Linux and `%APPDATA%\Code\User` on Windows.
+
+**First run without configuration.** An entry that lacks the URL and token variables (for example one added by a README badge) does not fail: the server starts in setup mode with a single tool, `darktrace_setup_status`, that names the command to run (`npx -y @nuoframework/darktrace-mcp@1.1.2 setup`). Run it once and restart the client.
 
 ## Rules for every manual snippet
 
@@ -213,9 +232,11 @@ Use **MCP: List Servers** to start or inspect it. Prefer the user configuration 
 
 ## Windsurf
 
+Windsurf's documentation now lives under Devin Desktop and reads `~/.config/devin/mcp_config.json` (Windows `%APPDATA%\devin\mcp_config.json`); the wizard writes the legacy `~/.codeium/windsurf/mcp_config.json` only when that directory still exists.
+
 **Automatic.** `darktrace-mcp setup`.
 
-**Manual.** Add to `~/.codeium/windsurf/mcp_config.json`:
+**Manual.** Add to `~/.config/devin/mcp_config.json` (or the legacy file above):
 
 ```json
 {
@@ -299,6 +320,315 @@ or add to `~/.gemini/settings.json`:
 ```
 
 Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool call.
+
+## Zed
+
+**Automatic.** `darktrace-mcp setup --client zed`. Zed's `settings.json` is JSONC; when the file contains comments the wizard prints the snippet instead of rewriting it.
+
+**Manual.** Add to `~/.config/zed/settings.json` (or Settings → AI → MCP Servers → Add Local Server):
+
+```json
+{
+  "context_servers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+Verify: the server appears under Settings → AI → MCP Servers.
+
+## Cline
+
+**Automatic.** `darktrace-mcp setup --client cline` writes `cline_mcp_settings.json` in Cline's VS Code storage (see the table above). Cline reloads the file on change.
+
+**Manual.** Cline panel → MCP Servers → Configure → Configure MCP Servers, then add under `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Keep `autoApprove` empty so Cline asks before each tool call. The Cline CLI uses `~/.cline/data/settings/cline_mcp_settings.json` with the same shape.
+
+## Roo Code
+
+**Automatic.** `darktrace-mcp setup --client roo` writes the global `mcp_settings.json` (table above).
+
+**Manual.** Roo Code → MCP Servers → Edit Global MCP, then add under `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      },
+      "alwaysAllow": [],
+      "disabled": false
+    }
+  }
+}
+```
+
+A project `.roo/mcp.json` overrides the global entry; review it as you would any project file.
+
+## Continue
+
+**Automatic.** `darktrace-mcp setup --client continue` inserts a marker-delimited item at the top of the `mcpServers` list in `~/.continue/config.yaml` (Windows `%USERPROFILE%\.continue\config.yaml`) and never touches the rest of the file. If the file already defines a `darktrace` server, or `mcpServers` is not a plain list, the wizard prints the snippet instead.
+
+**Manual.** Add to `config.yaml`:
+
+```yaml
+mcpServers:
+  - name: darktrace
+    type: stdio
+    command: /absolute/path/to/node
+    args:
+      - /absolute/path/to/darktrace-mcp/dist/src/index.js
+    env:
+      DARKTRACE_URL: https://darktrace.example.internal
+      DARKTRACE_PUBLIC_TOKEN_FILE: /absolute/private/darktrace/public-token
+      DARKTRACE_PRIVATE_TOKEN_FILE: /absolute/private/darktrace/private-token
+      DARKTRACE_PROFILES: read
+```
+
+MCP tools are available in Continue's agent mode. Verify with the tools icon in the chat input.
+
+## Kiro
+
+**Automatic.** `darktrace-mcp setup --client kiro` writes `~/.kiro/settings/mcp.json`. `darktrace-mcp config kiro` also prints a `https://kiro.dev/launch/mcp/add?…` link; Kiro shows a confirmation dialog before writing.
+
+**Manual.** Add to `~/.kiro/settings/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Kiro reloads the file on save; the server shows in the MCP Servers view.
+
+## Amp
+
+**Automatic.** `darktrace-mcp setup --client amp` writes `~/.config/amp/settings.json` (a `.jsonc` twin is used when it is the only file; comments are never rewritten).
+
+**Manual.** Add to `~/.config/amp/settings.json`:
+
+```json
+{
+  "amp.mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+Verify with `amp mcp list`.
+
+## GitHub Copilot CLI
+
+**Automatic.** `darktrace-mcp setup --client copilot-cli` writes `~/.copilot/mcp-config.json` (`COPILOT_HOME` is honoured).
+
+**Manual.** Either `/mcp add` inside Copilot CLI, or add to `~/.copilot/mcp-config.json`:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "type": "local",
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      },
+      "tools": ["*"]
+    }
+  }
+}
+```
+
+Copilot CLI passes only the variables listed in `env` to the server (plus `PATH`). Verify with `/mcp` in a session.
+
+## Warp
+
+**Automatic.** `darktrace-mcp setup --client warp` writes `~/.warp/.mcp.json`.
+
+**Manual.** Settings → Agents → MCP servers → add a CLI server and paste, or add to `~/.warp/.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+Start the server from the same settings page.
+
+## Goose
+
+**Automatic.** `darktrace-mcp setup --client goose` inserts a marker-delimited `darktrace` entry under `extensions` in `~/.config/goose/config.yaml` (Windows `%APPDATA%\Block\goose\config\config.yaml`) and leaves the rest untouched. An existing unmanaged `darktrace` entry is never rewritten; the snippet is printed instead.
+
+**Manual.** `goose configure` → Add Extension → Command-line Extension, or add under `extensions:`:
+
+```yaml
+extensions:
+  darktrace:
+    type: stdio
+    name: darktrace
+    enabled: true
+    cmd: /absolute/path/to/node
+    args: ["/absolute/path/to/darktrace-mcp/dist/src/index.js"]
+    timeout: 300
+    envs:
+      DARKTRACE_URL: https://darktrace.example.internal
+      DARKTRACE_PUBLIC_TOKEN_FILE: /absolute/private/darktrace/public-token
+      DARKTRACE_PRIVATE_TOKEN_FILE: /absolute/private/darktrace/private-token
+      DARKTRACE_PROFILES: read
+    env_keys: []
+```
+
+Goose's `goose://extension` links accept only `npx`, `uvx`, `jbang`, `goosed` or `docker` as the command, so the wizard does not print one for the absolute Node path it registers.
+
+## LM Studio
+
+**Automatic.** `darktrace-mcp setup --client lmstudio` writes `~/.lmstudio/mcp.json`. `darktrace-mcp config lmstudio` also prints an `lmstudio://add_mcp?…` link (LM Studio 0.3.17 or later).
+
+**Manual.** Program → Install → Edit mcp.json, then add under `mcpServers` (Cursor notation):
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+Saving the file loads the server. Local models have smaller context windows than hosted ones; keep the `read` profile.
+
+## Antigravity
+
+**Automatic.** `darktrace-mcp setup --client antigravity` writes `~/.gemini/config/mcp_config.json`.
+
+**Manual.** Agent panel → … → MCP Servers → Manage MCP Servers → View raw config, then add:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+Tools default to Ask mode in Antigravity; keep it that way for write profiles.
+
+## JetBrains Junie
+
+**Automatic.** `darktrace-mcp setup --client junie` writes `~/.junie/mcp/mcp.json`, shared by the Junie plugin and the Junie CLI. A project `.junie/mcp/mcp.json` is also read.
+
+**Manual.** Settings → Tools → Junie → MCP Settings → Add (opens the same file), then add:
+
+```json
+{
+  "mcpServers": {
+    "darktrace": {
+      "command": "/absolute/path/to/node",
+      "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
+      "env": {
+        "DARKTRACE_URL": "https://darktrace.example.internal",
+        "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
+        "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
+        "DARKTRACE_PROFILES": "read"
+      }
+    }
+  }
+}
+```
+
+## JetBrains AI Assistant
+
+JetBrains documents no configuration file for AI Assistant, so the wizard prints the JSON to paste.
+
+**Paste.** `darktrace-mcp config jetbrains`, then Settings | Tools | AI Assistant | Model Context Protocol (MCP) → Add → STDIO, paste the printed JSON (same shape as [Junie](#jetbrains-junie)) and Apply; the server starts immediately. If `setup` already configured Claude Desktop on this machine, **Import from Claude** on the same page reuses that entry.
 
 ## Docker
 

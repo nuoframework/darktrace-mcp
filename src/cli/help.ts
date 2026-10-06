@@ -28,7 +28,7 @@ Installer commands:
       then writes the local image ID (--pull=never) and records the ID and registry digest in setup.json.
   config <client> [--url <origin>] [--profiles <p>] [--acknowledge-sensitive-write] [--runtime node|docker] [--image <id>]
          [--date-format compact|spaced]
-      Print a ready-to-paste snippet (no secrets). VS Code and Cursor also get one-click install links.
+      Print a ready-to-paste snippet (no secrets). VS Code, Cursor, LM Studio and Kiro also get one-click install links.
       Reuses the date format saved by setup. Docker runtime: reuses the image ID and digest saved by setup.
       Reuses an acknowledgement saved by setup; otherwise sensitive + write profiles need the flag.
   remove [--client <name>]... [--dry-run] [--purge]
@@ -43,5 +43,8 @@ Installer commands:
       no date format chosen, retries once with the other format and tells you which DARKTRACE_DATE_FORMAT to set.
       With the docker runtime saved by setup, first runs the image's --check-config in a container with the client
       entry's mounts and user (no network); the signed GET /status then runs from this host.
-  Clients: claude-desktop, claude-code, codex, cursor, vscode, windsurf, opencode, gemini.
+  Clients: claude-desktop, claude-code, codex, cursor, vscode, windsurf, opencode, gemini, zed, cline, roo, continue, kiro,
+           amp, copilot-cli, warp, goose, lmstudio, antigravity, junie, jetbrains (paste-only: no documented file).
+  First run: a client entry without URL or tokens (for example from a README badge) starts the server in setup mode
+  with one tool, darktrace_setup_status, that names the setup command; run setup once and restart the client.
 `;

@@ -17,8 +17,11 @@ stdio server path, `--check-config` and offline `doctor` are unchanged.
 | `darktrace-mcp uninstall [--dry-run] [--yes] [--keep-copies] [--docker]` (alias `remove --all`) | Show a plan, ask once, then remove every client entry (with backups), the stored tokens, `setup.json` and the installer directory, and the fixed copies; `--docker` removes the image ID recorded by setup. Prints `npm uninstall -g` when the package is installed globally. |
 | `darktrace-mcp test` / `darktrace-mcp doctor --online` | Load the configuration and send one signed `GET /status` through the production client. With the docker runtime saved, first run `--check-config` in a container. |
 
-Clients: `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, `windsurf`, `opencode`, `gemini`
-(`--client all` selects every client).
+Clients: `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, `windsurf`, `opencode`, `gemini`, `zed`, `cline`, `roo`,
+`continue`, `kiro`, `amp`, `copilot-cli`, `warp`, `goose`, `lmstudio`, `antigravity`, `junie`, `jetbrains` (`--client all` selects every client).
+Sources per client: [install-matrix.md](install-matrix.md). First run without configuration: setup mode with the single
+`darktrace_setup_status` tool (`src/server/setupServer.ts`). Terminal presentation: `src/cli/ui.ts`; YAML block editor for
+Continue and Goose: `src/cli/yamlBlock.ts`; README badges: `installBadgesMarkdown` in `src/cli/entry.ts` and `scripts/install-badges.mjs`.
 
 ### `setup` flags
 

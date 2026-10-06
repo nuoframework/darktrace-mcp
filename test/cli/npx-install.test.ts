@@ -4,7 +4,9 @@ import { lstatSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from '
 import { join } from 'node:path';
 import { runSetup } from '../../src/cli/setup.js';
 import { runCli } from '../../src/cli/main.js';
-import { describeEntry, existingFixedCopyEntry, fixedCopyDir, installFixedCopy, isTransientInstall, PACKAGE_NAME } from '../../src/cli/install.js';
+import { describeEntry, entryOrigin, existingFixedCopyEntry, fixedCopyDir, installFixedCopy, isTransientInstall, PACKAGE_NAME } from '../../src/cli/install.js';
+import { NODE_RUNTIME_LABEL } from '../../src/cli/setup.js';
+import { createLinePrompter } from '../../src/cli/prompt.js';
 import { sandbox, collector, stdinFrom, readJson, PUBLIC, PRIVATE } from './helpers.js';
 
 const VERSION = '1.1.0';
@@ -115,3 +117,33 @@ test('config from the npx cache without a fixed copy warns that the path is temp
   assert.equal(code, 0);
   assert.match(out.text(), /Running from the npx cache: the path below is temporary/);
 });
+
+test('entry origin names the running package honestly: checkout, fixed copy, npx cache or installed package', async () => {
+  const box = sandbox('darwin');
+  const transient = fakeNpxTree(box.home);
+  assert.equal(entryOrigin(transient, box.ctx), 'transient');
+  // A source checkout has package.json next to src/.
+  mkdirSync(join(box.home, 'checkout/dist/src'), { recursive: true });
+  mkdirSync(join(box.home, 'checkout/src'));
+  writeFileSync(join(box.home, 'checkout/package.json'), JSON.stringify({ name: PACKAGE_NAME, version: VERSION }));
+  assert.equal(entryOrigin(join(box.home, 'checkout/dist/src/index.js'), box.ctx), 'checkout');
+  // The fixed copy that setup installs from the npx cache.
+  const copy = installFixedCopy(transient, box.ctx);
+  assert.equal(entryOrigin(copy.entryPath, box.ctx), 'fixed-copy');
+  // Any other installed package (no src/, not the fixed-copy path) and an unknown layout.
+  mkdirSync(join(box.home, 'global/node_modules/@nuoframework/darktrace-mcp/dist/src'), { recursive: true });
+  writeFileSync(join(box.home, 'global/node_modules/@nuoframework/darktrace-mcp/package.json'), JSON.stringify({ name: PACKAGE_NAME, version: VERSION }));
+  assert.equal(entryOrigin(join(box.home, 'global/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js'), box.ctx), 'package');
+  assert.equal(entryOrigin('/opt/darktrace-mcp/dist/src/index.js', box.ctx), 'package');
+  for (const label of Object.values(NODE_RUNTIME_LABEL)) assert.equal(label.includes('checkout') && label !== 'this checkout', false, label);
+
+  // The runtime question and the confirmation line use the label of the running origin, never "this checkout" from a fixed copy.
+  const out = collector();
+  const prompter = createLinePrompter(['https://dt.example.com', '1', PUBLIC, PRIVATE, '1', 'none']);
+  const io = { ctx: box.ctx, stdin: stdinFrom(''), stdout: out.stream, stderr: out.stream, execPath: '/opt/node/bin/node', entryPath: copy.entryPath, uid: 501, gid: 20, prompter };
+  assert.equal(await runSetup({ dryRun: true, yes: false, tokensFromStdin: false, inlineTokens: false }, io), 0, out.text());
+  assert.match(out.text(), /1\) node \(the fixed copy installed by setup\)  \[default\]/);
+  assert.match(out.text(), /Runtime: node, the fixed copy installed by setup/);
+  assert.equal(out.text().includes('this checkout'), false);
+});
+
