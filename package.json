@@ -1,7 +1,7 @@
 {
-  "name": "darktrace-mcp",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@nuoframework/darktrace-mcp",
+  "version": "1.1.0",
+  "mcpName": "io.github.nuoframework/darktrace-mcp",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -18,6 +18,10 @@
     "SECURITY.md",
     "npm-shrinkwrap.json"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "generate": "tsc -p tsconfig.generate.json && node dist/scripts/generate-catalogue.js",
     "build": "node scripts/build.mjs",
@@ -40,7 +44,15 @@
     "typescript": "5.9.3",
     "yaml": "2.9.1"
   },
-  "description": "Private stdio MCP integration for the Darktrace Threat Visualizer API",
+  "description": "Stdio MCP server for the Darktrace Threat Visualizer API (unofficial)",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "darktrace",
+    "threat-visualizer",
+    "security",
+    "soc"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

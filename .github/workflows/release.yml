@@ -1,11 +1,19 @@
-name: Prepare private prerelease (no publication)
+name: Release (prepare, verify, publish npm and ghcr)
+# Runs on a reviewed `v<version>` tag. `prepare` builds and byte-verifies the candidate exactly as
+# before; only after it succeeds do `publish-npm` (npm trusted publishing with provenance) and
+# `publish-ghcr` (multi-arch image, pinned by digest) publish the same verified bytes.
+# MCP Registry publication (server.json) stays a documented owner step: see docs/releases.md.
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: private-release-preparation
+  group: release-${{ github.ref }}
   cancel-in-progress: false
+env:
+  IMAGE: ghcr.io/nuoframework/darktrace-mcp
 jobs:
   prepare:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -21,10 +29,10 @@ jobs:
       - name: Require tag to match package version exactly
         run: node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json')); if(process.env.GITHUB_REF!=='refs/tags/v'+p.version) throw Error('Release tag/version mismatch');"
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
-      - name: Retain reviewed candidate assets; owner publishes manually
+      - name: Retain the verified candidate (tgz, checksums, evidence)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: darktrace-mcp-private-release-candidate
+          name: darktrace-mcp-release-candidate
           path: |
             ${{ runner.temp }}/darktrace-mcp-release/*.tgz
             ${{ runner.temp }}/darktrace-mcp-release/SHA256SUMS
@@ -32,4 +40,177 @@ jobs:
             ${{ runner.temp }}/darktrace-mcp-release/*.log
             ${{ runner.temp }}/darktrace-mcp-release/release-notes.md
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
+
+  publish-npm:
+    needs: prepare
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) and provenance; no long-lived npm token
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Require npm 11.5.1 or newer (trusted publishing)
+        run: |
+          set -euo pipefail
+          current="$(npm --version)"
+          if node -e 'const c=process.argv[1].split(".").map(Number),m=[11,5,1];for(let i=0;i<3;i++){if(c[i]>m[i])process.exit(0);if(c[i]<m[i])process.exit(1)}' "$current"; then
+            echo "npm $current"
+          else
+            echo "npm $current is too old; installing npm 11"
+            npm install -g npm@^11 --no-audit --no-fund
+            npm --version
+          fi
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: darktrace-mcp-release-candidate
+          path: ${{ runner.temp }}/candidate
+      - name: Verify the candidate checksums and package metadata against the tag
+        working-directory: ${{ runner.temp }}/candidate
+        run: |
+          set -euo pipefail
+          sha256sum -c SHA256SUMS
+          tgz="$(ls -- *.tgz)"
+          test "$(printf '%s\n' "$tgz" | wc -l)" -eq 1
+          tar -xzOf "$tgz" package/package.json > package.json.candidate
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const p=JSON.parse(fs.readFileSync('package.json.candidate'));
+            if(p.name!=='@nuoframework/darktrace-mcp')throw Error('unexpected package name '+p.name);
+            if('refs/tags/v'+p.version!==process.env.GITHUB_REF)throw Error('tag/version mismatch');
+            if(p.private!==undefined)throw Error('private flag present');
+            if(p.publishConfig?.access!=='public')throw Error('publishConfig.access must be public');
+            if(p.mcpName!=='io.github.nuoframework/darktrace-mcp')throw Error('mcpName missing');
+            for(const k of ['preinstall','install','postinstall','prepare','prepublish','prepublishOnly','postpublish'])if(p.scripts?.[k])throw Error('lifecycle script '+k);
+          "
+          echo "TGZ=$PWD/$tgz" >> "$GITHUB_ENV"
+      - name: Publish the verified tarball to npm (OIDC; NPM_TOKEN only as documented fallback)
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "::warning::Publishing with the NPM_TOKEN secret; configure a trusted publisher on npmjs.com and remove the secret."
+            umask 077
+            printf '//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" > "$RUNNER_TEMP/npmrc-publish"
+            export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmrc-publish"
+          fi
+          npm publish "$TGZ" --provenance --access public --registry https://registry.npmjs.org --ignore-scripts
+      - name: Record the published version
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          npm view "@nuoframework/darktrace-mcp@$version" name version dist.integrity dist.tarball --json | tee "$RUNNER_TEMP/npm-published.json"
+          {
+            echo "## npm"
+            echo '```'
+            echo "npx -y @nuoframework/darktrace-mcp@$version setup"
+            cat "$RUNNER_TEMP/npm-published.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-ghcr:
+    needs: prepare
+    if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Fetch and authenticate immutable archived runtime inputs
+        run: node scripts/prepare-docker-runtime.mjs "$RUNNER_TEMP/runtime-inputs" "${{ matrix.arch }}" > "$RUNNER_TEMP/runtime-inputs-fetch.log" 2>&1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push the ${{ matrix.arch }} image by digest
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          test "$(node -p 'require("./package.json").version')" = "$version"
+          docker buildx build --platform "linux/${{ matrix.arch }}" \
+            --build-context "runtime-apks=$RUNNER_TEMP/runtime-inputs/${{ matrix.arch }}" \
+            --label "org.opencontainers.image.version=$version" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --output "type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true" \
+            --metadata-file "$RUNNER_TEMP/build-metadata.json" .
+          digest="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8"))["containerimage.digest"]' "$RUNNER_TEMP/build-metadata.json")"
+          case "$digest" in sha256:*) ;; *) echo "no digest in build metadata" >&2; exit 1 ;; esac
+          mkdir -p "$RUNNER_TEMP/digests"
+          printf '%s\n' "$digest" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
+          echo "linux/${{ matrix.arch }}: $IMAGE@$digest" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ghcr-digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-ghcr-manifest:
+    needs: publish-ghcr
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: ghcr-digest-*
+          path: ${{ runner.temp }}/digests
+          merge-multiple: true
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create the multi-arch tag <version> (never a moving latest) and record its digest
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          amd64="$(cat "$RUNNER_TEMP/digests/amd64")"; arm64="$(cat "$RUNNER_TEMP/digests/arm64")"
+          docker buildx imagetools create --tag "$IMAGE:$version" "$IMAGE@$amd64" "$IMAGE@$arm64"
+          docker buildx imagetools inspect "$IMAGE:$version" --raw > "$RUNNER_TEMP/manifest-list.json"
+          digest="$(docker buildx imagetools inspect "$IMAGE:$version" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+          case "$digest" in sha256:*) ;; *) echo "no manifest digest" >&2; exit 1 ;; esac
+          {
+            echo "## ghcr.io"
+            echo '```'
+            echo "$IMAGE:$version"
+            echo "$IMAGE@$digest"
+            echo "linux/amd64 $amd64"
+            echo "linux/arm64 $arm64"
+            echo '```'
+            echo "Pin clients to the digest: darktrace-mcp setup --runtime docker --image $IMAGE@$digest"
+          } | tee "$RUNNER_TEMP/ghcr-image-digest.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ghcr-image-digest
+          path: |
+            ${{ runner.temp }}/ghcr-image-digest.md
+            ${{ runner.temp }}/manifest-list.json
+          if-no-files-found: error
+          retention-days: 90

@@ -146,7 +146,8 @@ COPY --from=build /build/dist/src ./dist/src
 COPY --from=build /build/runtime-package.json ./package.json
 COPY LICENSE ./LICENSE
 LABEL org.opencontainers.image.title="Darktrace MCP" \
-      org.opencontainers.image.description="Private stdio MCP server for Darktrace Threat Visualizer" \
+      org.opencontainers.image.description="Stdio MCP server for the Darktrace Threat Visualizer API (unofficial)" \
+      org.opencontainers.image.source="https://github.com/nuoframework/darktrace-mcp" \
       org.opencontainers.image.licenses="Apache-2.0"
 USER 1000:1000
 ENTRYPOINT ["/nodejs/bin/node", "/app/dist/src/index.js"]

@@ -1,15 +1,19 @@
 #!/bin/sh
-# darktrace-mcp installer for macOS and Linux (POSIX sh).
+# darktrace-mcp source installer for macOS and Linux (POSIX sh). Fallback path.
+# The primary install is the published package:  npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 # Usage (inside a checkout):  sh scripts/install.sh [setup options]
-#        (one-liner, private repo via gh):
-#   sh -c "$(gh api repos/nuoframework/darktrace-mcp/contents/scripts/install.sh -H 'Accept: application/vnd.github.raw')"
-# Clones the private repository into $DARKTRACE_MCP_HOME (default ~/.local/share/darktrace-mcp)
-# with gh (or git), installs locked dependencies without lifecycle scripts, builds, then runs
+#        (one-liner; read the script before running it):
+#   curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
+#   less install.sh && sh install.sh
+# Clones the repository into $DARKTRACE_MCP_HOME (default ~/.local/share/darktrace-mcp/source)
+# with git (or gh), installs locked dependencies without lifecycle scripts, builds, then runs
 # `darktrace-mcp setup`. Re-running updates (git pull --ff-only) and rebuilds. Idempotent.
 set -eu
 
 REPO="nuoframework/darktrace-mcp"
-TARGET="${DARKTRACE_MCP_HOME:-$HOME/.local/share/darktrace-mcp}"
+TARGET="${DARKTRACE_MCP_HOME:-$HOME/.local/share/darktrace-mcp/source}"
+# Checkouts made by earlier versions of this script lived one level up.
+if [ -z "${DARKTRACE_MCP_HOME:-}" ] && [ -d "$HOME/.local/share/darktrace-mcp/.git" ]; then TARGET="$HOME/.local/share/darktrace-mcp"; fi
 
 say() { printf '%s\n' "darktrace-mcp: $*"; }
 die() { printf '%s\n' "darktrace-mcp: error: $*" >&2; exit 1; }
@@ -21,7 +25,7 @@ NODE_MAJOR=$(node -p 'process.versions.node.split(".")[0]')
 
 # Use the checkout this script lives in, when it is one.
 SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" 2>/dev/null && pwd || true)
-if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/../package.json" ] && grep -q '"name": "darktrace-mcp"' "$SCRIPT_DIR/../package.json"; then
+if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/../package.json" ] && grep -q '"name": "@nuoframework/darktrace-mcp"' "$SCRIPT_DIR/../package.json"; then
   TARGET=$(CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd)
   say "using checkout $TARGET"
 elif [ -d "$TARGET/.git" ]; then
@@ -30,14 +34,14 @@ elif [ -d "$TARGET/.git" ]; then
 else
   [ -e "$TARGET" ] && die "$TARGET exists but is not a git checkout; move it or set DARKTRACE_MCP_HOME."
   mkdir -p "$(dirname -- "$TARGET")"
-  if command -v gh >/dev/null 2>&1; then
+  if command -v git >/dev/null 2>&1; then
+    say "cloning $REPO with git into $TARGET"
+    git clone "https://github.com/$REPO.git" "$TARGET"
+  elif command -v gh >/dev/null 2>&1; then
     say "cloning $REPO with gh into $TARGET"
     gh repo clone "$REPO" "$TARGET"
-  elif command -v git >/dev/null 2>&1; then
-    say "cloning $REPO with git into $TARGET (private repository: needs GitHub access)"
-    git clone "https://github.com/$REPO.git" "$TARGET"
   else
-    die "install gh (https://cli.github.com) or git first."
+    die "install git (https://git-scm.com) or gh (https://cli.github.com) first."
   fi
 fi
 

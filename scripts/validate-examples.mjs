@@ -50,7 +50,11 @@ export function lintMarkdown(text,label){
   if(language==='json')validateConfig(JSON.parse(body),label+': JSON fence');
   if(['sh','shell','bash','zsh','console'].includes(language)&&!warning){
    const commands=body.split('\n').filter(line=>!line.trim().startsWith('#')).join('\n').replace(/\\\n\s*/g,' ');
-   assert(!/\b(?:npx\s+(?:-[^\s]+\s+)*|npm\s+(?:exec|install|i|add)\s+(?:-[^\s]+\s+)*)darktrace-mcp(?:@[^\s]+)?(?:\s|$)/.test(commands),label+': no unpublished registry project invocation');
+   // Published package policy: only the scoped name, always pinned to an exact version (never latest or a range).
+   for(const [,name,spec] of commands.matchAll(/\b(?:npx\s+(?:-[^\s]+\s+)*|npm\s+(?:exec|install|i|add)\s+(?:-[^\s]+\s+)*)((?:@nuoframework\/)?darktrace-mcp)(@[^\s]+)?(?=\s|$)/g)){
+    assert.equal(name,'@nuoframework/darktrace-mcp',label+': only the scoped published package name (unscoped darktrace-mcp is not ours)');
+    assert.match(spec??'',/^@\d+\.\d+\.\d+$/,label+': pin an exact published version, never latest or a range');
+   }
    for(const line of commands.split('\n'))if(/\bclaude\s+mcp\s+add\b/.test(line))assert(/--scope(?:=|\s+)user\b/.test(line),label+': explicit user scope for protected MCP setup');
   }
  }

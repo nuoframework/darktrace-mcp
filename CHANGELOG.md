@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — prepared 2026-10-06
 
+- **Public distribution.** The package is now `@nuoframework/darktrace-mcp` on the public npm registry (published from CI with npm trusted publishing and provenance), the image is `ghcr.io/nuoframework/darktrace-mcp:<version>` (linux/amd64 and linux/arm64, pinned by digest), and the server is described for the MCP Registry as `io.github.nuoframework/darktrace-mcp` (`mcpName` in `package.json`, `server.json`). Bootstrap: `npx -y @nuoframework/darktrace-mcp@1.1.0 setup`. When run from the npx cache, `setup` copies the verified package tree to `~/.local/share/darktrace-mcp/<version>/` and writes absolute `node` + `dist/src/index.js` paths, so clients never launch `npx`.
 - **Full API surface with profiles.** 78 of the 79 catalogue operations are available as 51 tools (the deprecated `GET /aianalyst/incidents` stays excluded). `DARKTRACE_PROFILES` selects `read` (default), `sensitive`, `write`, `critical` or `all`. Non-critical writes accept `dryRun:true`; critical actions need `confirm:true` and otherwise return a preview. All writes are audited. `DARKTRACE_SENSITIVE_READ` and `DARKTRACE_WRITE_CRITICAL` keep working. Operations without lab evidence are marked "not lab-validated".
 - **Easier installation.** New `darktrace-mcp setup` wizard (hidden token entry, `0600` token files under `~/.config/darktrace-mcp/`, permission preset, automatic configuration of Claude Desktop, Claude Code, Codex, Cursor, VS Code, Windsurf, OpenCode and Gemini CLI with backups), plus `config <client>`, `remove` and `test`. One-line installers `scripts/install.sh` and `scripts/install.ps1`.
 - **Claude Desktop extension.** `npm run pack:mcpb` builds a `.mcpb` bundle; Claude Desktop stores the tokens in the OS keychain.

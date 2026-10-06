@@ -1,10 +1,16 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 // Historical prose and negative warnings are evidence, never installation examples.
-const bare = value => /^(?:darktrace-mcp)(?:@[^/\s]+)?$/.test(value);
-export function forbiddenCommand(line) {
+// Published name: @nuoframework/darktrace-mcp. The unscoped name is not ours (typosquat risk), and
+// documented bootstrap commands must pin an exact version. Client configurations never launch a
+// registry fetcher at all: `setup` writes absolute node + dist paths.
+const unscoped = value => /^darktrace-mcp(?:@[^/\s]+)?$/.test(value);
+const scoped = value => /^@nuoframework\/darktrace-mcp(?:@[^\s]+)?$/.test(value);
+const exact = value => /^@nuoframework\/darktrace-mcp@\d+\.\d+\.\d+$/.test(value);
+export function forbiddenCommand(line, launcher = false) {
   const words = line.trim().replace(/^\$\s*/, '').split(/\s+/).map(word => word.replace(/^['"]|['"]$/g, ''));
-  const registry = word => bare(word) || /^--(?:package|p)=/.test(word) && bare(word.slice(word.indexOf('=') + 1));
+  const spec = word => /^--(?:package|p)=/.test(word) ? word.slice(word.indexOf('=') + 1) : word;
+  const registry = word => { const s = spec(word); return unscoped(s) || (scoped(s) && (launcher || !exact(s))); };
   if (words[0] === 'npx') return words.slice(1).some(registry);
   if (words[0] === 'npm' && ['i', 'install', 'add', 'exec'].includes(words[1])) return words.slice(2).some(registry);
   return false;
@@ -13,7 +19,7 @@ function configs(value, where, issues) {
   if (!value || typeof value !== 'object') return;
   if (typeof value.command === 'string') {
     const command = value.command.split(/[\\/]/).at(-1);
-    if (forbiddenCommand([command, ...(value.args ?? [])].join(' '))) issues.push(where);
+    if (forbiddenCommand([command, ...(value.args ?? [])].join(' '), true)) issues.push(where);
   }
   for (const entry of Object.values(value)) configs(entry, where, issues);
 }
