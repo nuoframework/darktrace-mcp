@@ -2,7 +2,7 @@
   "schema": "darktrace-lab-signing-evidence/1",
   "generatedAt": "2026-10-06T09:17:38.944Z",
   "appliance": {
-    "url": "https://drqixbzh56.visualiser.labs.darktrace.com",
+    "url": "https://lab-a.example.invalid",
     "versionClaimed": "7.1.0",
     "authorisation": "owner-authorised non-production lab"
   },

@@ -27,7 +27,8 @@ import { homedir } from 'node:os';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const HOME = homedir();
-const ORIGIN = process.argv[2] ?? process.env.DARKTRACE_URL ?? 'https://2xqpmoedc7.visualiser.labs.darktrace.com';
+const ORIGIN = process.argv[2] ?? process.env.DARKTRACE_URL;
+if (!ORIGIN) { console.error('Usage: node scripts/lab-email-probe.mjs <https://appliance> (or set DARKTRACE_URL); no appliance URL is built in.'); process.exit(2); }
 const PUBLIC_TOKEN_FILE = process.env.DARKTRACE_PUBLIC_TOKEN_FILE ?? resolve(HOME, '.config/darktrace-mcp-lab-c/public-token');
 const PRIVATE_TOKEN_FILE = process.env.DARKTRACE_PRIVATE_TOKEN_FILE ?? resolve(HOME, '.config/darktrace-mcp-lab-c/private-token');
 const REQUEST_TIMEOUT_MS = 30000;

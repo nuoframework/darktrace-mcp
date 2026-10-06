@@ -28,7 +28,7 @@ import { homedir } from 'node:os';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const HOME = homedir();
-const DEFAULT_URL = 'https://drqixbzh56.visualiser.labs.darktrace.com';
+const DEFAULT_URL = process.env.DARKTRACE_URL; // no built-in appliance URL
 const PUBLIC_TOKEN_FILE = resolve(HOME, '.config/darktrace-mcp-lab/public-token');
 const PRIVATE_TOKEN_FILE = resolve(HOME, '.config/darktrace-mcp-lab/private-token');
 const REQUEST_TIMEOUT_MS = 30000;
@@ -179,6 +179,7 @@ function makeJsonReader(origin, publicToken, privateToken) {
 }
 
 async function main() {
+  if (!process.env.DARKTRACE_URL && !DEFAULT_URL) { console.error('Set DARKTRACE_URL to the appliance origin (https://...); no appliance URL is built in.'); process.exit(2); }
   const origin = (process.env.DARKTRACE_URL ?? DEFAULT_URL).replace(/\/+$/, '');
   if (!origin.startsWith('https://')) throw new Error('DARKTRACE_URL must be https');
   const publicToken = loadToken(PUBLIC_TOKEN_FILE);
