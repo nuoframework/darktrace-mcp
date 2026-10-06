@@ -89,6 +89,20 @@ Desde la primera release posterior a 1.1.1, `github-release` firma cada archivo 
 
 Descarga el archivo y su firma o procedencia; después:
 
+```sh
+# Procedencia (GitHub CLI 2.49 o posterior): compilado por release.yml desde la etiqueta
+gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
+  --signer-workflow nuoframework/darktrace-mcp/.github/workflows/release.yml --source-ref refs/tags/v<version>
+# Misma comprobación con el archivo descargado en lugar de la API
+gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
+  --bundle darktrace-mcp-<version>.provenance.sigstore.json
+# Firma (cosign 3.x): archivo, identidad exacta del workflow y emisor OIDC GitHub
+cosign verify-blob --bundle nuoframework-darktrace-mcp-<version>.tgz.sigstore.json \
+  --certificate-identity https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version> \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  nuoframework-darktrace-mcp-<version>.tgz
+# Declaración de procedencia (archivos, constructor y commit de origen)
+jq -r .payload darktrace-mcp-<version>.intoto.jsonl | base64 -d | jq .
 ```
 
 `--certificate-identity-regexp '^https://github.com/nuoframework/darktrace-mcp/\.github/workflows/release\.yml@refs/tags/v'` acepta cualquier etiqueta de ese workflow. Ambas herramientas comprueban la cadena de certificados Sigstore y el registro de transparencia. `sha256sum -c SHA256SUMS` sigue comprobando los bytes; verificar `SHA256SUMS.sigstore.json` autentica el archivo de sumas.

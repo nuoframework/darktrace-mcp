@@ -69,7 +69,7 @@ flowchart LR
     S --> A["Write audit on stderr"]
 ```
 
-The server opens no ports. It pins one HTTPS destination, rejects proxies and redirects, and never exceeds token permissions. Results reach the client and its provider: review data processing, retention and residency before production use.
+The server opens no ports. It pins one HTTPS destination, rejects proxies and redirects, and never exceeds token permissions. Results reach the client and its provider: review provider eligibility, data processing, retention and residency before production use.
 
 ### A critical action, step by step
 

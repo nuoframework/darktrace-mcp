@@ -65,7 +65,7 @@ Use one convention for every GitHub Release: tag `vX.Y.Z` and title `Darktrace M
 
 ### Verifying release signatures and provenance
 
-From the first release after 1.1.1, the `github-release` job signs every asset and attests its build provenance before it creates the release ([how it works ](../security/supply-chain-checks.md#release-signing-and-provenance)):
+From the first release after 1.1.1, the `github-release` job signs every asset and attests its build provenance before it creates the release ([how it works](../security/supply-chain-checks.md#release-signing-and-provenance)):
 
 - `<asset>.sigstore.json`: a keyless [Sigstore](https://www.sigstore.dev/) bundle written by `cosign sign-blob` (certificate, signature and transparency-log entry), one per asset including `SHA256SUMS`. The certificate identity is `https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version>`.
 - `darktrace-mcp-<version>.intoto.jsonl`: the SLSA v1 build provenance statement that lists every asset as a subject (in-toto DSSE envelope, one line).
@@ -97,7 +97,7 @@ Releases published before this change (`v0.1.0-alpha.0`, `v1.0.0`, `v1.1.0`, `v1
 
 1. Actions → **Sign an existing release** → *Run workflow* with the tag, for example `v1.1.1`; or `gh workflow run sign-release.yml -f tag=v1.1.1`.
 2. The run downloads the assets, verifies them with the release's `SHA256SUMS`, signs every asset that has no bundle yet, verifies the bundles and uploads only the new `<asset>.sigstore.json` files. Existing assets and the release notes are never changed, so re-running is safe.
-3. Repeat for `v1.1.0`, `v1.0.0` and `v0.1.0-alpha.0`. Scorecard's Signed-Releases check averages the last five releases with assets, so all four need signatures for the full effect ([status ](../security/supply-chain-checks.md#status-and-accepted-gaps-score-67-at-0e4d64f-2026-10-06)).
+3. Repeat for `v1.1.0`, `v1.0.0` and `v0.1.0-alpha.0`. Scorecard's Signed-Releases check averages the last five releases with assets, so all four need signatures for the full effect ([status](../security/supply-chain-checks.md#status-and-accepted-gaps-score-67-at-0e4d64f-2026-10-06)).
 
 ### Publishing a version (owner)
 

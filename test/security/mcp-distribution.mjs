@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 // Historical prose and negative warnings are evidence, never installation examples.
 // Published name: @nuoframework/darktrace-mcp. The unscoped name is not ours (typosquat risk), and
@@ -25,8 +25,7 @@ function configs(value, where, issues) {
 }
 export function distributionIssues(root) {
   const issues = [];
-  // Every README language present (README.md plus README.en.md or README.es.md) is inspected.
-  const files = ['README.md', 'README.en.md', 'README.es.md'].map((name) => join(root, name)).filter((file) => existsSync(file));
+  const files = [join(root, 'README.md'), join(root, 'README.en.md')];
   function walk(dir) { for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name); if (entry.isDirectory()) walk(path); else files.push(path);
   } }

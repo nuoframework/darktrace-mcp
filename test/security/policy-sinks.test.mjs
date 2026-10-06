@@ -138,7 +138,7 @@ test('ST-09.SENSITIVE only the operator sensitive profile adds Advanced Search; 
   assert.equal(sensitive.state.calls,0);
   const ok=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash}},sensitive);
   assert.equal(ok.isError,undefined);assert.equal(sensitive.state.calls,1);assert.equal(executionAudits(sensitive.state).length,0);noCanaries(ok);
-  const readme=readFileSync(new URL('../../docs/../README.md',import.meta.url),'utf8');for(const word of ['provider','retention','residency','eligibility'])assert.ok(readme.includes(word));
+  const readme=readFileSync(new URL('../../docs/../README.en.md',import.meta.url),'utf8');for(const word of ['provider','retention','residency','eligibility'])assert.ok(readme.includes(word));
 });
 test('ST-09.MINIMIZATION unknown telemetry is excluded in both read profiles',async()=>{
   const upstream={version:'7.1',timestamp:1,unexpectedField:CANARY,rawMailBody:CANARY,records:[{timestamp:1,unexpectedField:CANARY,rawMailBody:CANARY}]};

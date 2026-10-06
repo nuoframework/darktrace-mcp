@@ -50,13 +50,19 @@ Fecha: 2026-10-06. Revisión del borrador documental, pendiente de la revisión 
 - `npx -y @mermaid-js/mermaid-cli@11`: seis diagramas renderizados a SVG; también se inspeccionó visualmente el PNG de la secuencia española. Archivos de comprobación en un directorio temporal, fuera del repositorio.
 - `python3 scripts/demo/verify.py`: los tres GIF conservan dimensiones, duración y tamaño admitidos; enlaces de los README y guía de demos correctos.
 - `npm pack --dry-run --ignore-scripts --json`: incluye `README.md` y `README.en.md`, no `README.es.md`. Esta comprobación es del inventario documental, no una verificación completa de release.
-- `git diff --check`: correcto. Sin modificaciones en `src/`, `test/`, `.github/` o `claude-plugin/`.
+- `git diff --check`: correcto. Sin modificaciones en `src/`, `.github/` o `claude-plugin/`; los únicos cambios en `test/` son las referencias a los README autorizadas posteriormente por el propietario.
 
 ## Adaptaciones de integración
 
 - `package.json`: ambos README en el paquete; generación y comprobación bilingües; `lint` llama a `docs:check`, aprovechando la entrada que ya usa CI. La configuración inicial no tenía una comprobación específica del generador en CI.
 - `.dockerignore`, `scripts/prepare-release.mjs`, `scripts/verify-release.mjs`, `scripts/validate-examples.mjs` y `scripts/demo/verify.py`: nuevas rutas. El verificador conserva las comprobaciones de archivo normal, modo, tamaño y vinculación al origen del espejo, ahora con campos `readmeEnSha256` y `readmeEnSourceBinding`.
 - Se integró la documentación de [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), rama `origin/feat/install-everywhere`, commit `2f12f9d96e6e002fb2c71c4377ff9d96a2d13013`: botones exactos en ambos idiomas, guías `install` y `install-matrix`, y 13 secciones adicionales de clientes con sus ejemplos. Se tradujeron completas y se diferencian los ocho adaptadores publicados en 1.1.1 de los 13 pendientes. No se incorporó código ajeno de `src/` ni pruebas de esa rama. Sus cambios de código deben fusionarse por su PR; la futura versión publicada deberá actualizar los comandos fijados.
-- **Integración pendiente fuera del alcance:** `test/security/run-isolated.mjs`, `run-defense-isolated.mjs` y `mcp-distribution.mjs` todavía mencionan `README.es.md`. El propietario prohibió editar `test/`; se informó al orquestador y al responsable de instalación. Deben actualizarse al nuevo par antes de exigir la batería completa. No se afirma que CI completa o la preparación de release hayan pasado en esta rama.
+- **Integración de tests resuelta con permiso del propietario:** los dos ejecutores aislados y el comprobador de distribución usan `README.md` + `README.en.md`; el fixture de distribución conserva la correspondencia de idiomas. Las dos comprobaciones de avisos escritos en inglés leen `README.en.md`. No se cambian aserciones ni casos de seguridad. `npm test`: 267/267, sin omisiones. `npm run test:security`: 1.150 subcasos, 1.147 correctos, cero fallos y 3 omisiones de bits de permisos en macOS. Registro generado conservado fuera del repositorio; árbol de producción `98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad`.
 - Rebase sobre `main` en `cf9d5e3`: se conservó la instalación del plugin desde su bloqueo y se reflejaron sus instrucciones actualizadas en ambos idiomas; no se editaron sus archivos.
 - Revisión independiente: pendiente del orquestador; los hallazgos se resolverán en este mismo PR. No activar fusión automática.
+
+## Seguimiento de integración y revisión
+
+- Rebase sobre `origin/main` en `a287e3a` tras #15: se conservan íntegramente los controles de cadena de suministro y las instrucciones de firmas/procedencia se incorporan en español e inglés.
+- #18 sigue pendiente de fusión; se repetirá el rebase con sus documentos definitivos.
+- La revisión independiente de #19 todavía no ha publicado hallazgos; se responderá a cada comentario en la PR.

@@ -69,7 +69,7 @@ flowchart LR
     S --> A["Auditoría de escrituras en stderr"]
 ```
 
-El servidor no abre puertos. Fija un destino HTTPS, rechaza proxies y redirecciones y nunca supera los permisos del token. Los resultados llegan al cliente y a su proveedor: revisa tratamiento, retención y residencia de datos antes de usar producción.
+El servidor no abre puertos. Fija un destino HTTPS, rechaza proxies y redirecciones y nunca supera los permisos del token. Los resultados llegan al cliente y a su proveedor: revisa la idoneidad del proveedor, el tratamiento, la retención y la residencia de datos antes de usar producción.
 
 ### Una acción crítica, paso a paso
 
