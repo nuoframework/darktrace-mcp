@@ -76,3 +76,7 @@ Por indicación final del propietario, ambos README separan Herramientas y Opera
 ## Presentación de los botones
 
 Los tres botones usan badges oscuros homogéneos de 36 px en una sola fila HTML, con textos localizados y explicación debajo. `scripts/install-badges.mjs` modifica solo su presentación; las funciones de URI siguen siendo las de #18. Se comprobó la igualdad exacta de los tres deeplinks, incluido el JSON codificado, antes y después en ambos README. La comprobación de contenido del README se adapta a las filas HTML; las pruebas del JSON y de seguridad permanecen intactas. La vista renderizada se enlaza en la PR.
+
+## Descubribilidad
+
+El primer párrafo explica Darktrace MCP server / Model Context Protocol para SOC, respuesta a incidentes, Antigena / RESPOND y Darktrace/Email sin validar, con clientes identificados naturalmente. Seis casos de uso con H3 enlazan a las guías. El pie enlaza a npm, GHCR, el catálogo MCP y la documentación oficial de Darktrace; el portal requiere acceso y no se inventa una ficha del Claude Directory o del servidor en el Registry. La propuesta de descripción inglesa tiene 114 caracteres y 20 topics; el comando `gh repo edit` queda para el propietario. Los campos `description` y `keywords` de `package.json` permanecen intactos para que el propietario decida su aplicación en 1.1.3.

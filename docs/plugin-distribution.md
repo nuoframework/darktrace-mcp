@@ -174,3 +174,20 @@ Para Codex, usa un directorio temporal aislado con su opción de configuración 
 - **Cada opción necesita un valor.** Una cadena vacía para `DARKTRACE_DATE_FORMAT`, `DARKTRACE_PROFILES` o la aceptación impide el arranque; por eso todas las opciones `userConfig` opcionales tienen un valor predeterminado.
 - **Codex.** No pide configuración ni permite pasar la conexión al servidor incluido; usa el asistente y desactiva esa copia.
 - **La instalación necesita el registro.** Claude Code descarga el paquete y sus tres dependencias de registry.npmjs.org al instalar o actualizar (npm, `--ignore-scripts`, límite 60 s); los siguientes arranques no requieren descargas. En Codex, `npx` descarga al primer arranque y conserva la versión en la caché npm.
+
+## Descubribilidad del repositorio (propietario)
+
+Propuesta lista para aplicar; este cambio documental no modifica la descripción ni los topics de GitHub. Tampoco modifica `description` o `keywords` de `package.json`: el propietario puede aplicar la misma descripción y lista en 1.1.3.
+
+Descripción inglesa (114 caracteres): **Unofficial Darktrace MCP server for SOC investigations and incident response in Claude, Cursor, Codex and VS Code.**
+
+```sh
+gh repo edit nuoframework/darktrace-mcp \
+  --description 'Unofficial Darktrace MCP server for SOC investigations and incident response in Claude, Cursor, Codex and VS Code.' \
+  --remove-topic cybersecurity-tools,mcp-security,mcp-tools,security,security-tools \
+  --add-topic mcp,mcp-server,model-context-protocol,darktrace,darktrace-api,threat-visualizer,soc,incident-response,security-automation,claude,claude-code,cursor,codex,vscode,typescript,cybersecurity,ndr,antigena,llm-tools,ai-agents
+```
+
+El comando retira cinco topics genéricos existentes y añade la selección de 20, para dejar exactamente la propuesta; revísalo antes de ejecutarlo.
+
+Los 20 topics del comando son también la propuesta de `keywords` para npm. Describen integración y casos de uso; no implican afiliación ni validación de capacidades pendientes. Añade al README el enlace del Claude Directory cuando exista una ficha pública aprobada. Hasta confirmar la publicación del servidor en MCP Registry, el enlace «Relacionado» apunta al catálogo oficial, sin afirmar que exista ya una ficha del servidor. La documentación de Darktrace enlazada está en su portal público oficial y requiere acceso de cliente; nunca apunta a un appliance.

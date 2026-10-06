@@ -156,3 +156,20 @@ For Codex, use an isolated temporary user-configuration directory, register `./`
 - **Every option needs a value.** An empty string for `DARKTRACE_DATE_FORMAT`, `DARKTRACE_PROFILES` or the acknowledgement stops the server at startup, which is why every optional `userConfig` entry has a default.
 - **Codex.** No configuration prompts and no way to pass the connection to the bundled server; use the wizard and disable the bundled server as described above.
 - **Install needs the registry.** Claude Code downloads the pinned package and its three dependencies from registry.npmjs.org when it installs or updates the plugin (npm, `--ignore-scripts`, 60-second limit); later starts are offline. In Codex, `npx` downloads the pinned version on first start and keeps it in the npm cache.
+
+## Repository discoverability (owner)
+
+Ready-to-apply proposal; this documentation change does not edit the GitHub description or topics. It also leaves `package.json` description and keywords untouched: the owner can apply the same description and list in 1.1.3.
+
+English description (114 characters): **Unofficial Darktrace MCP server for SOC investigations and incident response in Claude, Cursor, Codex and VS Code.**
+
+```sh
+gh repo edit nuoframework/darktrace-mcp \
+  --description 'Unofficial Darktrace MCP server for SOC investigations and incident response in Claude, Cursor, Codex and VS Code.' \
+  --remove-topic cybersecurity-tools,mcp-security,mcp-tools,security,security-tools \
+  --add-topic mcp,mcp-server,model-context-protocol,darktrace,darktrace-api,threat-visualizer,soc,incident-response,security-automation,claude,claude-code,cursor,codex,vscode,typescript,cybersecurity,ndr,antigena,llm-tools,ai-agents
+```
+
+The command removes five existing generic topics and adds the selected 20 to leave exactly the proposed set; review it before running it.
+
+The command's 20 topics are also the proposed npm keywords. They describe integration and use cases, not affiliation or validation of pending capabilities. Add the Claude Directory link to the README once an approved public listing exists. Until the server's MCP Registry publication is confirmed, “Related” links to the official catalog without claiming that this server's listing is already published. The linked Darktrace documentation is on its official public portal and requires customer access; it never points to an appliance.

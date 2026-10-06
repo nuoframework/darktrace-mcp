@@ -11,15 +11,16 @@ export const BADGE_LABELS = {
 const escapeAttribute = value => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 /** Equal-height, dark badges. URI builders and encoded payloads remain unchanged. */
 export function readmeBadgesHtml(packageVersion, labels) {
+  const language = labels.cursor === BADGE_LABELS.es.cursor ? 'es' : 'en';
   const buttons = [
-    [labels.cursor, cursorBadgeLink(packageVersion)],
-    [labels.vscode, vscodeBadgeLink(packageVersion)],
-    [labels.insiders, vscodeBadgeLink(packageVersion, true)],
-  ].map(([label, href]) => {
-    const src = `https://img.shields.io/badge/${encodeURIComponent(label)}-161B22?style=for-the-badge`;
+    ['cursor', labels.cursor, cursorBadgeLink(packageVersion)],
+    ['vscode', labels.vscode, vscodeBadgeLink(packageVersion)],
+    ['insiders', labels.insiders, vscodeBadgeLink(packageVersion, true)],
+  ].map(([key, label, href]) => {
+    const src = `docs/assets/install/${language}-${key}.svg`;
     return `<a href="${escapeAttribute(href)}"><img src="${src}" height="36" alt="${escapeAttribute(label)}"></a>`;
   });
-  return `<p align="left">${buttons.join('\n')}<\/p>`;
+  return `<p align="left">${buttons.join('\n')}</p>`;
 }
 const BADGE_LINE = /^\[!\[[^\]]*\]\([^)]*\)\]\((?:cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install\?name=darktrace|vscode:mcp\/install\?|vscode-insiders:mcp\/install\?).*\)$/;
 const HTML_BADGE_LINE = /^(?:<p align="left">)?<a href="(?:cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install\?|vscode:mcp\/install\?|vscode-insiders:mcp\/install\?)/;
