@@ -20,12 +20,29 @@ Cada cliente se puede configurar de dos formas:
 | [Codex](#codex) | `codex` | `~/.codex/config.toml` |
 | [Cursor](#cursor) | `cursor` | `~/.cursor/mcp.json` |
 | [VS Code](#vs-code) | `vscode` | `mcp.json` de usuario (**MCP: Open User Configuration**) |
-| [Windsurf](#windsurf) | `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
+| [Windsurf](#windsurf) | `windsurf` | 1.1.2: `~/.codeium/windsurf/mcp_config.json`; 1.1.3: `~/.config/devin/mcp_config.json`, conservando la anterior si existe |
 | [OpenCode](#opencode) | `opencode` | `~/.config/opencode/opencode.json` |
 | [Gemini CLI](#gemini-cli) | `gemini` | `~/.gemini/settings.json` |
+| [Zed](#zed) (1.1.3) | `zed` | `~/.config/zed/settings.json` (`context_servers`) |
+| [Cline](#cline) (1.1.3) | `cline` | `<VS Code user dir>/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` |
+| [Roo Code](#roo-code) (1.1.3) | `roo` | `<VS Code user dir>/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json` |
+| [Continue](#continue) (1.1.3) | `continue` | `~/.continue/config.yaml` (lista `mcpServers`) |
+| [Kiro](#kiro) (1.1.3) | `kiro` | `~/.kiro/settings/mcp.json` |
+| [Amp](#amp) (1.1.3) | `amp` | `~/.config/amp/settings.json` (`amp.mcpServers`) |
+| [GitHub Copilot CLI](#github-copilot-cli) (1.1.3) | `copilot-cli` | `~/.copilot/mcp-config.json` |
+| [Warp](#warp) (1.1.3) | `warp` | `~/.warp/.mcp.json` |
+| [Goose](#goose) (1.1.3) | `goose` | `~/.config/goose/config.yaml` (mapa `extensions`; Windows `%APPDATA%\Block\goose\config\config.yaml`) |
+| [LM Studio](#lm-studio) (1.1.3) | `lmstudio` | `~/.lmstudio/mcp.json` |
+| [Antigravity](#antigravity) (1.1.3) | `antigravity` | `~/.gemini/config/mcp_config.json` |
+| [JetBrains Junie](#jetbrains-junie) (1.1.3) | `junie` | `~/.junie/mcp/mcp.json` |
+| [JetBrains AI Assistant](#jetbrains-ai-assistant) (1.1.3) | `jetbrains` | sin archivo: pega en Settings \| Tools \| AI Assistant \| MCP |
 | [Docker](#docker) | — | Cualquiera de los anteriores |
 
 <a id="rules-for-every-manual-snippet"></a>
+
+Los clientes marcados **1.1.3** están disponibles en `main` y llegarán en esa versión; en npm 1.1.2 usa la configuración manual. [Instalación](install.md) · [Matriz y fuentes de los fabricantes](install-matrix.md). `<VS Code user dir>` es `~/Library/Application Support/Code/User` en macOS, `~/.config/Code/User` en Linux y `%APPDATA%\Code\User` en Windows.
+
+**Arranque sin configurar (1.1.3).** `main` expone solo `darktrace_setup_status` si faltan los datos de conexión. En 1.1.2 la entrada incompleta se detiene con `startup_error`: ejecuta el asistente y reinicia el cliente.
 
 ## Reglas para toda configuración manual
 
@@ -209,6 +226,8 @@ Usa **MCP: List Servers** para iniciarlo o revisarlo. Prefiere la configuración
 
 ## Windsurf
 
+En Devin Desktop, la ruta manual actual es `~/.config/devin/mcp_config.json` (Windows `%APPDATA%\devin\mcp_config.json`). El asistente 1.1.2 usa la ruta anterior del ejemplo; el de 1.1.3 da prioridad a la nueva y conserva la anterior si ya existe.
+
 **Automática.** `darktrace-mcp setup`.
 
 **Manual.** Añade a `~/.codeium/windsurf/mcp_config.json`:
@@ -296,7 +315,7 @@ o añade a `~/.gemini/settings.json`:
 
 No pongas `"trust": true`: mantén la confirmación de Gemini en cada llamada.
 
-> Los adaptadores adicionales siguientes corresponden a la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Sus identificadores no están en el asistente npm 1.1.2: usa los fragmentos manuales hasta que se publique una versión que los incluya. Rutas y fuentes de fabricantes: [matriz de instalación](install-matrix.md).
+> Los adaptadores adicionales siguientes están disponibles en `main` y llegan en **1.1.3** ([PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), fusionada). Sus identificadores no están en el asistente npm 1.1.2: usa los fragmentos manuales hasta que se publique una versión que los incluya. Rutas y fuentes de fabricantes: [matriz de instalación](install-matrix.md).
 
 ## Zed
 

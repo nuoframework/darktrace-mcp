@@ -48,7 +48,7 @@ Otherwise, wherever this guide says `darktrace-mcp …`, run `npx -y @nuoframewo
 
 ### Windows
 
-The same `npx` command works in PowerShell. Native Windows cannot enforce owner-only token files, so the server rejects token files there; the wizard asks for explicit consent before writing token values into client configs. Prefer the [Claude Desktop extension](clients.md#claude-desktop), [Docker](docker.md) or WSL with the Linux command. See [troubleshooting](troubleshooting.md#token-file-permissions).
+The same `npx` command works in PowerShell. Native Windows cannot enforce owner-only token files, so the server rejects token files there; the wizard asks for explicit consent before writing token values into client configs. Prefer the [Claude Desktop extension](clients.md#claude-desktop), the VS Code badge or `config vscode` (secret storage), [Docker](docker.md) or WSL with the Linux command. See [troubleshooting](troubleshooting.md#token-file-permissions).
 
 ### Fallback: build from source
 
@@ -82,7 +82,7 @@ The wizard asks you:
 | Public token | Typed hidden |
 | Private token | Typed hidden |
 | Permission preset | `read` (recommended to start), `read,sensitive`, `read,write`, or `all`. `all` starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` in the client entry ([why](configuration.md#profiles)) |
-| Clients to configure | It lists the clients it found on your machine |
+| Clients to configure | It lists the clients it found on your machine; `main` expands this to 21 clients for 1.1.3 ([installation](install.md)) |
 
 It then:
 

@@ -44,8 +44,8 @@ test('VS Code badges prompt for URL and both tokens through inputs; tokens are p
 
 test('both README languages carry the badge rows generated for the current package version', async () => {
   const { BADGE_LABELS } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { BADGE_LABELS: Record<'en' | 'es', { cursor: string; vscode: string; insiders: string }> };
-  // The English and Spanish READMEs may be named README.md / README.es.md or README.en.md / README.md; one file per language must carry its rows.
-  const candidates = ['README.md', 'README.en.md', 'README.es.md'].filter((f) => existsSync(join(root, f))).map((f) => [f, readFileSync(join(root, f), 'utf8')] as const);
+  // README.md is Spanish and README.en.md is English; both must carry their language rows.
+  const candidates = ['README.md', 'README.en.md'].filter((f) => existsSync(join(root, f))).map((f) => [f, readFileSync(join(root, f), 'utf8')] as const);
   for (const [lang, labels] of Object.entries(BADGE_LABELS)) {
     const rows = installBadgesMarkdown(version, labels).split('\n');
     const carrier = candidates.find(([, text]) => rows.every((line) => text.includes(line)));
@@ -57,11 +57,11 @@ test('install-badges --write replaces stale badge rows in place and keeps indent
   const { rewriteBadges } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { rewriteBadges(file: string, text: string): { changed: boolean; text: string } };
   const stale = installBadgesMarkdown('0.0.1', { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n').map((l) => '    ' + l).join('\n');
   const before = `## Install\n\n2. Run it.\n\n${stale}\n\n3. Restart.\n`;
-  const { changed, text } = rewriteBadges('README.md', before);
+  const { changed, text } = rewriteBadges('README.en.md', before);
   assert.equal(changed, true);
   assert.equal(text.includes('0.0.1'), false);
   for (const line of installBadgesMarkdown(version, { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n')) assert.ok(text.includes('    ' + line));
-  assert.equal(rewriteBadges('README.md', text).changed, false);
-  assert.throws(() => rewriteBadges('README.md', '## Install\n'), /expected 3 badge rows/);
+  assert.equal(rewriteBadges('README.en.md', text).changed, false);
+  assert.throws(() => rewriteBadges('README.en.md', '## Install\n'), /expected 3 badge rows/);
 });
 

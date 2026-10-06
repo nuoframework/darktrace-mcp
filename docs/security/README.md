@@ -86,3 +86,4 @@ Los documentos originales se conservan **en inglés**, con sus fechas, alcance y
 | [validated-consultations-release-plan.md](validated-consultations-release-plan.md) | Plan de publicación de consultas validadas. |
 | [validated-consultations-test-migration.md](validated-consultations-test-migration.md) | Migración de pruebas al alcance de consultas validadas. |
 | [review-roles.md](review-roles.md) | Registro del cambio a roles neutrales en atribuciones de revisión, sin alterar resultados ni evidencia técnica. |
+| [release-pins-1.1.3.md](release-pins-1.1.3.md) | Valores fijados y comprobaciones del conjunto de instalación previsto para 1.1.3. |

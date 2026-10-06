@@ -6,7 +6,7 @@
 
 Install the server with one command and choose the path for your client.
 
-> **Version scope.** 1.1.2 includes the eight original clients, `uninstall` and the Docker wizard. The 13 additional adapters, `darktrace_setup_status` and the new Windsurf path are proposed in [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), still unmerged, for 1.1.3. They are not in npm 1.1.2: use the manual snippets for those clients.
+> **Version scope.** 1.1.2 includes the eight original clients, `uninstall` and the Docker wizard. The 13 additional adapters, `darktrace_setup_status` and the new Windsurf path are **available on `main` and arrive in 1.1.3**. They are not in npm 1.1.2: use the manual snippets for those clients.
 
 One command starts the process: it asks for settings, checks the appliance with a signed request, stores tokens in owner-only files and writes entries into detected clients:
 
@@ -25,7 +25,7 @@ Each line is the shortest path. `darktrace-mcp` means `npx -y @nuoframework/dark
 | Client | Shortest path | Where the entry lives |
 |---|---|---|
 | **Claude Desktop** | `setup --client claude-desktop`, or download the `.mcpb` from the [release](https://github.com/nuoframework/darktrace-mcp/releases) and open it (tokens go to the OS keychain) | `claude_desktop_config.json` ([details](clients.md#claude-desktop)) |
-| **Claude Code** | `setup --client claude-code` (runs `claude mcp add --scope user …`) | `~/.claude.json` ([details](clients.md#claude-code)) |
+| **Claude Code** | `setup --client claude-code` (runs `claude mcp add --scope user …`), or the [plugin](plugin-distribution.md) | `~/.claude.json` ([details](clients.md#claude-code)) |
 | **Codex CLI / Codex app** | `setup --client codex` (runs `codex mcp add …`, or edits the file) | `~/.codex/config.toml` ([details](clients.md#codex)) |
 | **Cursor** | click the Cursor badge in the [README](../../README.en.md#install-in-one-minute), then run `setup`; or `setup --client cursor` | `~/.cursor/mcp.json` ([details](clients.md#cursor)) |
 | **VS Code (Copilot agent mode)** | click the VS Code badge (it prompts for the URL and tokens and keeps the tokens in its secret storage); or `setup --client vscode` | user `mcp.json` ([details](clients.md#vs-code)) |
@@ -53,10 +53,10 @@ The wizard uses `npx` only during installation; clients launch absolute paths or
 
 ## What the badge does
 
-A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. In the pending installation change, a server without connection settings exposes exactly one tool, `darktrace_setup_status`, which says what is missing and the one command to run:
+A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. On `main`, for 1.1.3, a server without connection settings exposes exactly one tool, `darktrace_setup_status`, which says what is missing and the one command to run:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.2 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 ```
 
 With the 1.1.2 Cursor badge, run `setup` before starting the server: setup mode is not included in that version. `setup` then rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. These version-pinned badges are explicit bootstrap exceptions. Ordinary wizard entries use absolute paths to avoid a registry dependency at startup. If the npm cache is removed, a badge entry needs the registry again.
@@ -64,6 +64,8 @@ With the 1.1.2 Cursor badge, run `setup` before starting the server: setup mode 
 ## Pinning the version
 
 `npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; check the [channel status](releases.md#release-status-2026-10-06) before installing. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client.
+
+Badge versions come from `package.json`: after building, `node scripts/install-badges.mjs --write` updates both README files after a version bump. The corresponding test detects drift.
 
 ## Other paths
 

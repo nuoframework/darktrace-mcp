@@ -1,6 +1,6 @@
 // Prints the README one-click badge rows for the package version in package.json (run after `npm run build`).
-// With --write it replaces the existing badge rows in every README in place (README.md, README.en.md, README.es.md;
-// the language is detected from the "## Instalación" heading); test/cli/badges.test.ts checks they match.
+// With --write it replaces the existing badge rows in every README in place (README.md, README.en.md;
+// the language is detected from the language switch or Spanish installation heading); test/cli/badges.test.ts checks they match.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { installBadgesMarkdown } from '../dist/src/cli/entry.js';
@@ -12,7 +12,7 @@ export const BADGE_LABELS = {
 const BADGE_LINE = /^\[!\[[^\]]*\]\([^)]*\)\]\((?:cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install\?name=darktrace|vscode:mcp\/install\?|vscode-insiders:mcp\/install\?).*\)$/;
 /** Replace the three badge rows of one README with the current version; returns true when the file changed. */
 export function rewriteBadges(file, text) {
-  const lang = /^## Instalación$/m.test(text) ? 'es' : 'en';
+  const lang = /^(?:\*\*Español\*\*|## Instalación(?:\s|$))/m.test(text) ? 'es' : 'en';
   const rows = installBadgesMarkdown(version, BADGE_LABELS[lang]).split('\n');
   const lines = text.split('\n');
   const indexes = lines.flatMap((line, i) => (BADGE_LINE.test(line.trim()) ? [i] : []));
@@ -23,7 +23,7 @@ export function rewriteBadges(file, text) {
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   if (process.argv.includes('--write')) {
-    for (const name of ['README.md', 'README.en.md', 'README.es.md']) {
+    for (const name of ['README.md', 'README.en.md']) {
       const file = new URL('../' + name, import.meta.url);
       // Read directly and treat a missing README language as absent (no exists-then-read window).
       let current;

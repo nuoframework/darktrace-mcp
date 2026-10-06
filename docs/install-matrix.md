@@ -6,9 +6,9 @@
 
 Auditoría fechada de las vías de instalación por cliente, sistema operativo y método de distribución.
 
-> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores nuevos, `darktrace_setup_status` y la ruta Windsurf nueva están propuestos en la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), todavía sin fusionar, para 1.1.3. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
+> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores adicionales, `darktrace_setup_status` y la nueva ruta Windsurf están **disponibles en `main` y llegan en 1.1.3**. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
 
-Auditoría del **2026-10-06**. «Antes» es `origin/main` en `7ccfa79`; «Después» es la rama de instalación. El responsable de esa rama contrastó cada cliente con la documentación del fabricante en esa fecha; la última columna enlaza a la página consultada. Si el fabricante no documenta un archivo, el asistente muestra JSON para pegar en lugar de adivinar una ruta.
+Auditoría del **2026-10-06**. «Antes» es `origin/main` en `7ccfa79`; «Después» es el cambio de instalación fusionado en `main` mediante #18, previsto para 1.1.3. El responsable de esa rama contrastó cada cliente con la documentación del fabricante en esa fecha; la última columna enlaza a la página consultada. Si el fabricante no documenta un archivo, el asistente muestra JSON para pegar en lugar de adivinar una ruta.
 
 Regla del propietario: instalación fácil en cada cliente, IDE y vía. No se sugiere ni precarga ninguna dirección de appliance; normalmente los tokens se guardan en archivos privados (`0600`) o en el almacén secreto del cliente, nunca en enlaces ni argumentos. Guardarlos directamente en Windows nativo requiere la aceptación descrita abajo.
 
@@ -17,7 +17,7 @@ Regla del propietario: instalación fácil en cada cliente, IDE y vía. No se su
 | Vía | En qué consiste | Pasos |
 |---|---|---|
 | **Asistente** | `npx -y @nuoframework/darktrace-mcp@1.1.2 setup` | Un comando, preguntas de configuración (cinco numeradas en la presentación nueva), reiniciar |
-| **Botón de instalación** | Añade `darktrace` con paquete fijado y `npx`; el cambio pendiente incorpora un modo de configuración cuya única herramienta indica ejecutar `setup` | Botón → confirmar → `setup` una vez → reiniciar; en 1.1.2 ejecuta `setup` antes de arrancar |
+| **Botón de instalación** | Añade `darktrace` con paquete fijado y `npx`; `main` incorpora para 1.1.3 un modo de configuración cuya única herramienta indica ejecutar `setup` | Botón → confirmar → `setup` una vez → reiniciar; en 1.1.2 ejecuta `setup` antes de arrancar |
 | **Plugin / marketplace** | Plugin y marketplace Codex, otro trabajo en `claude-plugin/`, `.claude-plugin/`, `.agents/` | Fuera de esta auditoría |
 | **`.mcpb`** | Extensión Claude Desktop de GitHub Release; tokens al llavero | Descargar, abrir, completar formulario |
 | **Docker** | `setup --runtime docker`, ID fijado con `--pull=never` | Un comando y `Pull it now? [Y/n]` |
@@ -66,7 +66,7 @@ Cada entrada **W** hace copia `<file>.bak-<timestamp>`, escritura atómica, ruta
 
 | Dificultad | Antes | Después |
 |---|---|---|
-| Entrada sin dirección o tokens (botón, copia manual, falta `setup`) | `startup_error` y servidor detenido | **Modo de configuración** pendiente de publicación: solo `darktrace_setup_status`, con descripción y respuesta que indican `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`; una línea `setup_required` en stderr |
+| Entrada sin dirección o tokens (botón, copia manual, falta `setup`) | `startup_error` y servidor detenido | **Modo de configuración** en 1.1.3: solo `darktrace_setup_status`, con descripción y respuesta que indican `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`; una línea `setup_required` en stderr |
 | Cliente ausente del asistente | 13 de los 21 exigían JSON manual | Todos tienen ID; uno solo muestra JSON porque no hay archivo documentado |
 | Qué archivo y clave usar | Prosa por cliente en `docs/clients.md` | `docs/install.md` empieza por elegir cliente; resumen del asistente con archivo, estado y modo |
 | Terminal de 80 columnas | Texto sin estructura | Cabecera, `Step n of 5`, marcadores y resumen alineado; ASCII sin TTY o con `NO_COLOR` |
@@ -83,7 +83,7 @@ Cada entrada **W** hace copia `<file>.bak-<timestamp>`, escritura atómica, ruta
 
 **Vía investigada.** `icacls <file> /inheritance:r /grant:r "<user>:(R)"` restringe un archivo en `%LOCALAPPDATA%\darktrace-mcp\` a la cuenta actual (además de SYSTEM y Administrators mediante propiedad), como equivalente práctico de `0600`. El asistente podría ejecutarlo con un ejecutor inyectable y probarlo. Falta **verificar al arrancar**: Node necesita un complemento nativo (no aceptable para esta cadena de suministro) o lanzar `icacls`/PowerShell al iniciar el servidor, excluido por el diseño de seguridad (sin subprocesos/shell, arranque determinista). CI solo ejecuta Linux y no puede comprobarlo. No se entrega una comprobación de seguridad sin verificación ni pruebas.
 
-**Decisión.** No implementado en esa rama; queda documentado. Vías nativas, por preferencia:
+**Decisión.** No implementado en el cambio de instalación; queda documentado. Vías nativas, por preferencia:
 
 1. `.mcpb` de Claude Desktop: tokens en el llavero.
 2. Botón VS Code o `darktrace-mcp config vscode`: entradas de contraseña en su almacén secreto.

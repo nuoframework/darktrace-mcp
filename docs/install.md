@@ -6,7 +6,7 @@
 
 Instala el servidor con un comando y elige la vía adecuada para tu cliente.
 
-> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores nuevos, `darktrace_setup_status` y la ruta Windsurf nueva están propuestos en la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), todavía sin fusionar, para 1.1.3. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
+> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores adicionales, `darktrace_setup_status` y la nueva ruta Windsurf están **disponibles en `main` y llegan en 1.1.3**. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
 
 Un comando inicia el proceso. Pide los datos, comprueba el appliance con una petición firmada, guarda tokens en archivos privados y configura los clientes detectados:
 
@@ -25,7 +25,7 @@ Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuofram
 | Cliente | Vía más corta | Dónde se guarda |
 |---|---|---|
 | **Claude Desktop** | `setup --client claude-desktop`, o abre el `.mcpb` de la [release](https://github.com/nuoframework/darktrace-mcp/releases) (tokens al llavero) | `claude_desktop_config.json` ([detalles](clients.md#claude-desktop)) |
-| **Claude Code** | `setup --client claude-code` (ejecuta `claude mcp add --scope user …`) | `~/.claude.json` ([detalles](clients.md#claude-code)) |
+| **Claude Code** | `setup --client claude-code` (ejecuta `claude mcp add --scope user …`), o el [plugin](plugin-distribution.md) | `~/.claude.json` ([detalles](clients.md#claude-code)) |
 | **Codex CLI / aplicación** | `setup --client codex` (ejecuta `codex mcp add …` o edita el archivo) | `~/.codex/config.toml` ([detalles](clients.md#codex)) |
 | **Cursor** | Botón del [README](../README.md#instalación-en-1-minuto), después `setup`; o `setup --client cursor` | `~/.cursor/mcp.json` ([detalles](clients.md#cursor)) |
 | **VS Code (modo agente Copilot)** | Botón de VS Code (pide dirección y tokens y los guarda en su almacén secreto); o `setup --client vscode` | `mcp.json` de usuario ([detalles](clients.md#vs-code)) |
@@ -53,10 +53,10 @@ El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o
 
 ## Qué hace el botón
 
-Un botón del README no conoce tus rutas ni tokens: añade `darktrace` con la versión npm fijada, `npx`, perfil `read` y nada más. En el cambio de instalación pendiente, un servidor sin conexión expone solo `darktrace_setup_status`, que indica qué falta y el comando:
+Un botón del README no conoce tus rutas ni tokens: añade `darktrace` con la versión npm fijada, `npx`, perfil `read` y nada más. En `main`, para 1.1.3, un servidor sin conexión expone solo `darktrace_setup_status`, que indica qué falta y el comando:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.2 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 ```
 
 Con el botón Cursor que instala la versión 1.1.2, ejecuta `setup` antes de arrancar: esa versión no incluye el modo de configuración. El asistente reescribe la entrada con Node absoluto, copia fija y archivos de token; las herramientas aparecen tras reiniciar. Los botones VS Code piden dirección y tokens en el propio cliente y funcionan sin `setup`. Los botones con versión fijada son excepciones explícitas de arranque inicial. Las entradas normales del asistente usan rutas absolutas para evitar depender del registro en cada arranque. Si se borra la caché npm, una entrada creada por botón vuelve a necesitar el registro.
@@ -64,6 +64,8 @@ Con el botón Cursor que instala la versión 1.1.2, ejecuta `setup` antes de arr
 ## Fijar la versión
 
 Omitir la versión en `npx -y @nuoframework/darktrace-mcp setup` descarga la última publicada; consulta el [estado por canal](releases.md#release-status-2026-10-06) antes de instalar. Fija siempre una versión exacta para reproducir los mismos bytes entre máquinas, en scripts, botones y entradas de cliente. El asistente nunca escribe `npx` en la configuración.
+
+La versión de los botones procede de `package.json`: después de compilar, `node scripts/install-badges.mjs --write` actualiza las filas de ambos README al cambiar la versión. La prueba correspondiente detecta cualquier desajuste.
 
 ## Otras vías
 
