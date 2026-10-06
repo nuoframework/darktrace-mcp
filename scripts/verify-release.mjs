@@ -1,7 +1,7 @@
 // Verifies the npm archive in an empty installation; never runs package hooks.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,readdirSync,lstatSync,chmodSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,readdirSync,lstatSync,chmodSync,openSync,fstatSync,closeSync,constants as fsConstants} from 'node:fs';
 import {resolve,join,basename} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
@@ -49,7 +49,12 @@ const forbiddenProfiles=Object.freeze({
  'sensitive+critical-without-write':{profiles:{sensitiveRead:true,writeCritical:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
 });
 export function assertReviewedReleaseContractReady(){assert(typeof fixtureSha256==='string'&&/^[a-f0-9]{64}$/.test(fixtureSha256)&&Object.values(profileHashes).every(value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)),'full-API MR-04 fixture approval/pin pending; no release pipeline authorized');}
-function regularBytes(path){assert(lstatSync(path).isFile()&&!lstatSync(path).isSymbolicLink(),'reviewed input must be a regular file');return readFileSync(path);}
+// Open once without following symlinks; type, mode and bytes all come from the same descriptor (no check-then-use race).
+function openRegular(path,message='reviewed input must be a regular file',check=()=>{}){
+ let fd;try{fd=openSync(path,fsConstants.O_RDONLY|fsConstants.O_NOFOLLOW);}catch(error){if(error.code==='ELOOP')assert.fail(message);throw error;}
+ try{const stat=fstatSync(fd);check(stat);assert(stat.isFile(),message);return {stat,bytes:readFileSync(fd)};}finally{closeSync(fd);}
+}
+function regularBytes(path){return openRegular(path).bytes;}
 export function verifyFullApiContractContent(fixture){
  assertReviewedReleaseContractReady();
  assert.deepEqual(Object.keys(fixture).sort(),['alphaFixtureSha256','canonicalization','contracts','rejectedProfiles','releaseCapability']);
@@ -81,7 +86,7 @@ export function verifyHistoricalArchive(base){
  const supplementalFile='test/historical/alpha-stdio/stdio.test.ts.txt';assert.equal(sha(regularBytes(join(base,supplementalFile))),supplemental.originalSha256,'historical stdio supplemental bytes changed');
  return {manifestPath,manifestSha256,sourceTreeSha256:manifest.sourceTreeSha256,files,supplement:{manifestPath:supplementPath,manifestSha256:supplementSha256,sourceTreeSha256:supplemental.sourceTreeSha256,originalPath:supplemental.originalPath,filePath:supplementalFile,fileSha256:supplemental.originalSha256}};
 }
-function historicalBytes(path){assert.equal(lstatSync(path).mode&0o7777,0o644,'historical predecessor must be nonexecuting 0644');return regularBytes(path);}
+function historicalBytes(path){return openRegular(path,undefined,stat=>assert.equal(stat.mode&0o7777,0o644,'historical predecessor must be nonexecuting 0644')).bytes;}
 export function verifyValidatedPredecessorArchives(base){
  const manifestPath='test/historical/validated-contract-predecessor/provenance.json';
  const manifestSha256='7390a234bc73fa52f8922196771e9c5e38ef155f976f0da60a8a331d8358f878';
@@ -125,9 +130,9 @@ function verifyContractAsset(out,base){
 export function releaseAssets(archiveName){return [archiveName,'runtime-sbom.cdx.json','runtime-files.sha256.json','source-files.sha256.json','build-evidence.json','verification.json','security-receipt.json','release-notes.md','mcp-tool-contracts.json'];}
 export function verifyReleaseEvidence(archive,out,base=checkout){
  assertReviewedReleaseContractReady();
- const archiveName=basename(archive),expected=releaseAssets(archiveName),checksumPath=join(out,'SHA256SUMS');assert(lstatSync(checksumPath).isFile());
- const lines=readFileSync(checksumPath,'utf8').trim().split('\n'),seen=new Set();assert.equal(lines.length,expected.length,'complete release checksum inventory');
- for(const line of lines){const match=/^([a-f0-9]{64})  ([A-Za-z0-9_.-]+)$/.exec(line);assert(match,'checksum format');const [,digest,name]=match;assert(expected.includes(name)&&!seen.has(name),'unexpected or duplicate checksum asset');seen.add(name);assert(lstatSync(join(out,name)).isFile(),'regular checksum asset');assert.equal(sha(readFileSync(join(out,name))),digest,'checksum mismatch: '+name);}
+ const archiveName=basename(archive),expected=releaseAssets(archiveName),checksumPath=join(out,'SHA256SUMS');
+ const lines=openRegular(checksumPath,'regular checksum asset').bytes.toString('utf8').trim().split('\n'),seen=new Set();assert.equal(lines.length,expected.length,'complete release checksum inventory');
+ for(const line of lines){const match=/^([a-f0-9]{64})  ([A-Za-z0-9_.-]+)$/.exec(line);assert(match,'checksum format');const [,digest,name]=match;assert(expected.includes(name)&&!seen.has(name),'unexpected or duplicate checksum asset');seen.add(name);assert.equal(sha(openRegular(join(out,name),'regular checksum asset').bytes),digest,'checksum mismatch: '+name);}
  const read=name=>JSON.parse(readFileSync(join(out,name))),build=read('build-evidence.json'),source=read('source-files.sha256.json'),verification=read('verification.json');
  assert.equal(build.schemaVersion,3);assert.equal(build.archive,archiveName);assert.equal(build.archiveSha256,sha(readFileSync(archive)));assert.equal(verification.archiveSha256,build.archiveSha256);assert.equal(build.reproducibleTwoBuilds,true);
  assert.equal(build.sourceTreeSha256,sha(JSON.stringify(source)),'source evidence binding');
@@ -150,7 +155,7 @@ async function main(){
 assert(process.argv[2],'usage: node scripts/verify-release.mjs archive.tgz [external-output-directory]');
 const archive=resolve(process.argv[2]);
 assert(process.argv[4]===undefined||process.argv[4]==='--check-evidence','unknown verification mode');
-const out=resolveExternalOutput(checkout,process.argv[3]??join(tmpdir(),'darktrace-release-verification'));
+const out=resolveExternalOutput(checkout,process.argv[3]??mkdtempSync(join(tmpdir(),'darktrace-release-verification-')));
 assertReviewedReleaseContractReady();
 if(process.argv[4]==='--check-evidence'){console.log(JSON.stringify(verifyReleaseEvidence(archive,out)));return;}
 mkdirSync(out,{recursive:true});
@@ -167,7 +172,7 @@ assert.equal(headers.length,names.length);assert(headers.every(n=>n.startsWith('
 run('tar',['-xzf',archive]);
 for(const name of names) assert(lstatSync(join(work,name)).isFile(),'regular file: '+name);
 const packed=join(work,'package');
-const readmeEs=join(packed,'README.es.md'),readmeEsStat=lstatSync(readmeEs);assert(readmeEsStat.isFile()&&readmeEsStat.size>0&&readmeEsStat.size<=1048576);assert.equal(readmeEsStat.mode&0o7777,0o644);assert.equal(hash(readFileSync(readmeEs)),hash(readFileSync(join(checkout,'README.es.md'))),'Spanish README source binding');
+const readmeEs=join(packed,'README.es.md'),{stat:readmeEsStat,bytes:readmeEsBytes}=openRegular(readmeEs,'Spanish README must be a regular file');assert(readmeEsStat.isFile()&&readmeEsStat.size>0&&readmeEsStat.size<=1048576);assert.equal(readmeEsStat.mode&0o7777,0o644);assert.equal(hash(readmeEsBytes),hash(readFileSync(join(checkout,'README.es.md'))),'Spanish README source binding');
 const pkg=JSON.parse(readFileSync(join(packed,'package.json')));
 assert.equal(pkg.name,'@nuoframework/darktrace-mcp');assert.equal(pkg.private,undefined,'public npm publication: no private flag');assert.deepEqual(pkg.publishConfig,{access:'public',registry:'https://registry.npmjs.org'});assert.equal(pkg.mcpName,'io.github.nuoframework/darktrace-mcp');
 assert.equal(lstatSync(join(packed,'dist/src/index.js')).mode&0o777,0o755);
@@ -212,7 +217,7 @@ const rootComponent={type:'application','bom-ref':pkg.name,name:pkg.name,version
 const sbom={bomFormat:'CycloneDX',specVersion:'1.5',version:1,metadata:{component:rootComponent},components,dependencies:[{ref:pkg.name,dependsOn:['@modelcontextprotocol/server','zod']},{ref:'@modelcontextprotocol/server',dependsOn:['@modelcontextprotocol/core','zod']},{ref:'@modelcontextprotocol/core',dependsOn:['zod']},{ref:'zod',dependsOn:[]}]};
 writeFileSync(join(out,'runtime-sbom.cdx.json'),JSON.stringify(sbom,null,2)+'\n');
 writeFileSync(join(out,'runtime-files.sha256.json'),JSON.stringify(inventories,null,2)+'\n');
-const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readFileSync(readmeEs)),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,publicPackageMetadata:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,invalidProfilesRejected:true},work};
+const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readmeEsBytes),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,publicPackageMetadata:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,invalidProfilesRejected:true},work};
 writeFileSync(join(out,'verification.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await main();

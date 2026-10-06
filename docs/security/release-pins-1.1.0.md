@@ -140,3 +140,12 @@ written); the budget is now 10 minutes (`test/security/run-isolated.mjs`). The L
 | Runtime files / aggregate | 91 / `cc156c03…` | 91 / `d52f2a6305e6c08f5c6610dd5be3e8a3dd25e29b8f1f3399888d81dde251ba3c` |
 
 Receipt: `test/security/evidence/2026-10-06T16-15-55-312Z.json`.
+
+## CodeQL remediation in the release helpers (2026-10-06)
+
+CodeQL `security-extended` on PR #1 reported two HIGH findings in the release helpers. Neither fix changes production source, pins or the release output layout.
+
+- `js/insecure-temporary-file` (`scripts/prepare-release.mjs`): when no argument was given, the default output directory was the predictable path `os.tmpdir()/darktrace-mcp-release`. It is now a fresh `mkdtempSync` directory, as is the default npm cache. Every file the script writes into the output directory is created with exclusive `wx`, and a new output directory is created with mode `0700`. Asset names, the two-build reproducibility check and the evidence schema are unchanged.
+- `js/file-system-race` (`scripts/verify-release.mjs`): an `lstat` followed by a `readFile` on the same path is replaced by a single `open(O_RDONLY|O_NOFOLLOW)`, then `fstat` and a read on that descriptor. This covers reviewed inputs, historical predecessors (`0644` check), `SHA256SUMS` and its assets, and the packed Spanish README, which is now hashed once. Assertion messages are unchanged, and a symlinked asset still fails with `regular checksum asset`. The default verification directory is also a `mkdtempSync` directory. Because of the added helper, the `scripts/verify-release.mjs` line references above that point past line 52 are now four lines lower.
+
+`npm run release:prepare` to a new external directory passed end to end, including verify, and the two builds were identical. Archive SHA-256: `1b36cc9f65d9dbdd9558f1dfc2e5aa96041a1fdbc0a3f6ab33ceb4862f257c49`. `--check-evidence` also passed.

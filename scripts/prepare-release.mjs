@@ -8,9 +8,9 @@ import {resolve,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {resolveExternalOutput} from './release-path.mjs';
 import {captureReviewedContracts,releaseAssets,verifyReleaseEvidence,assertReviewedReleaseContractReady,verifyHistoricalArchive,verifyValidatedPredecessorArchives} from './verify-release.mjs';
-const root=fileURLToPath(new URL('../',import.meta.url)),out=resolveExternalOutput(root,process.argv[2]??join(tmpdir(),'darktrace-mcp-release'));
+const root=fileURLToPath(new URL('../',import.meta.url)),out=resolveExternalOutput(root,process.argv[2]??mkdtempSync(join(tmpdir(),'darktrace-mcp-release-')));
 assertReviewedReleaseContractReady();
-mkdirSync(out,{recursive:true});
+mkdirSync(out,{recursive:true,mode:0o700});
 assert.equal(readdirSync(out).length,0,'use a new empty external artifact directory');
 const snapshot=mkdtempSync(join(tmpdir(),'darktrace-release-source-'));
 for(const name of ['src','scripts','openapi','docs','test','examples'])cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')&&!/\/docs\/assets\/.*\.(png|jpe?g|webp)$/i.test(p)});
@@ -29,11 +29,11 @@ const productionSourceHashes=hashes(join(snapshot,'src'));
 const historicalAlphaTests=verifyHistoricalArchive(snapshot);
 const historicalValidatedPredecessors=verifyValidatedPredecessorArchives(snapshot);
 const releaseCapability={value:{read:true,sensitiveRead:true,write:true,writeCritical:true},sourcePath:'src/policy/release-capability.ts',sourceSha256:sourceHashes['src/policy/release-capability.ts']};
-writeFileSync(join(out,'source-files.sha256.json'),JSON.stringify(sourceHashes,null,2)+'\n');
+writeFileSync(join(out,'source-files.sha256.json'),JSON.stringify(sourceHashes,null,2)+'\n',{flag:'wx'});
 const commands=[];
-const childEnv={PATH:process.env.PATH,HOME:join(snapshot,'operator-free-home'),TMPDIR:tmpdir(),npm_config_cache:process.env.npm_config_cache??join(tmpdir(),'darktrace-release-npm-cache')};mkdirSync(childEnv.HOME);
+const childEnv={PATH:process.env.PATH,HOME:join(snapshot,'operator-free-home'),TMPDIR:tmpdir(),npm_config_cache:process.env.npm_config_cache??mkdtempSync(join(tmpdir(),'darktrace-release-npm-cache-'))};mkdirSync(childEnv.HOME);
 if(process.env.npm_config_offline==='true')childEnv.npm_config_offline='true';
-function run(cmd,args,label,cwd=snapshot){console.log('Running '+label);const r=spawnSync(cmd,args,{cwd,env:childEnv,encoding:'utf8',timeout:180000,maxBuffer:32*1024*1024});commands.push({cmd,args,status:r.status});writeFileSync(join(out,label+'.log'),(r.stdout??'')+(r.stderr??''));assert.equal(r.status,0,`${label} failed: see ${out}/${label}.log ${r.error??''}`);return r.stdout;}
+function run(cmd,args,label,cwd=snapshot){console.log('Running '+label);const r=spawnSync(cmd,args,{cwd,env:childEnv,encoding:'utf8',timeout:180000,maxBuffer:32*1024*1024});commands.push({cmd,args,status:r.status});writeFileSync(join(out,label+'.log'),(r.stdout??'')+(r.stderr??''),{flag:'wx'});assert.equal(r.status,0,`${label} failed: see ${out}/${label}.log ${r.error??''}`);return r.stdout;}
 run(process.execPath,['scripts/test-release-path.mjs'],'output-path-guard');
 run('npm',['ci','--ignore-scripts','--no-audit','--no-fund'],'install');
 run('npm',['run','typecheck'],'typecheck');run('npm',['test'],'test');run('npm',['run','test:security'],'security');
@@ -43,7 +43,7 @@ cpSync(join(snapshot,'test/security/evidence',receipts[0]),join(out,'security-re
 const receipt=JSON.parse(readFileSync(join(out,'security-receipt.json')));
 assert.equal(receipt.receiptComplete,true);assert.equal(receipt.tests.status,0);assert.equal(receipt.build.status,0);assert.deepEqual(receipt.sourceHashes,productionSourceHashes);assert.deepEqual(receipt.builtSourceHashes,productionSourceHashes);
 const contracts=await captureReviewedContracts(snapshot);
-writeFileSync(join(out,'mcp-tool-contracts.json'),contracts.bytes);
+writeFileSync(join(out,'mcp-tool-contracts.json'),contracts.bytes,{flag:'wx'});
 // npm test builds once; a second explicit build must produce identical packed bytes.
 const first=JSON.parse(run('npm',['pack','--ignore-scripts','--json','--pack-destination',out],'pack-first'))[0];
 const firstHash=digest(readFileSync(join(out,first.filename))),runtimeHashes=hashes(join(snapshot,'dist/src'));
@@ -55,8 +55,8 @@ const secondContracts=await captureReviewedContracts(snapshot);assert.deepEqual(
 run(process.execPath,['scripts/verify-release.mjs',join(out,second.filename),out],'verify');
 run(process.execPath,['scripts/validate-examples.mjs'],'examples');
 cpSync(join(snapshot,'CHANGELOG.md'),join(out,'release-notes.md'));
-writeFileSync(join(out,'build-evidence.json'),JSON.stringify({schemaVersion:3,releaseCapability,historicalAlphaTests,historicalValidatedPredecessors,node:process.version,platform:process.platform,arch:process.arch,snapshot,sourceTreeSha256:digest(JSON.stringify(sourceHashes)),sourceProductionTreeSha256:digest(JSON.stringify(productionSourceHashes)),archive:second.filename,archiveSha256:firstHash,reproducibleTwoBuilds:true,mcpToolContracts:contracts.metadata,contractGeneration:{helper:'test/security/mcp-contracts.mjs',execution:'module import; toolContract(profile) for six supported profiles, two approval-description variants and two startup-refusal profiles; no appliance requests',repeatedAfterSecondBuild:true},sourceOnlyDistributionInputs:['Dockerfile','.dockerignore',...Object.keys(sourceHashes).filter(p=>p.startsWith('docs/assets/'))],commands},null,2)+'\n');
+writeFileSync(join(out,'build-evidence.json'),JSON.stringify({schemaVersion:3,releaseCapability,historicalAlphaTests,historicalValidatedPredecessors,node:process.version,platform:process.platform,arch:process.arch,snapshot,sourceTreeSha256:digest(JSON.stringify(sourceHashes)),sourceProductionTreeSha256:digest(JSON.stringify(productionSourceHashes)),archive:second.filename,archiveSha256:firstHash,reproducibleTwoBuilds:true,mcpToolContracts:contracts.metadata,contractGeneration:{helper:'test/security/mcp-contracts.mjs',execution:'module import; toolContract(profile) for six supported profiles, two approval-description variants and two startup-refusal profiles; no appliance requests',repeatedAfterSecondBuild:true},sourceOnlyDistributionInputs:['Dockerfile','.dockerignore',...Object.keys(sourceHashes).filter(p=>p.startsWith('docs/assets/'))],commands},null,2)+'\n',{flag:'wx'});
 const assets=releaseAssets(second.filename);
-writeFileSync(join(out,'SHA256SUMS'),assets.map(n=>`${digest(readFileSync(join(out,n)))}  ${n}`).join('\n')+'\n');
+writeFileSync(join(out,'SHA256SUMS'),assets.map(n=>`${digest(readFileSync(join(out,n)))}  ${n}`).join('\n')+'\n',{flag:'wx'});
 verifyReleaseEvidence(join(out,second.filename),out,snapshot);
 console.log(JSON.stringify({out,snapshot,archive:second.filename,sha256:firstHash,reproducibleTwoBuilds:true}));
