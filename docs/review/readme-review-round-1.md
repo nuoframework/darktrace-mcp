@@ -32,37 +32,37 @@ Proposed: delete the line. The badge now renders `1.1.0`.
 
 **EN, line 43.** Current:
 
-> These 1.1.0 distribution paths become available when the release is published; see [release status and source-install fallback](docs/getting-started.md).
+> These 1.1.0 distribution paths become available when the release is published; see [release status and source-install fallback](../getting-started.md).
 
 Proposed:
 
-> All three paths ship 1.1.0 today: npm (with provenance), the `.mcpb` on the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and the ghcr image. Prefer to build from source? See the [fallback](docs/getting-started.md#fallback-build-from-source).
+> All three paths ship 1.1.0 today: npm (with provenance), the `.mcpb` on the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and the ghcr image. Prefer to build from source? See the [fallback](../getting-started.md#fallback-build-from-source).
 
 **EN, line 150.** Current:
 
-> Distribution channels are described in [Releases](docs/releases.md); availability follows publication of each version.
+> Distribution channels are described in [Releases](../releases.md); availability follows publication of each version.
 
 Proposed:
 
-> Where each version is published, and how to verify it: [Releases](docs/releases.md).
+> Where each version is published, and how to verify it: [Releases](../releases.md).
 
 **ES, line 20.** Same comment, delete.
 
 **ES, line 43.** Current:
 
-> Estas vías de distribución de 1.1.0 estarán disponibles cuando se publique la versión; consulta el [estado y la instalación desde el código](docs/es/getting-started.md).
+> Estas vías de distribución de 1.1.0 estarán disponibles cuando se publique la versión; consulta el [estado y la instalación desde el código](../es/getting-started.md).
 
 Proposed:
 
-> Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
+> Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](../es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
 **ES, line 150.** Current:
 
-> Los canales de distribución se detallan en [Releases](docs/releases.md); cada versión estará disponible tras su publicación.
+> Los canales de distribución se detallan en [Releases](../releases.md); cada versión estará disponible tras su publicación.
 
 Proposed:
 
-> Dónde se publica cada versión y cómo verificarla: [Releases](docs/releases.md).
+> Dónde se publica cada versión y cómo verificarla: [Releases](../releases.md).
 
 ### 2. [must] Make the first command unmistakable
 
@@ -74,7 +74,7 @@ Also, "Install in 60 seconds" contradicts `docs/getting-started.md`, which says 
 
 > ## Install in 60 seconds
 >
-> Have your appliance's HTTPS origin and API token pair ready. The wizard needs **Node.js 22+**. These 1.1.0 distribution paths become available when the release is published; see [release status and source-install fallback](docs/getting-started.md).
+> Have your appliance's HTTPS origin and API token pair ready. The wizard needs **Node.js 22+**. These 1.1.0 distribution paths become available when the release is published; see [release status and source-install fallback](../getting-started.md).
 
 Proposed (replace heading, lead and the table's first column; keep the `.mcpb` and Docker columns as a two-column "Other ways" table below, or as two short bullets):
 
@@ -86,7 +86,7 @@ Proposed (replace heading, lead and the table's first column; keep the `.mcpb` a
 > npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 > ```
 >
-> Choose `read`, then pick your clients. The wizard verifies TLS and the tokens with a signed request, stores the tokens in owner-only files and writes each client's config with a backup. [Full guide](docs/getting-started.md).
+> Choose `read`, then pick your clients. The wizard verifies TLS and the tokens with a signed request, stores the tokens in owner-only files and writes each client's config with a backup. [Full guide](../getting-started.md).
 >
 > **Other ways.** Claude Desktop: download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and open it; tokens go to the OS keychain. Docker: see item 3.
 
@@ -100,7 +100,7 @@ Proposed (replace heading, lead and the table's first column; keep the `.mcpb` a
 > npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 > ```
 >
-> Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario y escribe la configuración de cada cliente con copia de seguridad. [Guía completa](docs/es/getting-started.md).
+> Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario y escribe la configuración de cada cliente con copia de seguridad. [Guía completa](../es/getting-started.md).
 >
 > **Otras vías.** Claude Desktop: descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema. Docker: véase el punto 3.
 
@@ -113,7 +113,7 @@ The README tells readers to "resolve the digest" themselves. The digest is known
 **EN, lines 57–62.** Current:
 
 > `docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0`
-> [Resolve the digest and run the Docker wizard](docs/clients.md#docker). Pin the digest, never the moving tag.
+> [Resolve the digest and run the Docker wizard](../clients.md#docker). Pin the digest, never the moving tag.
 
 Proposed:
 
@@ -122,11 +122,11 @@ Proposed:
 >   --image ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
 > ```
 >
-> Multi-arch image (linux/amd64, linux/arm64), pinned by digest. Never pin the `1.1.0` tag. [Docker guide](docs/docker.md).
+> Multi-arch image (linux/amd64, linux/arm64), pinned by digest. Never pin the `1.1.0` tag. [Docker guide](../docker.md).
 
 **ES.** Same block; caption:
 
-> Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por digest. No fijes nunca la etiqueta `1.1.0`. [Guía Docker](docs/docker.md).
+> Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por digest. No fijes nunca la etiqueta `1.1.0`. [Guía Docker](../docker.md).
 
 Use the index digest above (verified with `docker buildx imagetools inspect`). Do not copy the per-platform values from the release notes into the README; they are image IDs, not manifest digests, and a reader who passes them to `--image` will get a pull error.
 
@@ -138,11 +138,11 @@ The table is excellent. The paragraph after it packs seven facts and four number
 
 **EN, line 101.** Current:
 
-> Counts come from [docs/tools.md](docs/tools.md). **✓** = lab evidence; **◐** = partial evidence; **—** = not lab-validated. 56 operations have evidence from the first 7.1.0 lab, including 11 partial. Most write evidence predates the final controls; see the per-operation limits and later lab checks there. All 13 Email reads remain unvalidated (403); email download returns size and SHA-256 only. The Email action is excluded and `GET /aianalyst/incidents` is unavailable.
+> Counts come from [docs/tools.md](../tools.md). **✓** = lab evidence; **◐** = partial evidence; **—** = not lab-validated. 56 operations have evidence from the first 7.1.0 lab, including 11 partial. Most write evidence predates the final controls; see the per-operation limits and later lab checks there. All 13 Email reads remain unvalidated (403); email download returns size and SHA-256 only. The Email action is excluded and `GET /aianalyst/incidents` is unavailable.
 
 Proposed:
 
-> **✓** passed on a Darktrace 7.1.0 lab appliance · **◐** passed partially (the [tool reference](docs/tools.md) says what was covered) · **—** follows the API docs but was not run against a real appliance.
+> **✓** passed on a Darktrace 7.1.0 lab appliance · **◐** passed partially (the [tool reference](../tools.md) says what was covered) · **—** follows the API docs but was not run against a real appliance.
 >
 > - 56 of 77 operations have lab evidence, 11 of them partial. Most write evidence predates the final write controls; only a few writes were re-checked afterwards.
 > - All 13 Darktrace/Email reads are unvalidated (the lab token got HTTP 403). The email download returns size and SHA-256 only.
@@ -150,7 +150,7 @@ Proposed:
 
 **ES, line 101.** Proposed:
 
-> **✓** probada en un appliance Darktrace 7.1.0 de laboratorio · **◐** probada parcialmente (la [referencia de herramientas](docs/tools.md), en inglés, indica qué se cubrió) · **—** sigue la documentación de la API pero no se ejecutó contra un appliance real.
+> **✓** probada en un appliance Darktrace 7.1.0 de laboratorio · **◐** probada parcialmente (la [referencia de herramientas](../tools.md), en inglés, indica qué se cubrió) · **—** sigue la documentación de la API pero no se ejecutó contra un appliance real.
 >
 > - 56 de 77 operaciones tienen evidencia de laboratorio, 11 de ellas parcial. La mayoría de la evidencia de escritura es anterior a los controles finales; solo unas pocas escrituras se volvieron a comprobar después.
 > - Las 13 lecturas de Darktrace/Email están sin validar (el token del laboratorio recibió HTTP 403). La descarga de correo solo devuelve tamaño y SHA-256.
@@ -209,15 +209,15 @@ Proposed:
 
 **ES, line 69.** Current:
 
-> El asistente configura estos clientes; cada insignia enlaza a su guía (en inglés; [guía en español](docs/es/clients.md)). Los diálogos dependen del cliente y del protocolo.
+> El asistente configura estos clientes; cada insignia enlaza a su guía (en inglés; [guía en español](../es/clients.md)). Los diálogos dependen del cliente y del protocolo.
 
 Proposed:
 
 > El asistente configura estos clientes; cada insignia enlaza a su guía. Los diálogos de aprobación dependen del cliente y del protocolo.
 
-**ES, line 23 (nav).** `Herramientas` and `Seguridad` point to English-only files while the table note on line 101 does flag "(inglés)". Be consistent: either mark both in the nav (`[Herramientas (EN)](docs/tools.md)`, `[Seguridad (EN)](docs/security.md)`) or drop the marker everywhere. I would mark them; a Spanish reader clicking through to an English page should not be surprised.
+**ES, line 23 (nav).** `Herramientas` and `Seguridad` point to English-only files while the table note on line 101 does flag "(inglés)". Be consistent: either mark both in the nav (`[Herramientas (EN)](../tools.md)`, `[Seguridad (EN)](../security.md)`) or drop the marker everywhere. I would mark them; a Spanish reader clicking through to an English page should not be surprised.
 
-Also line 148: `[Docker](docs/docker.md)`, `[Arquitectura](docs/architecture.md)`, `[Versiones](docs/releases.md)` are English-only; same treatment.
+Also line 148: `[Docker](../docker.md)`, `[Arquitectura](../architecture.md)`, `[Versiones](../releases.md)` are English-only; same treatment.
 
 ### 8. [nice] Trim the hero badges
 
