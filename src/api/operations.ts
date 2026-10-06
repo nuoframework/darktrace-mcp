@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { DarktraceApiError } from '../client/errors.js';
 import catalogue from './catalogue.generated.json' with { type: 'json' };
-import { schemaFromOpenApi, checkInput, checkRanges, validatePathSegment, validateSearchHash, inputUnit, type InputLimits } from './validation.js';
+import { schemaFromOpenApi, checkInput, checkRanges, validatePathSegment, validateSearchHash, inputUnit, QUERY_DEFAULTS, BODY_DEFAULTS, type InputLimits } from './validation.js';
 export type Tier = 'read'|'medium'|'high'|'critical';
 export interface OperationDescriptor {
   operationId:string; method:'GET'|'POST'|'DELETE'; pathTemplate:string; tool:string|null;
@@ -20,10 +20,10 @@ export interface ApiRequest {
 /** Operations whose success body is a file (PCAP, raw MIME email), read as bounded bytes. */
 export const BINARY_OPERATIONS:ReadonlySet<string>=Object.freeze(new Set(['get_pcaps_filename','get_agemail_api_ep_api_v1_0_emails_uuid_download']));
 export interface OperationClient { request(request:ApiRequest):Promise<unknown>; }
-function parameterObject(params:any[], location:string) {
+function parameterObject(params:any[], location:string, tier:Tier='read') {
   const fields:Record<string,z.ZodType<any>> = {};
   for (const p of params.filter(p=>p.in===location)) {
-    const field = schemaFromOpenApi({...p.schema,description:p.description??p.schema?.description},p.name);
+    const field = schemaFromOpenApi({...p.schema,description:p.description??p.schema?.description},p.name,0,location==='query'&&tier==='read');
     fields[p.name] = p.required ? field : field.optional();
   }
   return z.strictObject(fields);
@@ -32,13 +32,13 @@ export const operations:Readonly<Record<string,Operation>> = Object.freeze(Objec
   const fields:Record<string,z.ZodType<any>> = {operation:z.literal(row.operationId).default(row.operationId)};
   for (const location of ['path','query']) {
     const params = row.parameters.filter(p=>p.in===location);
-    const object = parameterObject(params,location);
+    const object = parameterObject(params,location,row.tier);
     fields[location] = params.some(p=>p.required) ? object : object.optional();
   }
   if (row.bodies.length) {
     const bodySchemas = row.bodies.map(b=>schemaFromOpenApi(b.schema));
     const body = bodySchemas.length===1?bodySchemas[0]:z.union(bodySchemas as any);
-    fields.body = row.bodyRequired ? body : body.optional();
+    fields.body = Object.hasOwn(BODY_DEFAULTS,row.operationId) ? body.default({...BODY_DEFAULTS[row.operationId]}) : row.bodyRequired ? body : body.optional();
     fields.contentType = z.enum(row.bodies.map(b=>b.contentType) as [string,...string[]]).optional();
   }
   // Writes execute by default when the operator profile allows; dryRun:true returns a value-free preview.
@@ -58,11 +58,12 @@ export function validateOperation(op:Operation, raw:unknown, limits:number|Parti
   const queryNames=new Set(queryParams.map(p=>p.name));
   const boundedQuery={...(args.query??{})};
   if (queryNames.has('count') && boundedQuery.count===undefined) boundedQuery.count=100;
+  for (const [name,value] of Object.entries(QUERY_DEFAULTS[op.operationId]??{})) if (queryNames.has(name)&&boundedQuery[name]===undefined) boundedQuery[name]=value;
   if (!op.parameters.some(p=>p.in==='path'&&p.required) && queryNames.has('starttime')&&queryNames.has('endtime')&&boundedQuery.starttime===undefined&&boundedQuery.endtime===undefined&&boundedQuery.from===undefined&&boundedQuery.to===undefined) {
     const scale=inputUnit({...queryParams.find(p=>p.name==='starttime')?.schema,description:queryParams.find(p=>p.name==='starttime')?.description},'starttime')==='milliseconds'?1000:1;
     boundedQuery.endtime=Math.floor(Date.now()/1000)*scale;boundedQuery.starttime=Number(boundedQuery.endtime)-3600*scale;
   }
-  if (Object.keys(boundedQuery).length) args.query=parameterObject(op.parameters,'query').parse(boundedQuery);
+  if (Object.keys(boundedQuery).length) args.query=parameterObject(op.parameters,'query',op.tier).parse(boundedQuery);
   if (args.body!==undefined) {
     const chosen=op.bodies.find(b=>b.contentType===(args.contentType??op.bodies[0]?.contentType));
     if (!chosen) throw new Error('Unsupported body encoding');
@@ -71,7 +72,15 @@ export function validateOperation(op:Operation, raw:unknown, limits:number|Parti
   for (const [name,value] of Object.entries(args.path??{})) {if(args.query?.[name]!==undefined&&String(args.query[name])!==String(value)) throw new Error('Conflicting target parameters');}
   checkRanges(args.query??{},Object.fromEntries(queryParams.map(p=>[p.name,inputUnit({...p.schema,description:p.description},p.name)])),op.operationId);
   const bodyProperties=op.bodies.find(b=>b.contentType===(args.contentType??op.bodies[0]?.contentType))?.schema.properties??{};
-  checkRanges((args.body&&typeof args.body==='object'?args.body:{}) as Record<string,unknown>,Object.fromEntries(Object.entries(bodyProperties).map(([name,schema])=>[name,inputUnit(schema as any,name)])));
+  // Free-form bodies (Darktrace/EMAIL search) have no documented time fields: there "from" is a sender, not a time.
+  const bodySchema=op.bodies.find(b=>b.contentType===(args.contentType??op.bodies[0]?.contentType))?.schema;
+  const freeform=bodySchema?.type==='object'&&!bodySchema.properties&&bodySchema.additionalProperties===true;
+  if (!freeform) checkRanges((args.body&&typeof args.body==='object'?args.body:{}) as Record<string,unknown>,Object.fromEntries(Object.entries(bodyProperties).map(([name,schema])=>[name,inputUnit(schema as any,name)])));
+  // The capture listing reports filename as "/pcaps/<name>"; the download route takes the bare name.
+  if (op.operationId==='get_pcaps_filename'&&typeof args.path?.filename==='string') {
+    const listed=/^\/pcaps\/([^/\\]+)$/.exec(args.path.filename);
+    if (listed) args.path={...args.path,filename:listed[1]};
+  }
   for (const [key,value] of Object.entries(args.path??{})) {
     if (key==='query' && op.pathTemplate.startsWith('/advancedsearch/')) validateSearchHash(String(value));
     else if (typeof value==='string') validatePathSegment(value);

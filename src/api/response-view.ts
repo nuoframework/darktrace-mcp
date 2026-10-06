@@ -10,6 +10,23 @@ export const CODE_OWNED_VIEWS:Readonly<Record<string,ResponseView>>=Object.freez
   // Email action acknowledgement: only a status-like field is returned; message content never is.
   post_agemail_api_ep_api_v1_0_emails_uuid_action:{kind:'object',fields:{response:{kind:'string'},status:{kind:'string'},success:{kind:'boolean'}}},
 });
+/**
+ * Aggregate endpoints whose spec leaves the nested sections untyped, while each section is the record type of
+ * another reviewed endpoint. The section is projected through that endpoint's reviewed view (same allowlist,
+ * so e.g. device credentials stay excluded) instead of collapsing to a summary.
+ */
+export const COMPOSED_VIEWS:Readonly<Record<string,Readonly<Record<string,string>>>>=Object.freeze({
+  get_devicesummary:Object.freeze({devices:'get_devices',similardevices:'get_similardevices',modelbreaches:'get_modelbreaches',deviceinfo:'get_deviceinfo',details:'get_details'}),
+});
+export function composedView(operationId:string,views:Readonly<Record<string,ResponseView>>):ResponseView|undefined {
+  if(!Object.hasOwn(COMPOSED_VIEWS,operationId))return undefined;
+  const fields:Record<string,ResponseView>={};
+  for(const [section,source] of Object.entries(COMPOSED_VIEWS[operationId])) {
+    const view=views[source];
+    if(view)fields[section]=view;
+  }
+  return {kind:'object',fields:{data:{kind:'object',fields}}};
+}
 export function selectResponseView(operationId:string,query:Record<string,unknown>|undefined,base:ResponseView|undefined):ResponseView|undefined {
   if (Object.hasOwn(CODE_OWNED_VIEWS,operationId)) return CODE_OWNED_VIEWS[operationId];
   return operationId==='get_summarystatistics'&&query?.eventtype==='loginput'?SUMMARY_LOGINPUT_VIEW:base;

@@ -8,7 +8,7 @@ const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
 const MAX_PATH_DECODE_PASSES = 16;
 export function inputUnit(raw:Schema,name:string):string {
   const text=String(raw.description??'');
-  if (/millisecond/i.test(text)) return 'milliseconds';
+  if (/millisecond|milisegundo/i.test(text)) return 'milliseconds';
   if (/seconds|segundos/i.test(text)) return 'seconds';
   if (/hours|hour intervals/i.test(text)||/^(hours|intervalhours)$/i.test(name)) return 'hours';
   if (/YYYY-MM-DD/.test(text)) return 'UTC datetime';
@@ -18,6 +18,18 @@ export function inputUnit(raw:Schema,name:string):string {
   if (/id$|^master$|^viewsubnet$/i.test(name)) return 'identifier';
   return ['number','integer'].includes(raw.type)?'dimensionless':'not applicable';
 }
+/**
+ * Code-owned query defaults applied when the caller omits the parameter: the cheap, safe first call.
+ * get_modelbreaches without minimal returns full records that exceed the response cap on busy appliances.
+ */
+export const QUERY_DEFAULTS:Readonly<Record<string,Readonly<Record<string,unknown>>>>=Object.freeze({
+  get_modelbreaches:Object.freeze({minimal:true}),
+});
+/** Bodies with exactly one valid value (a fixed flag), applied when the caller omits the body. */
+export const BODY_DEFAULTS:Readonly<Record<string,Readonly<Record<string,unknown>>>>=Object.freeze({
+  post_modelbreaches_pbid_acknowledge:Object.freeze({acknowledge:true}),
+  post_modelbreaches_pbid_unacknowledge:Object.freeze({unacknowledge:true}),
+});
 /** Single-value time/duration fields with an undocumented format: passed through as bounded opaque values; the appliance validates them. */
 export const OPAQUE_TIME_FIELDS:ReadonlySet<string>=Object.freeze(new Set(['iptime','investigateTime','expiry','duration','expiryDuration']));
 export function blockedInputReason(raw:Schema,name:string):string|null {
@@ -91,7 +103,9 @@ const freeformValue:z.ZodType<any>=z.lazy(()=>z.union([z.string().max(8192),z.nu
   z.array(freeformValue).max(100),z.record(freeformKey,freeformValue)]));
 /** Only for request bodies the spec types as an open object with no properties. Depth is bounded by checkInput. */
 export function freeformObject():z.ZodType<any> {return registerRules(z.record(freeformKey,freeformValue),[FREEFORM_JSON_RULE]);}
-export function schemaFromOpenApi(raw: Schema, name = '', depth = 0): z.ZodType<any> {
+/** Device/subnet filters the appliance itself reports as negative (network ranges, client sensors: did/sid -11). */
+const NEGATIVE_ID_FILTERS=/^(did|sid|ddid|odid|excludedid|excludesid)$/i;
+export function schemaFromOpenApi(raw: Schema, name = '', depth = 0, queryParameter = false): z.ZodType<any> {
   if (depth > 8) throw new Error('Schema depth exceeds budget');
   let s = raw;
   if (s.$ref) {
@@ -124,10 +138,12 @@ export function schemaFromOpenApi(raw: Schema, name = '', depth = 0): z.ZodType<
     if (/^(hours|intervalhours)$/i.test(name)) num = num.min(1).max(168);
     if (name==='days') num=num.int().min(1).max(365);
     if (/^(port|port1|port2|sourceport|destinationport)$/i.test(name)) num=num.int().min(1).max(65535);
-    if (/^(did|ddid|odid|excludedid|excludesid|master|viewsubnet|pbid|pid|sid|tid|teid|mlid|cid|codeid)$/i.test(name)) num=num.int().min(1);
+    if (/^(did|ddid|odid|excludedid|excludesid|master|viewsubnet|pbid|pid|sid|tid|teid|mlid|cid|codeid)$/i.test(name)) num=num.int().min(queryParameter&&NEGATIVE_ID_FILTERS.test(name)?-99999:1);
+    if (queryParameter&&NEGATIVE_ID_FILTERS.test(name)) num=num.refine(value=>value!==0);
     if (name==='priority') num=num.int().min(-5).max(5);
     if (/^(start|end|starttime|endtime)$/i.test(name)) num=num.int().min(0);
-    if (name==='interval') num=num.int().min(1).max(604800);
+    // Bucket size up to seven days in the documented unit (Advanced Search graph intervals are milliseconds).
+    if (name==='interval') num=num.int().min(1).max(inputUnit(s,name)==='milliseconds'?604800000:604800);
     if (/^(duration|expiryDuration)$/i.test(name)) num=num.int().min(0).max(86400);
     if (/^(minscore|maxscore|mingroupscore|maxgroupscore)$/i.test(name)) num=num.min(0).max(100);
     if (name==='latitude') num=num.min(-90).max(90);

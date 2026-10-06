@@ -100,7 +100,11 @@ test('read-only multi-operation tools default to their listing operation',async(
   const {ctx,requests}=context();
   assert.equal((await callTool('darktrace_list_model_breaches',{},ctx)).isError,undefined);
   assert.equal((await callTool('darktrace_list_models',{},ctx)).isError,undefined);
-  assert.deepEqual(requests.map(r=>r.operationId),['get_modelbreaches','get_models']);
-  assert.equal((await callTool('darktrace_list_tags',{},ctx)).isError,true);
+  // Several listings: the code-owned preferred default applies; without one the caller must choose.
+  assert.equal((await callTool('darktrace_list_tags',{},ctx)).isError,undefined);
+  assert.deepEqual(requests.map(r=>r.operationId),['get_modelbreaches','get_models','get_tags']);
+  const ambiguous=await callTool('darktrace_get_reference_data',{},ctx);
+  assert.equal(ambiguous.isError,true);assert.equal(ambiguous.structuredContent?.errorCode,'invalid_operation');
+  assert.deepEqual(ambiguous.structuredContent?.operations,['get_enums','get_filtertypes']);assert.equal(requests.length,3);
   const w=context({write:true});assert.equal((await callTool('darktrace_acknowledge_model_breach',{path:{pbid:1},body:{acknowledge:true}},w.ctx)).isError,true);assert.equal(w.requests.length,0);
 });

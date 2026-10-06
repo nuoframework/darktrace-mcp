@@ -1,5 +1,5 @@
 import test from 'node:test';
-import { DarktraceApiError, type ApiErrorKind } from '../../src/client/errors.js';
+import { DarktraceApiError, errorHint, safeErrorMessage, type ApiErrorKind } from '../../src/client/errors.js';
 import assert from 'node:assert/strict';
 import { operations, validateOperation, buildRequest } from '../../src/api/operations.js';
 import { checkRanges } from '../../src/api/validation.js';
@@ -97,7 +97,10 @@ test('API diagnostics return only exact code-owned enums and never remote except
     error.message='REMOTE_CANARY https://private.example';error.stack='STACK_CANARY';
     const output=await invoke(error);
     assert.equal(output.isError,true);assert.equal(output.structuredContent?.errorCode,kind);
-    assert.deepEqual(Object.keys(output.structuredContent!).sort(),['error','errorCode']);
+    assert.deepEqual(Object.keys(output.structuredContent!).sort(),['error','errorCode','hint']);
+    // The message and hint are looked up from the code-owned kind, never taken from the exception.
+    assert.equal(output.structuredContent?.error,safeErrorMessage(kind));
+    if(kind!=='too_large')assert.equal(output.structuredContent?.hint,errorHint(kind));
     assert.doesNotMatch(JSON.stringify(output),/CANARY|SECRET_REQUEST_ID|private\.example|401/);
   }
   const forged=new DarktraceApiError('REMOTE_CANARY' as ApiErrorKind,'SECRET_REQUEST_ID');

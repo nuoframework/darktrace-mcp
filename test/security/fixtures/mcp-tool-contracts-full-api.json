@@ -3,11 +3,11 @@
   "canonicalization": "Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON",
   "contracts": {
     "read": {
-      "sha256": "afeb056eb4e1830462256436948ceaa706601d14ade6ebc7f36ab00cda011964",
+      "sha256": "734a9e33dd8632df6efa4ec7b81c3f313d85dfbb478af3128bd3aec4f0b6833a",
       "tools": [
         {
           "name": "darktrace_list_ai_analyst_incidents",
-          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"; default get_aianalyst_groups): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16,6 +16,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_aianalyst_groups",
                     "type": "string",
                     "const": "get_aianalyst_groups"
                   },
@@ -65,17 +66,17 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -85,7 +86,7 @@
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "saasonly": {
@@ -115,9 +116,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -193,22 +191,22 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -298,7 +296,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_investigations",
-          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -351,7 +349,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_stats",
-          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -394,7 +392,7 @@
         },
         {
           "name": "darktrace_list_antigena_actions",
-          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"; default get_antigena): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -403,6 +401,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_antigena",
                     "type": "string",
                     "const": "get_antigena"
                   },
@@ -465,9 +464,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -520,7 +516,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. The full list exceeds the response cap: set responsedata (e.g. \"cid,mlid\") or fetch one by cid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -602,7 +598,7 @@
         },
         {
           "name": "darktrace_get_cves",
-          "description": "CVE / vulnerability information for devices. Operation: get_cves. Read-only. Not lab-validated.",
+          "description": "CVE / vulnerability information for devices. Operation: get_cves. Darktrace/OT deployments only. Read-only. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -621,7 +617,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "fulldevicedetails": {
@@ -643,7 +639,7 @@
         },
         {
           "name": "darktrace_get_connection_details",
-          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Needs a did or pbid filter. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -672,7 +668,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "deduplicate": {
@@ -685,7 +681,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -724,7 +720,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "pbid": {
@@ -813,7 +809,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "externaldomain": {
@@ -826,7 +822,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "showallgraphdata": {
@@ -888,7 +884,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "ip": {
@@ -914,7 +910,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "count": {
@@ -1046,7 +1042,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -1128,7 +1124,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. The full set exceeds the response cap: set responsedata to one enum name (e.g. \"Protocol\", \"Country\"). Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1246,7 +1242,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1348,7 +1344,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1375,7 +1371,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "destinationport": {
@@ -1385,7 +1381,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -1414,7 +1410,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "port": {
@@ -1459,7 +1455,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Each metric lists many filtertypes: set responsedata (e.g. \"mlid,name,label\") or fetch one by mlid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1541,7 +1537,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. The listing defaults to minimal:true (set minimal:false for full records on a narrow window). Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1567,7 +1563,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -1691,7 +1687,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -1801,7 +1797,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. The full list exceeds the response cap: set responsedata (comma list, e.g. \"pid,name\") or fetch one by pid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1888,7 +1884,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -1917,7 +1913,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -2070,7 +2066,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -2163,7 +2159,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "responsedata": {
@@ -2252,7 +2248,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"; default get_tags): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2261,6 +2257,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_tags",
                     "type": "string",
                     "const": "get_tags"
                   },
@@ -2286,9 +2283,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -2308,7 +2302,7 @@
                     "properties": {
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "tag": {
@@ -2426,7 +2420,7 @@
       ]
     },
     "read+sensitive": {
-      "sha256": "ca4ebd6b4d640aae3571ad3d68e18bd489ae39f02b980188a554dfb989462d6a",
+      "sha256": "d885ce0e247f9dc7d55c7f27ed67be4396ffd8b35b2c7a6faf18d3f6a051b046",
       "tools": [
         {
           "name": "darktrace_advanced_search",
@@ -2520,7 +2514,7 @@
                       "interval": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 604800
+                        "maximum": 604800000
                       },
                       "query": {
                         "type": "string",
@@ -3079,7 +3073,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_incidents",
-          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"; default get_aianalyst_groups): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3088,6 +3082,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_aianalyst_groups",
                     "type": "string",
                     "const": "get_aianalyst_groups"
                   },
@@ -3137,17 +3132,17 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -3157,7 +3152,7 @@
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "saasonly": {
@@ -3187,9 +3182,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -3265,22 +3257,22 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -3370,7 +3362,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_investigations",
-          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3423,7 +3415,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_stats",
-          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3466,7 +3458,7 @@
         },
         {
           "name": "darktrace_list_antigena_actions",
-          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"; default get_antigena): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3475,6 +3467,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_antigena",
                     "type": "string",
                     "const": "get_antigena"
                   },
@@ -3537,9 +3530,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -3592,7 +3582,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. The full list exceeds the response cap: set responsedata (e.g. \"cid,mlid\") or fetch one by cid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3674,7 +3664,7 @@
         },
         {
           "name": "darktrace_get_cves",
-          "description": "CVE / vulnerability information for devices. Operation: get_cves. Read-only. Not lab-validated.",
+          "description": "CVE / vulnerability information for devices. Operation: get_cves. Darktrace/OT deployments only. Read-only. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3693,7 +3683,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "fulldevicedetails": {
@@ -3715,7 +3705,7 @@
         },
         {
           "name": "darktrace_get_connection_details",
-          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Needs a did or pbid filter. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -3744,7 +3734,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "deduplicate": {
@@ -3757,7 +3747,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -3796,7 +3786,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "pbid": {
@@ -3885,7 +3875,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "externaldomain": {
@@ -3898,7 +3888,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "showallgraphdata": {
@@ -3960,7 +3950,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "ip": {
@@ -3986,7 +3976,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "count": {
@@ -4118,7 +4108,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -4200,7 +4190,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. The full set exceeds the response cap: set responsedata to one enum name (e.g. \"Protocol\", \"Country\"). Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4318,7 +4308,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4420,7 +4410,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4447,7 +4437,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "destinationport": {
@@ -4457,7 +4447,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -4486,7 +4476,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "port": {
@@ -4531,7 +4521,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Each metric lists many filtertypes: set responsedata (e.g. \"mlid,name,label\") or fetch one by mlid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4613,7 +4603,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. The listing defaults to minimal:true (set minimal:false for full records on a narrow window). Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4639,7 +4629,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -4763,7 +4753,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -4873,7 +4863,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. The full list exceeds the response cap: set responsedata (comma list, e.g. \"pid,name\") or fetch one by pid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4960,7 +4950,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4989,7 +4979,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -5186,7 +5176,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -5279,7 +5269,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "responsedata": {
@@ -5368,7 +5358,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"; default get_tags): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5377,6 +5367,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_tags",
                     "type": "string",
                     "const": "get_tags"
                   },
@@ -5402,9 +5393,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -5424,7 +5412,7 @@
                     "properties": {
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "tag": {
@@ -5633,11 +5621,11 @@
       ]
     },
     "read+write": {
-      "sha256": "9d55533f6fff2982f3aa0414687a259c1d042cc7aa267a0106126a4ea7d4e39b",
+      "sha256": "88f967f37a038bc92f1c324e8961fb9e3be56f618d158825bf54f2ba2983db90",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag (body: name, data); post_tags_entities = tag a device (form) (body: did, tag); post_tags_tid_entities = add entities to a tag (body: entityType, entityValue). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5991,7 +5979,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_incidents",
-          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"; default get_aianalyst_groups): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -6000,6 +5988,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_aianalyst_groups",
                     "type": "string",
                     "const": "get_aianalyst_groups"
                   },
@@ -6049,17 +6038,17 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -6069,7 +6058,7 @@
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "saasonly": {
@@ -6099,9 +6088,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -6177,22 +6163,22 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -6282,7 +6268,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_investigations",
-          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -6335,7 +6321,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_stats",
-          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -6378,7 +6364,7 @@
         },
         {
           "name": "darktrace_list_antigena_actions",
-          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"; default get_antigena): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -6387,6 +6373,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_antigena",
                     "type": "string",
                     "const": "get_antigena"
                   },
@@ -6449,9 +6436,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -6504,7 +6488,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. The full list exceeds the response cap: set responsedata (e.g. \"cid,mlid\") or fetch one by cid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -6586,7 +6570,7 @@
         },
         {
           "name": "darktrace_get_cves",
-          "description": "CVE / vulnerability information for devices. Operation: get_cves. Read-only. Not lab-validated.",
+          "description": "CVE / vulnerability information for devices. Operation: get_cves. Darktrace/OT deployments only. Read-only. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -6605,7 +6589,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "fulldevicedetails": {
@@ -6627,7 +6611,7 @@
         },
         {
           "name": "darktrace_get_connection_details",
-          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Needs a did or pbid filter. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -6656,7 +6640,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "deduplicate": {
@@ -6669,7 +6653,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -6708,7 +6692,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "pbid": {
@@ -6797,7 +6781,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "externaldomain": {
@@ -6810,7 +6794,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "showallgraphdata": {
@@ -6872,7 +6856,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "ip": {
@@ -6898,7 +6882,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "count": {
@@ -7030,7 +7014,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -7112,7 +7096,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. The full set exceeds the response cap: set responsedata to one enum name (e.g. \"Protocol\", \"Country\"). Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7230,7 +7214,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7332,7 +7316,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7359,7 +7343,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "destinationport": {
@@ -7369,7 +7353,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -7398,7 +7382,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "port": {
@@ -7443,7 +7427,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Each metric lists many filtertypes: set responsedata (e.g. \"mlid,name,label\") or fetch one by mlid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7525,7 +7509,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. The listing defaults to minimal:true (set minimal:false for full records on a narrow window). Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7551,7 +7535,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -7675,7 +7659,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -7785,7 +7769,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. The full list exceeds the response cap: set responsedata (comma list, e.g. \"pid,name\") or fetch one by pid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -7872,7 +7856,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -7901,7 +7885,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -8054,7 +8038,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -8147,7 +8131,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "responsedata": {
@@ -8236,7 +8220,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"; default get_tags): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8245,6 +8229,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_tags",
                     "type": "string",
                     "const": "get_tags"
                   },
@@ -8270,9 +8255,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -8292,7 +8274,7 @@
                     "properties": {
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "tag": {
@@ -8409,7 +8391,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge (body: uuid); post_aianalyst_unacknowledge = unacknowledge (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8533,7 +8515,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments (body: incident_id, message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8604,7 +8586,7 @@
         },
         {
           "name": "darktrace_create_ai_analyst_investigation",
-          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations (body: investigateTime, did). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8676,7 +8658,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin (body: uuid); post_aianalyst_unpin = unpin (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8800,7 +8782,7 @@
         },
         {
           "name": "darktrace_update_device",
-          "description": "Update device properties (label, priority, type). Operation: post_devices. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Update device properties (label, priority, type). Operation: post_devices (body: did). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -8914,7 +8896,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -8946,6 +8928,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "acknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -9003,8 +8988,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               },
@@ -9035,6 +9019,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "unacknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -9092,8 +9079,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               }
@@ -9108,7 +9094,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments (body: message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -9183,7 +9169,7 @@
         },
         {
           "name": "darktrace_request_pcap",
-          "description": "Request a new packet capture for a connection. Operation: post_pcaps. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Request a new packet capture for a connection. Operation: post_pcaps (body: ip1, start, end). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -9281,11 +9267,11 @@
       ]
     },
     "read+write+critical": {
-      "sha256": "f22cee1aefb944c8be6b683f251951a965d9d94dd0b9ff872a5c06cc69bd062b",
+      "sha256": "b0036aadc0c4d5948e96b8cf8d8d2921cc13834dc7979cdb8d64a47cc4aae1d0",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag (body: name, data); post_tags_entities = tag a device (form) (body: did, tag); post_tags_tid_entities = add entities to a tag (body: entityType, entityValue). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -9698,7 +9684,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_incidents",
-          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"; default get_aianalyst_groups): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -9707,6 +9693,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_aianalyst_groups",
                     "type": "string",
                     "const": "get_aianalyst_groups"
                   },
@@ -9756,17 +9743,17 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -9776,7 +9763,7 @@
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "saasonly": {
@@ -9806,9 +9793,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -9884,22 +9868,22 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -9989,7 +9973,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_investigations",
-          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10042,7 +10026,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_stats",
-          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10085,7 +10069,7 @@
         },
         {
           "name": "darktrace_list_antigena_actions",
-          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"; default get_antigena): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10094,6 +10078,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_antigena",
                     "type": "string",
                     "const": "get_antigena"
                   },
@@ -10156,9 +10141,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -10211,7 +10193,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. The full list exceeds the response cap: set responsedata (e.g. \"cid,mlid\") or fetch one by cid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10293,7 +10275,7 @@
         },
         {
           "name": "darktrace_get_cves",
-          "description": "CVE / vulnerability information for devices. Operation: get_cves. Read-only. Not lab-validated.",
+          "description": "CVE / vulnerability information for devices. Operation: get_cves. Darktrace/OT deployments only. Read-only. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10312,7 +10294,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "fulldevicedetails": {
@@ -10334,7 +10316,7 @@
         },
         {
           "name": "darktrace_get_connection_details",
-          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Needs a did or pbid filter. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -10363,7 +10345,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "deduplicate": {
@@ -10376,7 +10358,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -10415,7 +10397,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "pbid": {
@@ -10504,7 +10486,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "externaldomain": {
@@ -10517,7 +10499,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "showallgraphdata": {
@@ -10579,7 +10561,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "ip": {
@@ -10605,7 +10587,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "count": {
@@ -10737,7 +10719,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -10819,7 +10801,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. The full set exceeds the response cap: set responsedata to one enum name (e.g. \"Protocol\", \"Country\"). Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10937,7 +10919,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11039,7 +11021,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11066,7 +11048,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "destinationport": {
@@ -11076,7 +11058,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -11105,7 +11087,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "port": {
@@ -11150,7 +11132,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Each metric lists many filtertypes: set responsedata (e.g. \"mlid,name,label\") or fetch one by mlid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11232,7 +11214,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. The listing defaults to minimal:true (set minimal:false for full records on a narrow window). Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11258,7 +11240,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -11382,7 +11364,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -11492,7 +11474,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. The full list exceeds the response cap: set responsedata (comma list, e.g. \"pid,name\") or fetch one by pid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11579,7 +11561,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -11608,7 +11590,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -11761,7 +11743,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -11854,7 +11836,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "responsedata": {
@@ -11943,7 +11925,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"; default get_tags): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -11952,6 +11934,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_tags",
                     "type": "string",
                     "const": "get_tags"
                   },
@@ -11977,9 +11960,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -11999,7 +11979,7 @@
                     "properties": {
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "tag": {
@@ -12232,7 +12212,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge (body: uuid); post_aianalyst_unacknowledge = unacknowledge (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12356,7 +12336,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments (body: incident_id, message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12427,7 +12407,7 @@
         },
         {
           "name": "darktrace_create_ai_analyst_investigation",
-          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations (body: investigateTime, did). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12499,7 +12479,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin (body: uuid); post_aianalyst_unpin = unpin (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12623,7 +12603,7 @@
         },
         {
           "name": "darktrace_antigena_action",
-          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena (body: codeid). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12709,7 +12689,7 @@
         },
         {
           "name": "darktrace_antigena_manual_action",
-          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual (body: did, action, duration). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -12849,7 +12829,7 @@
         },
         {
           "name": "darktrace_update_device",
-          "description": "Update device properties (label, priority, type). Operation: post_devices. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Update device properties (label, priority, type). Operation: post_devices (body: did). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13116,7 +13096,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -13148,6 +13128,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "acknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -13205,8 +13188,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               },
@@ -13237,6 +13219,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "unacknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -13294,8 +13279,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               }
@@ -13310,7 +13294,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments (body: message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13385,7 +13369,7 @@
         },
         {
           "name": "darktrace_request_pcap",
-          "description": "Request a new packet capture for a connection. Operation: post_pcaps. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Request a new packet capture for a connection. Operation: post_pcaps (body: ip1, start, end). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13482,7 +13466,7 @@
         },
         {
           "name": "darktrace_update_subnet",
-          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets (body: sid). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -13642,11 +13626,11 @@
       ]
     },
     "all": {
-      "sha256": "b377eac60a2eed8233d8481b0b69074e79eac6a537b8e1b4ec1e47a5b2abf859",
+      "sha256": "d8e7530e6d1414b9ba75158a06113b394861a9d72978e440c4c32a6a3a442e6f",
       "tools": [
         {
           "name": "darktrace_manage_tags",
-          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag; post_tags_entities = tag a device (form); post_tags_tid_entities = add entities to a tag. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
+          "description": "Create tags and add/remove tags on devices or entities. Operations (set \"operation\"): delete_tags_entities = remove a tag from a device (did + tag); delete_tags_tid_entities_teid = remove one tag-entity link; post_tags = create tag (body: name, data); post_tags_entities = tag a device (form) (body: did, tag); post_tags_tid_entities = add entities to a tag (body: entityType, entityValue). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated: delete_tags_entities, delete_tags_tid_entities_teid.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -14149,7 +14133,7 @@
                       "interval": {
                         "type": "integer",
                         "minimum": 1,
-                        "maximum": 604800
+                        "maximum": 604800000
                       },
                       "query": {
                         "type": "string",
@@ -14708,7 +14692,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_incidents",
-          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst incidents: grouped incidents or individual incident events. Operations (set \"operation\"; default get_aianalyst_groups): get_aianalyst_groups = incidents (groups); get_aianalyst_incidentevents = incident events. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -14717,6 +14701,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_aianalyst_groups",
                     "type": "string",
                     "const": "get_aianalyst_groups"
                   },
@@ -14766,17 +14751,17 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -14786,7 +14771,7 @@
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "saasonly": {
@@ -14816,9 +14801,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -14894,22 +14876,22 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludedid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "sid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "excludesid": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "master": {
@@ -14999,7 +14981,7 @@
         },
         {
           "name": "darktrace_list_ai_analyst_investigations",
-          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List Cyber AI Analyst investigations. Operation: get_aianalyst_investigations. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15052,7 +15034,7 @@
         },
         {
           "name": "darktrace_get_ai_analyst_stats",
-          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Cyber AI Analyst summary statistics. Operation: get_aianalyst_stats. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15095,7 +15077,7 @@
         },
         {
           "name": "darktrace_list_antigena_actions",
-          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary. Operations (set \"operation\"; default get_antigena): get_antigena = RESPOND actions; get_antigena_summary = pending/active summary. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15104,6 +15086,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_antigena",
                     "type": "string",
                     "const": "get_antigena"
                   },
@@ -15166,9 +15149,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -15221,7 +15201,7 @@
         },
         {
           "name": "darktrace_list_components",
-          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. Read-only.",
+          "description": "List model components (filters/logic), or one by cid. Operations (set \"operation\"; default get_components): get_components = components; get_components_cid = one component. The full list exceeds the response cap: set responsedata (e.g. \"cid,mlid\") or fetch one by cid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15303,7 +15283,7 @@
         },
         {
           "name": "darktrace_get_cves",
-          "description": "CVE / vulnerability information for devices. Operation: get_cves. Read-only. Not lab-validated.",
+          "description": "CVE / vulnerability information for devices. Operation: get_cves. Darktrace/OT deployments only. Read-only. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15322,7 +15302,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "fulldevicedetails": {
@@ -15344,7 +15324,7 @@
         },
         {
           "name": "darktrace_get_connection_details",
-          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Raw connection/event history for a device or model breach. Operation: get_details. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Needs a did or pbid filter. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -15373,7 +15353,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "deduplicate": {
@@ -15386,7 +15366,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -15425,7 +15405,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "pbid": {
@@ -15514,7 +15494,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "externaldomain": {
@@ -15527,7 +15507,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "showallgraphdata": {
@@ -15589,7 +15569,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "ip": {
@@ -15615,7 +15595,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "count": {
@@ -15747,7 +15727,7 @@
                 "properties": {
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -15829,7 +15809,7 @@
         },
         {
           "name": "darktrace_get_reference_data",
-          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. Read-only. Not lab-validated: get_filtertypes.",
+          "description": "Reference enumerations and filter types used by other endpoints. Operations (set \"operation\"): get_enums = enumerations; get_filtertypes = filter types. The full set exceeds the response cap: set responsedata to one enum name (e.g. \"Protocol\", \"Country\"). Read-only. Not lab-validated: get_filtertypes.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -15947,7 +15927,7 @@
         },
         {
           "name": "darktrace_get_model_breach_comments",
-          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Read comments on model breaches. Operations (set \"operation\"; default get_mbcomments): get_mbcomments = comments across breaches; get_modelbreaches_pbid_comments = comments for one breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16049,7 +16029,7 @@
         },
         {
           "name": "darktrace_get_metric_data",
-          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Time series for a metric (e.g. bytes) for a device or connection. Operation: get_metricdata. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16076,7 +16056,7 @@
                   },
                   "ddid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "destinationport": {
@@ -16086,7 +16066,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -16115,7 +16095,7 @@
                   },
                   "odid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "port": {
@@ -16160,7 +16140,7 @@
         },
         {
           "name": "darktrace_list_metrics",
-          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Read-only.",
+          "description": "List available metrics, or one metric by mlid. Operations (set \"operation\"; default get_metrics): get_metrics = all metrics; get_metrics_mlid = one metric. Each metric lists many filtertypes: set responsedata (e.g. \"mlid,name,label\") or fetch one by mlid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16242,7 +16222,7 @@
         },
         {
           "name": "darktrace_list_model_breaches",
-          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "List model breaches (alerts), or fetch one by pbid. Operations (set \"operation\"; default get_modelbreaches): get_modelbreaches = model breaches (time window, score, device filters); get_modelbreaches_pbid = one model breach. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. The listing defaults to minimal:true (set minimal:false for full records on a narrow window). Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16268,7 +16248,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -16392,7 +16372,7 @@
                       },
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "endtime": {
@@ -16502,7 +16482,7 @@
         },
         {
           "name": "darktrace_list_models",
-          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. Read-only.",
+          "description": "List detection models, or fetch one by pid. Operations (set \"operation\"; default get_models): get_models = models; get_models_pid = one model. The full list exceeds the response cap: set responsedata (comma list, e.g. \"pid,name\") or fetch one by pid. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -16589,7 +16569,7 @@
         },
         {
           "name": "darktrace_get_network_stats",
-          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges: at most 7 days; default last hour when omitted. Read-only.",
+          "description": "Network traffic statistics for the network, a subnet or a device. Operation: get_network. Time ranges (starttime/endtime epoch ms): at most 7 days; default last hour when omitted. Read-only.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -16618,7 +16598,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "endtime": {
@@ -16815,7 +16795,7 @@
                   },
                   "did": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   }
                 },
@@ -16908,7 +16888,7 @@
                   },
                   "sid": {
                     "type": "integer",
-                    "minimum": 1,
+                    "minimum": -99999,
                     "maximum": 9007199254740991
                   },
                   "responsedata": {
@@ -16997,7 +16977,7 @@
         },
         {
           "name": "darktrace_list_tags",
-          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
+          "description": "Tags and tagged entities: list tags, one tag, or which devices carry which tags. Operations (set \"operation\"; default get_tags): get_tags = tags; get_tags_entities = tags of a device / devices with a tag; get_tags_tid = one tag; get_tags_tid_entities = entities of one tag. Read-only.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17006,6 +16986,7 @@
                 "type": "object",
                 "properties": {
                   "operation": {
+                    "default": "get_tags",
                     "type": "string",
                     "const": "get_tags"
                   },
@@ -17031,9 +17012,6 @@
                     "additionalProperties": false
                   }
                 },
-                "required": [
-                  "operation"
-                ],
                 "additionalProperties": false
               },
               {
@@ -17053,7 +17031,7 @@
                     "properties": {
                       "did": {
                         "type": "integer",
-                        "minimum": 1,
+                        "minimum": -99999,
                         "maximum": 9007199254740991
                       },
                       "tag": {
@@ -17377,7 +17355,7 @@
         },
         {
           "name": "darktrace_acknowledge_ai_analyst_incident",
-          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge; post_aianalyst_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_acknowledge = acknowledge (body: uuid); post_aianalyst_unacknowledge = unacknowledge (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17501,7 +17479,7 @@
         },
         {
           "name": "darktrace_comment_ai_analyst_incident",
-          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a Cyber AI Analyst incident. Operation: post_aianalyst_incident_comments (body: incident_id, message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17572,7 +17550,7 @@
         },
         {
           "name": "darktrace_create_ai_analyst_investigation",
-          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Start a Cyber AI Analyst investigation on a device. Operation: post_aianalyst_investigations (body: investigateTime, did). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17644,7 +17622,7 @@
         },
         {
           "name": "darktrace_pin_ai_analyst_incident",
-          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin; post_aianalyst_unpin = unpin. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Pin or unpin Cyber AI Analyst incident events. Operations (set \"operation\"): post_aianalyst_pin = pin (body: uuid); post_aianalyst_unpin = unpin (body: uuid). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -17768,7 +17746,7 @@
         },
         {
           "name": "darktrace_antigena_action",
-          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Activate, extend or clear Darktrace RESPOND (Antigena) actions. Operation: post_antigena (body: codeid). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17854,7 +17832,7 @@
         },
         {
           "name": "darktrace_antigena_manual_action",
-          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Create a manual RESPOND action (e.g. quarantine or block a device). Operation: post_antigena_manual (body: did, action, duration). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -17994,7 +17972,7 @@
         },
         {
           "name": "darktrace_update_device",
-          "description": "Update device properties (label, priority, type). Operation: post_devices. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Update device properties (label, priority, type). Operation: post_devices (body: did). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18261,7 +18239,7 @@
         },
         {
           "name": "darktrace_acknowledge_model_breach",
-          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Acknowledge or unacknowledge a model breach. Operations (set \"operation\"): post_modelbreaches_pbid_acknowledge = acknowledge; post_modelbreaches_pbid_unacknowledge = unacknowledge. Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -18293,6 +18271,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "acknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -18350,8 +18331,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               },
@@ -18382,6 +18362,9 @@
                     "additionalProperties": false
                   },
                   "body": {
+                    "default": {
+                      "unacknowledge": true
+                    },
                     "anyOf": [
                       {
                         "type": "object",
@@ -18439,8 +18422,7 @@
                 },
                 "required": [
                   "operation",
-                  "path",
-                  "body"
+                  "path"
                 ],
                 "additionalProperties": false
               }
@@ -18455,7 +18437,7 @@
         },
         {
           "name": "darktrace_comment_model_breach",
-          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments. Changes appliance state (profile \"write\"); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.",
+          "description": "Add a comment to a model breach. Operation: post_modelbreaches_pbid_comments (body: message). Write (profile \"write\"): runs immediately; dryRun:true previews. Never retry an unknown outcome.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18530,7 +18512,7 @@
         },
         {
           "name": "darktrace_request_pcap",
-          "description": "Request a new packet capture for a connection. Operation: post_pcaps. Changes appliance state (profile \"write\", high impact); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown. Not lab-validated.",
+          "description": "Request a new packet capture for a connection. Operation: post_pcaps (body: ip1, start, end). Write (profile \"write\", high impact): runs immediately; dryRun:true previews. Never retry an unknown outcome. Not lab-validated.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -18627,7 +18609,7 @@
         },
         {
           "name": "darktrace_update_subnet",
-          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets. CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
+          "description": "Update subnet settings (label, DHCP, exclusion from monitoring). Operation: post_subnets (body: sid). CRITICAL write (profiles \"write\"+\"critical\"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.",
           "inputSchema": {
             "type": "object",
             "properties": {
