@@ -190,7 +190,7 @@ export function validateSearchHash(hash: string): void {
 export function validatePathSegment(value: string): void {
   let candidate=value;
   for(let pass=0;pass<MAX_PATH_DECODE_PASSES;pass++) {
-    if(candidate==='.'||candidate==='..'||/[\\/?#\u0000-\u001f\u007f]/.test(candidate)) throw new Error('Invalid path segment');
+    if(candidate==='.'||candidate==='..'||/[\\/?#\s\u0000-\u001f\u007f]/.test(candidate)) throw new Error('Invalid path segment');
     let decoded:string;
     try {decoded=decodeURIComponent(candidate);} catch {throw new Error('Invalid path segment');}
     if(decoded===candidate) return;
