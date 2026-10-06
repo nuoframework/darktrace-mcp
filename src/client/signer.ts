@@ -77,9 +77,15 @@ function strictBase64(value: string): boolean {
 }
 
 /** Returns the final S6 Base64 segment index, and rejects malformed or raw S6 paths. */
-function s6Base64SegmentIndex(path: string): number | undefined {
+function s6Base64SegmentIndex(path: string, method: HttpMethod): number | undefined {
   const parts = path.split('/');
   if (parts[1] !== 'advancedsearch' || parts[2] !== 'api' || !['search', 'analyze', 'graph'].includes(parts[3] ?? '')) return undefined;
+  // The reviewed POST search route carries its Base64 document in the JSON body, never in the path.
+  if (method === 'POST') {
+    if (path === '/advancedsearch/api/search') return undefined;
+    throw new TypeError('POST Advanced Search accepts only the exact /advancedsearch/api/search route');
+  }
+  if (method !== 'GET') throw new TypeError('Advanced Search paths are limited to GET and the POST search route');
   const expectedLength = parts[3] === 'search' ? 5 : 7;
   const index = expectedLength - 1;
   if (parts.length !== expectedLength || !parts[index] || !strictBase64(decodeS6Segment(parts[index]!)) ||
@@ -94,7 +100,7 @@ function decodeS6Segment(segment: string): string {
   catch { throw new TypeError('S6 path contains invalid percent encoding'); }
 }
 
-function validatePath(path: string): void {
+function validatePath(path: string, method: HttpMethod): void {
   if (
     !path.startsWith('/') || path.includes('//') || path.includes('?') || path.includes('#') ||
     path.includes('\\') || CONTROL_CHARACTERS.test(path) || /\s/.test(path)
@@ -102,7 +108,7 @@ function validatePath(path: string): void {
     throw new TypeError('path must be a safe absolute-path reference');
   }
   const segments = path.split('/');
-  const s6Index = s6Base64SegmentIndex(path);
+  const s6Index = s6Base64SegmentIndex(path, method);
   for (let index = 0; index < segments.length; index += 1) {
     if (index === s6Index) continue;
     let segment = segments[index]!;
@@ -167,7 +173,7 @@ export function createSigner(publicToken: string, privateToken: string, opts: Si
   return Object.freeze({
     sign(input: SignInput): SignedRequest {
       if (!['GET', 'POST', 'DELETE'].includes(input.method)) throw new TypeError('unsupported HTTP method');
-      validatePath(input.path);
+      validatePath(input.path, input.method);
       validateDate(input.date);
       if (CONTROL_CHARACTERS.test(input.date)) throw new TypeError('date contains invalid control characters');
       if (input.body !== undefined && input.method !== 'POST') {

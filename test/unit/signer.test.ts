@@ -98,3 +98,14 @@ test('signer rejects unsafe paths, invalid dates, and non-compact JSON bodies', 
   assert.throws(() => signer.sign({ method: 'GET', path: '/devices', date: 'not-a-date' }), /DTAPI-Date/);
   assert.throws(() => signer.sign({ method: 'POST', path: '/devices', body: { kind: 'json', bytes: new TextEncoder().encode('{\n"ok":true}') }, date }), /compact serialization/);
 });
+
+test('V-W-01: the POST Advanced Search route signs without an S6 path segment; GET without a Base64 segment and POST variants are rejected', () => {
+  const signer = createSigner('pub', 'priv', { encodeQueryInSignature: false });
+  const date = '20260101T000000';
+  const body = { kind: 'json' as const, bytes: new TextEncoder().encode('{"hash":"eyJ9"}') };
+  const signed = signer.sign({ method: 'POST', path: '/advancedsearch/api/search', body, date });
+  assert.equal(signed.url, '/advancedsearch/api/search');
+  assert.throws(() => signer.sign({ method: 'GET', path: '/advancedsearch/api/search', date }), /S6 path/);
+  assert.throws(() => signer.sign({ method: 'POST', path: '/advancedsearch/api/search/eyJ9', body, date }), /exact/);
+  assert.throws(() => signer.sign({ method: 'DELETE', path: '/advancedsearch/api/search', date }), /limited to GET/);
+});
