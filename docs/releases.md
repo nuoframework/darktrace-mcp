@@ -91,7 +91,7 @@ Client badge logos were checked against the [Simple Icons catalog](https://simpl
 
 1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
 2. Answer the "passing" criteria. Most answers point to existing files: `SECURITY.md` (vulnerability reporting), `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, the CI workflows (tests, `lint`, CodeQL) and [supply-chain checks](security/supply-chain-checks.md) (static analysis, dependency updates).
-3. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). Add a badge linked to that project in `README.md` and `README.es.md` once it reaches a level worth showing; no placeholder badge is currently displayed. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
+3. The project is registered as id 15261 (`https://www.bestpractices.dev/projects/15261`); both READMEs link its badge. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). Add a badge linked to that project in `README.md` and `README.es.md` once it reaches a level worth showing; no placeholder badge is currently displayed. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
 4. Both READMEs are release inputs, so this edit belongs in a release commit (the release pins change).
 
 ## v1.0.0 (previous release, private)
