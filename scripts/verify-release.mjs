@@ -47,7 +47,7 @@ const forbiddenProfiles=Object.freeze({
 });
 export function assertReviewedReleaseContractReady(){assert(typeof fixtureSha256==='string'&&/^[a-f0-9]{64}$/.test(fixtureSha256)&&Object.values(profileHashes).every(value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)),'full-API MR-04 fixture approval/pin pending; no release pipeline authorized');}
 function regularBytes(path){assert(lstatSync(path).isFile()&&!lstatSync(path).isSymbolicLink(),'reviewed input must be a regular file');return readFileSync(path);}
-export function verifyFirstStableContractContent(fixture){
+export function verifyFullApiContractContent(fixture){
  assertReviewedReleaseContractReady();
  assert.deepEqual(Object.keys(fixture).sort(),['alphaFixtureSha256','canonicalization','contracts','rejectedProfiles','releaseCapability']);
  assert.equal(fixture.canonicalization,'Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON');
@@ -60,7 +60,7 @@ function reviewedFixture(base){
  assert.equal(sha(regularBytes(join(base,alphaFixturePath))),alphaFixtureSha256,'historical alpha fixture changed');
  assert.equal(sha(regularBytes(join(base,firstStableFixturePath))),firstStableFixtureSha256,'historical first-stable fixture changed');
  const bytes=regularBytes(join(base,fixturePath));assert.equal(sha(bytes),fixtureSha256,'reviewed full-API MR-04 fixture changed; independent review required');
- const fixture=JSON.parse(bytes);verifyFirstStableContractContent(fixture);
+ const fixture=JSON.parse(bytes);verifyFullApiContractContent(fixture);
  return {bytes,fixture};
 }
 function expectedStartupChecks(){return Object.fromEntries(Object.keys(forbiddenProfiles).map(name=>[name,{objectRejected:true,contractRejectedBeforeSdk:true,productionModes:['stdio','doctor','--check-config'],exitStatus:1,stdoutEmpty:true,networkSigningGuardTriggered:false}]));}
@@ -109,14 +109,14 @@ export async function captureReviewedContracts(base){
  for(const id of criticalOperations)assert(productionOperationDescriptors.some(o=>o.operationId===id),'critical route registered: '+id);
  assert.deepEqual(Object.keys(helper.releaseProfiles).sort(),Object.keys(profileHashes).sort());assert.deepEqual(helper.forbiddenReleaseProfiles,forbiddenProfiles);
  const contracts={};for(const [name,profile] of Object.entries(helper.releaseProfiles)){const tools=await helper.toolContract(profile);contracts[name]={sha256:helper.digest(tools),tools};}
- assert.equal(canonical(contracts),canonical(fixture.contracts),'generated complete tools/list contract differs from reviewed first-stable MR-04 oracle');
+ assert.equal(canonical(contracts),canonical(fixture.contracts),'generated complete tools/list contract differs from reviewed full-API MR-04 oracle');
  const rejected=await helper.verifyRejectedReleaseProfiles();assert.deepEqual(rejected.rejectedProfiles,fixture.rejectedProfiles);assert.deepEqual(rejected.startupChecks,expectedStartupChecks());
  verifyHistoricalArchive(base);verifyValidatedPredecessorArchives(base);
  return {bytes,metadata:contractMetadata(fixture)};
 }
 function verifyContractAsset(out,base){
  const {fixture}=reviewedFixture(base),path=join(out,'mcp-tool-contracts.json');const bytes=regularBytes(path);assert.equal(sha(bytes),fixtureSha256,'MR-04 contract artifact bytes changed');
- assert.equal(canonical(JSON.parse(bytes)),canonical(fixture),'MR-04 artifact must contain the complete reviewed first-stable contract and rejection policy');
+ assert.equal(canonical(JSON.parse(bytes)),canonical(fixture),'MR-04 artifact must contain the complete reviewed full-API contract and rejection policy');
  return contractMetadata(fixture);
 }
 export function releaseAssets(archiveName){return [archiveName,'runtime-sbom.cdx.json','runtime-files.sha256.json','source-files.sha256.json','build-evidence.json','verification.json','security-receipt.json','release-notes.md','mcp-tool-contracts.json'];}
@@ -196,7 +196,8 @@ assert.equal(run(process.execPath,[entry,'--version'],work,cliEnv).trim(),pkg.ve
 const help=run(process.execPath,[entry,'--help'],work,cliEnv);assert.match(help,/Usage:/);assert.match(help,/DARKTRACE_PROFILES/);assert.match(help,/confirm:true/);
 for(const [name,value] of [['public-token','offline-public-canary'],['private-token','offline-private-canary']]){writeFileSync(join(work,name),value,{mode:0o600});chmodSync(join(work,name),0o600);}
 const doctorEnv={...cliEnv,DARKTRACE_URL:'https://darktrace.example.internal',DARKTRACE_PUBLIC_TOKEN_FILE:join(work,'public-token'),DARKTRACE_PRIVATE_TOKEN_FILE:join(work,'private-token'),DARKTRACE_PROFILES:'read'};
-for(const [profiles,expected] of [['read',{read:true,sensitive:false,write:false,critical:false}],['all',{read:true,sensitive:true,write:true,critical:true}]])for(const flag of ['doctor','--check-config']){const result=JSON.parse(run(process.execPath,[entry,flag],work,{...doctorEnv,DARKTRACE_PROFILES:profiles}));assert.equal(result.ok,true);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);assert.deepEqual(result.profiles,expected);}
+// Write profiles start; only critical without write (or an unknown profile) is a startup error.
+for(const [profiles,expected,tools] of [['read',{read:true,sensitive:false,write:false,critical:false},profileShape.read[0]],['read,write',{read:true,sensitive:false,write:true,critical:false},profileShape['read+write'][0]],['all',{read:true,sensitive:true,write:true,critical:true},profileShape.all[0]]])for(const flag of ['doctor','--check-config']){const result=JSON.parse(run(process.execPath,[entry,flag],work,{...doctorEnv,DARKTRACE_PROFILES:profiles}));assert.deepEqual(Object.keys(result).sort(),['approval','labValidated','networkProbe','ok','profiles','registeredTools','transport']);assert.equal(result.ok,true);assert.equal(result.transport,'stdio');assert.equal(result.registeredTools,tools,'registered tools '+profiles);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);assert.deepEqual(result.profiles,expected);assert.deepEqual(Object.keys(result.approval).sort(),['critical','write']);}
 for(const variables of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'superuser'}])for(const flag of [[],['doctor'],['--check-config']]){const got=spawnSync(process.execPath,[entry,...flag],{cwd:work,env:{...doctorEnv,...variables},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});assert.equal(got.status,1);assert.equal(got.stdout,'');assert(!got.stderr.includes('offline-public-canary')&&!got.stderr.includes('offline-private-canary'));const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);}
 const rootComponent={type:'application','bom-ref':pkg.name,name:pkg.name,version:pkg.version,licenses:[{license:{id:pkg.license}}],hashes:[{alg:'SHA-256',content:hash(readFileSync(archive))}]};
 const sbom={bomFormat:'CycloneDX',specVersion:'1.5',version:1,metadata:{component:rootComponent},components,dependencies:[{ref:pkg.name,dependsOn:['@modelcontextprotocol/server','zod']},{ref:'@modelcontextprotocol/server',dependsOn:['@modelcontextprotocol/core','zod']},{ref:'@modelcontextprotocol/core',dependsOn:['zod']},{ref:'zod',dependsOn:[]}]};
