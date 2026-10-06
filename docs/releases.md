@@ -15,7 +15,23 @@
 
 The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
 
-The 1.1.0 candidate gates pin six operator profile contracts (including `read+sensitive+write`, AD-W-18) and two approval-description variants. The [release pin evidence](security/release-pins-1.1.0.md) records the final counts and byte bindings. Deterministic regeneration of the full-API fixture still requires independent review under [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) before release approval.
+The 1.1.0 candidate gates pin six operator profile contracts (including `read+sensitive+write`, AD-W-18) and two approval-description variants. The [release pin evidence](security/release-pins-1.1.0.md) records the final counts and byte bindings. The independent content review of the regenerated full-API fixture required by [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) is recorded as ACCEPT in the [1.1.0 final gate review](security/final-gate-review-1.1.0.md#15-e11-independent-review-of-the-full-api-contract-fixture-o) §1.5.
+
+### 1.1.0 evidence files
+
+What exists for the 1.1.0 candidate, and what does not yet. The [final gate review](security/final-gate-review-1.1.0.md) decides release readiness; nothing here is release approval.
+
+| Evidence | File | Covers |
+|---|---|---|
+| Security receipt, Linux arm64 (Node 24.18.1) | [`release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json`](../test/security/evidence/release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json), SHA-256 `cd71cecd…dad9` | 1,150 security subcases, 1,150 pass; source tree `5b1208f1…fdc503e` |
+| Security receipt, macOS arm64 (Node 24.14.1) | [`release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json`](../test/security/evidence/release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json), SHA-256 `5699ae23…0736` | 1,150 subcases, 1,147 pass, 3 platform skips (setgid file modes) |
+| Earlier receipt (superseded) | [`2026-10-06T11-44-04-525Z.json`](../test/security/evidence/2026-10-06T11-44-04-525Z.json) | Before the V-W-01 fix: 6 Advanced Search POST failures |
+| Release pins and local Docker check | [release-pins-1.1.0.md](security/release-pins-1.1.0.md) | Every CI/verify pin, `release:prepare` output hashes, arm64 image `sha256:7e5a2a41…6aad` |
+| Live lab checks after the write controls | [final-lab-campaign-1.1.0.md](security/final-lab-campaign-1.1.0.md) | 50 tools listed; reads, POST search, `post_tags` preview, `confirmation_required`, the intel-feed critical flow |
+| Signing probe | [lab-signing-evidence.md](security/lab-signing-evidence.md) and its [JSON](security/evidence/lab-signing-evidence-2026-10-06T09-17-38-944Z.json) | Which request-signing shapes the 7.1.0 appliance accepts |
+| Lab results per operation | [CHANGES-core §6](CHANGES-core.md#6-live-lab-validation-darktrace-710-2026-10-06) and the [tool reference](tools.md) | 56 operations with lab evidence, 11 partial; email not validated |
+
+Not yet available: CI receipts for Linux amd64, the Node 22 leg and the amd64 Docker job; a vulnerability scan of the 1.1.0 runtime; dated owner decisions on the residual risks; and the published release assets. The [known limitations](../CHANGELOG.md#known-limitations-in-110) go into the release notes.
 
 ### Publishing a version (owner)
 
@@ -113,7 +129,7 @@ Inspect the draft's assets and checksums before manually removing draft status. 
 
 The published `0.1.0-alpha.0` is immutable history. It predates the 15-tool / 19-selector contract and the patched runtime.
 
-`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#current-candidate-at-a-glance).
+`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#v100-image-at-a-glance-previous-release).
 
 - **CI:** [run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) on commit `2adb84b` passed every job: Node 22/24 offline, plus native Docker on amd64 and arm64 with 130 + 325 tests and 0 skipped. The release tag may point to a later commit that changes only documentation and keeps the production, build and shipped-document files identical.
 - **Lab:** on 2026-10-06, arm64 image `sha256:8cd85604…` passed [19/19 real queries](security/patched-runtime-lab-checkpoint.md). The lab is closed. 1.0.0 differs only in the production version literal and was not retested live.

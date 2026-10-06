@@ -91,30 +91,49 @@ Superseded by the writes remediation; the normative description is §8. In short
 
 ## 4. Signing choices (S4/S5/S6, email)
 
-All follow `LegendEvent/darktrace-sdk` v0.10.1 (`darktrace/auth.py`, `dt_utils.py`,
-`dt_advanced_search.py`, `dt_tags.py`), as compared in `openapi/DIFF-sdk-vs-docs.md`:
+> **Corrected 2026-10-06 (final gate blocker B6).** The first version of this section described the original
+> SDK-derived choices: S6 Base64 sent and signed **verbatim**, S4 signed as `path?query&{json}`, and over-budget
+> PCAP content cut and marked `partial:true`. CR-02, CR-03 and §8.9 replaced all three before the 1.1.0
+> candidate, and the earlier text contradicted the code. The bullets below describe the reviewed `src/` tree
+> (`5b1208f1…fdc503e`), with file:line evidence. The original choices are kept, marked as superseded, at the end.
+> No re-test was done for this correction.
 
-- **S4 query + JSON body**: signed as `path?query&{compact json}` (`auth.get_headers` with params and
-  json_body). The JSON bytes are serialized once and sent exactly as signed. No current catalogue operation
-  combines both, so this is only covered by unit tests.
+Baseline: `LegendEvent/darktrace-sdk` v0.10.1 (`darktrace/auth.py`, `dt_utils.py`, `dt_advanced_search.py`,
+`dt_tags.py`), as compared in `openapi/DIFF-sdk-vs-docs.md`, adjusted where the 7.1.0 lab
+([lab signing evidence](security/lab-signing-evidence.md)) showed the SDK form is rejected:
+
+- **S4 query + JSON body: refused** (CR-03). A request that combines a query with a JSON body is rejected
+  before signing and before any network access: `src/client/httpClient.ts:571-574` (`invalid_request`) and,
+  as defence in depth, `src/client/signer.ts:182-185`. The 7.1.0 appliance rejected the SDK form. No catalogue
+  operation combines both.
 - **S5 DELETE with query** (`DELETE /tags/entities?did=&tag=`): signed like a GET, `path?query`
-  (`dt_utils._delete`). The query-encoding mode (`querySignatureEncoding`) applies as for GET. DELETE
-  bodies are still rejected.
-- **S6 Advanced Search GET**: the standard Base64 document goes **verbatim** into the path, with `/`, `+`
-  and `=` literal, and is signed verbatim (`dt_advanced_search.search(post_request=False)` and `requests`
-  leave these characters unencoded). Only the parameter named `query` of the three `/advancedsearch/api/...`
-  GET routes takes this path. It must be strict Base64 (`[A-Za-z0-9+/]+={0,2}`, length divisible by 4, no
-  leading `/`, at most 21,848 characters), and its decoded document still passes `validateSearchHash` /
-  `SearchSchema`. The signer's path validation is unchanged: it rejects `.`/`..` segments, backslashes,
-  `?`, `#`, whitespace and control characters. The POST `{hash}` form is still preferred in tool
-  descriptions.
+  (`dt_utils._delete`; `src/client/httpClient.ts:575`). The query-encoding mode (`querySignatureEncoding`)
+  applies as for GET. DELETE bodies are still rejected (`src/client/signer.ts:179-181`).
+- **S6 Advanced Search GET: percent-encoded** (CR-02). The standard Base64 document is RFC 3986
+  percent-encoded once, and the same encoded bytes are both signed and sent (`src/client/httpClient.ts:205-208`).
+  The signer accepts an S6 segment only if it decodes to strict Base64 and re-encodes to exactly the same
+  bytes; a raw `+`, `/` or `=` in the path is refused (`src/client/signer.ts:89-94`, strict Base64 at `:73-77`:
+  `[A-Za-z0-9+/]+={0,2}`, length divisible by 4, at most 21,848 characters, at most 16 KiB decoded). Only the
+  parameter named `query` of the three `/advancedsearch/api/...` GET routes takes this path
+  (`src/client/httpClient.ts:118-122`), and its decoded document still passes `validateSearchHash` /
+  `SearchSchema`. Since `6b8d08d` (V-W-01) S6 classification depends on the method: the exact
+  `POST /advancedsearch/api/search` route has no S6 segment, and other POST or non-GET Advanced Search paths
+  are refused (`src/client/signer.ts:80-88`). The live GET PASS rows in §6 predate this encoding change; the
+  current encoding has probe evidence for `=` only. The POST `{hash}` form is still preferred in tool descriptions.
 - **Darktrace/EMAIL**: same HMAC scheme over path + ordered query (SDK `DarktraceEmail` uses the shared
-  `_get`/`_post_json`).
-- **PCAP / raw email download**: requested with `accept:'binary'`. The client reads at most
-  `maxResponseBytes` bytes (2 MiB hard cap). Nothing is written to disk. The tool returns `file:{name,
-  mediaType, sizeBytes, sha256, encoding:'base64'|'utf8', content…}`. Content beyond the tool-output budget
-  (60,000 characters, counting both result copies) is cut and marked `partial:true`. A JSON status answer
-  (for example a PCAP that is not ready yet) is returned as data.
+  `_get`/`_post_json`). Not lab-validated: the lab token got 403.
+- **PCAP / raw email download: whole or refused** (§8.9). Requested with `accept:'binary'`; the client reads at
+  most `maxResponseBytes` bytes (2 MiB hard cap) and writes nothing to disk. If the Base64 form cannot fit the
+  tool-output budget (60,000 characters), the client returns a byte-free `output_limit_exceeded` marker with
+  size and SHA-256 (`src/client/httpClient.ts:688-694`), and the tool refuses before any Base64 allocation
+  (`src/tools/index.ts:288-293`, `:446-448`). A PCAP that fits is returned as
+  `{kind:"pcap",encoding:"base64",byteLength,data}` (`src/tools/index.ts:288-295`). A raw email returns only
+  `mediaType`, `sizeBytes`, `sha256` and `contentOmitted:true` (`src/tools/index.ts:298-301`). Nothing is
+  returned as `partial:true`. A JSON status answer (for example a PCAP that is not ready yet) is returned as data.
+
+Superseded choices (history, not current behaviour): S6 Base64 inserted and signed verbatim with `/`, `+` and
+`=` literal; S4 signed as `path?query&{compact json}` with the query sent alongside the body; download
+content beyond the output budget cut and marked `partial:true`.
 
 ## 5. Response views
 
@@ -159,7 +178,7 @@ elicitation) against the lab appliance. No data contents are recorded here.
 | Operation | Result | Notes |
 |---|---|---|
 | POST advancedsearch/api/search | PASS | |
-| GET advancedsearch/api/search/{base64} | PASS | including a document whose Base64 contains `+` and `/`, which confirms the S6 signing choice |
+| GET advancedsearch/api/search/{base64} | PASS | including a document whose Base64 contains `+` and `/`. Run on the build before CR-02 changed S6 to percent-encoding (§4); the current encoding has probe evidence for `=` only |
 | GET advancedsearch analyze, graph | PASS | aggregations kept via the bounded fallback |
 | pcaps/{filename} | PASS | 79,725-byte capture; base64 prefix + size + SHA-256 returned |
 | 11 Darktrace/EMAIL routes tried (dash ×4, resources ×3, audit eventTypes/events, emails/search, decode_link) | HTTP 403 | lab token lacks the email permission (or module); signing not provable; not lab-validated. emails/{uuid}, download and action were not attempted (no test email) |
