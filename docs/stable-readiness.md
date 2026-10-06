@@ -1,6 +1,12 @@
 # First stable readiness — release hold
 
-## Accepted validated-consultation checkpoint — 2026-10-06
+## Current status — 2026-10-06
+
+Stable target `1.0.0`: 15 read-only tools / 19 validated GET selectors on the patched Alpine runtime (Node.js 24.18.1, shared OpenSSL 3.5.9). The arm64 image passed [19/19 real lab queries](security/patched-runtime-lab-checkpoint.md), the lab is closed, and 1.0.0 images differ only in the production version literal (not retested live). Grype's zlib High (library affected, vulnerable code not in the application path per independent review) and the `ada` name-collision Medium are retained; zlib is not fixed. [CI run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) passed every job on commit `2adb84b`. Publication of the private release assets is up to the owner. Details: [releases](releases.md#version-100).
+
+The sections below are history.
+
+## Accepted validated-consultation checkpoint — 2026-10-06 (predecessor image, history)
 
 The current candidate enforces **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
 

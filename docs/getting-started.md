@@ -4,13 +4,15 @@
 
 ## 1. Review deployment eligibility
 
-The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. The source contract is API 6.1; lab 7.1.0 passed the 19 selected recipes on native MCP and Docker, not every API variant. [Lab limits](security/validated-consultations-lab-checkpoint.md). No npm or public image publication.
+Version 1.0.0 enforces **19 validated GET selectors across 15 MCP tools**, identical in `read` and `read` + `sensitiveRead` ([mapping](../README.md#tools-in-this-release)). Sensitive read cannot widen this. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. The source contract is API 6.1; the current arm64 image passed the 19 bounded recipes on lab 7.1.0 ([lab checkpoint](security/patched-runtime-lab-checkpoint.md)), which is not full API compatibility. Nothing is published to npm or a public registry.
 
 ## 2. Install a reviewed version or build the private source
 
-For versioned delivery, follow [private GitHub Releases](releases.md): authenticated `gh release download`, checksum verification and `npm install --ignore-scripts --omit=dev`. Substitute the installed entrypoint `node_modules/darktrace-mcp/dist/src/index.js` in the checks below. Source installation remains available:
+Docker is recommended ([below](#docker-recommended)). The published `0.1.0-alpha.0` prerelease is historical and predates the 15-tool contract. For versioned delivery, follow [private GitHub Releases](releases.md): authenticated `gh release download`, checksum verification and `npm install --ignore-scripts --omit=dev`. Substitute the installed entrypoint `node_modules/darktrace-mcp/dist/src/index.js` in the checks below. Source installation remains available:
 
 Prerequisites: Node.js 22+, npm, authenticated `gh` and access to `nuoframework/darktrace-mcp`.
+
+> **Runtime OpenSSL.** Docker is the recommended route. Official upstream Node.js releases examined on 2026-10-05 bundle OpenSSL 3.5.8, affected by CVE-2026-35189. Being on Node 22 or 24 does **not** by itself make a native install patched. For a native install, use a maintained Node.js runtime whose OpenSSL you have independently verified as **3.5.9 or later**, for example with `node -p 'process.versions.openssl'` and your distribution's package records.
 
 ```sh
 gh auth status
@@ -22,7 +24,7 @@ node dist/src/index.js --help
 node dist/src/index.js --version
 ```
 
-No npm package or image has been published. `npm ci --ignore-scripts` suppresses dependency lifecycle hooks; the explicit build compiles the generator, refreshes the committed catalogue and compiles the runtime. Exact dependency pins remain in the manifest and locks. Native Windows token/config-file checks currently fail closed; run Node in an approved Linux/WSL environment with absolute runtime-environment paths and files owned by its Linux runtime UID on a filesystem enforcing the required permissions. Do not disable or weaken the file checks.
+Distribution uses private GitHub Release archives; no npm package or public registry image is published. `npm ci --ignore-scripts` suppresses dependency lifecycle hooks; the explicit build compiles the generator, refreshes the committed catalogue and compiles the runtime. Exact dependency pins remain in the manifest and locks. Native Windows token/config-file checks currently fail closed; run Node in an approved Linux/WSL environment with absolute runtime-environment paths and files owned by its Linux runtime UID on a filesystem enforcing the required permissions. Do not disable or weaken the file checks.
 
 ## 3. Provision credentials privately
 
@@ -37,7 +39,7 @@ export DARKTRACE_SENSITIVE_READ='false'
 node dist/src/index.js --check-config
 ```
 
-This check is offline. A successful result does not prove appliance token ACLs, DNS/TLS reachability, appliance compatibility or provider eligibility. `doctor` is an equivalent local configuration check. The source contract is API 6.1; lab 7.1.0 has bounded native/Docker evidence for all 19 permitted selectors only. See [lab validation](lab-validation.md) and [stable-readiness gates](stable-readiness.md); full compatibility is not established.
+This check is offline. A successful result does not prove appliance token ACLs, DNS/TLS reachability, appliance compatibility or provider eligibility. `doctor` is an equivalent local configuration check. The source contract is API 6.1; the current arm64 image passed the 19 bounded lab 7.1.0 recipes ([lab checkpoint](security/patched-runtime-lab-checkpoint.md)). See [lab validation](lab-validation.md) and [stable-readiness gates](stable-readiness.md); full compatibility is not established.
 
 For a private JSON configuration, copy [operator.config.json](../examples/operator.config.json) outside the checkout, edit the origin/token-file paths, and make it runtime-user-owned before loading:
 
@@ -88,9 +90,11 @@ node node_modules/darktrace-mcp/dist/src/index.js --version
 
 Compare actual installed runtime package paths, versions and resolved integrity values against the tarball's shrinkwrap, rather than only checking top-level pins. The install retrieves pinned dependencies from the configured npm registry; **the private project itself is never published there**. Source `npm ci` remains the canonical reproducible checkout install. A tarball-installed directory uses its generated lock for subsequent `npm ci --ignore-scripts --omit=dev`.
 
-## Optional local container
+## Docker (recommended)
 
-A local Dockerfile is provided as a private build recipe; no image is published. The accepted source/image has exact 15-tool SDK checks and all 19 permitted bounded lab recipes PASS. Its component binding uses dated scans and does not claim a fresh scan or final suite completion. OpenSSL 3.5.8 / CVE-2026-35189 still blocks stable publication. See the [Docker checkpoint](security/validated-consultations-docker-checkpoint.md). For Docker stdio setup, token-file ownership checks, and a client configuration example, see [container secret mounts](configuration.md#container-secret-mounts) and [MCP clients](clients.md#docker-stdio-client). Use an absolute Docker path, `-i` without a TTY, `--log-driver=none`, nonroot runtime, read-only token mounts and the documented runtime restrictions. Disabling Docker daemon stdout logging does not prevent the MCP host from forwarding results to its provider. Constrain outbound appliance access through deployment network policy; do not use host networking. Docker Desktop bind-mount ownership must pass `--check-config` without relaxing file checks. Use a dedicated MCP host/profile where supported, review other configured MCP servers' commands, environment and mounts, and review project/dependency license obligations before distributing a derived image.
+Docker ships the patched runtime: Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9, in a nonroot, shell-free `scratch` image with no listener. Build it with the [two-step recipe](docker.md#build); prebuilt private image archives are planned but not published. Current status (arm64 lab 19/19 PASS, the zlib scan match and its review, the pending amd64 security gate) is in the [Docker guide](docker.md#current-candidate-at-a-glance).
+
+For client setup, use an absolute Docker path, `-i` without a TTY, `--pull=never` with the image ID, `--log-driver=none`, `--read-only`, `--cap-drop=ALL`, `no-new-privileges` and read-only token-file mounts owned by the runtime UID. See [container secret mounts](configuration.md#container-secret-mounts) and [MCP clients](clients.md#docker-stdio-client). Docker Desktop ownership must pass `--check-config` without relaxing file checks. Disabling Docker logging does not stop the MCP host from forwarding results to its provider. Restrict outbound access to the appliance with network policy and do not use host networking.
 
 ## Output and destination boundaries
 

@@ -1,6 +1,6 @@
 # Darktrace MCP server: design baseline
 
-**Status: private alpha `0.1.0-alpha.0`; stable release conditional.** Date: 2026-10-05. This document began as the design baseline; catalogue and deferred-write sections below are historical design material, not active first-stable capabilities. [§1.1](#11-current-implementation-snapshot) records the current release surface. Security evidence is dated, synthetic and offline (see §3); it is not a certification. Lab 7.1.0 passed the 19 permitted bounded recipes on native MCP and Docker; full API compatibility is not established.
+**Status: private alpha `0.1.0-alpha.0`; stable release conditional.** Date: 2026-10-05, current-runtime notes updated 2026-10-06. This document began as the design baseline; catalogue and deferred-write sections below are historical design material, not active first-stable capabilities. [§1.1](#11-current-implementation-snapshot) records the current release surface. Security evidence is dated, synthetic and offline (see §3); it is not a certification. The current arm64 image passed the 19 permitted bounded recipes on lab 7.1.0 ([lab checkpoint](security/patched-runtime-lab-checkpoint.md)). Full API compatibility is not established.
 
 Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK comparison](../openapi/DIFF-sdk-vs-docs.md), [API contract](api-contract.md), [79-operation inventory](operation-inventory.json), and the unchanged [independent review](security/design-review.md). The target lab is **7.1**, not the documented **6.1**. [Design decisions and closure matrix](security/design-decisions.md) resolve B1–B8/F1–F15; their evidence is documentary. The repo is private; there is no npm publication. Raw `docs-src/` material must not be committed or packaged.
 
@@ -16,7 +16,7 @@ Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK compari
 | Canonicalization | Explicit startup `encoded` or `unencoded` query-signature mode; default `unencoded` per local SDK comparison, lab-unverified; no fallback. |
 | Network | Dedicated `node:https` connector, pinned initial DNS, preserved SNI and hostname verification, explicit `rejectUnauthorized:true`. |
 | Budgets | §5.3 hard ceilings; configuration can only lower them. |
-| Delivery | Private local build and inspected image ID; current image/lab checks passed, final candidate packaging remains pending. |
+| Delivery | Private local build and inspected image ID. Docker runtime: Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9. Release status: [releases](releases.md#version-100). |
 
 ### 1.1 Current implementation snapshot
 
@@ -42,7 +42,7 @@ The [79-operation coverage catalogue](../src/coverage/report.generated.json) is 
 | `darktrace_get_endpoint_details` | `get_endpointdetails` |
 | `darktrace_list_antigena_actions` | `get_antigena`, `get_antigena_summary` |
 
-Both profiles advertise these exact 15 tools with unchanged read-only, idempotent, non-destructive annotations. `write` and `writeCritical` cannot be enabled; no write preview exists. [Bounded native/Docker lab 19/19 evidence](security/validated-consultations-lab-checkpoint.md) is separate from final suites and stable publication.
+Both profiles advertise these exact 15 tools with unchanged read-only, idempotent, non-destructive annotations. `write` and `writeCritical` cannot be enabled; no write preview exists. The [predecessor's bounded native/Docker 19/19 lab evidence](security/validated-consultations-lab-checkpoint.md) is history; the current arm64 image's [19/19 lab result](security/patched-runtime-lab-checkpoint.md) is separate from the remaining suites and stable publication.
 
 ## 2. Runtime and dependency baseline
 
@@ -134,7 +134,7 @@ flowchart TB
     class DT2 ext
 ```
 
-The local image is built from a digest-pinned Node 22 base. Remediation of the base-image vulnerability scan is still in progress, so this document claims no clean scan. See the [Docker guide](docker.md) for the current record.
+The runtime image is `scratch` plus 22 signed, hash-pinned Alpine 3.24 packages: Alpine-maintained Node.js 24.18.1 linked to shared OpenSSL 3.5.9, with no shell or package manager. A Node 22 stage is used only to build. Fresh scans retain a zlib High match (library affected; an independent review found its vulnerable code is not in the application path) and an `ada` Medium name collision; this document claims no clean scan. See the [Docker guide](docker.md#current-candidate-at-a-glance).
 
 ### 3.4 Internal execution order
 
@@ -482,7 +482,7 @@ docker run -i --rm --init --pull=never --log-driver=none \
 
 No image is published to a registry. The [Docker guide](docker.md) and [Docker client example](../examples/docker.mcp.json) are the operational references.
 
-Files must be readable by and owned by the container's non-root UID with mode 0600 or stricter; a read-only mount does not waive ownership/mode checks. Host provisioning must arrange that ownership. No export mount is active in the baseline. Image build, digest, platforms and runtime behavior still require evidence.
+Files must be readable by and owned by the container's non-root UID with mode 0600 or stricter; a read-only mount does not waive ownership/mode checks. Host provisioning must arrange that ownership. No export mount is active in the baseline. Current image identities, platforms and runtime results are in the [Docker guide](docker.md#current-candidate-at-a-glance).
 
 ## 11. Testing plan
 

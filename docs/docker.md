@@ -1,18 +1,68 @@
-# Local Docker use
+# Docker use
 
-This image runs the MCP server over stdio. It exposes no TCP port and is built for a local, private deployment; no image is published by this repository.
+The image runs the MCP server over stdio. It exposes no TCP port and is built for a local, private deployment. No image has been published to a registry.
 
-The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. [Bounded lab results](security/validated-consultations-lab-checkpoint.md); no final suite or stable release approval.
+The release candidate enforces **19 validated GET selectors across 15 MCP tools**, identical in `read` and `read` + `sensitiveRead` ([mapping](../README.md#tools-in-this-release)). Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access.
+
+## Current candidate at a glance
+
+| Item | Status (2026-10-06) |
+|---|---|
+| Runtime | Alpine 3.24.2, Alpine-maintained Node.js **24.18.1** with shared OpenSSL **3.5.9**, ICU 78.1 (English data) |
+| Images | Pre-version reviewed images (history, before the 1.0.0 metadata change): arm64 `sha256:64d16616…5be842`, amd64 `sha256:65985236…68dad6` ([independent review](security/patched-runtime-independent-review.md)). The lab ran on the earlier arm64 `sha256:8cd85604…` with a byte-identical application. v1.0.0 archive image IDs are published in the release notes |
+| Application payload | 49 compiled files bound to v1.0.0 source `582a121…`, aggregate `054a25fa…`; 15-tool contract hash `cd4ee422…` in both profiles on both architectures |
+| Tests | [CI run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) on commit `2adb84b`: Node 22/24 offline jobs plus native Docker on amd64 and arm64, full 130 functional + 325 security tests, 0 skipped, all PASS |
+| Scans of the exact images | Trivy 0 matches. Grype: **High CVE-2026-85091 (zlib 1.3.2)** and Medium CVE-2024-9410 (matched to `ada`). Raw matches are retained and nothing is suppressed. An independent review of both architectures found that the zlib library is affected but its vulnerable `gz*` code is not in the application's execution path (no relevant imports, Node bindings, add-ons, FFI, `dlopen` or subprocesses), and that the `ada` match is a product-name collision. zlib is **not fixed**: Alpine 3.24 has no fixed package as of 2026-10-06 |
+| Lab, Darktrace 7.1.0 | arm64 image `sha256:8cd85604…`, 2026-10-06: **19/19 real queries PASS**, no writes. The lab is closed. 1.0.0 images differ only in the version literal and were not retested live; response shapes, caps, TLS and cleanup passed ([lab checkpoint](security/patched-runtime-lab-checkpoint.md)) |
+| TLS trust | Node uses the system CA store by default (`/etc/ssl/cert.pem` → `ca-certificates.crt`, 121 roots; Node's bundled store has 120). The lab used system trust; custom-CA (`NODE_EXTRA_CA_CERTS`) tests passed separately |
+| Release | Version `1.0.0`; private GitHub Release asset hashes and image IDs are listed in the release notes |
+
+This is not a zero-CVE claim, and it is not stable-release approval.
+
+## Install options
+
+1. **Private GitHub Release image archive (easiest; v1.0.0).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`. No public registry image exists.
+
+```sh
+gh release download v1.0.0 --repo nuoframework/darktrace-mcp \
+  --pattern 'darktrace-mcp-1.0.0-linux-arm64.tar.gz' --pattern SHA256SUMS
+shasum -a 256 --ignore-missing -c SHA256SUMS
+docker load --input darktrace-mcp-1.0.0-linux-arm64.tar.gz
+docker image inspect --format '{{.Id}}' darktrace-mcp:1.0.0-arm64
+```
+
+   On x86-64 hosts, use the `amd64` archive and the `darktrace-mcp:1.0.0-amd64` tag. Check that the loaded image ID matches the release notes, then use that `sha256:…` ID with `--pull=never`. Release asset availability is shown on the private v1.0.0 release page.
+2. **Build from the reviewed checkout** (below).
 
 ## Build
 
-From the repository root:
-
 ```sh
-docker build --pull --tag darktrace-mcp:local .
+# 1. Fetch and verify the pinned Alpine runtime packages (public HTTPS + Docker).
+#    Use an absolute directory outside the checkout; choose amd64 or arm64.
+node scripts/prepare-docker-runtime.mjs /absolute/private/darktrace-runtime arm64
+# 2. Build for the same architecture from that verified archive.
+docker buildx build --platform linux/arm64 \
+  --build-context runtime-apks=/absolute/private/darktrace-runtime/arm64 \
+  --load --tag darktrace-mcp:local .
+docker image inspect --format '{{.Id}}' darktrace-mcp:local
 ```
 
-The Dockerfile pins the official Node builder and production dependency stages to `node:22-bookworm-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c`. It uses `npm ci --ignore-scripts` with committed lock metadata. The runtime copies the public Distroless Debian 13 `cc` root filesystem at `sha256:e792ab3d241a468a4fd7519ddbbebe66b49b5f365771716ea688ad40b6c6f1c2` into a `scratch` stage, then copies the pinned builder's Node 22.23.3 binary, production dependencies, compiled application, and license files. This keeps npm and Corepack out of the runtime and avoids inheriting the upstream `SSL_CERT_FILE` setting while retaining the system CA bundle. Only the compiled application and production dependencies are copied into `/app`. The build context is allowlisted by `.dockerignore`; it omits local environment files, tests, unrelated documentation and examples. The `darktrace-mcp:local` tag is for local build and inspection. Before configuring a host, capture the immutable image ID with `docker image inspect --format '{{.Id}}' darktrace-mcp:local`; use that exact `sha256:...` ID and `--pull=never` in the client. A registry or npm network failure is a build failure: use an approved network path and keep npm TLS and lockfile integrity checks enabled. Do not add tokens, private registry credentials, proxy credentials or appliance data to build arguments or image layers.
+`scripts/prepare-docker-runtime.mjs` needs Docker and public HTTPS to `dl-cdn.alpinelinux.org`, `distfiles.alpinelinux.org` and `raw.githubusercontent.com` (one hash-pinned SPDX license text). It uses the pinned Alpine image's keys to authenticate the signed `main` package index and packages. It checks the SHA-256 of all 22 packages, the SHA-512 of their upstream source archives and the hashes of the extracted license files. It writes `<arch>/apks`, `<arch>/licenses` and `vendor-sources` under the directory you give it. Keep that directory outside the checkout, and keep it with any approved release, because mirrors eventually drop old package revisions. The `--platform` value and the `runtime-apks` directory must name the same architecture. The Dockerfile verifies the pins again and fails on any mismatch.
+
+| Stage | What it pins and checks |
+|---|---|
+| Builder / production dependencies | Official `node:22-bookworm-slim@sha256:43ac6c60…b772c`; `npm ci --ignore-scripts` from committed lock metadata. npm and this builder's bundled OpenSSL 3.5.8 exist only at build time and are **not** in the final image. |
+| Vendor runtime | `alpine@sha256:294b683c…c77e6` (Alpine 3.24.2). 22 signed Alpine `main` packages per architecture, pinned by SHA-256 and checked with `apk verify`, including `nodejs-24.18.1-r0`, `libssl3`/`libcrypto3` `3.5.9-r0`, `musl-1.2.6-r2` and `ca-certificates-bundle-20260909-r0`. Installed offline. |
+| Build-time assertions | Node reports `node_shared_openssl=true` and OpenSSL ≥ 3.5.9; the 3.5.9 packages own `libssl.so.3`/`libcrypto.so.3`. The curated root filesystem is executed in a chroot to repeat those checks and to confirm that there is no `/bin/sh`, npm, apk or `update-ca-certificates`. |
+| Final image | `FROM scratch`, `PATH=/nodejs/bin`, UID/GID `1000:1000`, no ports or volumes. `/nodejs/bin/node` links to the package-owned `/usr/bin/node`. Contains compiled `dist/src`, production `node_modules`, runtime `package.json`, the project `LICENSE`, `/licenses/<package-origin>/` and the CA bundle `/etc/ssl/certs/ca-certificates.crt` (121 certificates). |
+
+The build context is allowlisted by `.dockerignore`. It excludes local environment files and secrets. It includes tests, examples, scripts, selected docs and the EN/ES README/SECURITY files so CI can run a vendor-checks build target, but none of those reach the final image. Do not add tokens, registry or proxy credentials, or appliance data to build arguments, build contexts or image layers. Use the immutable image ID with `--pull=never` in clients; `darktrace-mcp:local` is only a local tag.
+
+## Runtime support
+
+The Node.js binary is Alpine's musl build, maintained by the Alpine distribution. It is not an upstream Node.js Tier 1 binary. The Node.js 24 [platform list](https://github.com/nodejs/node/blob/v24.x/BUILDING.md#platform-list) classifies x64 musl as Experimental and does not list arm64 musl; Node.js `main`, for future releases, lists x64 musl as Tier 2. Security fixes for this runtime therefore depend on Alpine updating `nodejs`, `openssl`, `zlib` and the other pinned packages. Each update changes the pinned hashes deliberately and repeats every gate.
+
+**Native installs.** Official upstream Node.js releases examined on 2026-10-05 bundle OpenSSL 3.5.8 (affected by CVE-2026-35189). Using Node 22 or 24 is not enough. Use a maintained runtime whose OpenSSL you have independently verified as 3.5.9 or later, or use Docker.
 
 ## MCP client configuration
 
@@ -55,7 +105,7 @@ For an approved appliance connection, apply deployment network policy that permi
 
 The runtime defaults to non-root UID `1000`. Keep its filesystem read-only, drop all capabilities, and prevent privilege escalation as shown above. The server defaults to the read profile and sensitive reads off. Provider eligibility and retention review still apply to appliance results delivered to the MCP host/model.
 
-The final image retains the project `LICENSE` and the licenses shipped with its production dependencies. To create a private transfer artifact after reviewing and testing a local image, record the archive digest separately and verify it before loading:
+The final image retains the project `LICENSE`, production-dependency licenses and the runtime package and upstream source licenses under `/licenses/<package-origin>/`. To create a private transfer artifact after reviewing and testing a local image, record the archive digest separately and verify it before loading:
 
 ```sh
 image_id="$(docker image inspect --format '{{.Id}}' darktrace-mcp:local)"
@@ -69,25 +119,31 @@ docker image inspect --format '{{.Id}}' darktrace-mcp:local
 
 Transfer the archive and checksum only through an approved private channel. This recipe does not authorize a registry push or publication. The archive hash protects transfer integrity only when its expected value is communicated separately over a trusted channel.
 
-## Base-image and hardening review
+## Hardening controls
+
+These controls apply to the current recipe and the documented client configuration. They do not establish host or daemon security.
+
+| Control | Status |
+|---|---|
+| Provenance | Builder, dependency and Alpine stages pinned by digest; 22 signed Alpine packages pinned by SHA-256 per architecture; `npm ci` with lifecycle scripts disabled. No derived-image attestation or signature is produced. |
+| Build/runtime separation | Only compiled `dist/src`, production `node_modules`, runtime metadata, curated vendor libraries, CA bundle and licenses reach the `scratch` image. No shell, busybox, apk, npm or CA-update tools. |
+| Identity/filesystem | Default UID/GID `1000:1000`; application and runtime files are root-owned. Run with `--read-only`. |
+| Privileges/resources | `--cap-drop=ALL`, `--security-opt=no-new-privileges`, `--pids-limit=64`, `--memory=256m`; Docker's default seccomp stays enabled. AppArmor/SELinux and rootless Docker were not tested. |
+| Network/ports | No exposed or published port. Diagnostics run with `--network=none`; production egress needs deployment policy limited to the approved appliance. |
+| Secrets | Token files only, mounted read-only, owned by the runtime UID, mode `0600` or stricter. No token values in environment, arguments or image layers. |
+| Host boundary | No Docker socket is mounted. Docker Desktop/daemon, host integration and other MCP servers remain trusted host components and were not audited. |
+
+## Predecessor base-image review (history)
+
+This section describes the earlier Distroless Debian 13 + official Node 22.23.3 recipe and is kept as history.
 
 The public upstream [Distroless project](https://github.com/GoogleContainerTools/distroless) currently publishes Debian 13 `cc` images, including `nonroot`; the [`cc` image documentation](https://github.com/GoogleContainerTools/distroless/blob/main/cc/README.md) describes its glibc runtime. This image uses the pinned multi-architecture Debian 13 `cc` root filesystem as an intermediate stage and starts the final stage from `scratch`, so it does not inherit base-image environment variables. The builder supplies Node 22.23.3 from the pinned official Node image; its upstream [`LICENSE`](https://github.com/nodejs/node/blob/v22.23.3/LICENSE) is retained at `/licenses/node/LICENSE`, and the copied Distroless root filesystem retains its system license files. A direct Distroless Node 22 runtime candidate had Node 22.22.0 and defined `SSL_CERT_FILE`, which did not meet this project's pinned Node version and environment checks. The official Node Trixie slim base was also evaluated; its base-only Trivy scan recorded 211 vulnerability entries, including 43 high affected and one high deferred. The historical selected-image scan is scanner-specific: Trivy recorded zero HIGH/CRITICAL, while Grype rated 11 of the same 31 matches HIGH. Do not summarize this as a clean scan or zero-CVE result. On 2026-10-05, `docker manifest inspect dhi.io/node:22-debian13` returned `unauthorized` using existing Docker auth. No login or new credentials were attempted. No upstream attestation or signature for a derived image has been produced; pinning the upstream digests does not attest this application image.
 
-The following controls are implemented or verified in this recipe; these checks do not establish host or daemon security:
+## Predecessor image and lab checkpoint — 2026-10-06 (history)
 
-| Control | Evidence or status |
-|---|---|
-| Base and dependency provenance | Official Node builder and production-dependency stages plus Distroless Debian 13 `cc` rootfs are pinned by digest; `npm ci` consumes committed lock metadata with lifecycle scripts disabled. Node upstream and project licenses are retained with the runtime. Final-image SBOM and Trivy findings are recorded below. No derived-image provenance attestation or signature has been produced. |
-| Build/runtime separation | Builder and production-dependency stages are not copied wholesale; runtime contains compiled `dist/src`, production `node_modules`, minimal ESM metadata and project/dependency licenses. |
-| Runtime identity/filesystem | Image defaults to UID/GID `1000:1000`; application files are root-owned and readable. Run with `--read-only`. |
-| Privileges/resources | Smoke runs used `--cap-drop=ALL`, `--security-opt=no-new-privileges`, `--pids-limit=64`, and `--memory=256m`; Docker's default seccomp profile was left enabled. AppArmor/SELinux and rootless Docker were not tested on the Docker Desktop host. |
-| Network/ports | No port is exposed or published. Diagnostics ran with `--network=none`; production egress still needs deployment policy that limits access to the approved appliance. |
-| Secrets | Synthetic 0600 token files passed `--check-config` from read-only mounts with a matching non-root UID. No real tokens, registry login, or private appliance address were used. |
-| Host boundary | No Docker socket is mounted into the container. Docker Desktop/daemon, its host integration and other MCP server registrations remain trusted host components and were not audited. |
+> Predecessor image `sha256:eb3a7681…` with bundled OpenSSL 3.5.8. Its OpenSSL hold applied to that image; the current candidate is summarized [above](#current-candidate-at-a-glance).
 
-## Current image and lab checkpoint — 2026-10-06
-
-The current candidate enforces **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
+That candidate enforced **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
 
 Source SHA-256: `9e7c7070298ef592a1a10cdcb7ca481420a377e25e4a93c863ca33c31921d7f2`; independent source review: [ACCEPT](security/validated-consultations-independent-review.md). Active full fixture: `6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c`; both ordered complete profile hashes: `cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3`. The exact predecessor is archived, never an active fallback.
 

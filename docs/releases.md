@@ -1,6 +1,17 @@
 # Versioned private GitHub Releases
 
-The published `v0.1.0-alpha.0` assets are immutable historical evidence. The working-tree candidate still has package version `0.1.0-alpha.0`; it must not replace those assets or be labeled stable. `0.1.0` (without a prerelease suffix) is the proposed first stable target under consultation; this proposal does not change the package version, create a tag or approve publication. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](release-preparation.md#current-release-direction-and-docker-smoke) and the earlier [Docker preparation record](release-preparation-docker-mcp.md).
+## Current private stable: v1.0.0
+
+Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.
+
+The first stable provides 15 read-only tools covering 19 lab-validated GET selectors. Native amd64/arm64 CI passed 130 functional and 325 security tests with zero skips. Exact image IDs, asset hashes and the disclosed vulnerability applicability results are in the bilingual release notes. No npm or public registry publication is used. Earlier alpha tags and assets remain unchanged.
+
+## Historical alpha installation and preparation
+
+The following procedure describes the immutable earlier alpha release, not the current stable. For v1.0.0, use the installation above.
+
+
+The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](release-preparation-docker-mcp.md).
 
 This is the distribution procedure for private releases of `nuoframework/darktrace-mcp`. Version `0.1.0-alpha.0` uses tag `v0.1.0-alpha.0`. No release is created by the preparation scripts or workflows. The owner publishes only after independent source review and artifact review. `package.private:true` remains set; neither npm publication nor container publication is used.
 
@@ -63,16 +74,24 @@ gh release create v0.1.0-alpha.0 --repo nuoframework/darktrace-mcp \
 
 Inspect the draft's assets and checksums before manually removing draft status. No workflow has `contents:write`, registry credentials, `id-token:write` or release publication rights. [GitHub CLI `--verify-tag`](https://cli.github.com/manual/gh_release_create) rejects a missing tag instead of creating one. [Environment required reviewers in private repositories](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) require an eligible GitHub plan; entitlement and remote protections have not been verified. Do not assume merely naming an environment would enforce approval. Artifact attestations are not produced or claimed.
 
-## Remaining deployment gates
+## Version 1.0.0
 
-The published alpha is immutable historical evidence and predates the accepted 19-selector candidate. Current source has 15 tools in both profiles; [native and hardened Docker MCP passed all 19 permitted bounded GET recipes](security/validated-consultations-lab-checkpoint.md), not all API variants. Exact [image/component binding](security/validated-consultations-docker-checkpoint.md) is separate from final suites, reproducible packaging and independent migration follow-up. **OpenSSL 3.5.8 / CVE-2026-35189 blocks stable publication.** Grype reports 11 High in unchanged scanned OS components; no zero-CVE claim. No stable tag or public/npm/container release is approved. Remote CI/protections and deployment-specific provider processing, retention, residency and eligibility remain separate gates.
+The published `0.1.0-alpha.0` is immutable history. It predates the 15-tool / 19-selector contract and the patched runtime.
 
-Output views are code-owned and conservative: at most eight selected principal fields, summaries for unknown objects/maps. They do not establish removal of every arbitrary nested sensitive field. Review the current configuration/security documentation before deployment.
+`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#current-candidate-at-a-glance).
+
+- **CI:** [run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) on commit `2adb84b` passed every job: Node 22/24 offline, plus native Docker on amd64 and arm64 with 130 + 325 tests and 0 skipped. The release tag may point to a later commit that changes only documentation and keeps the production, build and shipped-document files identical.
+- **Lab:** on 2026-10-06, arm64 image `sha256:8cd85604…` passed [19/19 real queries](security/patched-runtime-lab-checkpoint.md). The lab is closed. 1.0.0 differs only in the production version literal and was not retested live.
+- **Scans:** Grype's raw matches are retained: High CVE-2026-85091 (zlib 1.3.2) and Medium CVE-2024-9410 (`ada`). An independent review of both architectures found the zlib library affected but its vulnerable code outside the application's execution path, and the `ada` match a product-name collision. zlib is not fixed, because Alpine 3.24 has no fixed package yet. There is no zero-CVE claim.
+- **Assets:** per-architecture Docker image archives, the npm tarball and `SHA256SUMS`, with hashes and image IDs in the release notes.
+- **Deployment:** assess provider processing, retention, residency and eligibility for each deployment.
+
+Output views are code-owned and conservative: at most eight selected principal fields, summaries for unknown objects/maps. They do not establish removal of every arbitrary nested sensitive field.
 
 ## Incremental delivery cadence
 
 1. `0.1.0-alpha.0`: private offline alpha with reviewed source, verified package, checksums and runtime SBOM; live appliance/provider gates remain open.
-2. Proposed first stable target `0.1.0`: supported read-only queries, only after applicable compatibility, security and organizational gates have been reviewed and accepted. This is under consultation; it is not the current package version or a readiness decision.
+2. First stable, targeted as `1.0.0`: the 15 read-only tools, only after the gates above are accepted. The package metadata is still `0.1.0-alpha.0` until a separately coordinated version change; the target is not a readiness decision.
 3. A later delivery may add write operations after mutation compatibility, safety controls and residual risks receive separate review. The version label itself does not waive a gate.
 
 Each delivery uses a new immutable reviewed tag, its own notes, verified assets and explicit remaining gaps. Do not replace a published version's assets with a different build. No delivery dates or automatic publication are promised.

@@ -1,6 +1,21 @@
 # Validated-only private candidate preparation
 
-## Accepted validated-consultation checkpoint — 2026-10-06
+## Current status — 2026-10-06
+
+The candidate keeps the accepted source (`9e7c7070…`) and **15-tool / 19-selector** contract, and replaces the Docker runtime. The new runtime is 22 hash-pinned, `apk verify`-checked Alpine 3.24 packages per architecture: Alpine-maintained `nodejs-24.18.1-r0` with shared `libssl3`/`libcrypto3` `3.5.9-r0`, in a nonroot, shell-free `scratch` image. Images: arm64 `sha256:8cd85604…`, amd64 `sha256:b39e1b12…` ([implementation report](security/patched-runtime-implementation.md)).
+
+| Gate | Status |
+|---|---|
+| Contract in image | 15 tools in both profiles on both architectures (hash `cd4ee422…`) |
+| Tests | [CI run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585), commit `2adb84b`: Node 22/24 offline + native Docker amd64/arm64, 130 + 325, 0 skipped, PASS |
+| Scans | Trivy 0; Grype High CVE-2026-85091 (zlib) + Medium CVE-2024-9410 (`ada`), retained. Independent review (both architectures): zlib affected but vulnerable code not in the application path; `ada` is a name collision. zlib not fixed |
+| Lab 7.1.0 | arm64 image 19/19 PASS, cleanup verified ([checkpoint](security/patched-runtime-lab-checkpoint.md)) |
+| Release | `1.0.0` assets and hashes in the private GitHub Release notes; publication by the owner |
+| Release | Version, assets and publication await separate owner decisions |
+
+The section below records the **predecessor** image (`eb3a7681…`, OpenSSL 3.5.8) and is kept as history.
+
+## Accepted validated-consultation checkpoint — 2026-10-06 (predecessor image, history)
 
 The current candidate enforces **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
 

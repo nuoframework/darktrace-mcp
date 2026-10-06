@@ -1,6 +1,6 @@
 # Private prerelease preparation — 0.1.0-alpha.0
 
-Current accepted 19-selector scope, bound lab 19/19 results and outstanding publication gates are recorded in [candidate preparation](release-preparation-docker-mcp.md). The package version and published alpha assets remain unchanged. The evidence below is historical and does not claim final candidate suite completion.
+This file is the historical `0.1.0-alpha.0` preparation record. The current candidate status (15 tools / 19 selectors, patched Alpine runtime, open gates) is in [candidate preparation](release-preparation-docker-mcp.md#current-status--2026-10-06) and [releases](releases.md#version-100). The package version and published alpha assets are unchanged.
 
 > Historical alpha preparation evidence. The earlier [Docker/MR-04 preparation record](release-preparation-docker-mcp.md) retains its original findings; the dated update below records the later local Docker SDK smoke and current release direction. This report’s original hashes and results remain unchanged and do not establish compatibility or final gates for the newer source.
 
