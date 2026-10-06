@@ -37,6 +37,22 @@ export function describeEntry(entryPath: string): PackageLayout | undefined {
   return { name: pkg.name, version: pkg.version, packageRoot, ...(installed ? { installRoot: path.dirname(modulesDir) } : {}) };
 }
 
+/**
+ * Where the running `dist/src/index.js` comes from, for wording in prompts:
+ * `checkout`: a source tree (package.json next to a `src/` directory); `fixed-copy`: a per-version copy installed by
+ * setup (`<data>/darktrace-mcp/<version>/node_modules/...`); `transient`: npm's exec cache; `package`: any other
+ * installed package (for example a global `npm install -g`).
+ */
+export type EntryOrigin = 'checkout' | 'fixed-copy' | 'transient' | 'package';
+export function entryOrigin(entryPath: string, ctx: Pick<CliContext, 'home' | 'env' | 'platform'>): EntryOrigin {
+  if (isTransientInstall(entryPath, ctx)) return 'transient';
+  const layout = describeEntry(entryPath);
+  if (layout === undefined) return 'package';
+  if (lstatOrUndefined(path.join(layout.packageRoot, 'src'))?.isDirectory() === true) return 'checkout';
+  if (layout.name === PACKAGE_NAME && layout.installRoot !== undefined && path.resolve(entryPath) === fixedCopyEntry(fixedCopyDir(ctx, layout.version))) return 'fixed-copy';
+  return 'package';
+}
+
 /** True when `entryPath` lives in npm's transient exec cache (`_npx`) or under the npm cache directory. */
 export function isTransientInstall(entryPath: string, ctx: Pick<CliContext, 'home' | 'env' | 'platform'>): boolean {
   const resolved = path.resolve(entryPath);

@@ -107,7 +107,7 @@ export function validateImage(value: string): string {
 const CONTAINER_PUBLIC = '/run/secrets/public-token';
 const CONTAINER_PRIVATE = '/run/secrets/private-token';
 
-/** Build the launcher for this checkout (node) or a reviewed image (docker). Never contains token values in file mode. */
+/** Build the launcher for the running package (node, by absolute path) or a reviewed image (docker). Never contains token values in file mode. */
 export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToken: string; privateToken: string }): ServerEntry {
   const ackEnv: Record<string, string> = {};
   if (needsSensitiveWriteAck(s.profiles)) {

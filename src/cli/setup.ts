@@ -10,7 +10,7 @@ import { findOnPath, lstatOrUndefined } from './fsutil.js';
 import {
   checkDockerDaemon, defaultImageReference, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ImageReference, type ResolvedImage,
 } from './docker.js';
-import { installFixedCopy, isTransientInstall } from './install.js';
+import { entryOrigin, installFixedCopy, isTransientInstall, type EntryOrigin } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
 import { describeProbeFailure, probeDateFormat, probeStatus, type DateFormatProbe } from './online.js';
@@ -55,6 +55,13 @@ export interface SetupIo {
 }
 
 const STEPS = 5;
+/** What "node" means for the user, by where the running package comes from; never assumes a source checkout. */
+export const NODE_RUNTIME_LABEL: Readonly<Record<EntryOrigin, string>> = {
+  checkout: 'this checkout',
+  'fixed-copy': 'the fixed copy installed by setup',
+  transient: 'a fixed copy that setup installs now, outside the npx cache',
+  package: 'this installed package',
+};
 const write = (io: SetupIo, text: string): void => { io.stdout.write(text); };
 
 async function askUntilValid<T>(prompter: Prompter, question: string, fallback: string | undefined, parse: (v: string) => T, io: SetupIo): Promise<T> {
@@ -170,7 +177,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     write(io, ui.step(2, STEPS, 'Runtime'));
     let runtime: Runtime = args.runtime ?? saved?.runtime ?? 'node';
     if (args.runtime === undefined && interactive && prompter) {
-      write(io, 'How should clients start the server?\n  1) node (this checkout)  [default]\n  2) docker (setup pulls and pins the image)\n');
+      write(io, `How should clients start the server?\n  1) node (${NODE_RUNTIME_LABEL[entryOrigin(io.entryPath, ctx)]})  [default]\n  2) docker (setup pulls and pins the image)\n`);
       runtime = await askUntilValid(prompter, `Choice [${runtime === 'docker' ? 2 : 1}]: `, runtime === 'docker' ? '2' : '1',
         (v) => { if (v === '1' || v === 'node') return 'node' as const; if (v === '2' || v === 'docker') return 'docker' as const; throw new SetupInputError('choose 1 or 2'); }, io);
     }
@@ -213,7 +220,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       // Client entries start the immutable local image ID with --pull=never; the digest is recorded for verification.
       image = resolved?.id ?? 'sha256:<image ID after docker pull>';
       if (resolved !== undefined) write(io, describeImage(resolved));
-    } else write(io, ui.ok(`Runtime: node (${io.execPath}).\n`));
+    } else write(io, ui.ok(`Runtime: node, ${NODE_RUNTIME_LABEL[entryOrigin(io.entryPath, ctx)]} (${io.execPath}).\n`));
 
     // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path.
     let entryPath = io.entryPath;
