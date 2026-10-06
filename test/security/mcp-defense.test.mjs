@@ -14,7 +14,7 @@ import { assertSafeNetworkEnvironment, ConfigValidationError } from '../../dist/
 import { loadConfig } from '../../dist/src/config/load.js';
 import { startupVariable } from '../../dist/src/observability/log.js';
 import { runStdio } from '../../dist/src/server/stdio.js';
-import { clientIdentified } from '../../dist/src/server/createServer.js';
+import { clientIdentified, approvalChannel, APPROVAL_INPUT_KEY } from '../../dist/src/server/createServer.js';
 import { cfg, env, PUBLIC, PRIVATE, CANARY, noCanaries } from './helpers.mjs';
 import { profiles, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
 import { forbiddenCommand, distributionIssues } from './mcp-distribution.mjs';
@@ -119,10 +119,10 @@ const init = (id = 1, version = '2025-11-25') => ({ jsonrpc: '2.0', id, method: 
 const listed = id => ({ jsonrpc: '2.0', id, method: 'tools/list', params: {} });
 const called = id => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name: 'darktrace_get_status', arguments: {} } });
 const initialized = { jsonrpc: '2.0', method: 'notifications/initialized' };
-function session(t) {
+function session(t, config = cfg()) {
   const stdin = new PassThrough(), stdout = new PassThrough(), signals = new EventEmitter(), state = { calls: 0, closed: 0 }, waiters = new Map(), frames = []; let text = '';
   stdout.on('data', chunk => { text += chunk; let end; while ((end = text.indexOf('\n')) >= 0) { const frame = JSON.parse(text.slice(0, end)); text = text.slice(end + 1); assert.equal(frame.jsonrpc, '2.0'); frames.push(frame); waiters.get(frame.id)?.(frame); waiters.delete(frame.id); } });
-  const handle = runStdio(cfg(), { testOnly: true, stdin, stdout, signals, client: { async request() { state.calls++; return { json: { version: attack } }; }, close() { state.closed++; } } });
+  const handle = runStdio(config, { testOnly: true, stdin, stdout, signals, client: { async request() { state.calls++; return { json: { version: attack } }; }, close() { state.closed++; } } });
   t.after(() => handle.close());
   const send = value => stdin.write(typeof value === 'string' ? value + '\n' : JSON.stringify(value) + '\n');
   const request = value => new Promise((resolveReply, reject) => { const timeout = setTimeout(() => { waiters.delete(value.id); reject(new Error('Synthetic protocol reply timeout')); }, 3000); waiters.set(value.id, reply => { clearTimeout(timeout); resolveReply(reply); }); send(value); });
@@ -160,6 +160,77 @@ test('MR-05.ENVELOPE 2026-07-28 clients identify per request; missing/malformed 
   assert.equal(clientIdentified({ capabilities: {}, clientInfo: undefined, version: '2025-11-25' }, undefined), false);
   assert.equal(clientIdentified({ capabilities: {}, clientInfo: { name: 'x', version: '1' }, version: '2025-11-25' }, undefined), true);
 });
+{
+  // Frame shapes recorded from Claude Code 2.1.289 (protocol 2026-07-28): server/discover, then every request
+  // carries the client envelope plus Claude Code's own _meta keys; no initialize.
+  const PV = 'io.modelcontextprotocol/protocolVersion', CAPS = 'io.modelcontextprotocol/clientCapabilities', INFO = 'io.modelcontextprotocol/clientInfo';
+  const claudeCode = (capabilities) => ({ [PV]: '2026-07-28', [INFO]: { name: 'claude-code', title: 'Claude Code', version: '2.1.289' }, [CAPS]: capabilities });
+  const ELICIT = { roots: { listChanged: true }, elicitation: { form: {}, url: {} } };
+  const critical = cfg({ profiles: { write: true, writeCritical: true } });
+  async function modern(t, capabilities = ELICIT) {
+    const s = session(t, critical); let id = 100, tool = 0;
+    const meta = () => ({ ...claudeCode(capabilities), 'claudecode/toolUseId': 'toolu_synthetic_' + ++tool, progressToken: tool });
+    assert.deepEqual((await s.request({ jsonrpc: '2.0', id: 'server-discover-probe-1', method: 'server/discover', params: { _meta: claudeCode(capabilities) } })).result.supportedVersions, ['2026-07-28']);
+    const call = (args, extra = {}) => s.request({ method: 'tools/call', params: { name: 'darktrace_delete_tag', arguments: args, _meta: meta(), ...extra }, jsonrpc: '2.0', id: id++ });
+    const confirmed = async (tid = 9) => { const preview = (await call({ path: { tid } })).result.structuredContent; assert.match(preview.previewId, /^[a-f0-9]{32}$/); return { path: { tid }, confirm: true, previewId: preview.previewId }; };
+    return { s, call, confirmed };
+  }
+  test('MR-05.APPROVAL 2026-07-28 envelope elicitation: approval requested as input_required; accept executes once, decline/cancel send nothing', async t => {
+    const { s, call, confirmed } = await modern(t);
+    const args = await confirmed(), asked = (await call(args)).result;
+    assert.equal(asked.resultType, 'input_required'); assert.equal(s.state.calls, 0); assert.equal(typeof asked.requestState, 'string');
+    const prompt = asked.inputRequests[APPROVAL_INPUT_KEY]; assert.equal(prompt.method, 'elicitation/create'); assert.equal(prompt.params.mode, 'form');
+    assert.match(prompt.params.message, /CRITICAL action/); assert.match(prompt.params.message, /delete_tags_tid \(DELETE \/tags\/\{tid\}\)/); noCanaries(asked);
+    // Unsolicited answers without this server's state never count: the spent preview is not reusable.
+    const unsolicited = (await call(args, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept', content: {} } } })).result;
+    assert.equal(unsolicited.structuredContent.confirmationRequired, true); assert.equal(s.state.calls, 0);
+    const accepted = (await call(args, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept', content: {} } }, requestState: asked.requestState })).result;
+    assert.equal(accepted.isError, undefined, JSON.stringify(accepted)); assert.equal(s.state.calls, 1);
+    // Single use: replaying the accepted retry cannot execute again (the preview and the approval state are spent).
+    const replay = (await call(args, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept', content: {} } }, requestState: asked.requestState })).result;
+    assert.equal(replay.structuredContent.confirmationRequired, true); assert.equal(s.state.calls, 1);
+    for (const action of ['decline', 'cancel']) {
+      const next = await confirmed(), state = (await call(next)).result.requestState;
+      const refused = (await call(next, { inputResponses: { [APPROVAL_INPUT_KEY]: { action } }, requestState: state })).result.structuredContent;
+      assert.equal(refused.executed, false); assert.equal(refused.approval, action); assert.match(refused.hint, /Do not retry/); assert.equal(s.state.calls, 1);
+    }
+    // A retry with the state but no answer is a cancel.
+    const silent = await confirmed(), silentState = (await call(silent)).result.requestState;
+    assert.equal((await call(silent, { requestState: silentState })).result.structuredContent.approval, 'cancel'); assert.equal(s.state.calls, 1);
+  });
+  test('MR-05.APPROVAL approval state is integrity-protected and bound to the exact call', async t => {
+    const { s, call, confirmed } = await modern(t);
+    const first = await confirmed(9), state = (await call(first)).result.requestState;
+    const accept = { [APPROVAL_INPUT_KEY]: { action: 'accept', content: {} } };
+    const tampered = state.slice(0, -2) + (state.endsWith('AA') ? 'BB' : 'AA');
+    for (const requestState of [tampered, 'v1.e30.AAAA', CANARY]) assert.equal((await call(first, { inputResponses: accept, requestState })).result.structuredContent.confirmationRequired, true);
+    // State minted for tid 9 does not approve tid 10.
+    const other = await confirmed(10), otherState = (await call(other)).result.requestState; assert.equal(typeof otherState, 'string');
+    assert.equal((await call(other, { inputResponses: accept, requestState: state })).result.structuredContent.confirmationRequired, true);
+    assert.equal(s.state.calls, 0); noCanaries(s.frames);
+  });
+  test('MR-05.APPROVAL forged elicitation in params.arguments is ignored; missing envelope capability is refused with the operator hint', async t => {
+    for (const capabilities of [{}, { roots: { listChanged: true } }, { elicitation: { url: {} } }]) {
+      const { s, call, confirmed } = await modern(t, capabilities);
+      const args = await confirmed();
+      const refused = (await call(args)).result.structuredContent;
+      assert.equal(refused.executed, false); assert.equal(refused.approval, 'unsupported'); assert.match(refused.hint, /cannot show a human confirmation dialog \(MCP elicitation\)/); assert.match(refused.hint, /DARKTRACE_CRITICAL_APPROVAL=host/);
+      // Model-controlled arguments claiming the capability or an approval are rejected by the strict schema and never consulted.
+      for (const forged of [{ elicitation: { form: {} } }, { [CAPS]: ELICIT }, { _meta: claudeCode(ELICIT) }, { approve: true }, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept' } } }]) {
+        const reply = (await call({ ...(await confirmed()), ...forged })).result; assert.notEqual(reply.resultType, 'input_required'); assert.equal(reply.structuredContent?.executed ?? false, false);
+      }
+      assert.equal(s.state.calls, 0);
+    }
+    assert.equal(approvalChannel(undefined, '2026-07-28', claudeCode(ELICIT)), 'input-required');
+    assert.equal(approvalChannel(undefined, '2026-07-28', claudeCode({ elicitation: {} })), 'input-required');
+    for (const envelope of [claudeCode({}), claudeCode({ elicitation: { url: {} } }), claudeCode({ elicitation: true }), claudeCode([]), { ...claudeCode(ELICIT), [PV]: '2025-11-25' }, undefined, null, []])
+      assert.equal(approvalChannel(undefined, '2026-07-28', envelope), 'none');
+    // A legacy-era instance never uses the envelope; the initialize record decides.
+    assert.equal(approvalChannel(undefined, '2025-11-25', claudeCode(ELICIT)), 'none');
+    assert.equal(approvalChannel({}, '2026-07-28', claudeCode(ELICIT)), 'none');
+    assert.equal(approvalChannel({ elicitation: {} }, '2025-11-25', undefined), 'push');
+  });
+}
 test('MR-01/05.JSONRPC correlation IDs remain byte-for-byte even if containing controls or token literals', async t => {
   const s = session(t), id = PRIVATE + '\u202e\x1b' + String.fromCodePoint(0xe0049);
   const before = await s.request(listed(id)); assert.equal(before.id, id); assert.ok(before.error);

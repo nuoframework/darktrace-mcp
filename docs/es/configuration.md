@@ -54,7 +54,7 @@ Los perfiles deciden qué herramientas ve y puede usar el modelo. Se configuran 
 | `read` | Lecturas normales: dispositivos, model breaches, AI Analyst, lista de Antigena, etiquetas, modelos, métricas, estado | — |
 | `sensitive` | Lecturas que pueden devolver contenido en bruto: Advanced Search, contenido y búsqueda de correos, descarga de PCAP, eventos de auditoría de correo | — |
 | `write` | Cambios de nivel medio y alto: reconocer, comentar, fijar, etiquetas, etiquetas de dispositivo, solicitar PCAP, investigaciones de AI Analyst | Añade `dryRun:true` a una llamada para ver una vista previa sin cambiar nada |
-| `critical` | Acciones de Antigena/RESPOND, intel feed, subredes, acciones sobre correo, borrar una etiqueta | Solo se ejecuta si la llamada incluye `confirm:true`. Si no, devuelve una vista previa |
+| `critical` | Acciones de Antigena/RESPOND, intel feed, subredes, acciones sobre correo, borrar una etiqueta | Solo se ejecuta si la llamada repite una vista previa con `confirm:true` y su `previewId`, y (por defecto) aceptas el diálogo de confirmación del servidor. Si no, devuelve una vista previa. Consulta [aprobación humana](#aprobación-humana) |
 | `all` | Todo lo anterior | Las mismas reglas por operación |
 
 Ejemplos:
@@ -73,6 +73,25 @@ Buenas prácticas:
 - `confirm:true` debe venir de ti, después de leer la vista previa. No le digas al modelo que confirme siempre.
 - Cada escritura y acción crítica genera una línea de auditoría (JSON con `"audit":true`) en el log stderr del servidor.
 - Si una escritura agota el tiempo, su resultado es desconocido. Revisa el appliance antes de repetir. Las escrituras nunca se reintentan solas.
+
+### Aprobación humana
+
+Quién confirma una escritura antes de que llegue al appliance:
+
+| Variable | Campo JSON | Valores | Por defecto |
+|---|---|---|---|
+| `DARKTRACE_CRITICAL_APPROVAL` | `profiles.criticalApproval` | `elicitation`, `host` | `elicitation` |
+| `DARKTRACE_WRITE_APPROVAL` | `profiles.writeApproval` | `elicitation`, `host` | `host` |
+
+- `elicitation`: el propio servidor te pregunta en un diálogo de confirmación (elicitación MCP). El diálogo muestra la operación y los valores exactos. No se envía nada si no aceptas. Rechazar, cancelar, cerrar el diálogo o no responder en 2 minutos equivalen a no.
+- `host`: el servidor confía en el aviso de permisos de herramientas de tu cliente. Las acciones críticas siguen necesitando `confirm:true` con un `previewId` válido. Este modo es más débil: una regla de "permitir siempre" para la herramienta aprueba todas las llamadas siguientes sin enseñarte los valores.
+
+El servidor solo considera que un cliente puede mostrar el diálogo si el cliente lo declara a nivel de protocolo. Los argumentos de herramienta que escribe el modelo nunca cuentan. Hay dos formas de declararlo:
+
+- **Clientes del protocolo 2025**: declaran la capacidad `elicitation` en `initialize`. El servidor envía una petición `elicitation/create`.
+- **Clientes del protocolo 2026-07-28** (por ejemplo, Claude Code): no hay `initialize`. Declaran `elicitation` en el sobre `_meta` de cada petición. Esa revisión no tiene peticiones del servidor al cliente, así que el servidor responde a la llamada con un resultado `input_required` que lleva el diálogo. El cliente te pregunta y repite la llamada idéntica con tu respuesta. El servidor acepta esa respuesta una sola vez, para esa llamada exacta, durante 2 minutos, y solo junto con el estado firmado que emitió.
+
+Si el cliente no declara un diálogo de formulario (por ejemplo, sin `elicitation` o solo con URL), las acciones críticas se rechazan con `"approval":"unsupported"`. La pista dice que el host no puede mostrar el diálogo y menciona `DARKTRACE_CRITICAL_APPROVAL=host`. Consejos por cliente: [configuración de clientes](clients.md#claude-code).
 
 ### Variables antiguas
 

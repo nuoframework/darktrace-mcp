@@ -98,6 +98,11 @@ claude mcp get darktrace
 
 Usa `/mcp` dentro de Claude Code para ver el servidor. Prefiere `--scope user`. Un `.mcp.json` de proyecto se ejecuta para todo el que confíe en el repositorio: úsalo solo después de revisar cada comando y variable.
 
+**Aprobar acciones críticas.** Mantén el valor por defecto `DARKTRACE_CRITICAL_APPROVAL=elicitation`. Claude Code usa el protocolo 2026-07-28 y declara elicitación de formulario en cada petición (probado con Claude Code 2.1.289). Cuando Claude repite una llamada ya previsualizada con `confirm:true`, Claude Code muestra "MCP server "darktrace" requests your input" con la operación y los valores exactos, y las opciones **Accept** / **Decline**. No se envía nada si no eliges Accept. Consulta [aprobación humana](configuration.md#aprobación-humana).
+
+- **Ejecuciones no interactivas** (`claude -p`, CI): no hay nadie a quien mostrar el diálogo, así que Claude Code responde "cancel". La acción se rechaza y no se reintenta. Para aprobar en automatización, responde al diálogo con un hook `Elicitation` que controles. El hook recibe el mensaje del servidor (operación y valores) y puede devolver accept o decline.
+- **`DARKTRACE_CRITICAL_APPROVAL=host`**: úsalo solo si no puedes responder al diálogo, por ejemplo con un Claude Code antiguo que rechaza con `"approval":"unsupported"`. En ese caso el único control es el aviso de permisos por herramienta de Claude Code. Una regla de permitir (`--allowedTools`, "always allow") aprueba todas las llamadas críticas siguientes a esa herramienta sin enseñarte los valores.
+
 ## Codex
 
 **Automática.** `darktrace-mcp setup`.

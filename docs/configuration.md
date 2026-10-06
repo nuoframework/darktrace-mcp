@@ -54,7 +54,7 @@ Profiles decide which tools the model sees and can call. Set them with a comma-s
 | `read` | Normal reads: devices, model breaches, AI Analyst, Antigena list, tags, models, metrics, status | — |
 | `sensitive` | Reads that can return raw content: Advanced Search, email content and search, PCAP download, email audit events | — |
 | `write` | Medium and high changes: acknowledge, comment, pin, tags, device labels, PCAP requests, AI Analyst investigations | Add `dryRun:true` to a call to preview it without changing anything |
-| `critical` | Antigena/RESPOND actions, intel feed, subnets, email actions, deleting a tag | Runs only when the call includes `confirm:true`. Otherwise it returns a preview |
+| `critical` | Antigena/RESPOND actions, intel feed, subnets, email actions, deleting a tag | Runs only when the call repeats a preview with `confirm:true` and its `previewId`, and (by default) you accept the server's confirmation dialog. Otherwise it returns a preview. See [human approval](#human-approval) |
 | `all` | All of the above | Same rules per operation |
 
 Examples:
@@ -73,6 +73,25 @@ Good practice:
 - `confirm:true` should come from you, the user, after reading the preview. Do not tell the model to always confirm.
 - Every write and critical call writes an audit line (JSON with `"audit":true`) to the server's stderr log.
 - If a write times out, its result is unknown. Check the appliance before you try again. Writes are never retried automatically.
+
+### Human approval
+
+Who confirms a write before it reaches the appliance:
+
+| Variable | JSON field | Values | Default |
+|---|---|---|---|
+| `DARKTRACE_CRITICAL_APPROVAL` | `profiles.criticalApproval` | `elicitation`, `host` | `elicitation` |
+| `DARKTRACE_WRITE_APPROVAL` | `profiles.writeApproval` | `elicitation`, `host` | `host` |
+
+- `elicitation`: the server itself asks you in a confirmation dialog (MCP elicitation). The dialog shows the exact operation and values. Nothing is sent unless you accept. Decline, cancel, a closed dialog or no answer within 2 minutes all mean no.
+- `host`: the server relies on your client's own tool-permission prompt. Critical actions still need `confirm:true` with a valid `previewId`. This mode is weaker: an "always allow" rule for the tool approves every later call without showing you the values.
+
+The server only treats a client as able to show the dialog when the client says so at the protocol level. Tool arguments written by the model never count. There are two ways to say it:
+
+- **Protocol 2025 clients** declare the `elicitation` capability in `initialize`. The server sends an `elicitation/create` request.
+- **Protocol 2026-07-28 clients** (Claude Code, for example) have no `initialize`. They declare `elicitation` in the `_meta` envelope of each request. That revision has no server-to-client requests, so the server answers the call with an `input_required` result that carries the dialog. The client asks you and repeats the identical call with your answer. The server accepts that answer once, for that exact call, within 2 minutes, and only together with the signed state it issued.
+
+If the client declares no form dialog (for example no `elicitation`, or URL-only), critical actions are refused with `"approval":"unsupported"`. The hint says that the host cannot show the dialog and names `DARKTRACE_CRITICAL_APPROVAL=host`. Per-client advice: [client setup](clients.md#claude-code).
 
 ### Older variables
 
