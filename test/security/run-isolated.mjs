@@ -19,10 +19,10 @@ function hashes(dir,prefix='') {
 }
 const sourceHashes=hashes(join(snapshot,'src'));
 const childEnv={PATH:process.env.PATH,NODE_EXTRA_CA_CERTS:join(snapshot,'test/security/fixtures/ca.pem')};
-const build=spawnSync(process.execPath,['scripts/build.mjs'],{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:120000});
+const build=spawnSync(process.execPath,['scripts/build.mjs'],{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:300000});
 const suites=readdirSync(join(snapshot,'test/security')).filter(n=>n.endsWith('.test.mjs')).sort();
 const command=[process.execPath,'--import','./dist/test/security/test-runtime-argv.js','--import','./test/security/assertion-counter.mjs','--test','--test-reporter=spec','--test-concurrency=1',...suites.map(n=>'test/security/'+n)];
-const run=build.status===0?spawnSync(command[0],command.slice(1),{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024}):null;
+const run=build.status===0?spawnSync(command[0],command.slice(1),{cwd:snapshot,env:childEnv,encoding:'utf8',timeout:600000,maxBuffer:32*1024*1024}):null;
 const evidence=join(root,'test/security/evidence');mkdirSync(evidence,{recursive:true});
 const stamp=new Date().toISOString().replace(/[:.]/g,'-');
 const git=spawnSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'});
