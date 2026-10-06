@@ -1,130 +1,120 @@
-# Releases and distribution
+Dónde se publica cada versión, cómo verificarla y cómo preparar una release reproducible.
 
-[README](../README.md) · [Getting started](getting-started.md) · [Changelog](../CHANGELOG.md)
+[README](../README.md) · [Primeros pasos](getting-started.md) · [Cambios](../CHANGELOG.md)
 
-> Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
+**Español** · [English](en/releases.md)
 
-## 1.1.2 candidate
+<a id="releases-and-distribution"></a>
 
-Version 1.1.2 ships what was merged to `main` after 1.1.1 ([changelog](../CHANGELOG.md#112--2026-10-06)): the self-service Docker path in `setup`, the URL prompt without a saved default, `uninstall`, the Claude Code plugin bundle with the Codex marketplace layout, signed release assets with SLSA build provenance, the pinned npm fallback, property-based tests, the CodeQL fixes and the zlib 1.3.2-r1 runtime image. The API surface, tool contracts and lab evidence are those of 1.1.1. The [1.1.2 release pins](security/release-pins-1.1.2.md) record the checks and byte bindings on the release commit. Current [known limitations](../CHANGELOG.md#known-limitations-in-112). The 1.1.1 and 1.1.0 evidence below is historical.
+# Versiones y distribución
 
-## Release status (2026-10-06)
+> Para instalar, usa el [asistente](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`. Esta página explica los canales y el procedimiento del propietario. v1.0.0 contiene la compilación anterior de solo lectura (15 herramientas); la API completa y los perfiles del README se distribuyen desde 1.1.0.
 
-**1.1.2 is published** on npm, ghcr and GitHub Release (2026-10-06), as are 1.1.1 and 1.1.0. The installation commands in this repository are pinned to 1.1.2 and the README Docker snippet to its index digest.
+<a id="111-candidate"></a>
 
-## Published 1.1.2 (2026-10-06)
+## 1.1.1
 
-Version 1.1.2 is published on [npm with a provenance attestation](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.2), in ghcr, and as the [v1.1.2 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2). It is the first release whose assets are signed by `release.yml` (one `<asset>.sigstore.json` per asset) and attested with SLSA build provenance. Published by [release run 37536315754](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315754) from the tag; all eight jobs succeeded. The published tarball is byte-identical to the local `release:prepare` candidate recorded in the [release pins](security/release-pins-1.1.2.md) (`e8454c85…fe6a`).
+La [campaña de cobertura](security/lab-gap-campaign-1.1.1.md) eleva la evidencia a 59 operaciones, 6 parciales. Los [valores fijados de 1.1.1](security/release-pins-1.1.1.md) recogen las comprobaciones y la vinculación de bytes. Las [limitaciones](../CHANGELOG.md#known-limitations-in-111) incluyen Email, CVE, tipos de filtro y errores DELETE del gateway. La evidencia 1.1.0 siguiente es histórica.
 
-| Artifact | Value |
-|---|---|
-| Release commit (merge of [PR #20](https://github.com/nuoframework/darktrace-mcp/pull/20)) | `126e5ea88224dbbac3b24608f745c38a3d380b7b`, tag `v1.1.2` |
-| CI run on the release commit (`ci.yml`, both docker jobs) | [Run 37536315729](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315729): offline Node 22 and 24, lint, docker amd64 and arm64 all succeeded; consumed by the release run's `docker-gates` job |
-| npm `@nuoframework/darktrace-mcp@1.1.2` | `dist.shasum` `b83bb7b6a1eae79f8bd67c66459901a2a5f13098`, `dist.integrity` `sha512-TIdr8PaJ3/OtItU008JNS+Wq2eRTNkflMhPp+bG3fDl4R+XcZLhRoBdUhEqwmXlKJDoFQ30Wcp0WKv6Fev7E3Q==`, tarball SHA-256 `e8454c85012cf67ae39190f439974af74beda935ea7261db3ee73b6c8c71fe6a`; [npm provenance attestation](https://registry.npmjs.org/-/npm/v1/attestations/@nuoframework%2fdarktrace-mcp@1.1.2) (SLSA v1) |
-| ghcr index digest `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`; image manifests linux/amd64 `sha256:e5735fe678c341ace7b15a6ec5b727866f49ca0538c891ef9b98869e23390ac5`, linux/arm64 `sha256:b79158894172fefa8cd48ee215528e516b9ce2262e099dca1cbcb86961f71493` (the per-architecture push digests in the release notes, `8a7f06cb…` and `2967fab0…`, name the pushed per-architecture indexes that include the buildx attestation manifests) |
-| GitHub Release `Darktrace MCP v1.1.2` | [v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2), published 2026-10-06T21:56:59Z: `nuoframework-darktrace-mcp-1.1.2.tgz`, `darktrace-mcp-1.1.2.mcpb` (SHA-256 `a6bed56e7fd3dcf891a4f13d5c516baeaf701dbec11e47247bd83b7135c67478`), `SHA256SUMS`, SBOM, evidence, one `<asset>.sigstore.json` per asset (11), `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json` |
-| GitHub attestation (provenance) | [attestations/53354910](https://github.com/nuoframework/darktrace-mcp/attestations/53354910); `gh attestation verify nuoframework-darktrace-mcp-1.1.2.tgz --repo nuoframework/darktrace-mcp --signer-workflow nuoframework/darktrace-mcp/.github/workflows/release.yml --source-ref refs/tags/v1.1.2` and the `--bundle` form both succeed; `cosign verify-blob` (cosign 3.1.3) verifies the tarball, the `.mcpb` and `SHA256SUMS` bundles with the identity `.../release.yml@refs/tags/v1.1.2` |
-| Release pins and local Docker check | [release-pins-1.1.2.md](security/release-pins-1.1.2.md) |
-| Security receipt, macOS arm64 (Node 24.14.1), release commit | [`2026-10-06T21-20-32-905Z.json`](../test/security/evidence/2026-10-06T21-20-32-905Z.json), SHA-256 `dc8d1373…0f13`: 1,150 subcases, 1,147 pass, 3 platform skips; source tree `d6d76aa9…6e30` |
-| Security receipt, Linux arm64 (Node 24.18.1), local Docker gate | [`release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`](../test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json), SHA-256 `8f845606…550c`: 1,150 subcases, 1,150 pass, 0 skips; image `sha256:9d71b972…6a23` |
+<a id="release-status-2026-10-06"></a>
 
-## Published 1.1.1 (2026-10-06)
+## Estado de publicación (2026-10-06)
 
-Version 1.1.1 is published on [npm](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.1), in ghcr and as the [v1.1.1 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) (`.mcpb`, npm tarball, `SHA256SUMS`, runtime SBOM and evidence files; signature bundles can be added afterwards with `sign-release.yml`). The ghcr index digest is `sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1`, with linux/amd64 and linux/arm64 manifests. Its checks and byte bindings are in the [1.1.1 release pins](security/release-pins-1.1.1.md) and the [lab gap campaign](security/lab-gap-campaign-1.1.1.md).
+**1.1.1 está publicada en npm, ghcr y GitHub Release**, comprobado el 2026-10-06. npm devuelve la versión `1.1.1`; la [release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) es pública e incluye `.mcpb`, paquete, sumas y evidencia. El índice ghcr para linux/amd64 y linux/arm64 es `sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1`. La sección siguiente conserva 1.1.0 por separado; no uses su digest para fijar 1.1.1.
 
-## Published 1.1.0 (2026-10-06)
+<a id="published-110-2026-10-06"></a>
 
-Version 1.1.0 is published on [npm with a provenance attestation](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.0), in ghcr, and as the [v1.1.0 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0). The release includes the `.mcpb`, npm tarball, `SHA256SUMS`, runtime SBOM and evidence files. Publication status was checked on 2026-10-06; the dated gate reviews below retain their original scope and findings.
+## 1.1.0 publicada (2026-10-06)
 
-The ghcr index digest is `sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511`, with linux/amd64 and linux/arm64 manifests. Use `ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511` for pulls and client configuration; per-platform image IDs are not interchangeable with registry manifest digests.
+1.1.0 se publicó en [npm con atestación de procedencia](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.0), ghcr y [GitHub Release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0). Incluye `.mcpb`, paquete npm, `SHA256SUMS`, SBOM del runtime y evidencia. Estado comprobado el 2026-10-06; las revisiones fechadas conservan su alcance y hallazgos originales.
 
-## Distribution channels (1.1.0 and later)
+Digest del índice ghcr: `sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511`, con manifiestos linux/amd64 y linux/arm64. Usa `ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511` para descargar y configurar clientes. Los ID por plataforma no son intercambiables con digests de manifiesto del registro.
 
-| Channel | Name | Produced by |
+<a id="distribution-channels-110-and-later"></a>
+
+## Canales de distribución (desde 1.1.0)
+
+| Canal | Nombre | Quién lo produce |
 |---|---|---|
-| npm (public) | [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp), exact versions only | `publish-npm` job: publishes the byte-verified `release:prepare` tarball with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, `id-token: write`) and `--provenance --access public` |
-| GitHub Container Registry (public) | `ghcr.io/nuoframework/darktrace-mcp:<version>`, linux/amd64 + linux/arm64, pin by digest | `publish-ghcr` (one native build per architecture, pushed by digest) and `publish-ghcr-manifest` (one `<version>` tag; no `latest` tag is ever moved) |
-| GitHub Release assets | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM, evidence; from the first release after 1.1.1 also one `<asset>.sigstore.json` signature per asset, `darktrace-mcp-<version>.intoto.jsonl` and `darktrace-mcp-<version>.provenance.sigstore.json` | `github-release` job: cosign keyless signatures and SLSA provenance over the verified bytes ([verification](#verifying-release-signatures-and-provenance)) |
-| MCP Registry | `io.github.nuoframework/darktrace-mcp` ([`server.json`](../server.json), `mcpName` in `package.json`) | owner, with `mcp-publisher` (below) |
+| npm público | [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp), solo versiones exactas | `publish-npm`: publica el paquete verificado de `release:prepare` con [publicación de confianza npm](https://docs.npmjs.com/trusted-publishers) (OIDC, `id-token: write`) y `--provenance --access public` |
+| GitHub Container Registry público | `ghcr.io/nuoframework/darktrace-mcp:<version>`, linux/amd64 + linux/arm64; fija digest | `publish-ghcr` (compilación nativa por arquitectura y envío por digest) y `publish-ghcr-manifest` (etiqueta `<version>`; nunca se mueve `latest`) |
+| Archivos de GitHub Release | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM y evidencia; desde la primera release posterior a 1.1.1: `<asset>.sigstore.json` por archivo, `darktrace-mcp-<version>.intoto.jsonl` y `darktrace-mcp-<version>.provenance.sigstore.json` | `github-release`: firmas cosign sin claves persistentes y procedencia SLSA sobre bytes verificados ([verificación](#verifying-release-signatures-and-provenance)) |
+| MCP Registry | `io.github.nuoframework/darktrace-mcp` ([`server.json`](../server.json), `mcpName` en `package.json`) | Propietario mediante `mcp-publisher` |
 
-The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
+npm y GitHub Release reciben los mismos bytes del paquete; `SHA256SUMS` y `verification.json` de `prepare` los describen. `npx` se usa una vez para el arranque inicial: `setup` instala una copia fija y escribe rutas absolutas, por lo que los clientes configurados con el asistente no arrancan desde el registro.
 
-The 1.1.0 candidate gates pin six operator profile contracts (including `read+sensitive+write`, AD-W-18) and two approval-description variants. The [release pin evidence](security/release-pins-1.1.0.md) records the final counts and byte bindings. The independent content review of the regenerated full-API fixture required by [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) is recorded as ACCEPT in the [1.1.0 final gate review](security/final-gate-review-1.1.0.md#15-e11-independent-review-of-the-full-api-contract-fixture-o) §1.5.
+Las comprobaciones 1.1.0 fijan seis contratos de perfiles (incluido `read+sensitive+write`, AD-W-18) y dos variantes de descripción de aprobación. Los [registros](security/release-pins-1.1.0.md) contienen cifras y vinculación final de bytes. La revisión independiente del contrato completo regenerado exigida por [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) consta como ACCEPT en la [revisión final 1.1.0 §1.5](security/final-gate-review-1.1.0.md#15-e11-independent-review-of-the-full-api-contract-fixture-o).
 
-### 1.1.0 evidence files
+<a id="110-evidence-files"></a>
 
-Evidence for the published 1.1.0 release. Each receipt is bound to its recorded source and runtime bytes; see the [final gate review](security/final-gate-review-1.1.0.md) and [dated owner decisions](security/owner-decisions-1.1.0.md). Publication does not remove the disclosed residual risks.
+### Archivos de evidencia 1.1.0
 
-| Evidence | File | Covers |
+Cada registro está ligado a sus bytes de origen y runtime; consulta la [revisión final](security/final-gate-review-1.1.0.md) y las [decisiones fechadas del propietario](security/owner-decisions-1.1.0.md). Publicar no elimina los riesgos residuales.
+
+| Evidencia | Archivo | Alcance |
 |---|---|---|
-| Security receipt, Linux arm64 (Node 24.18.1) | [`release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json`](../test/security/evidence/release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json), SHA-256 `cd71cecd…dad9` | 1,150 security subcases, 1,150 pass; source tree `5b1208f1…fdc503e` |
-| Security receipt, macOS arm64 (Node 24.14.1) | [`release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json`](../test/security/evidence/release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json), SHA-256 `5699ae23…0736` | 1,150 subcases, 1,147 pass, 3 platform skips (setgid file modes) |
-| Earlier receipt (superseded) | [`2026-10-06T11-44-04-525Z.json`](../test/security/evidence/2026-10-06T11-44-04-525Z.json) | Before the V-W-01 fix: 6 Advanced Search POST failures |
-| Release pins and local Docker check | [release-pins-1.1.0.md](security/release-pins-1.1.0.md) | Every CI/verify pin, `release:prepare` output hashes, arm64 image `sha256:7e5a2a41…6aad` |
-| Live lab checks after the write controls | [final-lab-campaign-1.1.0.md](security/final-lab-campaign-1.1.0.md) | 50 tools listed; reads, POST search, `post_tags` preview, `confirmation_required`, the intel-feed critical flow |
-| Signing probe | [lab-signing-evidence.md](security/lab-signing-evidence.md) and its [JSON](security/evidence/lab-signing-evidence-2026-10-06T09-17-38-944Z.json) | Which request-signing shapes the 7.1.0 appliance accepts |
-| Lab results per operation | [CHANGES-core §6](CHANGES-core.md#6-live-lab-validation-darktrace-710-2026-10-06) and the [tool reference](tools.md) | 56 operations with lab evidence, 11 partial; email not validated |
+| Seguridad Linux arm64 (Node 24.18.1) | [`release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json`](../test/security/evidence/release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json), SHA-256 `cd71cecd…dad9` | 1.150 subcasos, todos correctos; origen `5b1208f1…fdc503e` |
+| Seguridad macOS arm64 (Node 24.14.1) | [`release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json`](../test/security/evidence/release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json), SHA-256 `5699ae23…0736` | 1.150 subcasos, 1.147 correctos, 3 omitidos por plataforma (modos setgid) |
+| Registro anterior, sustituido | [`2026-10-06T11-44-04-525Z.json`](../test/security/evidence/2026-10-06T11-44-04-525Z.json) | Antes de V-W-01: 6 fallos POST Advanced Search |
+| Valores fijados y Docker local | [release-pins-1.1.0.md](security/release-pins-1.1.0.md) | Valores CI/verificación, hashes de `release:prepare`, imagen arm64 `sha256:7e5a2a41…6aad` |
+| Laboratorio tras controles de escritura | [final-lab-campaign-1.1.0.md](security/final-lab-campaign-1.1.0.md) | 50 herramientas listadas; lecturas, búsqueda POST, vista previa `post_tags`, `confirmation_required`, flujo crítico de intel feed |
+| Prueba de firma | [lab-signing-evidence.md](security/lab-signing-evidence.md) y [JSON](security/evidence/lab-signing-evidence-2026-10-06T09-17-38-944Z.json) | Formas de firma aceptadas por 7.1.0 |
+| Resultados por operación | [CHANGES-core §6](CHANGES-core.md#6-live-lab-validation-darktrace-710-2026-10-06) y [herramientas](tools.md) | En 1.1.0: 56 operaciones con evidencia, 11 parciales; Email sin validar |
 
-Additional available evidence:
+Evidencia adicional:
 
-| Evidence | Record | Scope |
+| Evidencia | Registro | Alcance |
 |---|---|---|
-| Release-commit CI | [Run 37497433186](https://github.com/nuoframework/darktrace-mcp/actions/runs/37497433186), commit `f95e798bf3ed3f0dcedb91ff86e84849f1b12acb` | Node 22 and 24 offline jobs, lint, and native Docker jobs on amd64 and arm64 all succeeded |
-| Residual-risk decisions | [Owner decisions, 2026-10-06](security/owner-decisions-1.1.0.md) | Recorded acceptance of specific residuals; acceptance does not remove them |
-| Published assets | [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) | `.mcpb`, tarball, `SHA256SUMS`, SBOM and evidence files |
+| CI del commit de publicación | [37497433186](https://github.com/nuoframework/darktrace-mcp/actions/runs/37497433186), commit `f95e798bf3ed3f0dcedb91ff86e84849f1b12acb` | Correctos Node 22/24 offline, lint y Docker nativo amd64/arm64 |
+| Decisiones sobre riesgos | [Propietario, 2026-10-06](security/owner-decisions-1.1.0.md) | Aceptación de riesgos específicos; no los elimina |
+| Archivos publicados | [v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) | `.mcpb`, paquete, `SHA256SUMS`, SBOM y evidencia |
 
-A vulnerability scan of the 1.1.0 runtime is still not recorded here. CI is evidence for the source-built images it tested; the published ghcr images are rebuilt separately. The [known limitations](../CHANGELOG.md#known-limitations-in-110) remain disclosed in the release notes.
+No consta aquí un escaneo de vulnerabilidades del runtime 1.1.0. CI acredita las imágenes compiladas que probó; ghcr se recompila por separado. Las [limitaciones](../CHANGELOG.md#known-limitations-in-110) siguen declaradas en las notas.
 
-### Release naming
+<a id="release-naming"></a>
 
-Use one convention for every GitHub Release: tag `vX.Y.Z` and title `Darktrace MCP vX.Y.Z` (for example, tag `v1.1.1`, title `Darktrace MCP v1.1.1`). Pre-release tags include their version suffix, such as `v1.2.0-rc.1`; only pre-release titles may append ` — short subtitle`. The `github-release` job derives `VERSION` from the tag by removing its leading `v` and passes `--title "Darktrace MCP v${VERSION}"`. Existing releases already follow this convention.
+### Nombres de releases
 
-### Verifying release signatures and provenance
+Convención única: etiqueta `vX.Y.Z` y título `Darktrace MCP vX.Y.Z` (por ejemplo `v1.1.1` y `Darktrace MCP v1.1.1`). Las preliminares incluyen sufijo, como `v1.2.0-rc.1`; solo sus títulos pueden añadir ` — subtítulo breve`. `github-release` obtiene `VERSION` quitando la `v` inicial y pasa `--title "Darktrace MCP v${VERSION}"`. Las releases existentes siguen esa convención.
 
-From the first release after 1.1.1, the `github-release` job signs every asset and attests its build provenance before it creates the release ([how it works](security/supply-chain-checks.md#release-signing-and-provenance)):
+<a id="verifying-release-signatures-and-provenance"></a>
 
-- `<asset>.sigstore.json`: a keyless [Sigstore](https://www.sigstore.dev/) bundle written by `cosign sign-blob` (certificate, signature and transparency-log entry), one per asset including `SHA256SUMS`. The certificate identity is `https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version>`.
-- `darktrace-mcp-<version>.intoto.jsonl`: the SLSA v1 build provenance statement that lists every asset as a subject (in-toto DSSE envelope, one line).
-- `darktrace-mcp-<version>.provenance.sigstore.json`: the same statement with its verification material, as `actions/attest` wrote it and as the GitHub attestations API stores it.
+### Verificar firmas y procedencia
 
-Download the asset and its signature or the provenance file, then:
+Desde la primera release posterior a 1.1.1, `github-release` firma cada archivo y atestigua su procedencia antes de crear la release ([funcionamiento](security/supply-chain-checks.md#release-signing-and-provenance)):
 
-```sh
-# Provenance (GitHub CLI 2.49 or newer): built by release.yml in this repository, from the tag
-gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
-  --signer-workflow nuoframework/darktrace-mcp/.github/workflows/release.yml --source-ref refs/tags/v<version>
-# Same check from the downloaded bundle instead of the attestations API
-gh attestation verify nuoframework-darktrace-mcp-<version>.tgz --repo nuoframework/darktrace-mcp \
-  --bundle darktrace-mcp-<version>.provenance.sigstore.json
-# Signature (cosign 3.x): the bundle, the exact workflow identity and the GitHub OIDC issuer
-cosign verify-blob --bundle nuoframework-darktrace-mcp-<version>.tgz.sigstore.json \
-  --certificate-identity https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version> \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  nuoframework-darktrace-mcp-<version>.tgz
-# The provenance statement itself (subjects, builder, source commit)
-jq -r .payload darktrace-mcp-<version>.intoto.jsonl | base64 -d | jq .
+- `<asset>.sigstore.json`: archivo [Sigstore](https://www.sigstore.dev/) sin claves persistentes, creado por `cosign sign-blob` (certificado, firma y entrada del registro de transparencia), uno por archivo incluido `SHA256SUMS`. La identidad del certificado es `https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v<version>`.
+- `darktrace-mcp-<version>.intoto.jsonl`: declaración SLSA v1 de procedencia de compilación, con cada archivo como sujeto (sobre in-toto DSSE, una línea).
+- `darktrace-mcp-<version>.provenance.sigstore.json`: la misma declaración con su material de verificación, tal como la escribe `actions/attest` y la guarda la API de atestaciones de GitHub.
+
+Descarga el archivo y su firma o procedencia; después:
+
 ```
 
-`--certificate-identity-regexp '^https://github.com/nuoframework/darktrace-mcp/\.github/workflows/release\.yml@refs/tags/v'` accepts any tag of this workflow. Both tools check the Sigstore certificate chain and the transparency log; `sha256sum -c SHA256SUMS` still checks that the downloaded bytes match, and verifying `SHA256SUMS.sigstore.json` proves the checksum file itself.
+`--certificate-identity-regexp '^https://github.com/nuoframework/darktrace-mcp/\.github/workflows/release\.yml@refs/tags/v'` acepta cualquier etiqueta de ese workflow. Ambas herramientas comprueban la cadena de certificados Sigstore y el registro de transparencia. `sha256sum -c SHA256SUMS` sigue comprobando los bytes; verificar `SHA256SUMS.sigstore.json` autentica el archivo de sumas.
 
-Releases published before this change (`v0.1.0-alpha.0`, `v1.0.0`, `v1.1.0`, `v1.1.1`) receive signatures after the fact through `sign-release.yml` (next section). Their bundles have the identity `.../.github/workflows/sign-release.yml@refs/heads/main`, state that the published bytes were signed on that date, and carry no provenance.
+Las versiones anteriores (`v0.1.0-alpha.0`, `v1.0.0`, `v1.1.0`, `v1.1.1`) se pueden firmar después mediante `sign-release.yml`. Sus archivos usan la identidad `.../.github/workflows/sign-release.yml@refs/heads/main`, acreditan la firma de los bytes publicados en esa fecha y no aportan procedencia de compilación.
 
-### Signing a release published before 1.1.2 (owner, once per tag)
+<a id="signing-a-release-published-before-112-owner-once-per-tag"></a>
 
-1. Actions → **Sign an existing release** → *Run workflow* with the tag, for example `v1.1.1`; or `gh workflow run sign-release.yml -f tag=v1.1.1`.
-2. The run downloads the assets, verifies them with the release's `SHA256SUMS`, signs every asset that has no bundle yet, verifies the bundles and uploads only the new `<asset>.sigstore.json` files. Existing assets and the release notes are never changed, so re-running is safe.
-3. Repeat for `v1.1.0`, `v1.0.0` and `v0.1.0-alpha.0`. Scorecard's Signed-Releases check averages the last five releases with assets, so all four need signatures for the full effect ([status](security/supply-chain-checks.md#status-and-accepted-gaps-score-67-at-0e4d64f-2026-10-06)).
+### Firmar una release anterior a 1.1.2 (propietario, una vez por etiqueta)
 
-### Publishing a version (owner)
+1. Actions → **Sign an existing release** → *Run workflow*, con la etiqueta, por ejemplo `v1.1.1`; o `gh workflow run sign-release.yml -f tag=v1.1.1`.
+2. Descarga los archivos, los comprueba con `SHA256SUMS`, firma los que todavía no tienen firma, verifica y sube solo los nuevos `<asset>.sigstore.json`. No modifica archivos existentes ni notas: se puede repetir.
+3. Repite para `v1.1.0`, `v1.0.0` y `v0.1.0-alpha.0`. Signed-Releases de Scorecard promedia las cinco últimas releases con archivos; las cuatro necesitan firma para mejorar la puntuación completa ([estado](security/supply-chain-checks.md#status-and-accepted-gaps-score-67-at-0e4d64f-2026-10-06)).
 
-1. Set the same `version` in `package.json`, `package-lock.json`, `npm-shrinkwrap.json`, `manifest.json` and `server.json`, update `CHANGELOG.md`, commit, then create and push the tag `v<version>` on the reviewed commit. `release.yml` refuses a tag that does not match the package version.
-2. The workflow runs `prepare` exactly as before (clean install, typecheck, tests, security suite, two reproducible builds, tarball verification). Only when it passes do `publish-npm` and `publish-ghcr*` run, both from the verified bytes.
-   - **npm propagation.** `publish-npm` fails only when `npm publish` itself fails, based on npm's own exit code. A new version can take several minutes to appear on the public registry. After publishing, the job polls `npm view <package>@<version> --registry https://registry.npmjs.org` every 30 s for up to 15 minutes, then writes the registry record to the step summary. If the version is still not visible, the job emits a warning, records the tarball shasum (SHA-1, cross-checked against the verified tarball) and sha512 integrity, and still succeeds.
-   - **GitHub Release.** `github-release` runs when `prepare`, `docker-gates`, `pack-mcpb` and `publish-ghcr-manifest` succeeded and `publish-npm` did not fail. A delay in recording the npm version does not block the release, but a failed publish does. Before writing the body, the job checks the registry once more. The release body records the npm status as `published` (with the `npm view` record) or `published, pending registry propagation` (with the shasum and integrity).
-3. **npm trusted publisher (one-time).** On npmjs.com open the package → Settings → Trusted publisher → GitHub Actions: organization `nuoframework`, repository `darktrace-mcp`, workflow filename `release.yml`, no environment, allow `npm publish`. Until this exists (for example for the very first publish of the package name) the job falls back to an `NPM_TOKEN` repository secret (granular access token, publish-only, scoped to this package) and prints a warning; delete the secret once the trusted publisher works. Provenance statements are generated either way.
-4. **ghcr visibility (one-time).** The first push creates the package as private. In the organization's Packages settings set `darktrace-mcp` to public and confirm it is linked to this repository (the image carries `org.opencontainers.image.source`). Copy the digest from the `publish-ghcr-manifest` summary or the `ghcr-image-digest` artifact into the release notes.
-5. **Release assets.** The `github-release` job normally creates the release, with the title `Darktrace MCP v<version>`. Use this manual fallback only if that job did not run, for example because `publish-npm` failed and was then fixed by hand. Download the `darktrace-mcp-release-candidate` artifact, verify `SHA256SUMS`, build the extension from the tag (`npm ci --ignore-scripts && npm run pack:mcpb`), then create the release with `gh release create v<version> --title "Darktrace MCP v<version>" --verify-tag --draft --notes-file release-notes.md <assets>` and publish it after inspection. If only npm recording failed, re-running the failed jobs is usually enough. Before creating a release manually, confirm with `npm view @nuoframework/darktrace-mcp@<version> --registry https://registry.npmjs.org` that the version is visible.
-6. **MCP Registry.** After the npm version is live (the registry checks `mcpName` in the published `package.json`):
+<a id="publishing-a-version-owner"></a>
+
+### Publicar una versión (propietario)
+
+1. Fija la misma `version` en `package.json`, `package-lock.json`, `npm-shrinkwrap.json`, `manifest.json` y `server.json`; actualiza `CHANGELOG.md`, confirma el cambio y crea/envía `v<version>` en el commit revisado. `release.yml` rechaza una etiqueta que no coincida con el paquete.
+2. `prepare` hace instalación limpia, comprobación de tipos, pruebas, batería de seguridad, dos compilaciones reproducibles y verificación del paquete. Solo después se ejecutan `publish-npm` y `publish-ghcr*` con entradas verificadas.
+   - **Propagación npm.** `publish-npm` falla si falla `npm publish`, según su código de salida. La visibilidad puede tardar minutos; consulta `npm view <package>@<version> --registry https://registry.npmjs.org` cada 30 s hasta 15 min y guarda el resultado. Si sigue sin verse, emite aviso, registra SHA-1 del paquete cotejado e integridad SHA-512 y termina correctamente.
+   - **GitHub Release.** `github-release` corre si `prepare`, `docker-gates`, `pack-mcpb` y `publish-ghcr-manifest` pasan y `publish-npm` no falla. El retraso de visibilidad no bloquea; un fallo de publicación sí. Vuelve a consultar npm antes de redactar las notas, que indican `published` con el registro o `published, pending registry propagation` con hash e integridad.
+3. **Publicador de confianza npm (una vez).** En npmjs.com: paquete → Settings → Trusted publisher → GitHub Actions; organización `nuoframework`, repositorio `darktrace-mcp`, workflow `release.yml`, sin entorno, permitir `npm publish`. Hasta configurarlo (por ejemplo, primera publicación), usa como alternativa un secreto de repositorio `NPM_TOKEN`, granular, solo publicación y limitado al paquete, e imprime aviso; elimina el secreto cuando funcione el publicador de confianza. Ambos caminos generan procedencia.
+4. **Visibilidad ghcr (una vez).** El primer envío crea el paquete privado. En Packages de la organización, haz público `darktrace-mcp` y confirma el enlace al repositorio (la imagen lleva `org.opencontainers.image.source`). Copia el digest del resumen `publish-ghcr-manifest` o del archivo `ghcr-image-digest` a las notas.
+5. **Archivos de release.** Normalmente `github-release` la crea con título `Darktrace MCP v<version>`. Alternativa manual solo si no se ejecutó, por ejemplo por un fallo npm resuelto después: descarga `darktrace-mcp-release-candidate`, verifica `SHA256SUMS`, compila la extensión desde la etiqueta (`npm ci --ignore-scripts && npm run pack:mcpb`), crea un borrador con `gh release create v<version> --title "Darktrace MCP v<version>" --verify-tag --draft --notes-file release-notes.md <assets>` e inspecciónalo antes de publicarlo. Si solo falló registrar npm, suele bastar repetir los trabajos fallidos. Antes de crear manualmente, confirma visibilidad con `npm view @nuoframework/darktrace-mcp@<version> --registry https://registry.npmjs.org`.
+6. **MCP Registry.** Tras publicar npm (el registro comprueba `mcpName` del paquete):
 
 ```sh
 curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
@@ -133,43 +123,52 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 ./mcp-publisher publish
 ```
 
-   `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
+   `login github` demuestra la propiedad de `io.github.nuoframework`; en CI, `login github-oidc` con `id-token: write` lo hace sin navegador. Comprueba `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
 
-7. **Plugin bundle.** Only after `npm view @nuoframework/darktrace-mcp@<version>` shows the new version: set `version` to `<version>` in `claude-plugin/.claude-plugin/plugin.json` and `claude-plugin/plugin.json`, set the dependency to `<version>` in `claude-plugin/package.json` and regenerate `claude-plugin/package-lock.json` as [plugin distribution](plugin-distribution.md#bump-the-pinned-version-at-each-release) describes, change the pinned `@nuoframework/darktrace-mcp@<old>` to `@<version>` in `claude-plugin/mcp.json`, `claude-plugin/README.md` and the skill, run `claude plugin validate --strict ./claude-plugin` and `claude plugin validate .`, and merge that commit to `main`. The Claude Directory follows `main`, re-scans the plugin folder and publishes the version according to the plugin's publish setting; a pin to a version that is not on npm yet makes every install fail, so never bump it before the registry shows the package. Details: [plugin distribution](plugin-distribution.md).
+7. **Plugin.** Solo tras confirmar la versión con `npm view @nuoframework/darktrace-mcp@<version>`: cambia `version` en ambos manifiestos del plugin, fija la dependencia en `claude-plugin/package.json` y regenera `claude-plugin/package-lock.json` según la [guía](plugin-distribution.md#bump-the-pinned-version-at-each-release). Actualiza la referencia npm en `claude-plugin/mcp.json`, `claude-plugin/README.md` y la guía de investigación; ejecuta `claude plugin validate --strict ./claude-plugin` y `claude plugin validate .`, y fusiona en `main`. Claude Directory sigue esa rama y vuelve a analizar; no fijes una versión antes de que exista en npm porque fallaría toda instalación. [Distribución](plugin-distribution.md).
 
-## OpenSSF badge placeholders
+<a id="openssf-badge-placeholders"></a>
 
-OpenSSF badges are omitted from both READMEs until a public Scorecard result and a Best Practices project record exist. The former **OpenSSF Scorecard: pending** and **OpenSSF Best Practices: pending** labels were static placeholders, not scores, registrations or certifications. Add badges only with links to the project's public evidence. No numeric score or passing level is claimed.
+## Insignias OpenSSF
 
-The npm version and GitHub Release badges use live data from Shields.io. Version 1.1.0 is published in both channels. The CI badge links to `ci.yml`; its latest status does not replace the commit-specific release receipts above.
+Las antiguas etiquetas estáticas **OpenSSF Scorecard: pending** y **OpenSSF Best Practices: pending** no eran puntuaciones, registros ni certificaciones. Las insignias actuales de ambos README enlazan al resultado público y al proyecto Best Practices 15261; no se afirma aquí una puntuación ni un nivel de cumplimiento.
 
-Client badge logos were checked against the [Simple Icons catalog](https://simpleicons.org) and its [slug list](https://github.com/simple-icons/simple-icons/blob/develop/slugs.md) on 2026-10-06: `anthropic`, `cursor`, `windsurf`, `opencode`, `googlegemini`, `docker`. Codex and VS Code use plain badges because `openai` and `visualstudiocode` are absent from that catalog snapshot. The runtime badge uses `nodedotjs`. Names/logos state compatibility only, not endorsement.
+Las insignias npm y GitHub Release usan datos en directo de Shields.io. 1.1.0 está publicada en ambos canales. CI enlaza a `ci.yml`; el último resultado no sustituye los registros por commit anteriores.
 
-### OpenSSF Best Practices registration (owner, one-time)
+Los logotipos de clientes se cotejaron con el [catálogo Simple Icons](https://simpleicons.org) y la [lista de nombres](https://github.com/simple-icons/simple-icons/blob/develop/slugs.md) el 2026-10-06: `anthropic`, `cursor`, `windsurf`, `opencode`, `googlegemini`, `docker`. Codex y VS Code usan insignias sin icono porque `openai` y `visualstudiocode` no estaban en esa instantánea. El runtime usa `nodedotjs`. Nombres y logos indican compatibilidad, no respaldo.
 
-1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
-2. Answer the "passing" criteria. Most answers point to existing files: `SECURITY.md` (vulnerability reporting), `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, the CI workflows (tests, `lint`, CodeQL) and [supply-chain checks](security/supply-chain-checks.md) (static analysis, dependency updates).
-3. The project is registered as id 15261 (`https://www.bestpractices.dev/projects/15261`); both READMEs link its badge. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). Add a badge linked to that project in `README.md` and `README.es.md` once it reaches a level worth showing; no placeholder badge is currently displayed. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
-4. Both READMEs are release inputs, so this edit belongs in a release commit (the release pins change).
+<a id="openssf-best-practices-registration-owner-one-time"></a>
 
-## v1.0.0 (previous release, private)
+### Registro OpenSSF Best Practices (propietario, una vez)
 
-Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.
+1. Entra en [bestpractices.dev](https://www.bestpractices.dev/) con la cuenta GitHub administradora y elige **Get Your Badge Now** → añade `https://github.com/nuoframework/darktrace-mcp`.
+2. Responde a los criterios «passing». Las pruebas suelen estar en `SECURITY.md`, `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, workflows CI (pruebas, `lint`, CodeQL) y [cadena de suministro](security/supply-chain-checks.md) (análisis estático y actualizaciones).
+3. El proyecto está registrado con ID 15261 (`https://www.bestpractices.dev/projects/15261`); ambos README enlazan su insignia. Usa el ID real de `https://www.bestpractices.dev/projects/<id>` y el resultado público de `scorecard.yml` en `main`; no uses marcadores estáticos para aparentar resultados.
+4. Ambos README son entradas de publicación; cualquier cambio modifica los valores fijados de la release.
 
-The first stable provides 15 read-only tools covering 19 lab-validated GET selectors. Native amd64/arm64 CI passed 130 functional and 325 security tests with zero skips. Exact image IDs, asset hashes and the disclosed vulnerability applicability results are in the bilingual release notes. No npm or public registry publication is used. Earlier alpha tags and assets remain unchanged.
+<a id="v100-previous-release-private"></a>
 
-## Historical alpha installation and preparation
+## v1.0.0 (versión anterior, privada)
 
-The following procedure describes the immutable earlier alpha release, not the current stable. For v1.0.0, use the installation above.
+Usa la [release privada v1.0.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Se recomienda Docker: descarga el archivo de tu arquitectura y `SHA256SUMS`, verifica y ejecuta `docker load`. [Instalación Docker](docker.md#install-options). También incluye paquete nativo, seguridad/procedencia, registros CI nativos completos y un archivo de evidencia del paquete que conserva los ficheros auxiliares originales. Las sumas cubren todos los archivos descargables.
 
+La primera estable ofrece 15 herramientas de lectura con 19 GET validados. CI nativa amd64/arm64 pasó 130 funcionales y 325 de seguridad sin omisiones. Los ID, hashes y resultados de aplicabilidad de vulnerabilidades están en las notas bilingües. No usa npm ni registro público. Etiquetas y archivos alfa anteriores permanecen inalterados.
 
-The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](history/release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](history/release-preparation-docker-mcp.md).
+<a id="historical-alpha-installation-and-preparation"></a>
 
-This is the distribution procedure for private releases of `nuoframework/darktrace-mcp`. Version `0.1.0-alpha.0` uses tag `v0.1.0-alpha.0`. No release is created by the preparation scripts or workflows. The owner publishes only after independent source review and artifact review. `package.private:true` remains set; neither npm publication nor container publication is used.
+## Instalación y preparación alfa históricas
 
-## Install a reviewed version
+Lo siguiente describe la alfa inmutable anterior, no la estable actual. Para v1.0.0, usa lo indicado arriba.
 
-Require Node.js 22+, npm and an authenticated GitHub CLI account with private repository access. Choose an explicit reviewed tag; never install an implicit latest prerelease. Download into a new directory:
+Los archivos `v0.1.0-alpha.0` publicados son evidencia histórica inmutable. En ese punto, la candidata era `0.1.0-alpha.0` y se proponía `0.1.0`; los sustituye la preparación v1.0.0 revisada por separado. El alcance de la primera estable propuesta era lectura soportada, con escrituras para otra entrega. [Evidencia de preparación](history/release-preparation.md#historical-release-direction-and-docker-smoke) y [registro Docker anterior](history/release-preparation-docker-mcp.md).
+
+Era el procedimiento de distribución privada de `nuoframework/darktrace-mcp`. `0.1.0-alpha.0` usa etiqueta `v0.1.0-alpha.0`. En aquel procedimiento, scripts y workflows no creaban releases: el propietario publicaba tras revisión independiente de origen y archivos. `package.private:true` seguía activo; sin publicación npm ni de contenedores.
+
+<a id="install-a-reviewed-version"></a>
+
+## Instalar una versión revisada
+
+Para este procedimiento histórico necesitas Node.js 22+, npm y GitHub CLI autenticada con acceso privado. Elige una etiqueta revisada explícita, nunca una preliminar implícita «latest». Descarga en un directorio nuevo:
 
 ```sh
 mkdir darktrace-mcp-v0.1.0-alpha.0
@@ -185,15 +184,17 @@ node node_modules/darktrace-mcp/dist/src/index.js --version
 node node_modules/darktrace-mcp/dist/src/index.js --help
 ```
 
-Check the checksum against the owner's reviewed release record through your trusted organizational channel. A checksum downloaded beside a replaced artifact does not authenticate its origin. Registry access is needed for the three pinned dependencies; the project archive itself comes from the private GitHub Release. Their npm SRI values are recorded in the shipped shrinkwrap and SBOM. The generated installation lock supports subsequent `npm ci --ignore-scripts --omit=dev`.
+Coteja la suma con el registro revisado del propietario por tu canal organizativo de confianza. Una suma junto a un archivo reemplazado no autentica su origen. Las tres dependencias fijadas requieren registro; el paquete llega de GitHub Release privada. Sus SRI npm están en shrinkwrap y SBOM. El bloqueo generado permite después `npm ci --ignore-scripts --omit=dev`.
 
-Provision separate protected token files as described in [getting started](getting-started.md), then run `node node_modules/darktrace-mcp/dist/src/index.js doctor`. It performs local configuration checks and no network probe. Use the absolute Node executable and installed `node_modules/darktrace-mcp/dist/src/index.js` in the [client examples](clients.md); the packaged runtime does not require source compilation or dev dependencies.
+Prepara tokens separados y protegidos según [primeros pasos](getting-started.md), y ejecuta `node node_modules/darktrace-mcp/dist/src/index.js doctor`. Solo comprueba configuración local, sin red. En los [ejemplos de cliente](clients.md), usa rutas absolutas a Node y al `node_modules/darktrace-mcp/dist/src/index.js` instalado; el runtime no necesita fuentes ni dependencias de desarrollo.
 
-`runtime-sbom.cdx.json` lists the application and three runtime libraries with exact versions, license identifiers, real archive SHA-256/SHA-512 hashes and npm SRI. `runtime-files.sha256.json` records installed file hashes, including license files. It is an inventory, not a vulnerability clearance, signature or attestation. For the historical alpha, use the verifier from its matching reviewed release checkout, not a newer candidate verifier requiring additional evidence. Reproduce verification from that checkout with `npm run release:verify -- /absolute/path/package.tgz /absolute/private/verification` and compare SBOM and file-inventory bytes. That verifier installs without hooks, downloads dependency tarballs without hooks, verifies SRI and runs help/version/doctor using synthetic local credentials only.
+`runtime-sbom.cdx.json` enumera aplicación y tres bibliotecas con versiones exactas, licencias, SHA-256/SHA-512 reales y SRI npm. `runtime-files.sha256.json` recoge hashes instalados, incluidas licencias. Es inventario, no garantía de seguridad, firma o atestación. Para la alfa usa el verificador de su checkout revisado, no uno posterior que exija otra evidencia. Reproduce con `npm run release:verify -- /absolute/path/package.tgz /absolute/private/verification` y compara SBOM e inventario byte a byte. Instala y descarga dependencias sin hooks, comprueba SRI y ejecuta ayuda/versión/doctor solo con credenciales locales sintéticas.
 
-## Owner preparation and publication
+<a id="owner-preparation-and-publication"></a>
 
-From the final reviewed source, with Node 22+ and Python 3.11+ for TOML validation, use a new empty artifact directory outside the checkout (including its symlink aliases):
+## Preparación y publicación por el propietario
+
+Desde el origen final revisado, con Node 22+ y Python 3.11+ para TOML, usa un directorio vacío fuera del checkout y sus alias simbólicos:
 
 ```sh
 npm run release:prepare -- /absolute/private/darktrace-mcp-release
@@ -201,20 +202,19 @@ cd /absolute/private/darktrace-mcp-release
 shasum -a 256 -c SHA256SUMS
 ```
 
-The current script generates complete `tools/list` contracts for the four reviewed profiles through `test/security/mcp-contracts.mjs`, compares them to the versioned MR-04 fixture without rewriting it, repeats after the second build, and adds the full `mcp-tool-contracts.json` asset and profile hashes to build/verification evidence. The fixture SHA-256 is `37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72`; changing it requires explicit independent review. All nine assets are included in `SHA256SUMS`.
+En el punto histórico descrito, el script generaba contratos `tools/list` completos para cuatro perfiles con `test/security/mcp-contracts.mjs`, los comparaba con MR-04 sin reescribirla, repetía tras la segunda compilación e incluía `mcp-tool-contracts.json` y hashes de perfiles. SHA-256 de aquella instantánea: `37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72`; cambiarla requiere revisión independiente. Los nueve archivos figuraban en `SHA256SUMS`.
 
-The script builds an isolated copy, runs typecheck, the standard suite and `npm run test:security`, compares two builds/tarballs, validates examples, rejects tar entries outside the runtime allowlist and verifies an empty production install. It never commits, tags, pushes or publishes. Review all logs and `build-evidence.json`, including security skips and source-file hashes. Rebuild after any packaged source, README, metadata or shrinkwrap change. The source inventory binds generator YAML and `docs/operation-inventory.json`, all source/scripts/test/example inputs, tsconfigs, package/locks, both READMEs, inspected guides and original SVG assets. npm automatically includes `README.es.md`; it is explicitly allowed and verified as a regular mode-0644 file, at most 1 MiB, with exact source and installed byte equality. Dockerfile, `.dockerignore` and SVGs are source-only evidence, not files in the npm archive. No screenshot raster is copied or hashed. Protect the reviewed release ref with repository rulesets and restrict release write access to owners before publication; these remote settings are not asserted as configured by this repository.
+El script compila una copia aislada, comprueba tipos, pruebas estándar y seguridad, compara dos compilaciones/paquetes, valida ejemplos, rechaza entradas fuera de la lista de runtime y verifica una instalación vacía de producción. No confirma cambios, etiqueta, envía ni publica. Revisa logs y `build-evidence.json`, incluidas omisiones y hashes. Recompila tras cambiar fuentes empaquetadas, README, metadatos o shrinkwrap. El inventario liga YAML, `docs/operation-inventory.json`, fuentes/scripts/pruebas/ejemplos, tsconfigs, paquete/bloqueos, ambos README, guías inspeccionadas y SVG originales. `README.en.md` se permite y verifica explícitamente como archivo normal modo 0644, hasta 1 MiB, idéntico al origen y a la instalación; `README.md` es el español predeterminado. Dockerfile, `.dockerignore` y SVG solo son evidencia de origen, no entran en npm; no se copian ni resumen capturas raster. Protege el ref revisado con reglas del repositorio y limita publicación al propietario; el repositorio no demuestra que esos ajustes remotos estén configurados.
 
-
-After preparation, rerun the read-only sidecar integrity gate from the same reviewed source checkout:
+Tras preparar, repite la comprobación de integridad de archivos auxiliares desde el mismo checkout revisado:
 
 ```sh
 node scripts/verify-release.mjs /absolute/private/darktrace-mcp-release/darktrace-mcp-0.1.0-alpha.0.tgz /absolute/private/darktrace-mcp-release --check-evidence
 ```
 
-This mode verifies all nine checksums, full MR-04 contract bytes and their pinned oracle, build/source/archive/security-receipt bindings and installer checks without installation, network access or rewriting evidence. Missing or modified contract/evidence/checksum assets fail. It is integrity checking against the reviewed checkout, not origin authentication or compatibility proof. For a fresh installer/SBOM reproduction, first place the independently reviewed `mcp-tool-contracts.json` in a new external verification directory, build the matching reviewed checkout, then run the normal verifier; compare results with the approved candidate.
+Verifica nueve sumas, bytes completos MR-04 y su referencia fijada, vinculación de compilación/origen/archivo/seguridad e instalador, sin instalar, usar red ni reescribir evidencia. Rechaza evidencia, contratos o sumas ausentes/modificados. Es integridad frente al checkout revisado, no autenticación ni compatibilidad. Para reproducir instalador/SBOM, coloca `mcp-tool-contracts.json` revisado en un directorio externo nuevo, compila el checkout correspondiente y ejecuta el verificador normal; compara con la candidata aprobada.
 
-`.github/workflows/release.yml` is a manual read-only preparation workflow, restricted to an existing `refs/tags/v*` ref whose tag exactly matches `v` plus the package version. Dispatch it against that reviewed tag; branch dispatches are skipped. It uploads a seven-day candidate artifact, not a GitHub Release. CI separately configures Node 22 and 24; a configured job is not evidence of a completed run. Publication is a separate manual owner action using a previously created, reviewed and protected tag. The following was the alpha publication command pattern. **Do not rerun it to replace the published alpha.** A future delivery requires a new reviewed version/tag and independently approved assets:
+En la alfa, `.github/workflows/release.yml` era una preparación manual de solo lectura, limitada a `refs/tags/v*` existentes que coincidieran con `v` + versión del paquete; omitía ejecuciones por rama. Subía un archivo candidato de siete días, no una release. CI configuraba Node 22/24; configurar un trabajo no acredita haberlo ejecutado. Publicar era una acción manual del propietario sobre etiqueta revisada y protegida. Patrón histórico: **no lo repitas para sustituir la alfa publicada**. Cualquier entrega nueva necesita versión/etiqueta revisada y archivos aprobados por separado:
 
 ```sh
 gh release create v0.1.0-alpha.0 --repo nuoframework/darktrace-mcp \
@@ -224,26 +224,30 @@ gh release create v0.1.0-alpha.0 --repo nuoframework/darktrace-mcp \
   runtime-files.sha256.json source-files.sha256.json build-evidence.json verification.json security-receipt.json release-notes.md mcp-tool-contracts.json
 ```
 
-Inspect the draft's assets and checksums before manually removing draft status. No workflow has `contents:write`, registry credentials, `id-token:write` or release publication rights. [GitHub CLI `--verify-tag`](https://cli.github.com/manual/gh_release_create) rejects a missing tag instead of creating one. [Environment required reviewers in private repositories](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) require an eligible GitHub plan; entitlement and remote protections have not been verified. Do not assume merely naming an environment would enforce approval. Artifact attestations are not produced or claimed. (Historical: signatures and provenance start with the `github-release` job, see [verification](#verifying-release-signatures-and-provenance); earlier releases can be signed afterwards with `sign-release.yml`.)
+Inspecciona archivos y sumas del borrador antes de publicarlo. En aquel punto, ningún workflow tenía `contents:write`, credenciales de registro, `id-token:write` ni permisos de publicación. [`--verify-tag`](https://cli.github.com/manual/gh_release_create) rechaza etiquetas ausentes. Los [revisores obligatorios de entornos privados](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) requieren un plan GitHub adecuado; no se verificaron plan ni protecciones remotas. Nombrar un entorno no impone aprobación. En ese punto histórico no se produjeron ni afirmaron atestaciones. Ahora `github-release` añade firmas y procedencia; `sign-release.yml` puede firmar versiones anteriores ([verificación](#verifying-release-signatures-and-provenance)).
 
-## Version 1.0.0
+<a id="version-100"></a>
 
-The published `0.1.0-alpha.0` is immutable history. It predates the 15-tool / 19-selector contract and the patched runtime.
+## Versión 1.0.0
 
-`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#v100-image-at-a-glance-previous-release).
+La `0.1.0-alpha.0` publicada es historia inmutable, anterior a las 15 herramientas/19 selectores y al runtime corregido.
 
-- **CI:** [run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) on commit `2adb84b` passed every job: Node 22/24 offline, plus native Docker on amd64 and arm64 with 130 + 325 tests and 0 skipped. The release tag may point to a later commit that changes only documentation and keeps the production, build and shipped-document files identical.
-- **Lab:** on 2026-10-06, arm64 image `sha256:8cd85604…` passed [19/19 real queries](security/patched-runtime-lab-checkpoint.md). The lab is closed. 1.0.0 differs only in the production version literal and was not retested live.
-- **Scans:** Grype's raw matches are retained: High CVE-2026-85091 (zlib 1.3.2) and Medium CVE-2024-9410 (`ada`). An independent review of both architectures found the zlib library affected but its vulnerable code outside the application's execution path, and the `ada` match a product-name collision. zlib is not fixed, because Alpine 3.24 has no fixed package yet. There is no zero-CVE claim.
-- **Assets:** per-architecture Docker image archives, the npm tarball and `SHA256SUMS`, with hashes and image IDs in the release notes.
-- **Deployment:** assess provider processing, retention, residency and eligibility for each deployment.
+`1.0.0` usa Node.js 24.18.1 de Alpine con OpenSSL compartido 3.5.9 (corrección CVE-2026-35189) en arm64 y amd64. [Guía Docker](docker.md#v100-image-at-a-glance-previous-release).
 
-Output views are code-owned and conservative: at most eight selected principal fields, summaries for unknown objects/maps. They do not establish removal of every arbitrary nested sensitive field.
+- **CI:** [37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585), commit `2adb84b`, pasó Node 22/24 offline y Docker nativo amd64/arm64, 130 + 325 pruebas sin omisiones. La etiqueta puede apuntar a un commit posterior solo documental con producción, compilación y documentos distribuidos idénticos.
+- **Laboratorio:** el 2026-10-06 arm64 `sha256:8cd85604…` pasó [19/19 consultas](security/patched-runtime-lab-checkpoint.md). Laboratorio cerrado. 1.0.0 solo difiere en el literal de versión y no se repitió en vivo.
+- **Escaneos:** Grype conserva High CVE-2026-85091 (zlib 1.3.2) y Medium CVE-2024-9410 (`ada`). La revisión independiente de ambas arquitecturas determinó que zlib está afectada pero fuera de la ruta de ejecución vulnerable, y `ada` es coincidencia de nombres. zlib no está corregida: Alpine 3.24 aún no tenía paquete. No se afirma cero CVE.
+- **Archivos:** imágenes Docker por arquitectura, paquete npm y `SHA256SUMS`; hashes e ID en las notas.
+- **Despliegue:** evalúa tratamiento, retención, residencia e idoneidad del proveedor en cada entorno.
 
-## Incremental delivery cadence
+Las vistas son conservadoras y proceden del código: hasta ocho campos principales seleccionados y resúmenes de objetos/mapas desconocidos. No garantizan eliminar todo campo sensible anidado arbitrario.
 
-1. `0.1.0-alpha.0`: private offline alpha with reviewed source, verified package, checksums and runtime SBOM; live appliance/provider gates remain open.
-2. First stable, targeted as `1.0.0`: the 15 read-only tools, only after the gates above are accepted. The package metadata is still `0.1.0-alpha.0` until a separately coordinated version change; the target is not a readiness decision.
-3. A later delivery may add write operations after mutation compatibility, safety controls and residual risks receive separate review. The version label itself does not waive a gate.
+<a id="incremental-delivery-cadence"></a>
 
-Each delivery uses a new immutable reviewed tag, its own notes, verified assets and explicit remaining gaps. Do not replace a published version's assets with a different build. No delivery dates or automatic publication are promised.
+## Cadencia incremental
+
+1. `0.1.0-alpha.0`: alfa privada offline con origen revisado, paquete verificado, sumas y SBOM; seguían pendientes las pruebas de appliance/proveedor.
+2. Primera estable prevista como `1.0.0`: 15 herramientas de lectura, solo tras aceptar las comprobaciones. En ese plan, los metadatos seguían en `0.1.0-alpha.0` hasta un cambio coordinado; el objetivo no era una decisión de disponibilidad.
+3. Una entrega posterior podía añadir escrituras tras revisar por separado compatibilidad, controles y riesgos. Una etiqueta de versión no exime de una comprobación.
+
+Cada entrega usa etiqueta inmutable nueva, notas propias, archivos verificados y carencias explícitas. No reemplaces los archivos publicados por otra compilación. No se prometen fechas ni publicación automática.

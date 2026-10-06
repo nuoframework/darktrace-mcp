@@ -1,54 +1,66 @@
-**English** · [Español](es/getting-started.md)
+Instala el servidor, protege los tokens y comprueba tu primera conexión.
 
-# Getting started
+[README](../README.md) · [Clientes](clients.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
 
-[README](../README.md) · [Clients](clients.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+**Español** · [English](en/getting-started.md)
 
-This guide takes you from nothing to a working Darktrace MCP server in your client. It takes about ten minutes.
+<a id="getting-started"></a>
 
-## Before you start
+# Primeros pasos
 
-You need:
+Esta guía te lleva de cero a un servidor Darktrace MCP funcionando en tu cliente. Son unos diez minutos.
 
-| Item | Where to get it |
+<a id="before-you-start"></a>
+
+## Antes de empezar
+
+Necesitas:
+
+| Elemento | Dónde conseguirlo |
 |---|---|
-| Darktrace appliance address | For example `https://darktrace.example.internal`. HTTPS only |
-| Public API token and private API token | Darktrace Threat Visualizer: **System Config → Settings → API Token**. Ask your Darktrace admin |
-| Node.js 22 or later (npm and `npx` come with it) | [nodejs.org](https://nodejs.org) or your package manager |
-| Approval to send Darktrace data to your model provider | Your security or compliance team |
+| Dirección del appliance Darktrace | Por ejemplo `https://<tu-appliance>`. Solo HTTPS |
+| Token de API público y token de API privado | Darktrace Threat Visualizer: **System Config → Settings → API Token**. Pídeselo a tu administrador de Darktrace |
+| Node.js 22 o posterior (npm y `npx` vienen incluidos) | [nodejs.org](https://nodejs.org) o tu gestor de paquetes |
+| Aprobación para enviar datos de Darktrace a tu proveedor del modelo | Tu equipo de seguridad o cumplimiento |
 
-Give the token only the Darktrace permissions you want the model to have. The server can never do more than the token allows.
+Da al token solo los permisos de Darktrace que quieras que tenga el modelo. El servidor nunca puede hacer más de lo que el token permite.
 
-## Step 1. Install and run the wizard
+<a id="step-1-install-and-run-the-wizard"></a>
 
-### macOS, Linux and Windows
+## Paso 1. Instalar y lanzar el asistente
+
+<a id="macos-linux-and-windows"></a>
+
+### macOS, Linux y Windows
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.2 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-`npx` downloads the exact published version `1.1.2` (npm checks its integrity) and starts the setup wizard (Step 2). Because the `npx` cache is temporary, the wizard first copies the package and its three locked dependencies to a fixed directory and registers that absolute path in your clients:
+`npx` descarga la versión publicada exacta `1.1.1` (npm comprueba su integridad) y lanza el asistente (paso 2). Como la caché de `npx` es temporal, el asistente copia primero el paquete y sus tres dependencias fijadas a un directorio estable y registra esa ruta absoluta en tus clientes:
 
-| OS | Fixed copy |
+| Sistema | Copia fija |
 |---|---|
-| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.2/` (or `$XDG_DATA_HOME/darktrace-mcp/1.1.2/`) |
-| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.2\` |
+| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.1/` (o `$XDG_DATA_HOME/darktrace-mcp/1.1.1/`) |
+| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.1\` |
 
-Clients start the server as `/absolute/path/to/node …/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`; they never run `npx` and never need the registry again. Re-running the command reuses the copy.
+Los clientes arrancan el servidor como `/ruta/absoluta/a/node …/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`; nunca ejecutan `npx` ni vuelven a necesitar el registro. Repetir el comando reutiliza la copia.
 
-To get a `darktrace-mcp` command on your `PATH` (optional), install it globally with the same pinned version:
+Si quieres un comando `darktrace-mcp` en tu `PATH` (opcional), instálalo globalmente con la misma versión fijada:
 
 ```sh
-npm install -g @nuoframework/darktrace-mcp@1.1.2
+npm install -g @nuoframework/darktrace-mcp@1.1.1
 ```
 
-Otherwise, wherever this guide says `darktrace-mcp …`, run `npx -y @nuoframework/darktrace-mcp@1.1.2 …`.
+Si no, donde esta guía diga `darktrace-mcp …`, ejecuta `npx -y @nuoframework/darktrace-mcp@1.1.1 …`.
 
 ### Windows
 
-The same `npx` command works in PowerShell. Native Windows cannot prove that a token file is owner-only (Node has no file-ACL API), so the server rejects token files there; the wizard asks for explicit consent before writing token values into client configs. Paths that work natively without that trade-off: the [Claude Desktop extension](clients.md#claude-desktop) (OS keychain), the VS Code badge or `config vscode` link (VS Code secret storage), [Docker Desktop](docker.md), or WSL with the Linux command. Analysis and follow-up: [install matrix](install-matrix.md#windows-native). See also [troubleshooting](troubleshooting.md#token-file-permissions).
+El mismo comando `npx` funciona en PowerShell. Windows nativo no puede garantizar archivos de token legibles solo por su dueño, así que el servidor los rechaza; el asistente pide consentimiento explícito antes de escribir los valores de los tokens en la configuración de los clientes. Prefiere la [extensión de Claude Desktop](clients.md#claude-desktop), [Docker](docker.md) (inglés) o WSL con el comando de Linux. Consulta [solución de problemas](troubleshooting.md#permisos-de-los-archivos-de-token).
 
-### Fallback: build from source
+<a id="fallback-build-from-source"></a>
+
+### Alternativa: compilar desde el código fuente
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
@@ -56,7 +68,7 @@ less install.sh
 sh install.sh
 ```
 
-The script clones this repository into `~/.local/share/darktrace-mcp/source`, runs `npm ci --ignore-scripts` and `npm run build`, then starts the wizard. Windows: `scripts/install.ps1`. Manual equivalent:
+El script clona este repositorio en `~/.local/share/darktrace-mcp/source`, ejecuta `npm ci --ignore-scripts` y `npm run build`, y lanza el asistente. Windows: `scripts/install.ps1`. Equivalente manual:
 
 ```sh
 git clone https://github.com/nuoframework/darktrace-mcp.git
@@ -66,88 +78,102 @@ npm run build
 node dist/src/index.js setup
 ```
 
-## Step 2. Run the setup wizard
+<a id="step-2-run-the-setup-wizard"></a>
+
+## Paso 2. Ejecutar el asistente
 
 ```sh
 darktrace-mcp setup
 ```
 
-The wizard asks you:
+El asistente te pregunta:
 
-| Question | What to enter |
+| Pregunta | Qué responder |
 |---|---|
-| Appliance URL | `https://` address of your appliance |
-| Public token | Typed hidden |
-| Private token | Typed hidden |
-| Permission preset | `read` (recommended to start), `read,sensitive`, `read,write`, or `all`. `all` starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` in the client entry ([why](configuration.md#profiles)) |
-| Clients to configure | It lists the 21 clients it knows and marks the ones it found on your machine ([install page](install.md)) |
+| URL del appliance | Dirección `https://` de tu appliance |
+| Token público | Se escribe sin mostrarse |
+| Token privado | Se escribe sin mostrarse |
+| Permisos | `read` (recomendado para empezar), `read,sensitive`, `read,write` o `all`. `all` solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` en la entrada del cliente ([por qué](configuration.md#perfiles)) |
+| Clientes a configurar | Muestra los clientes que encuentra en tu equipo |
 
-It then:
+Después:
 
-- saves each token to its own file under `~/.config/darktrace-mcp/`, with mode `0600` (only you can read it);
-- backs up each client config file before changing it;
-- adds a `darktrace` server entry to every client you selected.
+- guarda cada token en su propio archivo en `~/.config/darktrace-mcp/`, con permisos `0600` (solo tú puedes leerlo);
+- hace una copia de seguridad de cada archivo de configuración antes de modificarlo;
+- añade una entrada `darktrace` en cada cliente que elegiste.
 
-Restart your client after the wizard finishes.
+Reinicia tu cliente al terminar.
 
-## Step 3. Check the setup
+<a id="step-3-check-the-setup"></a>
+
+## Paso 3. Comprobar la instalación
 
 ```sh
 darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-| Command | Network? | What it checks |
+| Comando | ¿Usa red? | Qué comprueba |
 |---|---|---|
-| `--check-config` (or `doctor`) | No | URL format, token files exist with safe permissions, profiles are valid |
-| `test` | Yes, one `GET /status` | Tokens work, clock is in sync, TLS is trusted |
+| `--check-config` (o `doctor`) | No | Formato de la URL, que los archivos de token existen con permisos seguros, perfiles válidos |
+| `test` | Sí, un `GET /status` | Que los tokens funcionan, el reloj está sincronizado y TLS es de confianza |
 
-If either fails, see [troubleshooting](troubleshooting.md).
+Si algo falla, consulta [solución de problemas](troubleshooting.md).
 
-## Step 4. Try it in your client
+<a id="step-4-try-it-in-your-client"></a>
 
-Ask your assistant, for example:
+## Paso 4. Probarlo en tu cliente
 
-- "Show the Darktrace system status."
-- "List model breaches from the last 24 hours with a score above 0.8."
-- "Which AI Analyst incidents are open right now?"
+Pídele a tu asistente, por ejemplo:
 
-With the `write` profile you can also ask "Acknowledge model breach 1234". Try it with `dryRun:true` first to see a preview.
+- "Muestra el estado del sistema Darktrace."
+- "Lista los model breaches de las últimas 24 horas con puntuación mayor que 0,8."
+- "¿Qué incidentes de AI Analyst están abiertos ahora?"
 
-## Change permissions later
+Con el perfil `write` también puedes pedir "Reconoce el model breach 1234". Pruébalo primero con `dryRun:true` para ver una vista previa.
 
-Run the wizard again, or edit `DARKTRACE_PROFILES` in your client config:
+<a id="change-permissions-later"></a>
+
+## Cambiar permisos más tarde
+
+Vuelve a ejecutar el asistente, o edita `DARKTRACE_PROFILES` en la configuración de tu cliente:
 
 ```sh
 darktrace-mcp setup
 ```
 
-Profiles are explained in [configuration](configuration.md#profiles).
+Los perfiles se explican en [configuración](configuration.md#perfiles).
 
-## Remove
+<a id="remove"></a>
+
+## Desinstalar
 
 ```sh
 darktrace-mcp remove
 ```
 
-This removes the `darktrace` entry from the clients the wizard configured. Delete the token files under `~/.config/darktrace-mcp/` yourself if you no longer need them, and revoke the tokens in Darktrace.
+Quita la entrada `darktrace` de los clientes que configuró el asistente. Borra tú mismo los archivos de token de `~/.config/darktrace-mcp/` si ya no los necesitas, y revoca los tokens en Darktrace.
 
-## Other ways to install
+<a id="other-ways-to-install"></a>
 
-| Method | Guide |
+## Otras formas de instalar
+
+| Método | Guía |
 |---|---|
-| Claude Desktop extension (`.mcpb`, from the GitHub release) | [Clients: Claude Desktop](clients.md#claude-desktop) |
-| Docker image `ghcr.io/nuoframework/darktrace-mcp` | [Docker guide](docker.md) and [Clients: Docker](clients.md#docker) |
-| One-line commands per client | [Clients: one-liners](clients.md#one-line-install-per-client) |
-| Manual config for one client | [Clients](clients.md) |
-| Release assets (`.tgz`, `.mcpb`, `SHA256SUMS`) | [Releases](releases.md) |
+| Extensión de Claude Desktop (`.mcpb`, desde la release de GitHub) | [Clientes: Claude Desktop](clients.md#claude-desktop) |
+| Imagen Docker `ghcr.io/nuoframework/darktrace-mcp` | [Guía de Docker](docker.md) (inglés) y [Clientes: Docker](clients.md#docker) |
+| Una línea por cliente | [Clientes: una línea por cliente](clients.md#una-línea-por-cliente) |
+| Configuración manual de un cliente | [Clientes](clients.md) |
+| Archivos de la release (`.tgz`, `.mcpb`, `SHA256SUMS`) | [Releases](releases.md) (inglés) |
 
-## Native install and OpenSSL
+<a id="native-install-and-openssl"></a>
 
-The Docker image ships OpenSSL 3.5.9. Some official Node.js builds still bundle OpenSSL 3.5.8, which has a known TLS issue. For a native install, check your version:
+## Instalación nativa y OpenSSL
+
+La imagen Docker incluye OpenSSL 3.5.9. Algunas versiones oficiales de Node.js todavía traen OpenSSL 3.5.8, que tiene un fallo conocido de TLS. En una instalación nativa, comprueba tu versión:
 
 ```sh
 node -p 'process.versions.openssl'
 ```
 
-Use a runtime with OpenSSL 3.5.9 or later, or use Docker. Details: [security overview](security.md).
+Usa un entorno con OpenSSL 3.5.9 o posterior, o usa Docker. Detalles: [resumen de seguridad](security.md) (inglés).

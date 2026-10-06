@@ -39,7 +39,7 @@ def anchors(path):
 
 
 checked = 0
-for relative in ('README.md', 'README.es.md', 'scripts/demo/README.md'):
+for relative in ('README.md', 'README.en.md', 'scripts/demo/README.md'):
     source = root / relative
     for raw in re.findall(r'\]\(([^\s)]+)', source.read_text()):
         url = urlsplit(raw.strip('<>'))
