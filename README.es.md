@@ -1,159 +1,166 @@
 [English](README.md) · **Español**
 
 <picture>
-  <source media="(max-width: 600px)" srcset="docs/assets/readme-banner-es-mobile.svg">
-  <img src="docs/assets/readme-banner-es.svg" width="1280" alt="Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
+  <source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-es-mobile.svg">
+  <img src="docs/assets/banner-variants/b/readme-banner-es.svg" width="1280" alt="Darktrace MCP — con un grafo de red decorativo. MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
 </picture>
 
 # Darktrace MCP
 
 **MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.**
 
-Usa la API de Darktrace Threat Visualizer desde Claude, Codex, Cursor, VS Code y otros clientes MCP: investiga dispositivos, model breaches e incidentes de AI Analyst y, si lo permites, ejecuta acciones.
+Investiga tu appliance Darktrace desde tu cliente MCP. Empieza en modo lectura y decide cuándo permitir cambios.
 
-<p>
-  <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-es.svg" alt="transporte: solo stdio"></a>
-  <a href="package.json"><img src="docs/assets/badges/node-22-es.svg" alt="entorno: Node.js 22+"></a>
-  <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-es.svg" alt="licencia: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-es.svg" alt="docker: build local o imagen de ghcr.io, ID de imagen fijado"></a>
-  <a href="docs/security.md"><img src="docs/assets/badges/security-tests-es.svg" alt="pruebas de seguridad: offline"></a>
-  <!-- Insignias OpenSSF: marcadores, comentados hasta que el proyecto tenga un resultado publicado de
-       Scorecard y una ficha en bestpractices.dev. Sustituye <BESTPRACTICES_ID> por el id numérico del proyecto.
-       Consulta docs/security/supply-chain-checks.md antes de activarlas (se cargan desde servicios externos).
-  <a href="https://scorecard.dev/viewer/?uri=github.com/nuoframework/darktrace-mcp"><img src="https://api.scorecard.dev/projects/github.com/nuoframework/darktrace-mcp/badge" alt="OpenSSF Scorecard"></a>
-  <a href="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>"><img src="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>/badge" alt="OpenSSF Best Practices"></a>
-  -->
-</p>
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2563EB)](LICENSE)
+[![Node.js 22+](https://img.shields.io/badge/node-22%2B-339933?logo=nodedotjs&logoColor=white)](docs/es/getting-started.md)
+[![MCP 2026-07-28](https://img.shields.io/badge/MCP-2026--07--28-7C3AED)](docs/es/configuration.md#aprobación-humana)
+[![CI](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@nuoframework/darktrace-mcp)](docs/releases.md#distribution-channels-110-and-later)
+[![Release](https://img.shields.io/github/v/release/nuoframework/darktrace-mcp?display_name=tag)](https://github.com/nuoframework/darktrace-mcp/releases)
 
-[Primeros pasos](docs/es/getting-started.md) · [Clientes](docs/es/clients.md) · [Herramientas](docs/tools.md) (inglés) · [Configuración](docs/es/configuration.md) · [Solución de problemas](docs/es/troubleshooting.md)
+[Primeros pasos](docs/es/getting-started.md) · [Herramientas (EN)](docs/tools.md) · [Configuración](docs/es/configuration.md) · [Seguridad (EN)](docs/security.md) · [Solución de problemas](docs/es/troubleshooting.md)
 
-## Inicio rápido
+## Instalación
 
-Necesitas: la dirección HTTPS de tu appliance Darktrace, un token de API **público** y uno **privado**, y Node.js 22 o posterior.
-
-### 1. Asistente de configuración (macOS, Linux, Windows)
+Necesitas **Node.js 22+**, la URL del appliance (`https://…`) y el par de tokens API público/privado (Darktrace: **System Config → Settings → API Token**).
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-El asistente pide la URL y los tokens (sin mostrarlos), guarda los tokens en archivos que solo tú puedes leer, copia el paquete a `~/.local/share/darktrace-mcp/1.1.1/` y configura los clientes que encuentra con rutas absolutas, de modo que los clientes nunca arrancan el servidor a través de `npx`. Windows no puede proteger los archivos de token: prefiere la extensión `.mcpb`, Docker o WSL ([detalles](docs/es/getting-started.md#windows)).
+Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario en macOS/Linux y hace una copia de seguridad de las configuraciones existentes antes de actualizarlas. [Guía completa](docs/es/getting-started.md).
 
-### 2. Extensión de Claude Desktop (.mcpb)
+`npx` solo se usa para instalar. El asistente copia una versión fija y configura los clientes con rutas absolutas a Node y `dist/src/index.js`. Windows nativo no puede proteger los archivos de tokens: usa [.mcpb, Docker o WSL](docs/es/getting-started.md#windows).
 
-Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) y haz doble clic. Claude Desktop pide la URL y los tokens y guarda los tokens en el llavero del sistema.
+Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
-### 3. Docker (ghcr.io)
+La publicación de 1.1.1 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
 
-```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
-```
+### Claude Desktop
 
-La imagen se publica para linux/amd64 y linux/arm64. Fija el digest, nunca la etiqueta. En 1.1.0, la imagen arm64 superó las comprobaciones Docker locales; la amd64 se verifica en CI sobre el commit de la release ([estado](docs/docker.md#110-image-verification-status), inglés).
+Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema.
 
-### Alternativa: compilar desde el código fuente
+### Docker
+
+Con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
 
 ```sh
-curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
-less install.sh && sh install.sh
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 ```
 
-`install.sh` clona este repositorio, lo compila y lanza el mismo asistente. Windows: `scripts/install.ps1`.
+Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.0`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).
 
-### Comprobar que funciona
+## Mira cómo funciona
 
-```sh
-darktrace-mcp --check-config
-darktrace-mcp test
-```
+Tres grabaciones con un **mock HTTPS sintético**, tokens de prueba y ningún dato de producción. Demuestran el flujo, no la compatibilidad con un appliance real. [Fuentes, transcripciones y guía para volver a grabar](scripts/demo/README.md).
 
-`--check-config` revisa la configuración sin conexión. `test` hace una llamada real (`GET /status`) a tu appliance. Sin instalación global, ejecútalos como `npx -y @nuoframework/darktrace-mcp@1.1.1 test`.
+**1 · Conecta una vez.** Escribe la URL del appliance y los dos tokens (no se muestran al teclear), elige `read` y un cliente. El asistente verifica TLS y los tokens con una petición firmada y lista lo que ha escrito. Grabado desde el código fuente; `npx` añade la instalación de una copia fija.
+
+![Asistente que selecciona acceso de solo lectura y escribe una configuración temporal de OpenCode](docs/assets/demo/setup.gif)
+
+**2 · Haz una pregunta de analista.** Claude Code llama a las herramientas de dispositivos y model breaches y propone qué revisar después. Salida real de una ejecución no interactiva (`claude -p`), con un ritmo ajustado para leerla; la respuesta no está preparada de antemano.
+
+![Claude Code consulta dispositivos y model breaches sintéticos mediante MCP y recomienda pasos de investigación](docs/assets/demo/analyst.gif)
+
+**3 · Mantén el control de las acciones críticas.** Vista previa, confirmación y el diálogo nativo de aprobación de Claude Code, donde una pulsación programada elige **Decline** (rechazar). El servidor deniega la acción; no se envía ninguna escritura al appliance. Se recortan el arranque y las esperas.
+
+![Sesión animada de Claude Code que previsualiza una acción de Antigena, selecciona Decline en el diálogo MCP nativo y muestra el rechazo](docs/assets/demo/approval.gif)
 
 ## Clientes compatibles
 
-`darktrace-mcp setup` configura estos clientes automáticamente. Cada enlace incluye también la configuración manual.
+El asistente configura estos clientes; cada insignia enlaza a su guía. Los diálogos de aprobación dependen del cliente y del protocolo. [Aprobación de acciones críticas](docs/es/clients.md#claude-code).
 
-| Cliente | Automático | Guía manual |
-|---|---|---|
-| Claude Desktop | `setup` o `.mcpb` | [Claude Desktop](docs/es/clients.md#claude-desktop) |
-| Claude Code | `setup` | [Claude Code](docs/es/clients.md#claude-code) |
-| Codex (CLI e IDE) | `setup` | [Codex](docs/es/clients.md#codex) |
-| Cursor | `setup` o enlace de un clic | [Cursor](docs/es/clients.md#cursor) |
-| VS Code (Copilot) | `setup` o enlace de un clic | [VS Code](docs/es/clients.md#vs-code) |
-| Windsurf | `setup` | [Windsurf](docs/es/clients.md#windsurf) |
-| OpenCode | `setup` | [OpenCode](docs/es/clients.md#opencode) |
-| Gemini CLI | `setup` | [Gemini CLI](docs/es/clients.md#gemini-cli) |
-| Cualquier cliente, con Docker | `setup --runtime docker` | [Docker](docs/es/clients.md#docker) |
-| Una línea por cliente | `claude mcp add`, `codex mcp add`, `code --add-mcp`, `gemini mcp add`, enlace de Cursor | [Una línea por cliente](docs/es/clients.md#una-línea-por-cliente) |
+[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/es/clients.md#claude-desktop)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/es/clients.md#claude-code)
+[![Codex](https://img.shields.io/badge/Codex-412991?style=flat-square)](docs/es/clients.md#codex)
+[![Cursor](https://img.shields.io/badge/Cursor-111111?style=flat-square&logo=cursor&logoColor=white)](docs/es/clients.md#cursor)
+[![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square)](docs/es/clients.md#vs-code)
+[![Windsurf](https://img.shields.io/badge/Windsurf-087F8C?style=flat-square&logo=windsurf&logoColor=white)](docs/es/clients.md#windsurf)
+[![OpenCode](https://img.shields.io/badge/OpenCode-222222?style=flat-square&logo=opencode&logoColor=white)](docs/es/clients.md#opencode)
+[![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](docs/es/clients.md#gemini-cli)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](docs/es/clients.md#docker)
 
-## Qué puede hacer
+Los nombres y logotipos identifican compatibilidad, pertenecen a sus respectivos titulares y no implican respaldo.
 
-Se pueden ejecutar 77 de las 79 operaciones de la API, agrupadas en 50 herramientas. La acción de Darktrace/Email (retener, liberar y similares) queda excluida de esta versión, y el endpoint obsoleto `GET /aianalyst/incidents` no está disponible. Lista completa: [referencia de herramientas](docs/tools.md) (inglés).
+## Qué puedes hacer
 
-| Área | Ejemplos | Perfil necesario |
-|---|---|---|
-| Dispositivos | listar, buscar, dispositivos similares, conexiones, métricas | `read` |
-| Model breaches | listar, comentarios | `read` |
-| | reconocer (acknowledge), comentar | `write` |
-| AI Analyst | incidentes, eventos, investigaciones, estadísticas | `read` |
-| | reconocer, fijar, comentar, iniciar una investigación | `write` |
-| Respuesta autónoma (Antigena) | listar acciones, resumen | `read` |
-| | activar, ampliar, anular, acciones manuales | `critical` |
-| Etiquetas (tags) | listar etiquetas y dispositivos etiquetados | `read` |
-| | crear, asignar, quitar | `write` |
-| | borrar una etiqueta | `critical` |
-| Intel feed y subredes | leer | `read` |
-| | modificar | `critical` |
-| Capturas de paquetes (PCAP) | listar | `read` |
-| | solicitar una captura | `write` |
-| | descargar una captura | `sensitive` |
-| Advanced Search | consultas, análisis, gráficos | `sensitive` |
-| Darktrace/Email | paneles, datos de referencia, metadatos de correos, búsqueda, eventos de auditoría | `sensitive` |
-| Modelos, métricas, estado | modelos, componentes, métricas, estado, estadísticas | `read` |
+**50 herramientas · 77 operaciones ejecutables.** Empieza con `read` (38 operaciones). Añade `sensitive` (18), `write` (16) o `write,critical` (5 operaciones críticas) según necesites. Los permisos del token del appliance siguen siendo el límite.
 
-59 operaciones tienen evidencia de un laboratorio Darktrace 7.1.0; en 6 de ellas es parcial (por ejemplo, en Antigena manual solo bloqueos `connection`). Las lecturas de correo **no están validadas en laboratorio** (not lab-validated: el token del laboratorio recibió 403). La [referencia de herramientas](docs/tools.md) muestra el estado de cada operación.
+| Área | Herram. / ops | Ejemplos | Perfiles | Evidencia de laboratorio |
+|---|---:|---|---|---:|
+| [Sistema y referencias](docs/tools.md#system-and-reference-data) | 5 / 6 | Estado, estadísticas de red, enumeraciones | `read` | 3 / 1 / 2 |
+| [Dispositivos](docs/tools.md#devices) | 9 / 9 | Búsquedas, conexiones, métricas, etiquetas | `read`, `write` | 9 / 0 / 0 |
+| [Model breaches](docs/tools.md#model-breaches) | 4 / 7 | Consultar, reconocer, comentar | `read`, `write` | 7 / 0 / 0 |
+| [Modelos y métricas](docs/tools.md#models-and-metrics) | 3 / 6 | Definiciones de modelos, componentes y métricas | `read` | 4 / 2 / 0 |
+| [AI Analyst](docs/tools.md#ai-analyst) | 8 / 11 | Incidentes, fijación, investigaciones | `read`, `write` | 11 / 0 / 0 |
+| [Respuesta autónoma (Antigena)](docs/tools.md#autonomous-response-antigena) | 3 / 4 | Listar, activar, ampliar, anular | `read`, `critical` | 3 / 1 / 0 |
+| [Etiquetas](docs/tools.md#tags) | 3 / 10 | Listar, crear, asignar, quitar, borrar | `read`, `write`, `critical` | 7 / 0 / 3 |
+| [Intel feed y subredes](docs/tools.md#intel-feed-and-subnets) | 4 / 4 | Watched Domains, ajustes de subred | `read`, `critical` | 2 / 2 / 0 |
+| [Capturas de paquetes](docs/tools.md#packet-captures) | 3 / 3 | Listar, solicitar, descargar | `read`, `sensitive`, `write` | 3 / 0 / 0 |
+| [Advanced Search](docs/tools.md#advanced-search) | 1 / 4 | Consultas, análisis de campos, gráficos | `sensitive` | 4 / 0 / 0 |
+| [Darktrace/Email](docs/tools.md#darktraceemail) | 7 / 13 | Paneles, metadatos, búsquedas, auditoría | `sensitive` | 0 / 0 / 13 |
 
-## Permisos y seguridad
+**✓** evidencia en un laboratorio Darktrace 7.1.0 · **◐** evidencia parcial (la [referencia de herramientas (EN)](docs/tools.md) indica qué se cubrió) · **—** sin validar en laboratorio, incluidas las pruebas bloqueadas o fallidas.
 
-Tú decides qué puede hacer el modelo con `DARKTRACE_PROFILES` (el asistente te lo pregunta). Por defecto es `read`.
+- 59 de 77 operaciones tienen evidencia de dos laboratorios Darktrace 7.1.0, 6 de ellas parcial. Las rutas de escritura y críticas se volvieron a comprobar después.
+- Las 13 lecturas de Darktrace/Email están sin validar (el token del laboratorio recibió HTTP 403). La descarga de correo solo devuelve tamaño y SHA-256.
+- No disponibles: la acción de Darktrace/Email (excluida) y el obsoleto `GET /aianalyst/incidents`.
 
-| Perfil | Permite | Protección adicional |
-|---|---|---|
-| `read` (por defecto) | Lecturas normales | — |
-| `sensitive` | Advanced Search, metadatos y búsqueda de correos, descarga de PCAP, eventos de auditoría | — |
-| `write` | Reconocer, comentar, fijar, etiquetas, etiquetas de dispositivo, solicitar PCAP, investigaciones | `dryRun:true` muestra una vista previa sin cambiar nada. Sin él, la escritura se ejecuta y depende del aviso de permisos de tu cliente |
-| `critical` | Acciones de Antigena, intel feed, subredes, borrar una etiqueta | `dryRun:true` devuelve una vista previa con un `previewId`. Solo se ejecuta al repetir la llamada con `confirm:true` y ese `previewId` y (por defecto) tras aceptar el diálogo del servidor. Sin `confirm:true` la llamada se rechaza |
-| `all` | Todo lo anterior | Las mismas reglas de cada perfil. Solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
+Prueba estas preguntas:
 
-Combina perfiles con comas, por ejemplo `DARKTRACE_PROFILES=read,write`. Cualquier lista con `sensitive` y `write` necesita la misma confirmación que `all`. `DARKTRACE_CRITICAL_APPROVAL=host` (sin diálogo del servidor) necesita `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` ([detalles](docs/es/configuration.md#aprobación-humana)). Cada escritura y acción crítica queda auditada. Los permisos de tu token de Darktrace siguen aplicando: el servidor no puede hacer más de lo que el token permite.
+- «Busca dispositivos llamados finance y muestra sus conexiones recientes». (`read`)
+- «Resume los model breaches con mayor puntuación de las últimas 24 horas». (`read`)
+- «Muestra los incidentes de AI Analyst de este dispositivo y los comentarios existentes». (`read`)
+- «Previsualiza una etiqueta de triaje para el dispositivo 42 antes de cambiar nada». (`write`)
+- «Busca tráfico de este dominio y resume las conexiones encontradas». (`sensitive`)
+- «Previsualiza la anulación de la acción Antigena 123. Espera mi aprobación». (`write,critical`)
 
-> **Los datos salen de tu red.** Los resultados llegan a tu cliente MCP y a su proveedor del modelo. Comprueba la idoneidad del proveedor, la retención y la residencia de datos (provider eligibility, retention, residency) en tu organización antes de conectar un appliance de producción. Las descargas de PCAP se devuelven en línea como Base64 y llegan al host y a su proveedor del modelo como cualquier otro resultado.
+## Seguridad desde el diseño
 
-Más: [resumen de seguridad](docs/security.md) (inglés) · [política de seguridad](SECURITY.md).
+Las acciones críticas (Antigena, intel feed, subredes, borrado de etiquetas) siguen este camino. Las escrituras ordinarias omiten la vista previa salvo que la pidas.
 
-## Documentación
+```mermaid
+flowchart LR
+    P[Perfiles + política de destinos] --> V[Vista previa crítica: previewId]
+    V --> C[confirm: true + mismos argumentos]
+    C --> H{Diálogo de aprobación humana}
+    H -->|Aceptar| W[Escritura en appliance]
+    H -->|Rechazar| R[Rechazo]
+    V -.-> A[Auditoría con cadena de hashes en stderr]
+    W --> A
+    R --> A
+```
 
-| Guía | Qué encontrarás |
-|---|---|
-| [Primeros pasos](docs/es/getting-started.md) | Instalación paso a paso, tokens, primera prueba |
-| [Clientes](docs/es/clients.md) | Configuración automática y manual de cada cliente |
-| [Configuración](docs/es/configuration.md) | Variables de entorno, archivo de configuración, perfiles, límites |
-| [Herramientas](docs/tools.md) (inglés) | Cada herramienta y operación de la API, con su perfil |
-| [Solución de problemas](docs/es/troubleshooting.md) | Autenticación, reloj, TLS, permisos, proxies |
-| [Docker](docs/docker.md) (inglés) | Imagen y opciones de ejecución endurecidas |
-| [Seguridad](docs/security.md) (inglés) | Modelo de seguridad y enlaces a revisiones detalladas |
-| [Arquitectura](docs/architecture.md) (inglés) | Flujo de una petición y decisiones de diseño |
-| [Releases](docs/releases.md) · [Changelog](CHANGELOG.md) | Versiones y cambios |
-| [Historial](docs/history/README.md) | Registros de revisiones y releases anteriores |
+- **Perfiles:** `read` por defecto; los datos sensibles y los cambios requieren activación. Las escrituras ordinarias se ejecutan sin vista previa salvo que indiques `dryRun:true`; por defecto dependen del aviso de permisos del cliente.
+- **Aprobación crítica:** `previewId` de un solo uso (5 minutos), después `confirm:true` con los mismos argumentos y el diálogo del servidor por defecto. Rechazar o cancelar impide la acción. El servidor no puede probar que respondió una persona; las reglas de aprobación automática debilitan este control.
+- **Límites de escritura:** hasta 10 por minuto, 3 críticas; tres fallos o resultados desconocidos consecutivos bloquean las escrituras hasta reiniciar. Los límites y el estado son por proceso. Las escrituras nunca se reintentan automáticamente.
+- **Destinos protegidos:** configuración opcional, coincidencia literal exacta y límites de destinos por operación. Para acciones Antigena se comprueba `codeid`, no el dispositivo.
+- **Auditoría:** escrituras, vistas previas y rechazos generan registros con cadena de hashes en stderr. Las lecturas sensibles no se auditan; las cadenas no tienen anclaje externo ni identidad de arranque.
+- **Salida acotada:** selección de campos, límites de tamaño y neutralización de instrucciones reducen la exposición. No garantizan eliminar todo campo sensible ni impedir toda inyección de instrucciones. Los PCAP de más de unos 45 KB se rechazan y solo devuelven tamaño y hash.
+- **Transporte:** stdio local; TLS verificado, peticiones firmadas con HMAC, destino fijado y sin proxies ni redirecciones.
+- **Aceptación explícita:** `all` o `sensitive` + `write` necesita `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (sin control de propagación de datos sensibles). La aprobación crítica `host` necesita `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`.
 
-## Estado del proyecto
+> **Los datos salen de tu red.** Los resultados llegan al cliente MCP y al proveedor del modelo, incluidos PCAP en Base64 y metadatos de correo. Evalúa la **idoneidad del proveedor, la retención y la residencia de los datos** antes de conectar un appliance de producción.
 
-Repositorio público. Desde v1.1.0, el flujo de release publica [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia) y `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry; el servidor se describe para el MCP Registry como `io.github.nuoframework/darktrace-mcp`. Cada canal solo está disponible cuando se publica la release v1.1.0 ([releases](docs/releases.md), inglés). Limitaciones conocidas: [changelog](CHANGELOG.md#known-limitations-in-111) (inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
+[Resumen de seguridad (EN)](docs/security.md) · [Configuración y aprobación](docs/es/configuration.md#aprobación-humana) · [Notificar una vulnerabilidad](SECURITY.md)
 
-## Marcas, logotipo y contacto
+## Cómo se ha validado
 
-**MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.** El nombre y el logotipo de Darktrace pertenecen a Darktrace. La portada muestra el [logotipo oficial sin modificar](docs/assets/brand/darktrace/Darktrace-white.svg) del [paquete público de logotipos del Brand Hub](https://brandhub.darktrace.com/visual-identity/logo) ([procedencia](docs/assets/brand/darktrace/README.md), [identidad visual](docs/visual-identity.md), en inglés). Identifica el producto con el que se integra este proyecto. **El uso del logotipo no implica autorización ni carácter oficial.**
+- Modelo de amenazas [TM-18…31](docs/security/threat-model-writes.md), [revisión independiente del diseño](docs/security/design-review-writes.md) y [pruebas adversariales](docs/security/adversarial-results-writes.md).
+- Cifras registradas para la versión: **230 pruebas funcionales / 1.150 subcasos de seguridad**. Los registros Linux recogen 1.150 aprobados; macOS omite tres por la plataforma. Es evidencia fechada, no una certificación. [Cifras y registros](docs/security/release-pins-1.1.0.md).
+- [Dos laboratorios Darktrace 7.1.0](docs/security/final-lab-campaign-1.1.0.md), con menor cobertura que las pruebas offline; [comprobaciones Docker en arm64 y amd64](https://github.com/nuoframework/darktrace-mcp/actions/runs/37497433186) en el commit de la versión `f95e798`. La validación del instalador también tiene [sus propios registros (EN)](docs/security/release-pins-1.1.0.md#update-after-the-installer-date-format-probe-2026-10-06-later).
+- La [revisión final](docs/security/final-gate-review-1.1.0.md) recoge bloqueos y [riesgos residuales](docs/security/final-gate-review-1.1.0.md#4-residual-risks-to-disclose-in-the-release-notes); las [decisiones fechadas del propietario](docs/security/owner-decisions-1.1.0.md) aceptan riesgos concretos, sin eliminarlos. No se afirma cero CVE ni existe un escaneo documentado del entorno 1.1.0.
 
-Reclamaciones y reivindicaciones sobre marcas o imagen corporativa, incluidas solicitudes para retirar el logotipo: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). Esta dirección no es para vulnerabilidades; consulta la [política de seguridad](SECURITY.md). Este proyecto nunca envía correo por sí mismo.
+## Documentación y contribuciones
+
+[Primeros pasos](docs/es/getting-started.md) · [Clientes](docs/es/clients.md) · [Herramientas (EN)](docs/tools.md) · [Configuración](docs/es/configuration.md) · [Docker (EN)](docs/docker.md) · [Arquitectura (EN)](docs/architecture.md) · [Solución de problemas](docs/es/troubleshooting.md) · [Versiones (EN)](docs/releases.md) · [Cambios](CHANGELOG.md)
+
+Código abierto bajo [Apache-2.0](LICENSE). Consulta cómo [contribuir](CONTRIBUTING.md). Dónde se publica cada versión y cómo verificarla: [Versiones (EN)](docs/releases.md).
+
+## Marcas y contacto
+
+El nombre y el logotipo Darktrace pertenecen a Darktrace. La cabecera usa el [logotipo oficial sin modificar](docs/assets/brand/darktrace/Darktrace-white.svg) para identificar el producto integrado ([procedencia](docs/assets/brand/darktrace/README.md)). **Su uso no implica autorización ni carácter oficial.**
+
+Consultas sobre marcas o retirada: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). Avisos de seguridad: [SECURITY.md](SECURITY.md). Este proyecto nunca envía correo por su cuenta.
