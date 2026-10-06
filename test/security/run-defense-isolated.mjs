@@ -1,4 +1,4 @@
-import { cpSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -7,7 +7,8 @@ import { spawnSync } from 'node:child_process';
 const root = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const snapshot = mkdtempSync(join(tmpdir(), 'darktrace-mcp-defense-'));
 for (const name of ['src', 'test', 'scripts', 'openapi', 'docs', 'examples']) cpSync(join(root, name), join(snapshot, name), { recursive: true, filter: path => !path.includes('/test/security/evidence') });
-for (const name of ['package.json', 'tsconfig.json', 'tsconfig.generate.json', 'README.md', 'README.es.md']) cpSync(join(root, name), join(snapshot, name));
+// README languages: README.md plus README.en.md or README.es.md, whichever the checkout carries.
+for (const name of ['package.json', 'tsconfig.json', 'tsconfig.generate.json', 'README.md', 'README.en.md', 'README.es.md']) if (existsSync(join(root, name))) cpSync(join(root, name), join(snapshot, name));
 symlinkSync(join(root, 'node_modules'), join(snapshot, 'node_modules'), 'dir');
 function hashes(dir, prefix = '') {
   const out = {}; for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
