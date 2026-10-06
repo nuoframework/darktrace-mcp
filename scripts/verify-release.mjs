@@ -177,10 +177,10 @@ const pkg=JSON.parse(readFileSync(join(packed,'package.json')));
 assert.equal(pkg.name,'@nuoframework/darktrace-mcp');assert.equal(pkg.private,undefined,'public npm publication: no private flag');assert.deepEqual(pkg.publishConfig,{access:'public',registry:'https://registry.npmjs.org'});assert.equal(pkg.mcpName,'io.github.nuoframework/darktrace-mcp');
 assert.equal(lstatSync(join(packed,'dist/src/index.js')).mode&0o777,0o755);
 assert(!Object.keys(pkg.scripts??{}).some(k=>['preinstall','install','postinstall','prepare','prepublish','prepublishOnly','postpublish'].includes(k)));
-assert.deepEqual(pkg.dependencies,{'@modelcontextprotocol/server':'2.3.0',zod:'4.2.0'});
+assert.deepEqual(pkg.dependencies,{'@modelcontextprotocol/server':'2.3.0',zod:'4.6.5'});
 const expected=JSON.parse(readFileSync(join(packed,'npm-shrinkwrap.json'))).packages;
 const wanted=Object.entries(expected).filter(([k,v])=>k&&!v.dev);
-assert.deepEqual(wanted.map(([k,v])=>[k,v.version]).sort(),[['node_modules/@modelcontextprotocol/core','2.3.0'],['node_modules/@modelcontextprotocol/server','2.3.0'],['node_modules/zod','4.2.0']]);
+assert.deepEqual(wanted.map(([k,v])=>[k,v.version]).sort(),[['node_modules/@modelcontextprotocol/core','2.3.0'],['node_modules/@modelcontextprotocol/server','2.3.0'],['node_modules/zod','4.6.5']]);
 for(const [path,p] of wanted){const name=path.slice('node_modules/'.length),slug=name.split('/').at(-1);assert.equal(p.resolved,`https://registry.npmjs.org/${name}/-/${slug}-${p.version}.tgz`);assert.match(p.integrity,/^sha512-[A-Za-z0-9+/]+={0,2}$/);}
 const install=join(work,'install');mkdirSync(install);
 writeFileSync(join(install,'package.json'),JSON.stringify({name:'private-release-verification',version:'1.0.0',private:true}));
