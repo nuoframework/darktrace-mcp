@@ -79,7 +79,7 @@ El asistente te pregunta:
 | URL del appliance | Dirección `https://` de tu appliance |
 | Token público | Se escribe sin mostrarse |
 | Token privado | Se escribe sin mostrarse |
-| Permisos | `read` (recomendado para empezar), `read,sensitive`, `read,write` o `all` |
+| Permisos | `read` (recomendado para empezar), `read,sensitive`, `read,write` o `all`. `all` solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` en la entrada del cliente ([por qué](configuration.md#perfiles)) |
 | Clientes a configurar | Muestra los clientes que encuentra en tu equipo |
 
 Después:

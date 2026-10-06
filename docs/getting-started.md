@@ -79,7 +79,7 @@ The wizard asks you:
 | Appliance URL | `https://` address of your appliance |
 | Public token | Typed hidden |
 | Private token | Typed hidden |
-| Permission preset | `read` (recommended to start), `read,sensitive`, `read,write`, or `all` |
+| Permission preset | `read` (recommended to start), `read,sensitive`, `read,write`, or `all`. `all` starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` in the client entry ([why](configuration.md#profiles)) |
 | Clients to configure | It lists the clients it found on your machine |
 
 It then:

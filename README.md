@@ -15,7 +15,7 @@ Use the Darktrace Threat Visualizer API from Claude, Codex, Cursor, VS Code and 
   <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-en.svg" alt="transport: stdio only"></a>
   <a href="package.json"><img src="docs/assets/badges/node-22-en.svg" alt="runtime: Node.js 22+"></a>
   <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-en.svg" alt="license: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: private image archive or local build, pinned image ID"></a>
+  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: local build or ghcr.io image, pinned image ID"></a>
   <a href="docs/security.md"><img src="docs/assets/badges/security-tests-en.svg" alt="security tests: offline"></a>
 </p>
 
@@ -45,7 +45,7 @@ docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/da
 npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
-The image is built for linux/amd64 and linux/arm64. Pin the digest, never the tag. See the [Docker guide](docs/docker.md).
+The image is built for linux/amd64 and linux/arm64. Pin the digest, never the tag. For 1.1.0, the arm64 image passed the local Docker gates; amd64 is verified by CI on the release commit ([status](docs/docker.md#110-image-verification-status)).
 
 ### Fallback: build from source
 
@@ -84,7 +84,7 @@ darktrace-mcp test
 
 ## What it can do
 
-78 of the 79 API operations are available, grouped into 51 tools. Full list: [tool reference](docs/tools.md).
+77 of the 79 API operations are executable, grouped into 50 tools. The Darktrace/Email action (hold, release and similar) is excluded from this release, and the deprecated `GET /aianalyst/incidents` is not available. Full list: [tool reference](docs/tools.md).
 
 | Area | Examples | Profile needed |
 |---|---|---|
@@ -104,12 +104,10 @@ darktrace-mcp test
 | | request a capture | `write` |
 | | download a capture | `sensitive` |
 | Advanced Search | queries, analysis, graphs | `sensitive` |
-| Darktrace/Email | dashboards, reference data | `read` |
-| | email content, search, audit events | `sensitive` |
-| | hold, release and other email actions | `critical` |
+| Darktrace/Email | dashboards, reference data, email metadata, search, audit events | `sensitive` |
 | Models, metrics, status | models, components, metrics, status, statistics | `read` |
 
-19 operations passed real queries on a Darktrace 7.1.0 lab. The others are marked **not lab-validated** in the [tool reference](docs/tools.md).
+56 operations have evidence from one Darktrace 7.1.0 lab; for 11 of them it is partial (for example, Antigena `clear` only). Email reads are **not lab-validated** (the lab token got 403). The [tool reference](docs/tools.md) shows the status of each operation.
 
 ## Permissions and safety
 
@@ -118,12 +116,12 @@ You choose what the model may do with `DARKTRACE_PROFILES` (the wizard asks you)
 | Profile | Allows | Extra safety |
 |---|---|---|
 | `read` (default) | Normal reads | — |
-| `sensitive` | Advanced Search, email content, PCAP download, audit events | — |
-| `write` | Acknowledge, comment, pin, tags, device labels, PCAP requests, investigations | `dryRun:true` shows a preview without changing anything |
-| `critical` | Antigena actions, intel feed, subnets, email actions, deleting a tag | Runs only with `confirm:true`. Without it you get a preview |
-| `all` | Everything above | Same rules as each profile |
+| `sensitive` | Advanced Search, email metadata and search, PCAP download, audit events | — |
+| `write` | Acknowledge, comment, pin, tags, device labels, PCAP requests, investigations | `dryRun:true` shows a preview without changing anything. Without it the write runs, relying on your client's tool-permission prompt |
+| `critical` | Antigena actions, intel feed, subnets, deleting a tag | `dryRun:true` returns a preview with a `previewId`. It runs only when repeated with `confirm:true` and that `previewId`, and (by default) after you accept the server's dialog. Without `confirm:true` the call is refused |
+| `all` | Everything above | Same rules as each profile. Starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
 
-Combine profiles with commas, for example `DARKTRACE_PROFILES=read,write`. Every write and critical call is audited. Your Darktrace token permissions still apply: the server cannot do more than the token allows.
+Combine profiles with commas, for example `DARKTRACE_PROFILES=read,write`. Any list with both `sensitive` and `write` needs the same acknowledgement as `all`. `DARKTRACE_CRITICAL_APPROVAL=host` (skip the server dialog) needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` ([details](docs/configuration.md#human-approval)). Every write and critical call is audited. Your Darktrace token permissions still apply: the server cannot do more than the token allows.
 
 > **Data leaves your network.** Results go to your MCP client and its model provider. Check provider eligibility, retention and residency for your organization before you connect a production appliance. PCAP downloads are returned inline as Base64 and are forwarded to the host and its model provider like any other result.
 
@@ -146,7 +144,7 @@ More: [security overview](docs/security.md) · [security policy](SECURITY.md).
 
 ## Project status
 
-Public repository. Published as [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance), as `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry, and described for the MCP Registry as `io.github.nuoframework/darktrace-mcp` ([releases](docs/releases.md)). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+Public repository. From v1.1.0 the release workflow publishes [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance) and `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry; the server is described for the MCP Registry as `io.github.nuoframework/darktrace-mcp`. Each channel is live only once the v1.1.0 release is published ([releases](docs/releases.md)). Known limitations: [changelog](CHANGELOG.md#known-limitations-in-110). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Trademarks, logo and contact
 

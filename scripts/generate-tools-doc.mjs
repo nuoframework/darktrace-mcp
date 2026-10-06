@@ -12,15 +12,30 @@ const catalogue = read('src/api/catalogue.generated.json');
 const toolGroups = read('src/api/tool-groups.json');
 const target = new URL('docs/tools.md', root);
 
-// Operations that passed real queries on a Darktrace 7.1.0 lab (2026-10-06).
-// Anything else is listed as "not lab-validated" unless the catalogue records validatedOn.
-const LAB_VALIDATED = new Set([
-  'get_status', 'get_devices', 'get_subnets', 'get_aianalyst_stats', 'get_intelfeed',
-  'get_modelbreaches', 'get_devicesearch', 'get_similardevices', 'get_aianalyst_groups',
-  'get_aianalyst_incidentevents', 'get_aianalyst_investigations', 'get_mbcomments',
-  'get_details', 'get_tags_entities', 'get_tags_tid', 'get_tags_tid_entities',
-  'get_endpointdetails', 'get_antigena', 'get_antigena_summary',
-]);
+// Lab evidence comes only from the catalogue's `validatedOn` (Darktrace 7.1.0 lab, 2026-10-06).
+// `validatedOn` has no per-action scope (DR-W-12, still open), so the operations below are listed with
+// the scope the lab actually covered, as recorded in docs/CHANGES-core.md §6 and the 1.1.0 final gate
+// review (docs/security/final-gate-review-1.1.0.md §3.1). Keep this list in sync with those records.
+const PRE_CR02 = 'partial: passed live before the path encoding changed (CR-02); the current encoding has probe evidence for `=` only';
+const RESPONSEDATA_ONLY = 'partial: passed only with `responsedata`; the full list returns `too_large`';
+const LAB_PARTIAL = {
+  post_antigena: 'partial: only `clear` ran live (not activate, extend or reactivate)',
+  post_antigena_manual: 'partial: one manual `connection` block ran live',
+  post_subnets: 'partial: only a subnet label change ran live',
+  post_intelfeed: 'partial: only add and remove of one entry ran live',
+  get_models: RESPONSEDATA_ONLY,
+  get_components: RESPONSEDATA_ONLY,
+  get_enums: RESPONSEDATA_ONLY,
+  get_pcaps_filename: 'partial: tested live under an earlier partial-result contract; the current full-or-error contract was not tested live, and that 79,725-byte capture would now be refused',
+  get_advancedsearch_api_search_query: PRE_CR02,
+  get_advancedsearch_api_analyze_field_analysis_query: PRE_CR02,
+  get_advancedsearch_api_graph_graphmode_interval_query: PRE_CR02,
+};
+// Why an operation is not callable in this release.
+const NOT_AVAILABLE_REASON = {
+  get_aianalyst_incidents: 'Deprecated by Darktrace. Use `darktrace_list_ai_analyst_incidents`.',
+  post_agemail_api_ep_api_v1_0_emails_uuid_action: 'Excluded from this release: `darktrace_email_action` is not registered in any profile. Signing and request schema are unvalidated and the lab token got HTTP 403. Re-enabling it needs a reviewed schema, a signing proof with an email-licensed token and a new design review.',
+};
 
 // One plain-language line per operation. Missing entries fall back to "METHOD path".
 const DESCRIPTIONS = {
@@ -84,7 +99,7 @@ const DESCRIPTIONS = {
   post_subnets: 'Change subnet settings.',
   get_pcaps: 'List packet captures.',
   post_pcaps: 'Request a new packet capture.',
-  get_pcaps_filename: 'Download a packet capture file.',
+  get_pcaps_filename: 'Download a packet capture as Base64, whole or not at all: captures above about 45 KB are refused with `output_limit_exceeded` (size and SHA-256 only).',
   get_advancedsearch_api_search_query: 'Advanced Search query (GET form).',
   post_advancedsearch_api_search: 'Advanced Search query (POST form).',
   get_advancedsearch_api_analyze_field_analysis_query: 'Advanced Search field analysis.',
@@ -94,9 +109,10 @@ const DESCRIPTIONS = {
   get_agemail_api_ep_api_v1_0_dash_data_loss: 'Email dashboard: data loss.',
   get_agemail_api_ep_api_v1_0_dash_user_anomaly: 'Email dashboard: user anomaly.',
   get_agemail_api_ep_api_v1_0_emails_uuid: 'One email, including content metadata.',
-  get_agemail_api_ep_api_v1_0_emails_uuid_download: 'Download a raw email.',
+  get_agemail_api_ep_api_v1_0_emails_uuid_download: 'Size and SHA-256 of a raw email (the content is not returned).',
   post_agemail_api_ep_api_v1_0_emails_search: 'Search emails.',
-  post_agemail_api_ep_api_v1_0_emails_uuid_action: 'Act on an email (for example, hold or release).',
+  // The email action is excluded from this release; it appears only under "Not available".
+  post_agemail_api_ep_api_v1_0_emails_uuid_action: 'Act on an email (excluded from this release).',
   get_agemail_api_ep_api_v1_0_admin_decode_link: 'Decode a rewritten email link.',
   get_agemail_api_ep_api_v1_0_resources_actions: 'Email reference data: actions.',
   get_agemail_api_ep_api_v1_0_resources_filters: 'Email reference data: filters.',
@@ -137,32 +153,37 @@ export function profileOf(op) {
   if (RANK[declared] > RANK[p]) p = declared;
   return p;
 }
-const validated = op => LAB_VALIDATED.has(op.operationId) || (op.validatedOn ?? []).length > 0;
+const validated = op => (op.validatedOn ?? []).length > 0;
+const labCell = op => !validated(op) ? 'not lab-validated' : LAB_PARTIAL[op.operationId] ?? 'yes';
 
 export function render() {
   const ops = catalogue.operations.map(op => ({ ...op, tool: toolGroups[op.operationId] ?? op.tool ?? null }));
-  const available = ops.filter(op => op.tool && op.status !== 'excluded');
-  const excluded = ops.filter(op => !op.tool || op.status === 'excluded');
+  // Only `implemented` operations are callable; `blocked` (the email action) and `excluded` are not.
+  const available = ops.filter(op => op.tool && op.status === 'implemented');
+  const excluded = ops.filter(op => !available.includes(op));
   const byTool = new Map();
   for (const op of available) { if (!byTool.has(op.tool)) byTool.set(op.tool, []); byTool.get(op.tool).push(op); }
   const counts = { read: 0, sensitive: 0, write: 0, critical: 0 };
   for (const op of available) counts[profileOf(op)]++;
   const nValidated = available.filter(validated).length;
+  const nPartial = available.filter(op => validated(op) && LAB_PARTIAL[op.operationId]).length;
+  const nEmail = available.filter(op => op.pathTemplate.startsWith('/agemail/')).length;
+  const deprecated = excluded.filter(op => op.status === 'excluded').length;
 
   const out = [];
   out.push('# Tool reference', '');
   out.push('[README](../README.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)', '');
   out.push('> Generated by `npm run docs:tools` from `src/api/catalogue.generated.json` and `src/api/tool-groups.json`. Do not edit by hand. English only.', '');
-  out.push(`**${byTool.size} tools** cover **${available.length} of ${ops.length} API operations** (Darktrace Threat Visualizer API ${catalogue.specVersion ?? '6.1'}).`);
-  out.push(`${nValidated} operations passed real queries on a Darktrace 7.1.0 lab. The rest are marked *not lab-validated*: they follow the API documentation but were not tried against a real appliance.`, '');
+  out.push(`**${byTool.size} tools** cover **${available.length} executable operations** out of the ${ops.length} in the API inventory (Darktrace Threat Visualizer API ${catalogue.specVersion ?? '6.1'}). The other ${excluded.length} are [not available](#not-available): ${excluded.length - deprecated} excluded (the email action) and ${deprecated} deprecated (\`GET /aianalyst/incidents\`).`, '');
+  out.push(`**Lab evidence.** ${nValidated} operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06). For ${nPartial} of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all ${nEmail} Darktrace/Email reads (the lab token got HTTP 403). Most write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. After those controls, only the intel-feed critical flow, a \`post_tags\` preview, the \`confirmation_required\` refusal and POST Advanced Search were re-checked live.`, '');
   out.push('## Which profile do I need?', '');
   out.push('| Profile | What it unlocks | Operations |', '|---|---|---:|');
   out.push(`| \`read\` (default) | Normal reads | ${counts.read} |`);
   out.push(`| \`sensitive\` | Reads that can return raw traffic, email content or audit data | ${counts.sensitive} |`);
-  out.push(`| \`write\` | Reversible or configuration changes. Supports \`dryRun:true\` | ${counts.write} |`);
-  out.push(`| \`critical\` | Actions that can block traffic, act on email or change detection. Needs \`confirm:true\` | ${counts.critical} |`, '');
-  out.push('Set profiles with `DARKTRACE_PROFILES`. See [Configuration](configuration.md#profiles).', '');
-  out.push('Columns: **Tier** is the risk class from the API inventory. **Lab** shows whether the operation passed a real-appliance test.', '');
+  out.push(`| \`write\` | Reversible or configuration changes. \`dryRun:true\` returns a preview | ${counts.write} |`);
+  out.push(`| \`critical\` | Actions that can block traffic or change detection. Call with \`dryRun:true\` for a preview, then repeat with \`confirm:true\` and its \`previewId\`; by default you also accept a server dialog. Without \`confirm:true\` the call is refused (\`confirmation_required\`) | ${counts.critical} |`, '');
+  out.push('Set profiles with `DARKTRACE_PROFILES`. `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. See [Configuration](configuration.md#profiles).', '');
+  out.push('Columns: **Tier** is the risk class from the API inventory. **Lab** shows whether, and how far, the operation passed a real-appliance test.', '');
 
   const areas = new Map();
   for (const tool of [...byTool.keys()].sort()) {
@@ -183,14 +204,14 @@ export function render() {
       const list = byTool.get(tool).sort((a, b) => a.pathTemplate.localeCompare(b.pathTemplate) || a.method.localeCompare(b.method));
       for (const op of list) {
         const desc = DESCRIPTIONS[op.operationId] ?? `${op.method} ${op.pathTemplate}`;
-        out.push(`| \`${tool}\` | \`${op.method} ${op.pathTemplate}\` | ${op.tier} | \`${profileOf(op)}\` | ${validated(op) ? 'yes' : 'not lab-validated'} | ${desc} |`);
+        out.push(`| \`${tool}\` | \`${op.method} ${op.pathTemplate}\` | ${op.tier} | \`${profileOf(op)}\` | ${labCell(op)} | ${desc} |`);
       }
     }
     out.push('');
   }
   out.push('## Not available', '');
   out.push('| Method and path | Reason |', '|---|---|');
-  for (const op of excluded) out.push(`| \`${op.method} ${op.pathTemplate}\` | ${op.operationId === 'get_aianalyst_incidents' ? 'Deprecated by Darktrace. Use `darktrace_list_ai_analyst_incidents`.' : 'Not exposed.'} |`);
+  for (const op of excluded) out.push(`| \`${op.method} ${op.pathTemplate}\` | ${NOT_AVAILABLE_REASON[op.operationId] ?? 'Not exposed.'} |`);
   out.push('');
   return out.join('\n');
 }

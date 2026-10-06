@@ -24,7 +24,8 @@ darktrace-mcp test
 | "token file must be owned by…", "mode 0600" | Token file permissions | [Token file permissions](#token-file-permissions) |
 | "proxy environment is not supported" | Proxy variables in your environment | [Proxy variables are rejected](#proxy-variables-are-rejected) |
 | A tool you expect is missing | Its profile is not enabled | [A tool is missing](#a-tool-is-missing) |
-| Critical action returns only a preview | `confirm:true` missing | [Writes and critical actions](#writes-and-critical-actions) |
+| Critical action refused with `confirmation_required` or `preview_required` | `confirm:true` or the `previewId` from a `dryRun:true` preview is missing | [Writes and critical actions](#writes-and-critical-actions) |
+| Startup error naming `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` or `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (or `sensitive` + `write`), or `DARKTRACE_CRITICAL_APPROVAL=host`, without its acknowledgement | [Server does not start](#server-does-not-start) |
 | "response too large" | Result exceeds the size limit | [Large results](#large-results) |
 
 ## Server does not start
@@ -33,7 +34,8 @@ darktrace-mcp test
 2. Use absolute paths. Desktop apps do not see your shell `PATH`, so `node` alone may fail. Get the full path with `node -p 'process.execPath'`.
 3. Make sure you built the project: `dist/src/index.js` must exist (`npm run build`).
 4. Check the JSON or TOML syntax. On Windows, backslashes in JSON must be doubled.
-5. Look at the client's MCP log. Server messages go to stderr. A configuration problem prints one line such as `{"event":"startup_error","reason":"could not read private token file"}`; `reason` names the setting, never its value. Other startup failures print only the event.
+5. Profile `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. `DARKTRACE_CRITICAL_APPROVAL=host` with `critical` starts only with `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. Add the variable to the client's `env` only after reading what it accepts ([profiles](configuration.md#profiles), [human approval](configuration.md#human-approval)).
+6. Look at the client's MCP log. Server messages go to stderr. A configuration problem prints one line such as `{"event":"startup_error","reason":"could not read private token file"}`; `reason` names the setting, never its value. Other startup failures print only the event.
 
 A server that seems "idle" is normal: it waits for the client.
 
@@ -114,14 +116,15 @@ Tools appear only when their profile is on. Check `DARKTRACE_PROFILES` in the cl
 |---|---|
 | Advanced Search, email content, PCAP download, email audit | `sensitive` |
 | Acknowledge, comment, pin, tags, PCAP request, investigations | `write` |
-| Antigena actions, intel feed, subnet changes, email actions, delete tag | `critical` |
+| Antigena actions, intel feed, subnet changes, delete tag | `critical` |
 
-The deprecated `GET /aianalyst/incidents` is never available. Use `darktrace_list_ai_analyst_incidents`.
+The Darktrace/Email action (`darktrace_email_action`) is excluded from this release and never appears. The deprecated `GET /aianalyst/incidents` is never available. Use `darktrace_list_ai_analyst_incidents`.
 
 ## Writes and critical actions
 
-- **Preview first.** Add `dryRun:true` to any write to see what would happen.
-- **Critical actions** return a preview unless the call has `confirm:true`. Read the preview, then confirm.
+- **Preview first.** Add `dryRun:true` to any write to see what would happen. Without it, an ordinary write runs (by default after your client's own permission prompt).
+- **Critical actions** need three steps: a `dryRun:true` preview that returns a `previewId` (valid 5 minutes, once); the same call repeated with `confirm:true` and that `previewId`; and, by default, your acceptance in the server's dialog. A call without `confirm:true` is refused with `confirmation_required`, and one without a `previewId` with `preview_required` (an expired, used or mismatched one gives `preview_expired`, `preview_used` or `preview_invalid`).
+- **All writes refused after failures.** Three failed or unknown writes in a row stop all writes until the server restarts. Reads keep working. On some appliances DELETE answers 502 after applying the change, which counts as unknown.
 - **Timeout or disconnect during a write.** The result is unknown. Check in Darktrace whether it happened before trying again. Writes are never retried automatically.
 - **Darktrace returns 403 on a write.** Your token lacks that permission. Profiles cannot override token permissions.
 

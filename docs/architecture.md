@@ -11,10 +11,10 @@ Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK compari
 | Area | Decision |
 |---|---|
 | Deployment | One HTTPS origin and credential pair per process; **stdio only**, no HTTP listener. |
-| Surface | 78 of 79 catalogue operations, grouped into 51 tools ([tool reference](tools.md)). The deprecated `GET /aianalyst/incidents` is excluded. |
-| Profiles | Set by the operator at startup with `DARKTRACE_PROFILES`: `read` (default), `sensitive`, `write`, `critical`, `all`. Tools outside the enabled profiles are not registered and are denied before signing. |
-| Changes | `write` operations accept `dryRun:true` previews. `critical` operations return a preview unless the call carries `confirm:true`. Every write is audited. POST/DELETE are never retried. |
-| Validation | 19 read operations passed a Darktrace 7.1.0 lab; all others are marked *not lab-validated*. |
+| Surface | 77 of 79 catalogue operations are executable, grouped into 50 tools ([tool reference](tools.md)). The Darktrace/Email action is `blocked` (excluded from this release, never registered) and the deprecated `GET /aianalyst/incidents` is excluded. |
+| Profiles | Set by the operator at startup with `DARKTRACE_PROFILES`: `read` (default), `sensitive`, `write`, `critical`, `all`. Tools outside the enabled profiles are not registered and are denied before signing. `sensitive` + `write` (including `all`) requires `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`; `critical` with `DARKTRACE_CRITICAL_APPROVAL=host` requires `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. |
+| Changes | `write` operations accept `dryRun:true` previews and otherwise run under the write approval mode (default `host`). `critical` operations need a `dryRun:true` preview, then `confirm:true` with its single-use `previewId`, then (by default) an accepted server dialog; without `confirm:true` the call is refused with `confirmation_required`. Every write, preview and refusal is audited. POST/DELETE are never retried. The normative contract is [CHANGES-core §8](CHANGES-core.md#8-writes-remediation-2026-10-06). |
+| Validation | 56 operations have Darktrace 7.1.0 lab evidence, 11 of them only partial (scope shown in the [tool reference](tools.md)); all others, including every Darktrace/Email read, are marked *not lab-validated*. |
 | Canonicalization | Explicit `encoded` or `unencoded` query-signature mode; default `unencoded`; no fallback. |
 | Network | Dedicated `node:https` connector, pinned initial DNS, hostname verification, `rejectUnauthorized:true`, proxies refused. |
 | Budgets | §5.3 hard ceilings; configuration can only lower them. |
@@ -74,25 +74,27 @@ The server never asks the model for credentials, origins or policy. Returned res
 ```mermaid
 flowchart LR
     accTitle: Profile decisions
-    accDescr: Each tool call is checked against the operation inventory and the operator's profiles. Reads run when their profile is on. Writes can be previewed with dryRun. Critical operations return a preview unless confirm is true. Anything outside the enabled profiles is denied before signing.
+    accDescr: Each tool call is checked against the operation inventory and the operator's profiles. Reads run when their profile is on. Writes can be previewed with dryRun. Critical operations return a preview with dryRun, are refused without confirm, and run only with confirm, a valid previewId and (by default) an accepted dialog. Anything outside the enabled profiles is denied before signing.
     T["tools/call"] --> Q{"Operation in inventory<br/>and profile enabled?"}
     Q -->|"no"| X["Denied<br/>no signing, no network"]
     Q -->|"read · sensitive"| RD["Bounded read"]
     Q -->|"write"| W{"dryRun?"}
     W -->|"yes"| PV["Preview only"]
     W -->|"no"| EX["Signed change<br/>audited, never retried"]
-    Q -->|"critical"| CF{"confirm:true?"}
-    CF -->|"no"| PV
+    Q -->|"critical"| CD{"dryRun?"}
+    CD -->|"yes"| PV
+    CD -->|"no"| CF{"confirm:true + valid previewId<br/>+ approval?"}
+    CF -->|"no"| X
     CF -->|"yes"| EX
     classDef core fill:#030D11,stroke:#FF6B00,stroke-width:2px,color:#FFFFFF
     classDef allow fill:#FFFFFF,stroke:#4B00D7,stroke-width:2px,color:#030D11
     classDef deny fill:#FFFFFF,stroke:#FF00D9,stroke-width:2px,stroke-dasharray:5 3,color:#030D11
-    class T,Q,W,CF core
+    class T,Q,W,CD,CF core
     class RD,PV,EX allow
     class X deny
 ```
 
-Only the operator sets profiles, at startup. The model cannot enable a profile, and its approval is not authorization; appliance token permissions remain authoritative. `confirm:true` should reflect an explicit user decision after reading the preview.
+Only the operator sets profiles, at startup. The model cannot enable a profile, and its approval is not authorization; appliance token permissions remain authoritative. `confirm:true` should reflect an explicit user decision after reading the preview. The server cannot verify that a human answered: in `host` mode, with "always allow" rules or with auto-answering clients, no human may see the call.
 
 ### 3.3 Docker runtime
 
@@ -119,7 +121,7 @@ flowchart TB
     class DT2 ext
 ```
 
-The runtime image is `scratch` plus 22 signed, hash-pinned Alpine 3.24 packages: Alpine-maintained Node.js 24.18.1 linked to shared OpenSSL 3.5.9, with no shell or package manager. A Node 22 stage is used only to build. Fresh scans retain a zlib High match (library affected; an independent review found its vulnerable code is not in the application path) and an `ada` Medium name collision; this document claims no clean scan. See the [Docker guide](docker.md#current-candidate-at-a-glance).
+The runtime image is `scratch` plus 22 signed, hash-pinned Alpine 3.24 packages: Alpine-maintained Node.js 24.18.1 linked to shared OpenSSL 3.5.9, with no shell or package manager. A Node 22 stage is used only to build. Scans of the v1.0.0 image retain a zlib High match (library affected; an independent review found its vulnerable code is not in the application path) and an `ada` Medium name collision; this document claims no clean scan, and the 1.1.0 runtime has no scan record yet. See the [Docker guide](docker.md#v100-image-at-a-glance-previous-release) (v1.0.0 scans) and the [1.1.0 status](docker.md#110-image-verification-status).
 
 ### 3.4 Internal execution order
 
@@ -471,7 +473,7 @@ docker run -i --rm --init --pull=never --log-driver=none \
 
 No image is published to a registry. The [Docker guide](docker.md) and [Docker client example](../examples/docker.mcp.json) are the operational references.
 
-Files must be readable by and owned by the container's non-root UID with mode 0600 or stricter; a read-only mount does not waive ownership/mode checks. Host provisioning must arrange that ownership. No export mount is active in the baseline. Current image identities, platforms and runtime results are in the [Docker guide](docker.md#current-candidate-at-a-glance).
+Files must be readable by and owned by the container's non-root UID with mode 0600 or stricter; a read-only mount does not waive ownership/mode checks. Host provisioning must arrange that ownership. No export mount is active in the baseline. Image identities, platforms and runtime results are in the [Docker guide](docker.md#110-image-verification-status).
 
 ## 11. Testing plan
 

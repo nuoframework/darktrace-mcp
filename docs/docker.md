@@ -2,11 +2,11 @@
 
 [README](../README.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
 
-The image runs the MCP server over stdio and opens no network port. Since v1.1.0 the release workflow publishes it as `ghcr.io/nuoframework/darktrace-mcp:<version>` for linux/amd64 and linux/arm64; always pin the digest.
+The image runs the MCP server over stdio and opens no network port. From v1.1.0 the release workflow publishes it as `ghcr.io/nuoframework/darktrace-mcp:<version>` for linux/amd64 and linux/arm64, once the v1.1.0 release is published; always pin the digest. Verification status: [below](#110-image-verification-status).
 
 The image exposes the same tools as a native install. Profiles work the same way: set `DARKTRACE_PROFILES` with `-e` (default `read`). See [profiles](configuration.md#profiles).
 
-> **Release archives.** The v1.0.0 image archives contain the earlier read-only build (15 tools). For the full API surface, build the image from the current checkout ([Build](#build)) or use a later release.
+> **Release archives.** The v1.0.0 image archives contain the earlier read-only build (15 tools). For the full API surface, build the image from the current checkout ([Build](#build)) or use the 1.1.0 image once it is published.
 
 ## Quick steps
 
@@ -14,9 +14,22 @@ The image exposes the same tools as a native install. Profiles work the same way
 2. Run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)).
 3. Add the client snippet from [Clients: Docker](clients.md#docker), with the image ID.
 
-## Current candidate at a glance
+## 1.1.0 image verification status
 
-This table records the reviewed v1.0.0 image (read-only build).
+| Item | Status (2026-10-06) |
+|---|---|
+| linux/arm64 | Local build `sha256:7e5a2a410cce692efb1dc0848ad040424fccf66d1c7d482003ca5fbeaadd6aad` passed every local CI Docker check: configuration inventory, help/version, vendor Node.js and shared OpenSSL, runtime inventory, `--check-config`, `tools/list` for all eight pinned contracts, doctor per profile and approval channel, and startup refusals. Its runtime bytes match the Linux arm64 security receipt ([release pins](security/release-pins-1.1.0.md#docker-evidence)) |
+| linux/amd64 | Not run locally. Verified only by the CI `docker` job on the release commit |
+| Published ghcr image | `release.yml` rebuilds the image for publication; it is not the image the CI Docker job tested. The manifest digest is recorded in the release notes |
+| Live MCP session | Only on a build from before the final write controls ([lab campaign](security/final-lab-campaign-1.1.0.md#docker-hardened-run-macos-docker-desktop)) |
+| Vulnerability scan | None yet for the 1.1.0 runtime. The v1.0.0 scan and its review are below; they are not a statement about 1.1.0 |
+| Attestation | No image attestation. SBOMs are inventories, not clearances |
+
+This is not a zero-CVE claim, and it is not release approval.
+
+## v1.0.0 image at a glance (previous release)
+
+This table records the reviewed v1.0.0 image (read-only build). It is history for 1.1.0.
 
 | Item | Status (2026-10-06) |
 |---|---|
@@ -162,7 +175,7 @@ The public upstream [Distroless project](https://github.com/GoogleContainerTools
 
 ## Predecessor image and lab checkpoint — 2026-10-06 (history)
 
-> Predecessor image `sha256:eb3a7681…` with bundled OpenSSL 3.5.8. Its OpenSSL hold applied to that image; the current candidate is summarized [above](#current-candidate-at-a-glance).
+> Predecessor image `sha256:eb3a7681…` with bundled OpenSSL 3.5.8. Its OpenSSL hold applied to that image; the v1.0.0 image is summarized [above](#v100-image-at-a-glance-previous-release).
 
 That candidate enforced **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
 

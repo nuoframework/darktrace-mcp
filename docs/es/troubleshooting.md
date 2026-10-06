@@ -24,7 +24,8 @@ darktrace-mcp test
 | "token file must be owned by…", "mode 0600" | Permisos de los archivos de token | [Permisos de los archivos de token](#permisos-de-los-archivos-de-token) |
 | "proxy environment is not supported" | Variables de proxy en tu entorno | [Se rechazan las variables de proxy](#se-rechazan-las-variables-de-proxy) |
 | Falta una herramienta | Su perfil no está activado | [Falta una herramienta](#falta-una-herramienta) |
-| Una acción crítica solo devuelve una vista previa | Falta `confirm:true` | [Escrituras y acciones críticas](#escrituras-y-acciones-críticas) |
+| Acción crítica rechazada con `confirmation_required` o `preview_required` | Falta `confirm:true` o el `previewId` de una vista previa con `dryRun:true` | [Escrituras y acciones críticas](#escrituras-y-acciones-críticas) |
+| Error de arranque que nombra `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` o `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (o `sensitive` + `write`), o `DARKTRACE_CRITICAL_APPROVAL=host`, sin su confirmación | [El servidor no arranca](#el-servidor-no-arranca) |
 | "response too large" | El resultado supera el límite | [Resultados grandes](#resultados-grandes) |
 
 ## El servidor no arranca
@@ -33,7 +34,8 @@ darktrace-mcp test
 2. Usa rutas absolutas. Las aplicaciones de escritorio no ven el `PATH` de tu shell, así que `node` a secas puede fallar. Obtén la ruta completa con `node -p 'process.execPath'`.
 3. Asegúrate de haber compilado: `dist/src/index.js` debe existir (`npm run build`).
 4. Revisa la sintaxis JSON o TOML. En Windows, las barras invertidas en JSON se escriben dobles.
-5. Mira el log MCP del cliente. Los mensajes del servidor van a stderr. Un problema de configuración escribe una línea como `{"event":"startup_error","reason":"could not read private token file"}`; `reason` nombra el ajuste, nunca su valor. Otros fallos de arranque solo muestran el evento.
+5. El perfil `all`, o cualquier lista con `sensitive` y `write`, solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. `DARKTRACE_CRITICAL_APPROVAL=host` con `critical` solo arranca con `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. Añade la variable al `env` del cliente solo después de leer lo que aceptas ([perfiles](configuration.md#perfiles), [aprobación humana](configuration.md#aprobación-humana)).
+6. Mira el log MCP del cliente. Los mensajes del servidor van a stderr. Un problema de configuración escribe una línea como `{"event":"startup_error","reason":"could not read private token file"}`; `reason` nombra el ajuste, nunca su valor. Otros fallos de arranque solo muestran el evento.
 
 Que el servidor parezca "parado" es normal: espera al cliente.
 
@@ -114,14 +116,15 @@ Las herramientas solo aparecen si su perfil está activado. Revisa `DARKTRACE_PR
 |---|---|
 | Advanced Search, contenido de correo, descarga de PCAP, auditoría de correo | `sensitive` |
 | Reconocer, comentar, fijar, etiquetas, solicitar PCAP, investigaciones | `write` |
-| Acciones de Antigena, intel feed, cambios de subredes, acciones de correo, borrar etiqueta | `critical` |
+| Acciones de Antigena, intel feed, cambios de subredes, borrar etiqueta | `critical` |
 
-El endpoint obsoleto `GET /aianalyst/incidents` nunca está disponible. Usa `darktrace_list_ai_analyst_incidents`.
+La acción de Darktrace/Email (`darktrace_email_action`) queda excluida de esta versión y nunca aparece. El endpoint obsoleto `GET /aianalyst/incidents` nunca está disponible. Usa `darktrace_list_ai_analyst_incidents`.
 
 ## Escrituras y acciones críticas
 
-- **Primero la vista previa.** Añade `dryRun:true` a cualquier escritura para ver qué pasaría.
-- **Las acciones críticas** devuelven una vista previa salvo que la llamada incluya `confirm:true`. Lee la vista previa y después confirma.
+- **Primero la vista previa.** Añade `dryRun:true` a cualquier escritura para ver qué pasaría. Sin él, una escritura normal se ejecuta (por defecto, tras el aviso de permisos de tu cliente).
+- **Las acciones críticas** necesitan tres pasos: una vista previa con `dryRun:true` que devuelve un `previewId` (válido 5 minutos, una vez); la misma llamada repetida con `confirm:true` y ese `previewId`; y, por defecto, tu aceptación en el diálogo del servidor. Una llamada sin `confirm:true` se rechaza con `confirmation_required`, y una sin `previewId` con `preview_required` (uno caducado, usado o que no coincide da `preview_expired`, `preview_used` o `preview_invalid`).
+- **Todas las escrituras rechazadas tras fallos.** Tres escrituras fallidas o de resultado desconocido seguidas detienen todas las escrituras hasta reiniciar el servidor. Las lecturas siguen funcionando. En algunos appliances, DELETE responde 502 después de aplicar el cambio, y eso cuenta como desconocido.
 - **Tiempo agotado o desconexión durante una escritura.** El resultado es desconocido. Comprueba en Darktrace si se aplicó antes de repetir. Las escrituras nunca se reintentan solas.
 - **Darktrace devuelve 403 en una escritura.** Tu token no tiene ese permiso. Los perfiles no pueden saltarse los permisos del token.
 

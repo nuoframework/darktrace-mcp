@@ -94,6 +94,30 @@ Retrieval used the raw files under the [v0.10.1 SDK source](https://github.com/L
 
 ## Verification after remediation
 
+> **Correction (2026-10-06, final gate blocker B6).** Documentation only; nothing was re-tested. The
+> [1.1.0 final gate review](final-gate-review-1.1.0.md) §3.1 found that this record contradicted the code
+> in two places, now corrected below with file:line evidence:
+>
+> 1. **V-W-01 is CLOSED**, not open. Commit `6b8d08d` makes S6 classification depend on the HTTP method:
+>    `src/client/signer.ts:80` (`s6Base64SegmentIndex(path, method)`) returns no S6 segment for the exact
+>    `POST /advancedsearch/api/search` route (`:84-85`) and rejects every other POST (`:86`) and non-GET
+>    (`:88`) Advanced Search path. The GET S6 checks (`:89-94`) are unchanged. The regression test is
+>    `test/unit/signer.test.ts:102-111`. The six `ST-20.NONGET post_advancedsearch_api_search` cases
+>    (`test/security/writes.test.mjs:243`) are PASSED in both release receipts:
+>    [`release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json`](../../test/security/evidence/release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json)
+>    (1,150 / 1,150 PASSED) and
+>    [`release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json`](../../test/security/evidence/release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json)
+>    (1,147 PASSED, 3 platform skips). POST Advanced Search also passed live afterwards
+>    ([final lab campaign](final-lab-campaign-1.1.0.md), 8,214 hits).
+> 2. **The DR-W summary counts were wrong.** The DR-W table below records 12 CLOSED (01, 02, 05–11, 13, 16, 18),
+>    3 OPEN (12, 14, 15) and 4 PARTIAL (03, 04, 17, 19). The old summary said 9 / 5 / 5 and listed DR-W-09 and
+>    DR-W-16 as OPEN and DR-W-08 as PARTIAL, although their own rows say CLOSED after the §8.12 follow-up
+>    (`src/tools/index.ts:68,111` for DR-W-09; `src/config/load.ts:246` for DR-W-16; `src/tools/index.ts:92,118`
+>    for DR-W-08). The summary table and the list after it are corrected.
+>
+> AD-W-18 stays PARTIAL in this record; the E11 fixture review it waited for was later recorded as ACCEPT in the
+> final gate review §1.5. Line references are to the reviewed `src/` tree `5b1208f1…fdc503e`.
+
 Verification date: 2026-10-06. Source baseline: `10ec5abdbb5ed05d42d4e0aabc53793671fadafc`.
 I read the implementation against CHANGES-core §8, including its target table and E1–E11, rather than
 treating green tests as proof of every original recommendation. The original findings above are historical.
@@ -140,7 +164,7 @@ The three skips concern macOS discarding the requested setgid bit (`2600`) on PU
 |---|---|---|
 | CR-01 | CLOSED | `src/policy/guard.ts:43`, `src/policy/guard.ts:69`, `src/tools/index.ts:370`: JSON-quoted full fields, digest, no reverse escape and refusal when incomplete. ST-27.UI/DIGEST, MR2-03/04 and unit summary checks pass. |
 | CR-02 | CLOSED | `src/client/httpClient.ts:208`, `src/client/signer.ts:80`: RFC3986-encoded standard Base64 is both signed and sent. ST-25.S6 and `test/contract/integration.test.ts:38` use independent encoded-as-sent HMAC vectors. No new live appliance test. |
-| CR-03 | CLOSED | `src/api/operations.ts:110`, `src/client/httpClient.ts:571`: query+JSON rejected before signing/transport; ST-25.S4 and client S4 unit test pass. The NONGET fixture explicitly verifies a validated body-only request; V-W-01 separately shows the signer rejects that valid POST path. |
+| CR-03 | CLOSED | `src/api/operations.ts:110`, `src/client/httpClient.ts:571`: query+JSON rejected before signing/transport; ST-25.S4 and client S4 unit test pass. The NONGET fixture explicitly verifies a validated body-only request; V-W-01 separately showed the signer rejected that valid POST path (since fixed, see the correction above). |
 | CR-04 | CLOSED | `src/tools/index.ts:396`, `src/policy/previews.ts:47`: expiry rechecked after acceptance; ST-19.APPROVAL_EXPIRY zero-effect test passes. |
 | CR-05 | CLOSED | `src/tools/index.ts:201`, `src/api/email-views.ts:33`: sensitive JSON has code-owned projections; unreviewed passthrough limited to non-sensitive low-sensitivity reads. Unit EMAIL unknown/body/header/attachment fields are omitted. SDK pins do not prove live EMAIL schemas. |
 | CR-06 | CLOSED | `src/policy/targets.ts:13`, `src/tools/index.ts:342`: fixed per-operation N plus operator literal protection before preview/approval; unit N/N+1 and protected-target cases pass. |
@@ -171,7 +195,7 @@ The three skips concern macOS discarding the requested setgid bit (`2600`) on PU
 | DR-W-03 | PARTIAL | `src/config/load.ts:298`, `src/tools/index.ts:96`: explicit union acknowledgement and free-text notices exist; unit acknowledgement test passes. ST-23.TOXIC still demonstrates authorized copying into ordinary free-text writes; no session-taint forced elicitation. The minimum startup gate is closed, the stronger proposal is absent. |
 | DR-W-04 | PARTIAL | `src/observability/audit.ts:10`, `src/tools/index.ts:309`, `src/tools/index.ts:408`: write/denial/preview digest and mode verified. `src/tools/index.ts:405` audits execution only for writes; §8.7 intentionally excludes successful sensitive reads and has no reason enum in the exact record. Sensitive-read traceability recommendation remains absent. |
 | DR-W-05 | CLOSED | `src/policy/targets.ts:13`, `src/policy/admission.ts:48`: target bounds/protection and three-failure breaker pass unit/ST-17/ST-22 checks. §8 counts DELETE 502 unknowns as failures; the review's suggested exclusion was not adopted. E8 limits scope to one operation client. |
-| DR-W-06 | CLOSED | `src/config/schema.ts:138`, `src/tools/index.ts:340`, `src/tools/index.ts:377`: ceiling 10 and tier-based write slots (POST reads excluded). Unit ceiling checks pass; read-via-POST is excluded by the tier check, but V-W-01 prevents Advanced Search POST transport from being exercised. |
+| DR-W-06 | CLOSED | `src/config/schema.ts:138`, `src/tools/index.ts:340`, `src/tools/index.ts:377`: ceiling 10 and tier-based write slots (POST reads excluded). Unit ceiling checks pass; read-via-POST is excluded by the tier check, V-W-01 prevented Advanced Search POST transport from being exercised at this snapshot; after `6b8d08d` the ST-20.NONGET POST cases reach transport and pass. |
 | DR-W-07 | CLOSED | `src/policy/admission.ts:58`, `src/tools/index.ts:258`: plan-selected 1/session, 4/process, 30 seconds/preview TTL; ST-28 tests pass. |
 | DR-W-08 | CLOSED (description); residual noted | `src/tools/index.ts:92`, `src/tools/index.ts:118`: approval sentence now follows the configured channel. Host-mode critical tools say they execute after confirm:true + previewId relying on the host's own tool-permission prompt, with no server confirmation dialog; elicitation-mode ordinary writes say the user must accept a server dialog. Pinned as `read+write+critical/critical-host` and `read+write/write-elicitation` in the full-API contract fixture (MR-04.CONTRACT approval-channel; schemas/annotations asserted identical to the default channel) and in the profiles-policy DR-W-08 matrix. Residual: the server still cannot verify that an auto-answering host involved a human (CHANGES-core §8.12). |
 | DR-W-09 | CLOSED | `src/tools/index.ts:68`, `src/tools/index.ts:111`: the three irreversible medium operations (model-breach comment, AI Analyst incident comment, AI Analyst investigation) carry destructiveHint:true and `Write (profile "write", irreversible)`; ack/unack and pin/unpin stay destructiveHint:false. MR2-10.ANNOTATIONS and the contract annotation test pin the exact three ids and six reversible ids independently. Read-only sensitive download hint wording (the review's secondary point) is unchanged. |
@@ -198,7 +222,9 @@ The three skips concern macOS discarding the requested setgid bit (`2600`) on PU
 - **E9:** startup harness acknowledgements were already set in `test/security/writes-helpers.mjs:106`; retain them. Unit startup gates and MR-06 env/file overlays test refusal without acknowledgement and acceptance with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`.
 - **E10/E11:** note only: no held slot across input-required retries, 120-second HMAC state separate from the 30-second push deadline/preview expiry. Fixture review and release-pin recomputation remain release work; no snapshot or pin was regenerated here.
 
-**V-W-01 — OPEN, real compatibility regression (client/signer owner).**
+**V-W-01 — CLOSED by `6b8d08d`** (see the correction at the top of this section). The text below is the original finding at source baseline `10ec5ab`, kept as history.
+
+Original finding: real compatibility regression (client/signer owner).
 `src/client/signer.ts:80` classifies every `/advancedsearch/api/{search,analyze,graph}` path as S6,
 without considering the HTTP method. Its expected segment count at `:83` and rejection at `:85`
 therefore reject the valid POST `/advancedsearch/api/search`, which has no Base64 path segment.
@@ -224,19 +250,20 @@ Final checks on Node 24.14.1 / macOS arm64:
 | `npm test` | **209 pass, 0 fail, 0 skipped**; includes production runStdio single-client wiring and safe unsupported-encoding unit coverage |
 | Targeted writes + MR2 | **815 total, 809 pass, 6 fail, 0 skipped**; all AD2 reproductions now pass |
 | `npm run test:security` (loopback enabled) | **1,147 total, 1,138 pass, 6 fail, 3 macOS skips**, no cancellations/todos; all six failures are V-W-01 |
+| After `6b8d08d` (release receipts, source tree `5b1208f1…`) | **1,150 total**: Linux arm64 1,150 pass; macOS arm64 1,147 pass + 3 platform skips; 0 fail |
 
-Original-finding summary (58 IDs; V-W-01 is additional):
+Original-finding summary (58 IDs; V-W-01 is additional and CLOSED):
 
 | Family | CLOSED | OPEN | PARTIAL |
 |---|---:|---:|---:|
 | AD-W-01..21 | 20 | 0 | 1 |
 | CR-01..14 | 12 | 0 | 2 |
 | AD2-01..04 | 4 | 0 | 0 |
-| DR-W-01..19 | 9 | 5 | 5 |
-| **Total** | **45** | **5** | **8** |
+| DR-W-01..19 | 12 | 3 | 4 |
+| **Total** | **48** | **3** | **7** |
 
-OPEN original recommendations are DR-W-09/12/14/15/16. PARTIAL are AD-W-18, CR-11/12,
-DR-W-03/04/08/17/19. These remain visible even though they have no failing plan oracle after reconciliation.
+OPEN original recommendations are DR-W-12/14/15. PARTIAL are AD-W-18, CR-11/12,
+DR-W-03/04/17/19. (Corrected 2026-10-06; the earlier text listed DR-W-09/16 as OPEN and DR-W-08 as PARTIAL.) These remain visible even though they have no failing plan oracle after reconciliation.
 They concern annotations/host delegation, validation scope, audit identity/read traceability, token guidance,
 legacy precedence, fixture review, taint/cooldown and availability. None is relabeled as live ACL, host UI,
 full-capture lab or organizational risk acceptance. Receipt: [`2026-10-06T11-44-04-525Z.json`](../../test/security/evidence/2026-10-06T11-44-04-525Z.json),

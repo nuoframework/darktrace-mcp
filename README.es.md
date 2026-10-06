@@ -15,7 +15,7 @@ Usa la API de Darktrace Threat Visualizer desde Claude, Codex, Cursor, VS Code y
   <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-es.svg" alt="transporte: solo stdio"></a>
   <a href="package.json"><img src="docs/assets/badges/node-22-es.svg" alt="entorno: Node.js 22+"></a>
   <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-es.svg" alt="licencia: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-es.svg" alt="docker: archivo de imagen privado o build local, ID de imagen fijado"></a>
+  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-es.svg" alt="docker: build local o imagen de ghcr.io, ID de imagen fijado"></a>
   <a href="docs/security.md"><img src="docs/assets/badges/security-tests-es.svg" alt="pruebas de seguridad: offline"></a>
 </p>
 
@@ -45,7 +45,7 @@ docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/da
 npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
-La imagen se publica para linux/amd64 y linux/arm64. Fija el digest, nunca la etiqueta. Consulta la [guía de Docker](docs/docker.md) (inglés).
+La imagen se publica para linux/amd64 y linux/arm64. Fija el digest, nunca la etiqueta. En 1.1.0, la imagen arm64 superó las comprobaciones Docker locales; la amd64 se verifica en CI sobre el commit de la release ([estado](docs/docker.md#110-image-verification-status), inglés).
 
 ### Alternativa: compilar desde el código fuente
 
@@ -84,7 +84,7 @@ darktrace-mcp test
 
 ## Qué puede hacer
 
-Están disponibles 78 de las 79 operaciones de la API, agrupadas en 51 herramientas. Lista completa: [referencia de herramientas](docs/tools.md) (inglés).
+Se pueden ejecutar 77 de las 79 operaciones de la API, agrupadas en 50 herramientas. La acción de Darktrace/Email (retener, liberar y similares) queda excluida de esta versión, y el endpoint obsoleto `GET /aianalyst/incidents` no está disponible. Lista completa: [referencia de herramientas](docs/tools.md) (inglés).
 
 | Área | Ejemplos | Perfil necesario |
 |---|---|---|
@@ -104,12 +104,10 @@ Están disponibles 78 de las 79 operaciones de la API, agrupadas en 51 herramien
 | | solicitar una captura | `write` |
 | | descargar una captura | `sensitive` |
 | Advanced Search | consultas, análisis, gráficos | `sensitive` |
-| Darktrace/Email | paneles, datos de referencia | `read` |
-| | contenido de correos, búsqueda, eventos de auditoría | `sensitive` |
-| | retener, liberar y otras acciones sobre correo | `critical` |
+| Darktrace/Email | paneles, datos de referencia, metadatos de correos, búsqueda, eventos de auditoría | `sensitive` |
 | Modelos, métricas, estado | modelos, componentes, métricas, estado, estadísticas | `read` |
 
-19 operaciones superaron consultas reales en un laboratorio Darktrace 7.1.0. El resto aparece como **not lab-validated** (no validada en laboratorio) en la [referencia de herramientas](docs/tools.md).
+56 operaciones tienen evidencia de un laboratorio Darktrace 7.1.0; en 11 de ellas es parcial (por ejemplo, en Antigena solo `clear`). Las lecturas de correo **no están validadas en laboratorio** (not lab-validated: el token del laboratorio recibió 403). La [referencia de herramientas](docs/tools.md) muestra el estado de cada operación.
 
 ## Permisos y seguridad
 
@@ -118,12 +116,12 @@ Tú decides qué puede hacer el modelo con `DARKTRACE_PROFILES` (el asistente te
 | Perfil | Permite | Protección adicional |
 |---|---|---|
 | `read` (por defecto) | Lecturas normales | — |
-| `sensitive` | Advanced Search, contenido de correos, descarga de PCAP, eventos de auditoría | — |
-| `write` | Reconocer, comentar, fijar, etiquetas, etiquetas de dispositivo, solicitar PCAP, investigaciones | `dryRun:true` muestra una vista previa sin cambiar nada |
-| `critical` | Acciones de Antigena, intel feed, subredes, acciones sobre correo, borrar una etiqueta | Solo se ejecuta con `confirm:true`. Sin él recibes una vista previa |
-| `all` | Todo lo anterior | Las mismas reglas de cada perfil |
+| `sensitive` | Advanced Search, metadatos y búsqueda de correos, descarga de PCAP, eventos de auditoría | — |
+| `write` | Reconocer, comentar, fijar, etiquetas, etiquetas de dispositivo, solicitar PCAP, investigaciones | `dryRun:true` muestra una vista previa sin cambiar nada. Sin él, la escritura se ejecuta y depende del aviso de permisos de tu cliente |
+| `critical` | Acciones de Antigena, intel feed, subredes, borrar una etiqueta | `dryRun:true` devuelve una vista previa con un `previewId`. Solo se ejecuta al repetir la llamada con `confirm:true` y ese `previewId` y (por defecto) tras aceptar el diálogo del servidor. Sin `confirm:true` la llamada se rechaza |
+| `all` | Todo lo anterior | Las mismas reglas de cada perfil. Solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
 
-Combina perfiles con comas, por ejemplo `DARKTRACE_PROFILES=read,write`. Cada escritura y acción crítica queda auditada. Los permisos de tu token de Darktrace siguen aplicando: el servidor no puede hacer más de lo que el token permite.
+Combina perfiles con comas, por ejemplo `DARKTRACE_PROFILES=read,write`. Cualquier lista con `sensitive` y `write` necesita la misma confirmación que `all`. `DARKTRACE_CRITICAL_APPROVAL=host` (sin diálogo del servidor) necesita `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` ([detalles](docs/es/configuration.md#aprobación-humana)). Cada escritura y acción crítica queda auditada. Los permisos de tu token de Darktrace siguen aplicando: el servidor no puede hacer más de lo que el token permite.
 
 > **Los datos salen de tu red.** Los resultados llegan a tu cliente MCP y a su proveedor del modelo. Comprueba la idoneidad del proveedor, la retención y la residencia de datos (provider eligibility, retention, residency) en tu organización antes de conectar un appliance de producción. Las descargas de PCAP se devuelven en línea como Base64 y llegan al host y a su proveedor del modelo como cualquier otro resultado.
 
@@ -146,7 +144,7 @@ Más: [resumen de seguridad](docs/security.md) (inglés) · [política de seguri
 
 ## Estado del proyecto
 
-Repositorio público. Publicado como [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia), como `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry y descrito para el MCP Registry como `io.github.nuoframework/darktrace-mcp` ([releases](docs/releases.md), inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
+Repositorio público. Desde v1.1.0, el flujo de release publica [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia) y `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry; el servidor se describe para el MCP Registry como `io.github.nuoframework/darktrace-mcp`. Cada canal solo está disponible cuando se publica la release v1.1.0 ([releases](docs/releases.md), inglés). Limitaciones conocidas: [changelog](CHANGELOG.md#known-limitations-in-110) (inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Marcas, logotipo y contacto
 
