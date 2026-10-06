@@ -4,6 +4,7 @@ import { atomicWrite, backupFile, fileModeOr, findOnPath, isSymlink, lstatOrUnde
 import { planJsonEntry } from './jsonConfig.js';
 import { removeCodexServer, renderCodexBlock, upsertCodexServer } from './toml.js';
 import { SERVER_NAME, type ServerEntry } from './entry.js';
+import type { StatusProber } from './online.js';
 
 export const CLIENT_IDS = ['claude-desktop', 'claude-code', 'codex', 'cursor', 'vscode', 'windsurf', 'opencode', 'gemini'] as const;
 export type ClientId = typeof CLIENT_IDS[number];
@@ -16,6 +17,8 @@ export interface CliContext {
   readonly now: () => Date;
   /** Runs an external client CLI with an argument vector (never a shell). */
   readonly run: (command: string, args: readonly string[]) => RunResult;
+  /** Signed GET /status used by `test` and the `setup` date-format probe. Defaults to the production client. */
+  readonly probeStatus?: StatusProber;
 }
 
 export type ResultStatus = 'written' | 'unchanged' | 'command' | 'manual' | 'dry-run' | 'failed' | 'absent';

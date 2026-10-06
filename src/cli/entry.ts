@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseConfig } from '../config/schema.js';
+import { parseConfig, type DateFormat } from '../config/schema.js';
 
 export const SERVER_NAME = 'darktrace';
 export const PROFILE_PRESETS = Object.freeze([
@@ -49,6 +49,8 @@ export interface InstallSettings {
   readonly hostPlatform?: NodeJS.Platform;
   /** Explicit operator acknowledgement of the sensitive-read + write risk; required when `needsSensitiveWriteAck(profiles)`. */
   readonly acknowledgeSensitiveWrite?: boolean;
+  /** Signature date format the appliance accepts; emitted as DARKTRACE_DATE_FORMAT when known. */
+  readonly dateFormat?: DateFormat;
 }
 
 export interface ServerEntry {
@@ -112,6 +114,8 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
     if (s.acknowledgeSensitiveWrite !== true) throw new SetupInputError('profiles combining sensitive and write need the explicit risk acknowledgement (--acknowledge-sensitive-write)');
     ackEnv.DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE = 'true';
   }
+  if (s.dateFormat !== undefined && s.dateFormat !== 'compact' && s.dateFormat !== 'spaced') throw new SetupInputError('date format must be compact or spaced');
+  const formatEnv: Record<string, string> = s.dateFormat === undefined ? {} : { DARKTRACE_DATE_FORMAT: s.dateFormat };
   if (s.runtime === 'docker') {
     if (!s.dockerPath || !s.image || s.uid === undefined || s.gid === undefined) throw new SetupInputError('docker runtime requires docker path, image and uid/gid');
     if (s.uid === 0 || s.gid === 0) throw new SetupInputError('docker runtime refuses to run the container as root; run setup as a regular user');
@@ -125,6 +129,7 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
         '--network=bridge', '--mount', bind(s.publicTokenFile, CONTAINER_PUBLIC), '--mount', bind(s.privateTokenFile, CONTAINER_PRIVATE),
         '-e', `DARKTRACE_URL=${s.url}`, '-e', `DARKTRACE_PUBLIC_TOKEN_FILE=${CONTAINER_PUBLIC}`,
         '-e', `DARKTRACE_PRIVATE_TOKEN_FILE=${CONTAINER_PRIVATE}`, '-e', `DARKTRACE_PROFILES=${s.profiles}`,
+        ...Object.entries(formatEnv).flatMap(([k, v]) => ['-e', `${k}=${v}`]),
         ...Object.entries(ackEnv).flatMap(([k, v]) => ['-e', `${k}=${v}`]),
         ...(dockerDesktop ? ['-e', 'DARKTRACE_TOKEN_FILE_OWNER=root-or-current'] : []), s.image],
       env: {},
@@ -138,7 +143,7 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
   return {
     command: s.nodePath,
     args: [s.entryPath],
-    env: { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles, ...ackEnv },
+    env: { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles, ...formatEnv, ...ackEnv },
   };
 }
 

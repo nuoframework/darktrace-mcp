@@ -32,6 +32,8 @@ Clients: `claude-desktop`, `claude-code`, `codex`, `cursor`, `vscode`, `windsurf
 | `--image <id>` | Docker image ID (`sha256:<64 hex>`) or `name@sha256:<digest>`; mutable tags are refused. |
 | `--tokens-from-stdin` | Read two lines from stdin: public token, then private token. |
 | `--inline-tokens-windows` | Windows only: explicit consent to place token values in client configs. |
+| `--date-format compact\|spaced` | Use this signature date format and skip the appliance probe (see below). |
+| `--offline` | Skip the appliance probe; use the saved date format or `compact`. |
 
 Credentials are never accepted as flags. Any option whose name contains `token`, `secret`,
 `password` or `key` (other than the two booleans above) is rejected with exit code 2, and
@@ -157,6 +159,32 @@ N ms[, version X])` or `FAIL <kind>: <hint>`; exit 0/1.
 
 The client folds TLS failures into `network` (no separate `tls` kind exists), so the hint covers
 both.
+
+## Signature date format probe (2026-10-06)
+
+Field finding: one Darktrace 7.1.0 appliance rejected the HMAC with HTTP 400 on `GET /status` when
+`DTAPI-Date` used `compact` (`YYYYMMDDTHHMMSS`) and accepted `spaced` (`YYYY-MM-DD HH:MM:SS`);
+another 7.1.0 appliance accepted both. The server keeps its rule of no runtime fallback (it never
+switches signing mode after a 400/401), so the installer chooses the format:
+
+- `setup`: after URL, tokens and profiles are collected and before anything is written, one signed
+  `GET /status` with `compact`; only on `bad_request` (HTTP 400) one more with `spaced`. The
+  accepted format is written as `DARKTRACE_DATE_FORMAT` into every emitted entry (node `env`,
+  docker `-e`, `claude`/`codex --env`, VS Code and Cursor links) and into `setup.json`
+  (`dateFormat`). If neither works (or the first answer is 401, network, TLS, ...), setup stops
+  with the kind and hint and writes no tokens, settings or client entries. `--date-format` skips the
+  probe; `--dry-run` and `--offline` skip it and use the saved format or `compact`, with a note.
+  The probe uses the production config loader and hardened client with the `read` profile; token
+  values stay in memory and are never printed.
+- `test` / `doctor --online`: on `bad_request` with no format chosen (no `DARKTRACE_DATE_FORMAT`,
+  no `auth.dateFormat`, no saved `dateFormat`), retries once with the other format and on success
+  prints `OK … using date format <x>; set DARKTRACE_DATE_FORMAT=<x> in your client configuration`
+  (exit 0). With a chosen format there is no retry; the output names where it was set and suggests
+  the other value (`setup --date-format <x>` when it came from the saved setup).
+- `config <client>` reuses the saved format; `--date-format` overrides it. Without a saved format
+  the variable is omitted and the server default (`compact`) applies.
+- The probe is injectable (`CliContext.probeStatus`); `test/cli/date-format.test.ts` covers
+  compact OK, compact 400 then spaced OK, both rejected, 401, explicit flag, dry run and offline.
 
 ## Claude Desktop extension (`.mcpb`)
 

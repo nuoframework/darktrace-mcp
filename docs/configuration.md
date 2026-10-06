@@ -41,6 +41,23 @@ chmod 600 ~/.config/darktrace-mcp/public-token ~/.config/darktrace-mcp/private-t
 
 `DARKTRACE_PUBLIC_TOKEN` and `DARKTRACE_PRIVATE_TOKEN` (token values in the environment) also work, for secret managers that inject them. Prefer files. Never set a value and a file for the same token.
 
+### Signature date format
+
+Every request is signed with an HMAC over the path, the public token and a `DTAPI-Date` header. Darktrace appliances accept that date in one of two formats, set with `DARKTRACE_DATE_FORMAT` (or `auth.dateFormat`):
+
+| Value | `DTAPI-Date` looks like |
+|---|---|
+| `compact` (default) | `20261006T081500` (`YYYYMMDDTHHMMSS`) |
+| `spaced` | `2026-10-06 08:15:00` (`YYYY-MM-DD HH:MM:SS`) |
+
+Appliances on the same version can differ. On two Darktrace 7.1.0 appliances, one accepted both formats and the other rejected `compact` with HTTP 400 (`bad_request`) on `GET /status` and accepted `spaced`.
+
+The server never switches format at runtime: it does not retry with the other format after a 400 or 401, so a signing problem can never turn into a silent mode change. The choice is made at install time:
+
+- `darktrace-mcp setup` sends a signed `GET /status` with `compact` and, only if the appliance answers HTTP 400, once more with `spaced`. It writes the accepted format as `DARKTRACE_DATE_FORMAT` into every client entry and into `setup.json`. If neither works it stops before writing anything. `--date-format compact|spaced` skips this check; `--dry-run` and `--offline` skip it and use the saved format or `compact`.
+- `darktrace-mcp test` (or `doctor --online`) does the same retry only when you did not set a format yourself, and then tells you which value to set. When the format is set (environment, config file or saved setup), it does not retry and suggests the other value instead.
+- `darktrace-mcp config <client>` reuses the saved format.
+
 ## Profiles
 
 Profiles decide which tools the model sees and can call. Set them with a comma-separated list:

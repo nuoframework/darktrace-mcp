@@ -40,12 +40,12 @@ test('non-interactive setup with --tokens-from-stdin stores private token files 
   assert.equal(readFileSync(join(dir, 'public-token'), 'utf8'), PUBLIC + '\n');
   assert.equal(readFileSync(join(dir, 'private-token'), 'utf8'), PRIVATE + '\n');
   assert.equal(mode(join(dir, 'setup.json')), 0o600);
-  assert.deepEqual(readSavedSetup(box.ctx), { version: 1, url: 'https://darktrace.example.internal', profiles: 'read', runtime: 'node', tokenMode: 'file' });
+  assert.deepEqual(readSavedSetup(box.ctx), { version: 1, url: 'https://darktrace.example.internal', profiles: 'read', runtime: 'node', tokenMode: 'file', dateFormat: 'compact' });
   const desktop = readJson(join(box.home, 'Library/Application Support/Claude/claude_desktop_config.json')).mcpServers.darktrace;
   assert.deepEqual(desktop, {
     command: '/opt/node/bin/node', args: [ENTRY],
     env: { DARKTRACE_URL: 'https://darktrace.example.internal', DARKTRACE_PUBLIC_TOKEN_FILE: join(dir, 'public-token'),
-      DARKTRACE_PRIVATE_TOKEN_FILE: join(dir, 'private-token'), DARKTRACE_PROFILES: 'read' },
+      DARKTRACE_PRIVATE_TOKEN_FILE: join(dir, 'private-token'), DARKTRACE_PROFILES: 'read', DARKTRACE_DATE_FORMAT: 'compact' },
   });
   assert.ok(readJson(join(box.home, '.cursor/mcp.json')).mcpServers.darktrace);
   // Claude Code and Codex went through their CLIs; argv carries file paths, never token values.
@@ -54,7 +54,7 @@ test('non-interactive setup with --tokens-from-stdin stores private token files 
   assert.match(argv, /"mcp","add","darktrace"/);
   assert.equal(argv.includes(PUBLIC) || argv.includes(PRIVATE), false);
   // Only known DARKTRACE_* variables are emitted.
-  for (const key of Object.keys(desktop.env)) assert.ok(['DARKTRACE_URL', 'DARKTRACE_PUBLIC_TOKEN_FILE', 'DARKTRACE_PRIVATE_TOKEN_FILE', 'DARKTRACE_PROFILES'].includes(key));
+  for (const key of Object.keys(desktop.env)) assert.ok(['DARKTRACE_URL', 'DARKTRACE_PUBLIC_TOKEN_FILE', 'DARKTRACE_PRIVATE_TOKEN_FILE', 'DARKTRACE_PROFILES', 'DARKTRACE_DATE_FORMAT'].includes(key));
   assertNoLeak(box.home, out.text());
 
   // Re-running keeps the stored tokens and changes nothing.
