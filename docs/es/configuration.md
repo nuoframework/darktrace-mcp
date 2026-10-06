@@ -50,7 +50,7 @@ Cada petición se firma con un HMAC sobre la ruta, el token público y la cabece
 | `compact` (por defecto) | `20261006T081500` (`YYYYMMDDTHHMMSS`) |
 | `spaced` | `2026-10-06 08:15:00` (`YYYY-MM-DD HH:MM:SS`) |
 
-Appliances con la misma versión pueden comportarse distinto. En dos appliances Darktrace 7.1.0, uno aceptó ambos formatos y el otro rechazó `compact` con HTTP 400 (`bad_request`) en `GET /status` y aceptó `spaced`.
+Appliances con la misma versión pueden comportarse distinto, e incluso el mismo appliance puede cambiar con el tiempo: el 2026-10-06 un appliance Darktrace 7.1.0 aceptó ambos formatos y otro, recién aprovisionado, respondió HTTP 400 (`bad_request`) a `compact` en `GET /status` durante varios minutos mientras aceptaba `spaced`, y después aceptó ambos. Ante un 400 en `/status`, ejecuta `darktrace-mcp test`: prueba una vez el otro formato y te dice qué fijar.
 
 El servidor nunca cambia de formato en ejecución: no reintenta con el otro formato tras un 400 o un 401, así que un problema de firma nunca se convierte en un cambio de modo silencioso. La elección se hace al instalar:
 

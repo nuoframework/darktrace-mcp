@@ -57,8 +57,7 @@ Residuals: email routes answer 403 for this token (not validated); `get_cves` 50
 
 The first lab expired during the day; the owner provisioned a second Darktrace 7.1.0 appliance.
 
-- **Signing difference:** lab B rejects the compact `DTAPI-Date` (`YYYYMMDDTHHMMSS`, HTTP 400 on
-  `GET /status`) and accepts the spaced form; lab A accepted both. `DARKTRACE_DATE_FORMAT=spaced`
+- **Signing difference (transient):** for several minutes after provisioning, lab B answered HTTP 400 to the compact `DTAPI-Date` (`YYYYMMDDTHHMMSS`) on `GET /status` while accepting the spaced form; about 10 minutes later it accepted both, like lab A. `DARKTRACE_DATE_FORMAT=spaced`
   was set for every run below. The installer now probes both formats at setup time and records the
   working one (no runtime fallback).
 - **Node, profile `all` (acknowledged):** 50 tools; status, device search, breaches, AI Analyst
