@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "darktrace": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@nuoframework/darktrace-mcp@1.1.1"],
+      "env": {
+        "DARKTRACE_URL": "${user_config.appliance_url}",
+        "DARKTRACE_PUBLIC_TOKEN": "${user_config.public_token}",
+        "DARKTRACE_PRIVATE_TOKEN": "${user_config.private_token}",
+        "DARKTRACE_PROFILES": "${user_config.profiles}",
+        "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE": "${user_config.acknowledge_sensitive_write}",
+        "DARKTRACE_DATE_FORMAT": "${user_config.date_format}"
+      }
+    }
+  }
+}

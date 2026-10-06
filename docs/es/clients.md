@@ -45,13 +45,15 @@ Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranqu
 |---|---|
 | Claude Code | `claude mcp add --scope user --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read --transport stdio darktrace -- /abs/node /abs/index.js` |
 | Codex | `codex mcp add darktrace --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read -- /abs/node /abs/index.js` |
+| Claude Code (plugin) | `claude plugin marketplace add nuoframework/darktrace-mcp` y después `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code pide la URL, los tokens y el perfil ([guía del plugin, EN](../plugin-distribution.md)) |
+| Codex (plugin) | `codex plugin marketplace add nuoframework/darktrace-mcp` y después `codex plugin add darktrace-mcp@darktrace-mcp`; carga la skill, pero la conexión sigue saliendo de `darktrace-mcp setup` ([guía del plugin, EN](../plugin-distribution.md#install-from-the-repository-marketplace)) |
 | VS Code | `code --add-mcp '{"name":"darktrace","type":"stdio","command":"/abs/node","args":["/abs/index.js"],"env":{…}}'`; `darktrace-mcp config vscode` lo imprime relleno, más un enlace `vscode:mcp/install` cuyas entradas de contraseña guardan los tokens en el almacén secreto de VS Code |
 | Cursor | `darktrace-mcp config cursor` imprime un enlace `cursor://anysphere.cursor-deeplink/mcp/install?…` |
 | Gemini CLI | `gemini mcp add --scope user -e DARKTRACE_URL=https://… -e DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token -e DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token -e DARKTRACE_PROFILES=read darktrace /abs/node /abs/index.js` |
 | Claude Desktop | `.mcpb` de la release (abajo) |
 | Windsurf, OpenCode | Fragmentos JSON de abajo (sin CLI) |
 
-Nunca pongas `npx` en la configuración de un cliente: cada arranque dependería del registro y recogería código nuevo sin avisar. El asistente siempre escribe rutas absolutas.
+Nunca pongas `npx` en la configuración de un cliente: cada arranque dependería del registro y recogería código nuevo sin avisar. El asistente siempre escribe rutas absolutas. El [plugin](../plugin-distribution.md) es la única excepción: un plugin no puede conocer tus rutas, así que su `.mcp.json` arranca `npx -y @nuoframework/darktrace-mcp@1.1.1`, fijado a una versión exacta que el Claude Directory comprueba; `npx` descarga esa versión una vez y después reutiliza su caché.
 
 ## Claude Desktop
 
@@ -83,6 +85,13 @@ Cierra Claude Desktop por completo y vuelve a abrirlo.
 
 **Automática.** `darktrace-mcp setup` añade un servidor con ámbito de usuario.
 
+**Plugin.** El repositorio es un marketplace de plugins. El plugin arranca el paquete npm fijado a `1.1.1`, añade la skill `darktrace-investigation` y, al activarlo, pide la URL del appliance, los dos tokens (guardados en el almacén de credenciales del sistema) y el perfil; el perfil se cambia después en `/config`. También funciona en sesiones de Cowork en tu máquina, pero no en el chat de claude.ai. Detalles, ficha en el Claude Directory y limitaciones: [distribución del plugin (EN)](../plugin-distribution.md).
+
+```sh
+claude plugin marketplace add nuoframework/darktrace-mcp
+claude plugin install darktrace-mcp@darktrace-mcp
+```
+
 **Manual.**
 
 ```sh
@@ -106,6 +115,8 @@ Usa `/mcp` dentro de Claude Code para ver el servidor. Prefiere `--scope user`. 
 ## Codex
 
 **Automática.** `darktrace-mcp setup`.
+
+**Plugin.** `codex plugin marketplace add nuoframework/darktrace-mcp` y después `codex plugin add darktrace-mcp@darktrace-mcp` instala la skill `darktrace-investigation` y un servidor incluido. Codex no pide configuración y solo pasa a ese servidor las variables declaradas en el plugin, así que no puede llegar a tu appliance; configura la conexión con `darktrace-mcp setup` (abajo) y desactiva la copia incluida con `[plugins."darktrace-mcp@darktrace-mcp".mcp_servers.darktrace]` `enabled = false` en `~/.codex/config.toml`. Consulta [distribución del plugin (EN)](../plugin-distribution.md#install-from-the-repository-marketplace).
 
 **Manual.** Añade a `~/.codex/config.toml`. La CLI de Codex y la extensión del IDE comparten este archivo.
 

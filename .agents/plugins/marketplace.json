@@ -1,0 +1,20 @@
+{
+  "name": "darktrace-mcp",
+  "interface": {
+    "displayName": "Darktrace MCP"
+  },
+  "plugins": [
+    {
+      "name": "darktrace-mcp",
+      "source": {
+        "source": "local",
+        "path": "./claude-plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
