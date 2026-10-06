@@ -25,17 +25,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
       - name: Require tag to match package version exactly
         run: node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json')); if(process.env.GITHUB_REF!=='refs/tags/v'+p.version) throw Error('Release tag/version mismatch');"
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
       - name: Retain the verified candidate (tgz, checksums, evidence)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: |
@@ -94,7 +94,7 @@ jobs:
             echo "### Docker gates (ci.yml at $GITHUB_SHA)"
             jq -r '"- CI run: \(.ciRun.html_url)", (.dockerJobs[] | "- \(.name): \(.conclusion) \(.html_url)")' "$RUNNER_TEMP/docker-gates.json"
           } | tee "$RUNNER_TEMP/docker-gates.md" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docker-gates
           path: |
@@ -111,10 +111,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
       - run: npm ci --ignore-scripts --no-audit --no-fund
@@ -127,7 +127,7 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           test -f "release/darktrace-mcp-$version.mcpb"
           echo "MCPB=$PWD/release/darktrace-mcp-$version.mcpb" >> "$GITHUB_ENV"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/candidate
@@ -154,7 +154,7 @@ jobs:
           cd "$RUNNER_TEMP/mcpb"
           sha256sum -- *.mcpb | tee mcpb.sha256
           echo "mcpb: $(cat mcpb.sha256)" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: darktrace-mcp-mcpb
           path: |
@@ -167,12 +167,17 @@ jobs:
     needs: [prepare, docker-gates]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30 # publish plus up to 15 minutes of registry propagation polling
+    outputs:
+      status: ${{ steps.record.outputs.status }}
+      shasum: ${{ steps.publish.outputs.shasum }}
+      integrity: ${{ steps.publish.outputs.integrity }}
+      view: ${{ steps.record.outputs.view }}
     permissions:
       contents: read
       id-token: write # npm trusted publishing (OIDC) and provenance; no long-lived npm token
     steps:
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
       - name: Require npm 11.5.1 or newer (trusted publishing)
@@ -186,7 +191,7 @@ jobs:
             npm install -g npm@^11 --no-audit --no-fund
             npm --version
           fi
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/candidate
@@ -210,6 +215,7 @@ jobs:
           "
           echo "TGZ=$PWD/$tgz" >> "$GITHUB_ENV"
       - name: Publish the verified tarball to npm (OIDC; NPM_TOKEN only as documented fallback)
+        id: publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -220,19 +226,88 @@ jobs:
             printf '//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" > "$RUNNER_TEMP/npmrc-publish"
             export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmrc-publish"
           fi
-          npm publish "$TGZ" --provenance --access public --registry https://registry.npmjs.org --ignore-scripts
-      - name: Record the published version
-        run: |
-          set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
-          npm view "@nuoframework/darktrace-mcp@$version" name version dist.integrity dist.tarball --json | tee "$RUNNER_TEMP/npm-published.json"
+          # Capture npm's own exit code (not tee's): a failed publish must fail this job.
+          set +e
+          npm publish "$TGZ" --provenance --access public --registry https://registry.npmjs.org --ignore-scripts 2>&1 \
+            | tee "$RUNNER_TEMP/npm-publish.log"
+          rc="${PIPESTATUS[0]}"
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::npm publish exited with status $rc" >&2
+            exit "$rc"
+          fi
+          # Tarball identity as npm records it: the shasum (SHA-1) from the publish output, cross-checked
+          # against the local bytes, and the full sha512 integrity (npm's notice line truncates it).
+          local_shasum="$(sha1sum "$TGZ" | awk '{print $1}')"
+          shasum="$(sed -n 's/.*npm notice shasum:[[:space:]]*\([0-9a-f]\{40\}\).*/\1/p' "$RUNNER_TEMP/npm-publish.log" | tail -n1)"
+          if [ -z "$shasum" ]; then
+            echo "::warning::no shasum line in the npm publish output; using the SHA-1 of the published tarball"
+            shasum="$local_shasum"
+          elif [ "$shasum" != "$local_shasum" ]; then
+            echo "::error::npm reported shasum $shasum but the verified tarball is $local_shasum" >&2
+            exit 1
+          fi
+          integrity="sha512-$(openssl dgst -sha512 -binary "$TGZ" | base64 -w0)"
           {
-            echo "## npm"
-            echo '```'
-            echo "npx -y @nuoframework/darktrace-mcp@$version setup"
-            cat "$RUNNER_TEMP/npm-published.json"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "shasum=$shasum"
+            echo "integrity=$integrity"
+          } >> "$GITHUB_OUTPUT"
+      - name: Record the published version (waits for registry propagation; a timeout only warns)
+        id: record
+        env:
+          SHASUM: ${{ steps.publish.outputs.shasum }}
+          INTEGRITY: ${{ steps.publish.outputs.integrity }}
+        run: |
+          set -uo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          pkg="@nuoframework/darktrace-mcp@$version"
+          view="$RUNNER_TEMP/npm-published.json"
+          # The public registry can take several minutes to expose a new version: poll every 30 s for
+          # up to 15 minutes. The publish already succeeded, so a timeout is a warning, not a failure.
+          deadline=$(( $(date +%s) + 15 * 60 ))
+          attempt=0
+          status=pending
+          while :; do
+            attempt=$((attempt + 1))
+            if npm view "$pkg" name version dist.integrity dist.shasum dist.tarball --json \
+                 --registry https://registry.npmjs.org --prefer-online > "$view" 2> "$RUNNER_TEMP/npm-view.err" \
+               && jq -e --arg v "$version" '.version == $v' "$view" > /dev/null 2>&1; then
+              status=published
+              break
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then break; fi
+            echo "attempt $attempt: $pkg not visible on registry.npmjs.org yet; retrying in 30 s"
+            sleep 30
+          done
+          if [ "$status" = published ]; then
+            # A registry record for different bytes is not a propagation delay: fail loudly.
+            registry_integrity="$(jq -r '.["dist.integrity"] // empty' "$view")"
+            if [ -n "$registry_integrity" ] && [ "$registry_integrity" != "$INTEGRITY" ]; then
+              echo "::error::registry integrity $registry_integrity differs from the published tarball $INTEGRITY" >&2
+              exit 1
+            fi
+            echo "view=$(jq -c . "$view")" >> "$GITHUB_OUTPUT"
+            {
+              echo "## npm"
+              echo '```'
+              echo "npx -y @nuoframework/darktrace-mcp@$version setup"
+              cat "$view"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::npm publish succeeded but $pkg was not visible on registry.npmjs.org after 15 minutes (pending registry propagation); recorded shasum $SHASUM"
+            {
+              echo "## npm"
+              echo "Published; pending registry propagation after 15 minutes of polling."
+              echo '```'
+              echo "npx -y @nuoframework/darktrace-mcp@$version setup"
+              echo "shasum: $SHASUM"
+              echo "integrity: $INTEGRITY"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
 
   publish-ghcr:
     needs: [prepare, docker-gates]
@@ -251,10 +326,10 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
       - name: Fetch and authenticate immutable archived runtime inputs
@@ -281,7 +356,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/digests"
           printf '%s\n' "$digest" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
           echo "linux/${{ matrix.arch }}: $IMAGE@$digest" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ghcr-digest-${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/${{ matrix.arch }}
@@ -297,7 +372,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: ghcr-digest-*
           path: ${{ runner.temp }}/digests
@@ -327,7 +402,7 @@ jobs:
             echo '```'
             echo "Pin clients to the digest: darktrace-mcp setup --runtime docker --image $IMAGE@$digest"
           } | tee "$RUNNER_TEMP/ghcr-image-digest.md" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ghcr-image-digest
           path: |
@@ -339,33 +414,47 @@ jobs:
   github-release:
     # Last step: every channel published from the same verified SHA. Attaches the assets and records
     # the npm integrity, the image digests and the CI docker-gate run in the release notes.
+    # Runs unless a gate or a publish actually failed: a slow npm registry (version not yet visible)
+    # does not block the release, but a failed `npm publish` (publish-npm result `failure`) does.
     needs: [prepare, docker-gates, pack-mcpb, publish-npm, publish-ghcr-manifest]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      always() &&
+      needs.prepare.result == 'success' &&
+      needs.docker-gates.result == 'success' &&
+      needs.pack-mcpb.result == 'success' &&
+      needs.publish-ghcr-manifest.result == 'success' &&
+      needs.publish-npm.result != 'failure'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write # create the GitHub Release for this tag
     steps:
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-release-candidate
           path: ${{ runner.temp }}/assets
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: darktrace-mcp-mcpb
           path: ${{ runner.temp }}/mcpb
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: ghcr-image-digest
           path: ${{ runner.temp }}/ghcr
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docker-gates
           path: ${{ runner.temp }}/gates
       - name: Add the .mcpb to SHA256SUMS and write the release notes
+        env:
+          NPM_RESULT: ${{ needs.publish-npm.result }}
+          NPM_STATUS: ${{ needs.publish-npm.outputs.status }}
+          NPM_SHASUM: ${{ needs.publish-npm.outputs.shasum }}
+          NPM_INTEGRITY: ${{ needs.publish-npm.outputs.integrity }}
+          NPM_VIEW: ${{ needs.publish-npm.outputs.view }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
@@ -376,7 +465,22 @@ jobs:
           cp "$RUNNER_TEMP/mcpb/$mcpb" .
           sha256sum -- "$mcpb" >> SHA256SUMS
           sha256sum -c SHA256SUMS
-          npm view "@nuoframework/darktrace-mcp@$version" version dist.integrity dist.tarball --json > "$RUNNER_TEMP/npm.json"
+          # npm record: what publish-npm saw; if the version was still propagating, look once more (never fatal).
+          if [ "$NPM_RESULT" = success ] && [ "$NPM_STATUS" != published ]; then
+            if npm view "@nuoframework/darktrace-mcp@$version" name version dist.integrity dist.shasum dist.tarball --json \
+                 --registry https://registry.npmjs.org --prefer-online > "$RUNNER_TEMP/npm-recheck.json" 2>/dev/null \
+               && jq -e --arg v "$version" '.version == $v' "$RUNNER_TEMP/npm-recheck.json" > /dev/null 2>&1; then
+              NPM_STATUS=published
+              NPM_VIEW="$(jq -c . "$RUNNER_TEMP/npm-recheck.json")"
+            fi
+          fi
+          if [ "$NPM_RESULT" != success ]; then
+            npm_line="not published by this run (publish-npm: $NPM_RESULT)"
+          elif [ "$NPM_STATUS" = published ]; then
+            npm_line="published"
+          else
+            npm_line="published, pending registry propagation (shasum $NPM_SHASUM)"
+          fi
           # release-notes.md stays byte-identical (it is listed in SHA256SUMS); the publication record goes in the release body.
           {
             cat release-notes.md
@@ -384,9 +488,17 @@ jobs:
             echo "## Published artifacts ($GITHUB_SHA)"
             echo
             echo "### npm"
+            echo
+            echo "Status: $npm_line"
+            echo
             echo '```'
             echo "npx -y @nuoframework/darktrace-mcp@$version setup"
-            cat "$RUNNER_TEMP/npm.json"
+            if [ "$NPM_STATUS" = published ] && [ -n "$NPM_VIEW" ]; then
+              jq . <<<"$NPM_VIEW"
+            elif [ -n "$NPM_SHASUM" ]; then
+              echo "shasum: $NPM_SHASUM"
+              echo "integrity: $NPM_INTEGRITY"
+            fi
             echo '```'
             echo
             sed 's/^## /### /' "$RUNNER_TEMP/ghcr/ghcr-image-digest.md"
