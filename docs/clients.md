@@ -48,14 +48,14 @@ Run the second command inside the `darktrace-mcp` folder. After the `npx` bootst
 | Claude Code | `claude mcp add --scope user --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read --transport stdio darktrace -- /abs/node /abs/index.js` |
 | Codex | `codex mcp add darktrace --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read -- /abs/node /abs/index.js` |
 | Claude Code (plugin) | `claude plugin marketplace add nuoframework/darktrace-mcp` then `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code asks for the URL, the tokens and the profile ([plugin guide](plugin-distribution.md)) |
-| Codex (plugin) | `codex plugin marketplace add nuoframework/darktrace-mcp` then `codex plugin add darktrace-mcp@darktrace-mcp`; the skill loads, the connection still comes from `darktrace-mcp setup` ([plugin guide](plugin-distribution.md#install-from-the-repository-marketplace)) |
+| Codex (plugin) | `codex plugin marketplace add nuoframework/darktrace-mcp` then `codex plugin add darktrace-mcp@darktrace-mcp`; the skill loads, the connection still comes from `darktrace-mcp setup` ([plugin guide](plugin-distribution.md#install)) |
 | VS Code | `code --add-mcp '{"name":"darktrace","type":"stdio","command":"/abs/node","args":["/abs/index.js"],"env":{…}}'`; `darktrace-mcp config vscode` prints it filled in, plus a `vscode:mcp/install` link whose password inputs keep the tokens in VS Code's secret storage |
 | Cursor | `darktrace-mcp config cursor` prints a `cursor://anysphere.cursor-deeplink/mcp/install?…` link |
 | Gemini CLI | `gemini mcp add --scope user -e DARKTRACE_URL=https://… -e DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token -e DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token -e DARKTRACE_PROFILES=read darktrace /abs/node /abs/index.js` |
 | Claude Desktop | `.mcpb` from the release (below) |
 | Windsurf, OpenCode | JSON snippets below (no CLI) |
 
-Never put `npx` in a client config: every launch would depend on the registry and would silently pick up new code. The wizard always writes absolute paths. The [plugin](plugin-distribution.md) is the one exception: a plugin cannot know your paths, so its `.mcp.json` starts `npx -y @nuoframework/darktrace-mcp@1.1.1`, pinned to an exact version that the Claude Directory checks; `npx` downloads that version once and reuses its cache afterwards.
+Never put `npx` in a client config: every launch would depend on the registry and would silently pick up new code. The wizard always writes absolute paths. The Claude Code [plugin](plugin-distribution.md) follows the same rule: Claude Code installs the package from the plugin's lockfile, pinned to `1.1.1`, when it installs the plugin, and starts `node` on the installed entry file. Only the Codex copy of the plugin starts `npx -y @nuoframework/darktrace-mcp@1.1.1`, pinned to the same version, because Codex has no lockfile install.
 
 ## Claude Desktop
 
@@ -87,12 +87,14 @@ Quit Claude Desktop completely and open it again.
 
 **Automatic.** `darktrace-mcp setup` adds a user-scoped server.
 
-**Plugin.** The repository is a plugin marketplace. The plugin starts the npm package pinned to `1.1.1`, adds the `darktrace-investigation` skill, and asks for the appliance URL, both tokens (stored in the operating system's credential store) and the profile when you enable it; change the profile later in `/config`. It also works in Cowork sessions on your machine, but not in chat on claude.ai. Details, Claude Directory listing and limitations: [plugin distribution](plugin-distribution.md).
+**Plugin.** Two commands, then answer the prompts (appliance URL, both tokens, profile). Nothing else to run:
 
 ```sh
 claude plugin marketplace add nuoframework/darktrace-mcp
 claude plugin install darktrace-mcp@darktrace-mcp
 ```
+
+The plugin installs the npm package pinned to `1.1.1` from its lockfile and adds the `darktrace-investigation` skill. The tokens go to the operating system's credential store; change the profile later in `/config`. It also works in Cowork sessions on your machine, but not in chat on claude.ai. Details, Claude Directory listing and limitations: [plugin distribution](plugin-distribution.md).
 
 **Manual.**
 
@@ -118,7 +120,15 @@ Use `/mcp` inside Claude Code to see the server. Prefer `--scope user`. A projec
 
 **Automatic.** `darktrace-mcp setup`.
 
-**Plugin.** `codex plugin marketplace add nuoframework/darktrace-mcp` then `codex plugin add darktrace-mcp@darktrace-mcp` installs the `darktrace-investigation` skill and a bundled server. Codex does not prompt for configuration and passes the bundled server only the variables declared in the plugin, so that server cannot reach your appliance; configure the connection with `darktrace-mcp setup` (below) and disable the bundled copy with `[plugins."darktrace-mcp@darktrace-mcp".mcp_servers.darktrace]` `enabled = false` in `~/.codex/config.toml`. See [plugin distribution](plugin-distribution.md#install-from-the-repository-marketplace).
+**Plugin.** Three commands: install the plugin, then run the wizard once for the connection:
+
+```sh
+codex plugin marketplace add nuoframework/darktrace-mcp
+codex plugin add darktrace-mcp@darktrace-mcp
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+```
+
+The plugin brings the `darktrace-investigation` skill and a bundled server. Codex does not prompt for configuration and passes the bundled server only the variables declared in the plugin, so that copy stops at startup; the wizard writes the working `mcp_servers.darktrace` entry, and the skill guides you to the wizard if the tools are missing. Then disable the bundled copy with `[plugins."darktrace-mcp@darktrace-mcp".mcp_servers.darktrace]` `enabled = false` in `~/.codex/config.toml`. See [plugin distribution](plugin-distribution.md#install).
 
 **Manual.** Add to `~/.codex/config.toml`. The Codex CLI and IDE extension share this file.
 
