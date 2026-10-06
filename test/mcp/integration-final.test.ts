@@ -7,7 +7,7 @@ import { boundedInput } from '../../src/server/input.js';
 import { runStdio } from '../../src/server/stdio.js';
 import { parseConfig } from '../../src/config/schema.js';
 import { checkInput } from '../../src/api/validation.js';
-import { createAudit } from '../../src/observability/audit.js';
+import { createAudit, verifyAuditChain } from '../../src/observability/audit.js';
 import { callTool } from '../../src/tools/index.js';
 const cfg=parseConfig({instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'TEST_PUBLIC',privateToken:'TEST_PRIVATE'},profiles:{write:false}});
 async function decoded(args:unknown,limits:Parameters<typeof boundedInput>[0]) {
@@ -36,7 +36,11 @@ test('lowered argument depth/elements are enforced before SDK and direct tool di
 test('audit exact allowlist generates a correlation ID and awaits sink failure',async()=>{
   const records:any[]=[];const audit=createAudit([],line=>{records.push(JSON.parse(line));});
   await audit.record('get_status','error');await audit.record('get_status','ok','correlation_123');
-  assert.deepEqual(Object.keys(records[0]).sort(),['audit','ts','requestId','operationId','outcome'].sort());
+  assert.deepEqual(Object.keys(records[0]).sort(),['audit','ts','requestId','operationId','outcome','seq','prevHash','hash'].sort());
+  assert.deepEqual(records.map(r=>r.seq),[1,2]);assert.equal(records[0].prevHash,'0'.repeat(64));assert.equal(records[1].prevHash,records[0].hash);
+  assert.equal(verifyAuditChain(records),-1);
+  const tampered=records.map(r=>({...r}));tampered[0].outcome='ok';assert.equal(verifyAuditChain(tampered),0);
+  assert.equal(verifyAuditChain([records[1]]),0);assert.equal(verifyAuditChain([records[0],{...records[1],seq:3}]),1);
   assert.match(records[0].requestId,/^[a-f0-9-]{36}$/);assert.equal(records[1].requestId,'correlation_123');
   await assert.rejects(createAudit([],async()=>{throw new Error('sink failed');}).record('post_devices','start'));
   await assert.rejects(audit.record('post_caller_chosen','start'));

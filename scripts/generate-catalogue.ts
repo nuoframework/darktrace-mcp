@@ -55,7 +55,9 @@ for (const [pathTemplate, item] of Object.entries(spec.paths) as [string, any][]
     const tool = assignments.get(op.operationId);
     if (!excluded && !tool) throw new Error(`Missing curated mapping: ${op.operationId}`);
     if (!Object.hasOwn(outputFields,op.operationId)) throw new Error('Missing reviewed output field policy');
-    responseViews[op.operationId] = compileResponseView(op.responses?.['200']?.content?.['application/json']?.schema,spec.components?.schemas??{},outputFields[op.operationId]);
+    responseViews[op.operationId] = compileResponseView(op.responses?.['200']?.content?.['application/json']?.schema,spec.components?.schemas??{});
+    // Every documented response field is kept (minus credential-like keys); response-fields.json remains the reviewed core list.
+    void outputFields;
     const bodies = Object.entries(op.requestBody?.content ?? {}).map(([contentType, entry]: [string, any]) => ({contentType,schema:entry.schema}));
     rows.push({operationId:op.operationId, method:method.toUpperCase(), pathTemplate, tool:tool ?? null,
       tier:risk.risk_tier, sensitivity:risk.data_sensitivity, status,

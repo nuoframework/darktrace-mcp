@@ -44,6 +44,8 @@ export interface Config {
     readonly rateLimitPerMinute: number;
     readonly maxGetRetries: number;
     readonly maxRetryAfterMs: number;
+    /** Non-GET operations per rolling minute (critical writes are additionally capped at 3/min). */
+    readonly maxWritesPerMinute: number;
   };
 }
 
@@ -81,6 +83,7 @@ export interface ConfigSource {
     readonly rateLimitPerMinute?: unknown;
     readonly maxGetRetries?: unknown;
     readonly maxRetryAfterMs?: unknown;
+    readonly maxWritesPerMinute?: unknown;
   };
   readonly transport?: { readonly kind?: unknown; readonly http?: unknown };
   readonly compat?: { readonly assumeVersion?: unknown };
@@ -100,6 +103,7 @@ export const DEFAULT_LIMITS = Object.freeze({
   rateLimitPerMinute: 120,
   maxGetRetries: 2,
   maxRetryAfterMs: 2_000,
+  maxWritesPerMinute: 10,
 });
 
 const CEILINGS = Object.freeze({
@@ -115,6 +119,7 @@ const CEILINGS = Object.freeze({
   rateLimitPerMinute: 120,
   maxGetRetries: 2,
   maxRetryAfterMs: 2_000,
+  maxWritesPerMinute: 60,
 });
 
 export class ConfigValidationError extends Error {
@@ -334,6 +339,7 @@ export function parseConfig(source: unknown): Config {
       rateLimitPerMinute: boundedInteger(limits.rateLimitPerMinute, DEFAULT_LIMITS.rateLimitPerMinute, 'rateLimitPerMinute'),
       maxGetRetries: boundedInteger(limits.maxGetRetries, DEFAULT_LIMITS.maxGetRetries, 'maxGetRetries', 0),
       maxRetryAfterMs: boundedInteger(limits.maxRetryAfterMs, DEFAULT_LIMITS.maxRetryAfterMs, 'maxRetryAfterMs', 0),
+      maxWritesPerMinute: boundedInteger(limits.maxWritesPerMinute, DEFAULT_LIMITS.maxWritesPerMinute, 'maxWritesPerMinute'),
     }),
   });
 }

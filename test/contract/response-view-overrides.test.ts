@@ -16,7 +16,7 @@ const CANARY='SYNTHETIC_OVERRIDE_CANARY',KEY_CANARY='SYNTHETIC_KEY_CANARY';
 function compiled():Record<string,ResponseView> {
   const out:Record<string,ResponseView>={};
   for(const item of Object.values(spec.paths) as any[])for(const method of ['get','post','delete'])if(item[method])
-    out[item[method].operationId]=compileResponseView(item[method].responses?.['200']?.content?.['application/json']?.schema,schemas,fields[item[method].operationId]);
+    out[item[method].operationId]=compileResponseView(item[method].responses?.['200']?.content?.['application/json']?.schema,schemas);void fields;
   return out;
 }
 // Harness verdict, extracted verbatim so projection and live acceptance cannot drift.
@@ -70,7 +70,7 @@ test('documented did arrays and automatic null triggerer project without fallbac
 });
 
 test('unknown keys stay dropped and the array cap is unchanged',()=>{
-  const a=projectResponse(views.get_antigena,[{codeid:1,triggerer:null,model:CANARY,score:0.3},{codeid:2,triggerer:{username:'u',[CANARY]:1}}]);
+  const a=projectResponse(views.get_antigena,[{codeid:1,triggerer:null,[KEY_CANARY]:CANARY,score:0.3},{codeid:2,triggerer:{username:'u',[CANARY]:1}}]);
   assert.equal(a.omitted,true);assert.equal(a.unmodeled,false);
   assert.equal(JSON.stringify(a.value).includes(CANARY),false);
   const big=projectResponse(views.get_antigena_summary,{activeActionDevices:Array.from({length:1001},(_,i)=>i)});

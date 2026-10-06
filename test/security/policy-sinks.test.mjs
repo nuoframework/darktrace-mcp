@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';import test from 'node:test';import {readFileSync} from 'node:fs';
 import { operations } from '../../dist/src/api/operations.js';
 import { callTool,eligibleTools } from '../../dist/src/tools/index.js';
-import { createAudit } from '../../dist/src/observability/audit.js';
+import { createAudit, verifyAuditChain } from '../../dist/src/observability/audit.js';
 import {cfg,PUBLIC,PRIVATE,CANARY,noCanaries} from './helpers.mjs';
 const forgedConfig=profiles=>{const base=cfg();return {...base,profiles:{...base.profiles,...profiles}};};
 const effects=()=>({calls:0,audits:[],client:{async request(){throw new Error('replace synthetic client');}}});
@@ -39,7 +39,12 @@ for(const [id,args] of Object.entries(criticalArgs)) for(const dryRun of [undefi
   assert.equal(result.isError,undefined);assert.equal(result.structuredContent.dryRun,true);assert.equal(result.structuredContent.outcome,undefined);
   assert.equal(result.structuredContent.confirmationRequired,dryRun===true?undefined:true);noCanaries(result);
   assert.equal(c.state.calls,0);assert.equal(c.state.audits.length,0);
-  const confirmed=await callTool(op.tool,{...raw,confirm:true},c);
+  // Without a human approver (no elicitation) a confirmed, preview-bound call is still refused.
+  const unapproved=await callTool(op.tool,{...raw,confirm:true,previewId:result.structuredContent.previewId},c);
+  assert.equal(unapproved.structuredContent.executed,dryRun===true?undefined:false);assert.equal(c.state.calls,0);assert.equal(c.state.audits.length,0);
+  c.approve=async()=>'accept';
+  const fresh=await callTool(op.tool,raw,c);
+  const confirmed=await callTool(op.tool,{...raw,confirm:true,previewId:fresh.structuredContent.previewId},c);
   if(dryRun===true){assert.equal(confirmed.structuredContent.dryRun,true);assert.equal(c.state.calls,0);assert.equal(c.state.audits.length,0);}
   else {assert.equal(confirmed.isError,undefined);assert.equal(c.state.calls,1);assert.deepEqual(c.state.audits.map(a=>[a[0],a[1]]),[[id,'start'],[id,'ok']]);}
 });
@@ -80,7 +85,8 @@ test('ST-11.OUTPUT cap includes both text and structured representation and mark
 test('ST-13.AUDIT exact stored fields/omitted ID/explicit ID and asynchronous rejection awaited',async()=>{
   const records=[];const audit=createAudit([PUBLIC,PRIVATE],async line=>{await new Promise(r=>setImmediate(r));records.push(JSON.parse(line));});
   await audit.record('get_status','preview');await audit.record('get_status','error','synthetic_id');
-  for(const row of records){assert.deepEqual(Object.keys(row).sort(),['audit','operationId','outcome','requestId','ts']);assert.ok(row.requestId);noCanaries(row);}
+  for(const row of records){assert.deepEqual(Object.keys(row).sort(),['audit','hash','operationId','outcome','prevHash','requestId','seq','ts']);assert.ok(row.requestId);noCanaries(row);}
+  assert.equal(verifyAuditChain(records),-1);assert.equal(verifyAuditChain([records[0],{...records[1],operationId:'post_devices'}]),1);
   assert.equal(records[1].requestId,'synthetic_id');await assert.rejects(createAudit([],async()=>{await new Promise(r=>setImmediate(r));throw new Error(PRIVATE);}).record('post_devices','start'));
 });
 test('ST-13.WRITE rejecting pre-audit sink fails closed; dryRun previews skip audit and network; critical needs its profile',async()=>{

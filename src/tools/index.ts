@@ -5,7 +5,7 @@ import { Buffer } from 'node:buffer';
 import { redactValue } from '../observability/redact.js';
 import type { Config } from '../config/schema.js';
 import { operations, buildRequest, validateOperation, BINARY_OPERATIONS, type Operation, type OperationArgs, type OperationClient } from '../api/operations.js';
-import { authorize, isEligible, requiresPreview, preview, approvalMode, approvalMessage, approvalRefusal } from '../policy/guard.js';
+import { authorize, isEligible, requiresPreview, preview, approvalMode, approvalMessage, approvalRefusal, invalidOptionalPreview, consumeWriteSlot } from '../policy/guard.js';
 import { releaseAllowsOperation } from '../policy/release-capability.js';
 import { createAudit, type Audit } from '../observability/audit.js';
 import responseViews from '../api/response-views.generated.json' with {type:'json'};
@@ -24,15 +24,22 @@ export function allTools():ToolDefinition[] {
   for (const op of Object.values(operations)) {if (!op.tool||!releaseAllowsOperation(op)) continue; const group=groups.get(op.tool)??[]; group.push(op);groups.set(op.tool,group);}
   return [...groups].map(([name,ops])=>defineTool(name,ops));
 }
+/** A read-only multi-operation tool defaults to its single listing operation (no required path parameter). */
+export function defaultOperation(ops:readonly Operation[]):Operation|undefined {
+  if (ops.length<2||!ops.every(op=>op.tier==='read')) return undefined;
+  const listing=ops.filter(op=>!op.parameters.some(p=>p.in==='path'&&p.required));
+  return listing.length===1?listing[0]:undefined;
+}
 function toolDescription(name:string,ops:Operation[]):string {
   const purpose=(op:Operation)=>OPERATION_PURPOSES[op.operationId]??op.operationId;
   const lines=[TOOL_SUMMARIES[name]??'Darktrace API operation.'];
-  lines.push(ops.length>1?`Operations (set "operation"): ${ops.map(op=>`${op.operationId} = ${purpose(op)}`).join('; ')}.`:`Operation: ${ops[0].operationId}.`);
+  const fallback=defaultOperation(ops);
+  lines.push(ops.length>1?`Operations (set "operation"${fallback?`; default ${fallback.operationId}`:''}): ${ops.map(op=>`${op.operationId} = ${purpose(op)}`).join('; ')}.`:`Operation: ${ops[0].operationId}.`);
   if (ops.some(op=>op.parameters.some(p=>p.name==='starttime')&&op.parameters.some(p=>p.name==='endtime')))
     lines.push('Time ranges: at most 7 days; default last hour when omitted.');
   const profiles=new Set(ops.flatMap(op=>requiredProfiles(op)));
   if (ops.every(op=>op.tier==='read')) lines.push(profiles.has('sensitive')?'Read-only; returns sensitive data (operator profile "sensitive").':'Read-only.');
-  else if (ops.some(op=>op.tier==='critical')) lines.push('CRITICAL write (profiles "write"+"critical"): without confirm:true it only returns a preview. Set confirm:true only after the user explicitly approves; the user must then also accept a confirmation dialog. dryRun:true always previews.');
+  else if (ops.some(op=>op.tier==='critical')) lines.push('CRITICAL write (profiles "write"+"critical"): first call returns a preview with previewId. Only after the user explicitly approves, repeat with confirm:true and that previewId; the user must then also accept a confirmation dialog.');
   else lines.push(`Changes appliance state (profile "write"${ops.some(op=>op.tier==='high')?', high impact':''}); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.`);
   const unvalidated=ops.filter(op=>op.validatedOn.length===0);
   if (unvalidated.length===ops.length) lines.push('Not lab-validated.');
@@ -41,7 +48,7 @@ function toolDescription(name:string,ops:Operation[]):string {
 }
 function defineTool(name:string,ops:Operation[]):ToolDefinition {
   return {name,operations:ops,
-    inputSchema:ops.length===1?ops[0].input:z.union(ops.map(op=>op.input.extend({operation:z.literal(op.operationId)})) as any),
+    inputSchema:ops.length===1?ops[0].input:z.union(ops.map(op=>op.input.extend({operation:op===defaultOperation(ops)?z.literal(op.operationId).default(op.operationId):z.literal(op.operationId)})) as any),
     description:toolDescription(name,ops),
     annotations:{readOnlyHint:ops.every(op=>op.tier==='read'),destructiveHint:ops.some(op=>op.tier==='high'||op.tier==='critical'),
       idempotentHint:ops.every(op=>op.method==='GET'),openWorldHint:false}};
@@ -83,6 +90,32 @@ function sanitizeResult(value:unknown):{value:unknown;truncated:boolean} {
   }
   return {value:visit(value,0),truncated};
 }
+/**
+ * Oversized results keep as many leading records as fit: the data array itself, or the largest array
+ * directly under the data object, is cut by binary search. Returns undefined when even zero records do not fit.
+ */
+function fitToBudget(value:Record<string,unknown>,limit:number):ToolResult|undefined {
+  const data=value.data;
+  let key:string|undefined,items:unknown[]|undefined;
+  if (Array.isArray(data)) items=data;
+  else if (data&&typeof data==='object') {
+    for (const [name,entry] of Object.entries(data)) if (Array.isArray(entry)&&(!items||JSON.stringify(entry).length>JSON.stringify(items).length)) {key=name;items=entry;}
+  }
+  if (!items||items.length===0) return undefined;
+  const all=items;
+  const build=(count:number)=>{
+    const sliced=all.slice(0,count);
+    const nextData=key===undefined?sliced:{...(data as Record<string,unknown>),[key]:sliced};
+    return result({...value,data:nextData,truncated:true,returnedItems:count,totalItems:all.length,
+      ...(key===undefined?{}:{truncatedField:key}),hint:'Output budget reached: only the first records are shown. Narrow the query (time window, filters, count) for the rest.'});
+  };
+  let low=0,high=all.length-1,best:ToolResult|undefined;
+  while (low<=high) {
+    const mid=Math.floor((low+high)/2),candidate=build(mid);
+    if (JSON.stringify(candidate).length<=limit) {best=candidate;low=mid+1;} else high=mid-1;
+  }
+  return best;
+}
 function outputLimit(ctx:ToolContext):number {return Math.min(ctx.cfg.limits.maxToolOutputChars,60000);}
 /** Files are returned inline (never written to disk), cut to the tool output budget with full size and SHA-256. */
 function filePayload(op:Operation,args:OperationArgs,bytes:Uint8Array,mediaType:string|undefined,limit:number):Record<string,unknown> {
@@ -103,19 +136,27 @@ function filePayload(op:Operation,args:OperationArgs,bytes:Uint8Array,mediaType:
     take=Math.floor(take/2);
   }
 }
+const audits=new WeakMap<Config,Audit>();
+/** One hash-chained audit stream per configuration (process), so seq/prevHash span every call. */
+function defaultAudit(cfg:Config):Audit {
+  let audit=audits.get(cfg);
+  if (!audit) {audit=createAudit([cfg.auth.publicToken,cfg.auth.privateToken]);audits.set(cfg,audit);}
+  return audit;
+}
 export async function callTool(name:string,raw:unknown,ctx:ToolContext,signal?:AbortSignal):Promise<ToolResult> {
   let audited:Operation|undefined;
-  const audit=ctx.audit??createAudit([ctx.cfg.auth.publicToken,ctx.cfg.auth.privateToken]);
+  const audit=ctx.audit??defaultAudit(ctx.cfg);
   const requestId=randomUUID();
   try {
     const tool=allTools().find(t=>t.name===name);
     if (!tool) return result({error:'Tool unavailable.'},true);
     const id=raw&&typeof raw==='object'&&!Array.isArray(raw)?(raw as Record<string,unknown>).operation:undefined;
-    const op=tool.operations.length===1&&id===undefined?tool.operations[0]:tool.operations.find(op=>op.operationId===id);
+    const op=id===undefined?(tool.operations.length===1?tool.operations[0]:defaultOperation(tool.operations)):tool.operations.find(op=>op.operationId===id);
     if (!op) return result({error:'Invalid operation selection.'},true);
     authorize(op,ctx.cfg);
     const args=validateOperation(op,raw,ctx.cfg.limits);
     if (requiresPreview(op,args)) return result(preview(op,args));
+    if (invalidOptionalPreview(op,args)) return result({error:'previewId is unknown, expired, already used or does not match these arguments. Request a new preview.'},true);
     if (approvalMode(op,ctx.cfg)==='elicitation') {
       // Human-in-the-loop: the user (not the model) must accept a code-owned summary before anything is sent.
       let decision:ApprovalDecision='unsupported';
@@ -126,6 +167,7 @@ export async function callTool(name:string,raw:unknown,ctx:ToolContext,signal?:A
       if (decision!=='accept') return result(approvalRefusal(op,args,decision,ctx.cfg));
       authorize(op,ctx.cfg);
     }
+    if (!consumeWriteSlot(ctx.client,op,ctx.cfg)) return result({error:'Write rate limit reached for this session. Wait before retrying.',errorCode:'rate_limited'},true);
     if (op.tier!=='read') { await audit.record(op.operationId,'start',requestId);audited=op; }
     // A second guard makes this boundary safe even for calls bypassing registration.
     authorize(op,ctx.cfg);
@@ -154,7 +196,7 @@ export async function callTool(name:string,raw:unknown,ctx:ToolContext,signal?:A
       ...(bounded.truncated||minimized.truncated?{truncated:true,hint:'Narrow the query or request fewer records.'}:{})};
     // No upstream exceptions, remote error strings, request values or config are reflected.
     const responseResult=result(value);
-    if (JSON.stringify(responseResult).length>outputLimit(ctx)) return result({truncated:true,hint:'Narrow the query or request fewer records.',...(responseResult.structuredContent?.controlCharsNeutralized?{controlCharsNeutralized:true}:{})});
+    if (JSON.stringify(responseResult).length>outputLimit(ctx)) return fitToBudget(value,outputLimit(ctx))??result({truncated:true,hint:'Narrow the query or request fewer records.',...(responseResult.structuredContent?.controlCharsNeutralized?{controlCharsNeutralized:true}:{})});
     return responseResult;
   } catch (error) {
     if (audited) {try {await audit.record(audited.operationId,'unknown',requestId);} catch { /* never reflect exception */ }

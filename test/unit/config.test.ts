@@ -33,6 +33,7 @@ test('config defaults are conservative and every public limit has a hard ceiling
     rateLimitPerMinute: 120,
     maxGetRetries: 2,
     maxRetryAfterMs: 2_000,
+    maxWritesPerMinute: 10,
   });
 });
 

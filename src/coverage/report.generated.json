@@ -2020,6 +2020,84 @@
                     }
                   }
                 }
+              },
+              "mitreTactics": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "devices": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "initialDevices": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "category": {
+                "kind": "string"
+              },
+              "groupScore": {
+                "kind": "number"
+              },
+              "start": {
+                "kind": "number"
+              },
+              "end": {
+                "kind": "number"
+              },
+              "edges": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "isAction": {
+                      "kind": "boolean"
+                    },
+                    "source": {
+                      "kind": "object",
+                      "fields": {
+                        "nodeType": {
+                          "kind": "string"
+                        },
+                        "value": {
+                          "kind": "number"
+                        }
+                      }
+                    },
+                    "target": {
+                      "kind": "object",
+                      "fields": {
+                        "nodeType": {
+                          "kind": "string"
+                        },
+                        "value": {
+                          "kind": "string"
+                        }
+                      }
+                    },
+                    "start": {
+                      "kind": "number"
+                    },
+                    "incidentEvent": {
+                      "kind": "string"
+                    },
+                    "description": {
+                      "kind": "string"
+                    },
+                    "details": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2602,6 +2680,148 @@
               },
               "id": {
                 "kind": "string"
+              },
+              "children": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "category": {
+                "kind": "string"
+              },
+              "currentGroup": {
+                "kind": "string"
+              },
+              "groupCategory": {
+                "kind": "string"
+              },
+              "groupScore": {
+                "kind": "number"
+              },
+              "groupPreviousGroups": {
+                "kind": "summary"
+              },
+              "activityId": {
+                "kind": "string"
+              },
+              "groupingIds": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "groupByActivity": {
+                "kind": "boolean"
+              },
+              "userTriggered": {
+                "kind": "boolean"
+              },
+              "externalTriggered": {
+                "kind": "boolean"
+              },
+              "aiaScore": {
+                "kind": "number"
+              },
+              "summary": {
+                "kind": "string"
+              },
+              "periods": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "start": {
+                      "kind": "number"
+                    },
+                    "end": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "sender": {
+                "kind": "string"
+              },
+              "breachDevices": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "identifier": {
+                      "kind": "string"
+                    },
+                    "hostname": {
+                      "kind": "string"
+                    },
+                    "ip": {
+                      "kind": "string"
+                    },
+                    "mac": {
+                      "kind": "string"
+                    },
+                    "subnet": {
+                      "kind": "string"
+                    },
+                    "did": {
+                      "kind": "number"
+                    },
+                    "sid": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "relatedBreaches": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "modelName": {
+                      "kind": "string"
+                    },
+                    "pbid": {
+                      "kind": "number"
+                    },
+                    "threatScore": {
+                      "kind": "number"
+                    },
+                    "timestamp": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "details": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "header": {
+                      "kind": "string"
+                    },
+                    "contents": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "key": {
+                            "kind": "summary"
+                          },
+                          "type": {
+                            "kind": "string"
+                          },
+                          "values": {
+                            "kind": "array",
+                            "items": {
+                              "kind": "summary"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -3121,6 +3341,154 @@
               },
               "pinned": {
                 "kind": "boolean"
+              },
+              "acknowledged": {
+                "kind": "boolean"
+              },
+              "details": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "header": {
+                      "kind": "string"
+                    },
+                    "contents": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "object",
+                        "fields": {
+                          "type": {
+                            "kind": "string"
+                          },
+                          "key": {
+                            "kind": "string"
+                          },
+                          "values": {
+                            "kind": "array",
+                            "items": {
+                              "kind": "summary"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "summariser": {
+                "kind": "string"
+              },
+              "relatedBreaches": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "timestamp": {
+                      "kind": "number"
+                    },
+                    "threatScore": {
+                      "kind": "number"
+                    },
+                    "pbid": {
+                      "kind": "number"
+                    },
+                    "modelName": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              },
+              "sender": {
+                "kind": "string"
+              },
+              "breachDevices": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "sid": {
+                      "kind": "number"
+                    },
+                    "mac": {
+                      "kind": "string"
+                    },
+                    "ip": {
+                      "kind": "string"
+                    },
+                    "identifier": {
+                      "kind": "string"
+                    },
+                    "did": {
+                      "kind": "number"
+                    },
+                    "hostname": {
+                      "kind": "string"
+                    },
+                    "subnet": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              },
+              "periods": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "start": {
+                      "kind": "number"
+                    },
+                    "end": {
+                      "kind": "number"
+                    }
+                  }
+                }
+              },
+              "attackPhases": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "mitreTactics": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "groupingIds": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "activityId": {
+                "kind": "string"
+              },
+              "groupByActivity": {
+                "kind": "boolean"
+              },
+              "title": {
+                "kind": "string"
+              },
+              "groupCategory": {
+                "kind": "string"
+              },
+              "groupPreviousGroups": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "groupScore": {
+                "kind": "number"
+              },
+              "userTriggered": {
+                "kind": "boolean"
+              },
+              "externalTriggered": {
+                "kind": "boolean"
               }
             }
           }
@@ -3376,6 +3744,35 @@
               },
               "noticeUid": {
                 "kind": "string"
+              },
+              "pbid": {
+                "kind": "number"
+              },
+              "incidentId": {
+                "kind": "string"
+              },
+              "summarizer": {
+                "kind": "string"
+              },
+              "incidents": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "uuid": {
+                      "kind": "string"
+                    },
+                    "related": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "summariser": {
+                      "kind": "string"
+                    }
+                  }
+                }
               }
             }
           }
@@ -3754,6 +4151,42 @@
               },
               "detail": {
                 "kind": "string"
+              },
+              "score": {
+                "kind": "number"
+              },
+              "pbid": {
+                "kind": "number"
+              },
+              "model": {
+                "kind": "string"
+              },
+              "modeluuid": {
+                "kind": "string"
+              },
+              "start": {
+                "kind": "number"
+              },
+              "expires": {
+                "kind": "number"
+              },
+              "blocked": {
+                "kind": "boolean"
+              },
+              "updated": {
+                "kind": "string"
+              },
+              "agemail": {
+                "kind": "boolean"
+              },
+              "aghost": {
+                "kind": "boolean"
+              },
+              "active": {
+                "kind": "boolean"
+              },
+              "cleared": {
+                "kind": "boolean"
               }
             }
           }
@@ -4614,6 +5047,50 @@
               },
               "sdid": {
                 "kind": "number"
+              },
+              "ddid": {
+                "kind": "number"
+              },
+              "port": {
+                "kind": "number"
+              },
+              "sourcePort": {
+                "kind": "number"
+              },
+              "destinationPort": {
+                "kind": "number"
+              },
+              "direction": {
+                "kind": "string"
+              },
+              "applicationprotocol": {
+                "kind": "string"
+              },
+              "protocol": {
+                "kind": "string"
+              },
+              "sourceDevice": {
+                "kind": "summary"
+              },
+              "destinationDevice": {
+                "kind": "summary"
+              },
+              "proxyDevice": {
+                "kind": "object",
+                "fields": {
+                  "ip": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "source": {
+                "kind": "string"
+              },
+              "destination": {
+                "kind": "string"
+              },
+              "proxy": {
+                "kind": "string"
               }
             }
           }
@@ -5549,6 +6026,40 @@
                 },
                 "hostname": {
                   "kind": "string"
+                },
+                "quarantine": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "number"
+                },
+                "endtime": {
+                  "kind": "number"
+                },
+                "os": {
+                  "kind": "string"
+                },
+                "devicelabel": {
+                  "kind": "string"
+                },
+                "typename": {
+                  "kind": "string"
+                },
+                "typelabel": {
+                  "kind": "string"
+                },
+                "customFields": {
+                  "kind": "object",
+                  "fields": {
+                    "DT-MANUAL": {
+                      "kind": "object",
+                      "fields": {
+                        "notes": {
+                          "kind": "string"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -5597,6 +6108,40 @@
                   },
                   "hostname": {
                     "kind": "string"
+                  },
+                  "quarantine": {
+                    "kind": "number"
+                  },
+                  "time": {
+                    "kind": "number"
+                  },
+                  "endtime": {
+                    "kind": "number"
+                  },
+                  "os": {
+                    "kind": "string"
+                  },
+                  "devicelabel": {
+                    "kind": "string"
+                  },
+                  "typename": {
+                    "kind": "string"
+                  },
+                  "typelabel": {
+                    "kind": "string"
+                  },
+                  "customFields": {
+                    "kind": "object",
+                    "fields": {
+                      "DT-MANUAL": {
+                        "kind": "object",
+                        "fields": {
+                          "notes": {
+                            "kind": "string"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -6305,6 +6850,9 @@
                 },
                 "longitude": {
                   "kind": "number"
+                },
+                "latitude": {
+                  "kind": "number"
                 }
               }
             },
@@ -6334,12 +6882,73 @@
                 },
                 "longitude": {
                   "kind": "number"
+                },
+                "latitude": {
+                  "kind": "number"
+                },
+                "devices": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "did": {
+                        "kind": "number"
+                      },
+                      "ip": {
+                        "kind": "string"
+                      },
+                      "ips": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "object",
+                          "fields": {
+                            "ip": {
+                              "kind": "string"
+                            },
+                            "timems": {
+                              "kind": "number"
+                            },
+                            "time": {
+                              "kind": "string"
+                            },
+                            "sid": {
+                              "kind": "number"
+                            }
+                          }
+                        }
+                      },
+                      "sid": {
+                        "kind": "number"
+                      },
+                      "hostname": {
+                        "kind": "string"
+                      },
+                      "firstSeen": {
+                        "kind": "number"
+                      },
+                      "lastSeen": {
+                        "kind": "number"
+                      },
+                      "os": {
+                        "kind": "string"
+                      },
+                      "typename": {
+                        "kind": "string"
+                      },
+                      "typelabel": {
+                        "kind": "string"
+                      }
+                    }
+                  }
                 }
               }
             },
             {
               "kind": "object",
               "fields": {
+                "hostname": {
+                  "kind": "string"
+                },
                 "firsttime": {
                   "kind": "number"
                 }
@@ -6348,14 +6957,81 @@
             {
               "kind": "object",
               "fields": {
+                "hostname": {
+                  "kind": "string"
+                },
                 "firsttime": {
                   "kind": "number"
+                },
+                "devices": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "did": {
+                        "kind": "number"
+                      },
+                      "ip": {
+                        "kind": "string"
+                      },
+                      "ips": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "object",
+                          "fields": {
+                            "ip": {
+                              "kind": "string"
+                            },
+                            "timems": {
+                              "kind": "number"
+                            },
+                            "time": {
+                              "kind": "string"
+                            },
+                            "sid": {
+                              "kind": "number"
+                            }
+                          }
+                        }
+                      },
+                      "sid": {
+                        "kind": "number"
+                      },
+                      "hostname": {
+                        "kind": "string"
+                      },
+                      "firstSeen": {
+                        "kind": "number"
+                      },
+                      "lastSeen": {
+                        "kind": "number"
+                      },
+                      "os": {
+                        "kind": "string"
+                      },
+                      "typename": {
+                        "kind": "string"
+                      },
+                      "typelabel": {
+                        "kind": "string"
+                      }
+                    }
+                  }
                 }
               }
             },
             {
               "kind": "object",
               "fields": {
+                "subnetlabel": {
+                  "kind": "string"
+                },
+                "subnetid": {
+                  "kind": "string"
+                },
+                "subnetnetwork": {
+                  "kind": "string"
+                },
                 "country": {
                   "kind": "string"
                 },
@@ -6370,12 +7046,24 @@
                 },
                 "longitude": {
                   "kind": "number"
+                },
+                "latitude": {
+                  "kind": "number"
                 }
               }
             },
             {
               "kind": "object",
               "fields": {
+                "subnetlabel": {
+                  "kind": "string"
+                },
+                "subnetid": {
+                  "kind": "string"
+                },
+                "subnetnetwork": {
+                  "kind": "string"
+                },
                 "country": {
                   "kind": "string"
                 },
@@ -6390,6 +7078,64 @@
                 },
                 "longitude": {
                   "kind": "number"
+                },
+                "latitude": {
+                  "kind": "number"
+                },
+                "devices": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "did": {
+                        "kind": "number"
+                      },
+                      "ip": {
+                        "kind": "string"
+                      },
+                      "ips": {
+                        "kind": "array",
+                        "items": {
+                          "kind": "object",
+                          "fields": {
+                            "ip": {
+                              "kind": "string"
+                            },
+                            "timems": {
+                              "kind": "number"
+                            },
+                            "time": {
+                              "kind": "string"
+                            },
+                            "sid": {
+                              "kind": "number"
+                            }
+                          }
+                        }
+                      },
+                      "sid": {
+                        "kind": "number"
+                      },
+                      "hostname": {
+                        "kind": "string"
+                      },
+                      "firstSeen": {
+                        "kind": "number"
+                      },
+                      "lastSeen": {
+                        "kind": "number"
+                      },
+                      "os": {
+                        "kind": "string"
+                      },
+                      "typename": {
+                        "kind": "string"
+                      },
+                      "typelabel": {
+                        "kind": "string"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -6663,6 +7409,132 @@
                     "kind": "string"
                   },
                   "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Internal destination device type": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "code": {
+                    "kind": "string"
+                  },
+                  "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Protocol": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "code": {
+                    "kind": "string"
+                  },
+                  "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Application protocol": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "code": {
+                    "kind": "string"
+                  },
+                  "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Malformed traffic type": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "code": {
+                    "kind": "string"
+                  },
+                  "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Vendor": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "code": {
+                    "kind": "string"
+                  },
+                  "name": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Destination Resource Type": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "code": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Access Method": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "code": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Resource Type": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "code": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "Action Direction": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "name": {
+                    "kind": "string"
+                  },
+                  "code": {
                     "kind": "string"
                   }
                 }
@@ -8213,6 +9085,55 @@
               },
               "percentscore": {
                 "kind": "number"
+              },
+              "device": {
+                "kind": "object",
+                "fields": {
+                  "did": {
+                    "kind": "number"
+                  },
+                  "ip": {
+                    "kind": "string"
+                  },
+                  "ips": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "object",
+                      "fields": {
+                        "ip": {
+                          "kind": "string"
+                        },
+                        "timems": {
+                          "kind": "number"
+                        },
+                        "time": {
+                          "kind": "string"
+                        },
+                        "sid": {
+                          "kind": "number"
+                        }
+                      }
+                    }
+                  },
+                  "sid": {
+                    "kind": "number"
+                  },
+                  "hostname": {
+                    "kind": "string"
+                  },
+                  "firstSeen": {
+                    "kind": "number"
+                  },
+                  "lastSeen": {
+                    "kind": "number"
+                  },
+                  "typename": {
+                    "kind": "string"
+                  },
+                  "typelabel": {
+                    "kind": "string"
+                  }
+                }
               }
             }
           }
@@ -9234,6 +10155,55 @@
             },
             "percentscore": {
               "kind": "number"
+            },
+            "device": {
+              "kind": "object",
+              "fields": {
+                "did": {
+                  "kind": "number"
+                },
+                "ip": {
+                  "kind": "string"
+                },
+                "ips": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "object",
+                    "fields": {
+                      "ip": {
+                        "kind": "string"
+                      },
+                      "timems": {
+                        "kind": "number"
+                      },
+                      "time": {
+                        "kind": "string"
+                      },
+                      "sid": {
+                        "kind": "number"
+                      }
+                    }
+                  }
+                },
+                "sid": {
+                  "kind": "number"
+                },
+                "hostname": {
+                  "kind": "string"
+                },
+                "firstSeen": {
+                  "kind": "number"
+                },
+                "lastSeen": {
+                  "kind": "number"
+                },
+                "typename": {
+                  "kind": "string"
+                },
+                "typelabel": {
+                  "kind": "string"
+                }
+              }
             }
           }
         },
@@ -9923,6 +10893,167 @@
                     "kind": "boolean"
                   }
                 }
+              },
+              "tags": {
+                "kind": "array",
+                "items": {
+                  "kind": "summary"
+                }
+              },
+              "interval": {
+                "kind": "number"
+              },
+              "delay": {
+                "kind": "number"
+              },
+              "sequenced": {
+                "kind": "boolean"
+              },
+              "active": {
+                "kind": "boolean"
+              },
+              "modified": {
+                "kind": "string"
+              },
+              "activeTimes": {
+                "kind": "object",
+                "fields": {
+                  "devices": {
+                    "kind": "summary"
+                  },
+                  "tags": {
+                    "kind": "summary"
+                  },
+                  "type": {
+                    "kind": "string"
+                  },
+                  "version": {
+                    "kind": "number"
+                  }
+                }
+              },
+              "autoUpdatable": {
+                "kind": "boolean"
+              },
+              "autoUpdate": {
+                "kind": "boolean"
+              },
+              "autoSuppress": {
+                "kind": "boolean"
+              },
+              "description": {
+                "kind": "string"
+              },
+              "behaviour": {
+                "kind": "string"
+              },
+              "defeats": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "arguments": {
+                      "kind": "object",
+                      "fields": {
+                        "value": {
+                          "kind": "string"
+                        }
+                      }
+                    },
+                    "comparator": {
+                      "kind": "string"
+                    },
+                    "defeatID": {
+                      "kind": "summary"
+                    },
+                    "filtertype": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              },
+              "created": {
+                "kind": "object",
+                "fields": {
+                  "by": {
+                    "kind": "string"
+                  }
+                }
+              },
+              "edited": {
+                "kind": "object",
+                "fields": {
+                  "by": {
+                    "kind": "string"
+                  },
+                  "userID": {
+                    "kind": "number"
+                  }
+                }
+              },
+              "history": {
+                "kind": "array",
+                "items": {
+                  "kind": "object",
+                  "fields": {
+                    "modified": {
+                      "kind": "string"
+                    },
+                    "active": {
+                      "kind": "boolean"
+                    },
+                    "message": {
+                      "kind": "string"
+                    },
+                    "by": {
+                      "kind": "string"
+                    },
+                    "phid": {
+                      "kind": "number"
+                    },
+                    "defeatsOnly": {
+                      "kind": "boolean"
+                    },
+                    "accepted": {
+                      "kind": "string"
+                    },
+                    "acceptedby": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              },
+              "message": {
+                "kind": "string"
+              },
+              "mitre": {
+                "kind": "object",
+                "fields": {
+                  "tactics": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  },
+                  "techniques": {
+                    "kind": "array",
+                    "items": {
+                      "kind": "summary"
+                    }
+                  }
+                }
+              },
+              "version": {
+                "kind": "number"
+              },
+              "priority": {
+                "kind": "number"
+              },
+              "category": {
+                "kind": "string"
+              },
+              "compliance": {
+                "kind": "boolean"
               }
             }
           }
@@ -10070,6 +11201,167 @@
                   "kind": "boolean"
                 }
               }
+            },
+            "tags": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "interval": {
+              "kind": "number"
+            },
+            "delay": {
+              "kind": "number"
+            },
+            "sequenced": {
+              "kind": "boolean"
+            },
+            "active": {
+              "kind": "boolean"
+            },
+            "modified": {
+              "kind": "string"
+            },
+            "activeTimes": {
+              "kind": "object",
+              "fields": {
+                "devices": {
+                  "kind": "summary"
+                },
+                "tags": {
+                  "kind": "summary"
+                },
+                "type": {
+                  "kind": "string"
+                },
+                "version": {
+                  "kind": "number"
+                }
+              }
+            },
+            "autoUpdatable": {
+              "kind": "boolean"
+            },
+            "autoUpdate": {
+              "kind": "boolean"
+            },
+            "autoSuppress": {
+              "kind": "boolean"
+            },
+            "description": {
+              "kind": "string"
+            },
+            "behaviour": {
+              "kind": "string"
+            },
+            "defeats": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "arguments": {
+                    "kind": "object",
+                    "fields": {
+                      "value": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "comparator": {
+                    "kind": "string"
+                  },
+                  "defeatID": {
+                    "kind": "summary"
+                  },
+                  "filtertype": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "created": {
+              "kind": "object",
+              "fields": {
+                "by": {
+                  "kind": "string"
+                }
+              }
+            },
+            "edited": {
+              "kind": "object",
+              "fields": {
+                "by": {
+                  "kind": "string"
+                },
+                "userID": {
+                  "kind": "number"
+                }
+              }
+            },
+            "history": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "modified": {
+                    "kind": "string"
+                  },
+                  "active": {
+                    "kind": "boolean"
+                  },
+                  "message": {
+                    "kind": "string"
+                  },
+                  "by": {
+                    "kind": "string"
+                  },
+                  "phid": {
+                    "kind": "number"
+                  },
+                  "defeatsOnly": {
+                    "kind": "boolean"
+                  },
+                  "accepted": {
+                    "kind": "string"
+                  },
+                  "acceptedby": {
+                    "kind": "string"
+                  }
+                }
+              }
+            },
+            "message": {
+              "kind": "string"
+            },
+            "mitre": {
+              "kind": "object",
+              "fields": {
+                "tactics": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "techniques": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                }
+              }
+            },
+            "version": {
+              "kind": "number"
+            },
+            "priority": {
+              "kind": "number"
+            },
+            "category": {
+              "kind": "string"
+            },
+            "compliance": {
+              "kind": "boolean"
             }
           }
         },
@@ -10833,6 +12125,21 @@
               },
               "port1": {
                 "kind": "number"
+              },
+              "ip2": {
+                "kind": "string"
+              },
+              "port2": {
+                "kind": "number"
+              },
+              "start": {
+                "kind": "number"
+              },
+              "end": {
+                "kind": "number"
+              },
+              "state": {
+                "kind": "string"
               }
             }
           }
@@ -10970,6 +12277,15 @@
               },
               "lastSeen": {
                 "kind": "number"
+              },
+              "os": {
+                "kind": "string"
+              },
+              "typename": {
+                "kind": "string"
+              },
+              "typelabel": {
+                "kind": "string"
               }
             }
           }
@@ -11122,6 +12438,9 @@
             "installed": {
               "kind": "string"
             },
+            "mobileAppConfigured": {
+              "kind": "boolean"
+            },
             "version": {
               "kind": "string"
             },
@@ -11131,11 +12450,632 @@
             "label": {
               "kind": "string"
             },
+            "modelsUpdated": {
+              "kind": "string"
+            },
+            "modelPackageVersion": {
+              "kind": "string"
+            },
+            "bundleVersion": {
+              "kind": "string"
+            },
+            "bundleVariant": {
+              "kind": "string"
+            },
+            "bundleDate": {
+              "kind": "string"
+            },
+            "bundleInstalledDate": {
+              "kind": "string"
+            },
+            "maximumOSSensors": {
+              "kind": "number"
+            },
             "hostname": {
               "kind": "string"
             },
+            "uuid": {
+              "kind": "string"
+            },
+            "inoculation": {
+              "kind": "boolean"
+            },
+            "applianceOSCode": {
+              "kind": "string"
+            },
+            "license": {
+              "kind": "string"
+            },
+            "saasConnectorLicense": {
+              "kind": "string"
+            },
+            "antigenaSaasLicense": {
+              "kind": "string"
+            },
+            "cloudSecurityLicense": {
+              "kind": "string"
+            },
+            "syslogTLSSHA1Fingerprint": {
+              "kind": "string"
+            },
+            "syslogTLSSHA256Fingerprint": {
+              "kind": "string"
+            },
+            "antigenaNetworkEnabled": {
+              "kind": "boolean"
+            },
+            "antigenaNetworkRunning": {
+              "kind": "boolean"
+            },
+            "antigenaNetworkConfirmationMode": {
+              "kind": "boolean"
+            },
+            "antigenaNetworkLicense": {
+              "kind": "string"
+            },
+            "preventE2ELicense": {
+              "kind": "string"
+            },
+            "logIngestionReplicated": {
+              "kind": "number"
+            },
+            "logIngestionProcessed": {
+              "kind": "number"
+            },
+            "logIngestionTCP": {
+              "kind": "number"
+            },
+            "logIngestionUDP": {
+              "kind": "number"
+            },
+            "logIngestionMatches": {
+              "kind": "object",
+              "fields": {
+                "exampletemplate": {
+                  "kind": "number"
+                }
+              }
+            },
+            "logIngestionTypes": {
+              "kind": "object",
+              "fields": {
+                "exampletemplate": {
+                  "kind": "number"
+                }
+              }
+            },
+            "licenseCounts": {
+              "kind": "object",
+              "fields": {
+                "saas": {
+                  "kind": "object",
+                  "fields": {
+                    "total": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "licenseIPCount": {
+                  "kind": "number"
+                },
+                "licenseCloudIPCount": {
+                  "kind": "number"
+                }
+              }
+            },
+            "antigenaNetworkBlockedConnections": {
+              "kind": "object",
+              "fields": {
+                "attempted": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
+            "diskSpaceUsed_": {
+              "kind": "number"
+            },
+            "type": {
+              "kind": "string"
+            },
+            "diskUtilization": {
+              "kind": "number"
+            },
+            "load": {
+              "kind": "number"
+            },
             "cpu": {
               "kind": "number"
+            },
+            "memoryUsed": {
+              "kind": "number"
+            },
+            "dataQueue": {
+              "kind": "number"
+            },
+            "darkflowQueue": {
+              "kind": "number"
+            },
+            "flowProcessingTimes": {
+              "kind": "summary"
+            },
+            "networkInterfacesState_eth0": {
+              "kind": "string"
+            },
+            "networkInterfacesAddress_eth0": {
+              "kind": "string"
+            },
+            "networkInterfacesState_eth1": {
+              "kind": "string"
+            },
+            "networkInterfacesState_eth2": {
+              "kind": "string"
+            },
+            "networkInterfacesState_eth3": {
+              "kind": "string"
+            },
+            "networkInterfacesReceived_eth0": {
+              "kind": "number"
+            },
+            "networkInterfacesReceived_eth1": {
+              "kind": "number"
+            },
+            "networkInterfacesReceived_eth2": {
+              "kind": "number"
+            },
+            "networkInterfacesReceived_eth3": {
+              "kind": "number"
+            },
+            "networkInterfacesTransmitted_eth0": {
+              "kind": "number"
+            },
+            "networkInterfacesTransmitted_eth1": {
+              "kind": "number"
+            },
+            "networkInterfacesTransmitted_eth2": {
+              "kind": "number"
+            },
+            "networkInterfacesTransmitted_eth3": {
+              "kind": "number"
+            },
+            "bandwidthCurrent": {
+              "kind": "number"
+            },
+            "bandwidthCurrentString": {
+              "kind": "string"
+            },
+            "bandwidthAverage": {
+              "kind": "number"
+            },
+            "bandwidthAverageString": {
+              "kind": "string"
+            },
+            "bandwidth7DayPeak": {
+              "kind": "number"
+            },
+            "bandwidth7DayPeakString": {
+              "kind": "string"
+            },
+            "bandwidth2WeekPeak": {
+              "kind": "number"
+            },
+            "bandwidth2WeekPeakString": {
+              "kind": "string"
+            },
+            "processedBandwidthCurrent": {
+              "kind": "number"
+            },
+            "processedBandwidthCurrentString": {
+              "kind": "string"
+            },
+            "processedBandwidthAverage": {
+              "kind": "number"
+            },
+            "processedBandwidthAverageString": {
+              "kind": "string"
+            },
+            "processedBandwidth7DayPeak": {
+              "kind": "number"
+            },
+            "processedBandwidth7DayPeakString": {
+              "kind": "string"
+            },
+            "processedBandwidth2WeekPeak": {
+              "kind": "number"
+            },
+            "processedBandwidth2WeekPeakString": {
+              "kind": "string"
+            },
+            "eventsPerMinuteCurrent": {
+              "kind": "object",
+              "fields": {
+                "cSensorNotices": {
+                  "kind": "number"
+                },
+                "cSensorDeviceDetails": {
+                  "kind": "number"
+                },
+                "cSensorModelEvents": {
+                  "kind": "number"
+                },
+                "networkNotices": {
+                  "kind": "number"
+                },
+                "networkDeviceDetails": {
+                  "kind": "number"
+                },
+                "networkModelEvents": {
+                  "kind": "number"
+                },
+                "logInputNotices": {
+                  "kind": "number"
+                },
+                "logInputDeviceDetails": {
+                  "kind": "number"
+                },
+                "logInputModelEvents": {
+                  "kind": "number"
+                },
+                "saasNotices": {
+                  "kind": "number"
+                },
+                "saasModelEvents": {
+                  "kind": "number"
+                }
+              }
+            },
+            "probes": {
+              "kind": "object",
+              "fields": {
+                "12": {
+                  "kind": "object",
+                  "fields": {
+                    "id": {
+                      "kind": "number"
+                    },
+                    "uuid": {
+                      "kind": "string"
+                    },
+                    "version": {
+                      "kind": "string"
+                    },
+                    "bundleVersion": {
+                      "kind": "string"
+                    },
+                    "bundleDate": {
+                      "kind": "string"
+                    },
+                    "bundleInstalledDate": {
+                      "kind": "string"
+                    },
+                    "configuredServer": {
+                      "kind": "string"
+                    },
+                    "ipAddress": {
+                      "kind": "string"
+                    },
+                    "label": {
+                      "kind": "string"
+                    },
+                    "hostname": {
+                      "kind": "string"
+                    },
+                    "time": {
+                      "kind": "string"
+                    },
+                    "metadata": {
+                      "kind": "summary"
+                    },
+                    "type": {
+                      "kind": "string"
+                    },
+                    "load": {
+                      "kind": "number"
+                    },
+                    "cpu": {
+                      "kind": "number"
+                    },
+                    "memoryUsed": {
+                      "kind": "number"
+                    },
+                    "osSensors": {
+                      "kind": "array",
+                      "items": {
+                        "kind": "summary"
+                      }
+                    },
+                    "antigenaNetworkBlockedConnections": {
+                      "kind": "object",
+                      "fields": {
+                        "attempted": {
+                          "kind": "number"
+                        },
+                        "failed": {
+                          "kind": "number"
+                        }
+                      }
+                    },
+                    "osPacketsProcessed": {
+                      "kind": "string"
+                    },
+                    "networkInterfacesState_eth0": {
+                      "kind": "string"
+                    },
+                    "networkInterfacesAddress_eth0": {
+                      "kind": "string"
+                    },
+                    "networkInterfacesReceived_eth0": {
+                      "kind": "number"
+                    },
+                    "networkInterfacesTransmitted_eth0": {
+                      "kind": "number"
+                    },
+                    "bandwidthCurrent": {
+                      "kind": "number"
+                    },
+                    "bandwidthCurrentString": {
+                      "kind": "string"
+                    },
+                    "bandwidthAverage": {
+                      "kind": "number"
+                    },
+                    "bandwidthAverageString": {
+                      "kind": "string"
+                    },
+                    "bandwidth7DayPeak": {
+                      "kind": "number"
+                    },
+                    "bandwidth7DayPeakString": {
+                      "kind": "string"
+                    },
+                    "bandwidth2WeekPeak": {
+                      "kind": "number"
+                    },
+                    "bandwidth2WeekPeakString": {
+                      "kind": "string"
+                    },
+                    "processedBandwidthCurrent": {
+                      "kind": "number"
+                    },
+                    "processedBandwidthCurrentString": {
+                      "kind": "string"
+                    },
+                    "processedBandwidthAverage": {
+                      "kind": "number"
+                    },
+                    "processedBandwidthAverageString": {
+                      "kind": "string"
+                    },
+                    "processedBandwidth7DayPeak": {
+                      "kind": "number"
+                    },
+                    "processedBandwidth7DayPeakString": {
+                      "kind": "string"
+                    },
+                    "processedBandwidth2WeekPeak": {
+                      "kind": "number"
+                    },
+                    "processedBandwidth2WeekPeakString": {
+                      "kind": "string"
+                    },
+                    "connectionsPerMinuteCurrent": {
+                      "kind": "number"
+                    },
+                    "connectionsPerMinuteAverage": {
+                      "kind": "number"
+                    },
+                    "connectionsPerMinute7DayPeak": {
+                      "kind": "number"
+                    },
+                    "connectionsPerMinute2WeekPeak": {
+                      "kind": "number"
+                    }
+                  }
+                },
+                "13": {
+                  "kind": "object",
+                  "fields": {
+                    "configuredServer": {
+                      "kind": "string"
+                    },
+                    "ipAddress": {
+                      "kind": "string"
+                    },
+                    "label": {
+                      "kind": "string"
+                    },
+                    "error": {
+                      "kind": "boolean"
+                    },
+                    "lastContact": {
+                      "kind": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "connectionsPerMinuteCurrent": {
+              "kind": "number"
+            },
+            "connectionsPerMinuteAverage": {
+              "kind": "number"
+            },
+            "connectionsPerMinute7DayPeak": {
+              "kind": "number"
+            },
+            "connectionsPerMinute2WeekPeak": {
+              "kind": "number"
+            },
+            "operatingSystems": {
+              "kind": "number"
+            },
+            "newDevices4Weeks": {
+              "kind": "number"
+            },
+            "newDevices7Days": {
+              "kind": "number"
+            },
+            "newDevices24Hours": {
+              "kind": "number"
+            },
+            "newDevicesHour": {
+              "kind": "number"
+            },
+            "activeDevices4Weeks": {
+              "kind": "number"
+            },
+            "activeDevices7Days": {
+              "kind": "number"
+            },
+            "activeDevices24Hours": {
+              "kind": "number"
+            },
+            "activeDevicesHour": {
+              "kind": "number"
+            },
+            "deviceHostnames": {
+              "kind": "number"
+            },
+            "deviceMACAddresses": {
+              "kind": "number"
+            },
+            "deviceRecentIPChange": {
+              "kind": "number"
+            },
+            "models": {
+              "kind": "number"
+            },
+            "modelsBreached": {
+              "kind": "number"
+            },
+            "modelsSuppressed": {
+              "kind": "number"
+            },
+            "recentUnidirectionalConnections": {
+              "kind": "number"
+            },
+            "mostRecentDHCPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentDNSTraffic": {
+              "kind": "string"
+            },
+            "mostRecentDCE_RPCTraffic": {
+              "kind": "string"
+            },
+            "mostRecentHTTPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentHTTPSTraffic": {
+              "kind": "string"
+            },
+            "mostRecentKERBEROSTraffic": {
+              "kind": "string"
+            },
+            "mostRecentLDAPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentNTPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentSMBTraffic": {
+              "kind": "string"
+            },
+            "mostRecentSMTPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentSNMPTraffic": {
+              "kind": "string"
+            },
+            "mostRecentSSHTraffic": {
+              "kind": "string"
+            },
+            "mostRecentSSLTraffic": {
+              "kind": "string"
+            },
+            "VLANs": {
+              "kind": "object",
+              "fields": {
+                "1": {
+                  "kind": "number"
+                }
+              }
+            },
+            "internalIPRangeList": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "internalIPRanges": {
+              "kind": "number"
+            },
+            "dnsServers": {
+              "kind": "number"
+            },
+            "internalDomains": {
+              "kind": "number"
+            },
+            "internalAndExternalDomainList": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "internalAndExternalDomains": {
+              "kind": "number"
+            },
+            "proxyServers": {
+              "kind": "number"
+            },
+            "proxyServerIPs": {
+              "kind": "array",
+              "items": {
+                "kind": "summary"
+              }
+            },
+            "subnets": {
+              "kind": "number"
+            },
+            "subnetData": {
+              "kind": "array",
+              "items": {
+                "kind": "object",
+                "fields": {
+                  "sid": {
+                    "kind": "number"
+                  },
+                  "network": {
+                    "kind": "string"
+                  },
+                  "devices": {
+                    "kind": "number"
+                  },
+                  "clientDevices": {
+                    "kind": "number"
+                  },
+                  "mostRecentTraffic": {
+                    "kind": "string"
+                  },
+                  "mostRecentDHCP": {
+                    "kind": "string"
+                  },
+                  "dhcpQuality": {
+                    "kind": "number"
+                  },
+                  "kerberosQuality": {
+                    "kind": "number"
+                  }
+                }
+              }
+            },
+            "uptime": {
+              "kind": "string"
+            },
+            "systemuptime": {
+              "kind": "string"
             }
           }
         },
@@ -11258,6 +13198,51 @@
                 "kind": "number"
               },
               "longitude": {
+                "kind": "number"
+              },
+              "network": {
+                "kind": "string"
+              },
+              "shid": {
+                "kind": "number"
+              },
+              "uniqueHostnames": {
+                "kind": "boolean"
+              },
+              "uniqueUsernames": {
+                "kind": "boolean"
+              },
+              "confidence": {
+                "kind": "number"
+              },
+              "lastDHCP": {
+                "kind": "number"
+              },
+              "dhcpCount": {
+                "kind": "number"
+              },
+              "kerberosCount": {
+                "kind": "number"
+              },
+              "dhcpQuality": {
+                "kind": "number"
+              },
+              "kerberosQuality": {
+                "kind": "number"
+              },
+              "recentTrafficPercent": {
+                "kind": "number"
+              },
+              "clientDevices": {
+                "kind": "number"
+              },
+              "serverDevices": {
+                "kind": "number"
+              },
+              "icsDevices": {
+                "kind": "number"
+              },
+              "mostRecentTraffic": {
                 "kind": "number"
               }
             }
@@ -11865,6 +13850,29 @@
                   },
                   "expiry": {
                     "kind": "number"
+                  },
+                  "name": {
+                    "kind": "string"
+                  },
+                  "restricted": {
+                    "kind": "boolean"
+                  },
+                  "data": {
+                    "kind": "object",
+                    "fields": {
+                      "auto": {
+                        "kind": "boolean"
+                      },
+                      "color": {
+                        "kind": "number"
+                      },
+                      "description": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "isReferenced": {
+                    "kind": "boolean"
                   }
                 }
               },
@@ -12169,6 +14177,29 @@
                   },
                   "expiry": {
                     "kind": "number"
+                  },
+                  "name": {
+                    "kind": "string"
+                  },
+                  "restricted": {
+                    "kind": "boolean"
+                  },
+                  "data": {
+                    "kind": "object",
+                    "fields": {
+                      "auto": {
+                        "kind": "boolean"
+                      },
+                      "color": {
+                        "kind": "number"
+                      },
+                      "description": {
+                        "kind": "string"
+                      }
+                    }
+                  },
+                  "isReferenced": {
+                    "kind": "boolean"
                   }
                 }
               },
@@ -12303,6 +14334,23 @@
             "timed_out": {
               "kind": "boolean"
             },
+            "_shards": {
+              "kind": "object",
+              "fields": {
+                "total": {
+                  "kind": "number"
+                },
+                "successful": {
+                  "kind": "number"
+                },
+                "skipped": {
+                  "kind": "number"
+                },
+                "failed": {
+                  "kind": "number"
+                }
+              }
+            },
             "hits": {
               "kind": "object",
               "fields": {
@@ -12350,6 +14398,40 @@
                         }
                       }
                     }
+                  }
+                }
+              }
+            },
+            "darktraceChildError": {
+              "kind": "string"
+            },
+            "kibana": {
+              "kind": "object",
+              "fields": {
+                "index": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
+                  }
+                },
+                "per_page": {
+                  "kind": "number"
+                },
+                "time": {
+                  "kind": "object",
+                  "fields": {
+                    "from": {
+                      "kind": "string"
+                    },
+                    "to": {
+                      "kind": "string"
+                    }
+                  }
+                },
+                "default_fields": {
+                  "kind": "array",
+                  "items": {
+                    "kind": "summary"
                   }
                 }
               }
@@ -15675,6 +17757,21 @@
             },
             "port1": {
               "kind": "number"
+            },
+            "ip2": {
+              "kind": "string"
+            },
+            "port2": {
+              "kind": "number"
+            },
+            "start": {
+              "kind": "number"
+            },
+            "end": {
+              "kind": "number"
+            },
+            "state": {
+              "kind": "string"
             }
           }
         },

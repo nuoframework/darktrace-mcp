@@ -80,7 +80,7 @@ test('form write and confirmed critical write reach HTTP with SDK-compatible sig
  assert.equal((await callTool('darktrace_acknowledge_ai_analyst_incident',{operation:'post_aianalyst_acknowledge',body:{uuid:'fixture-uuid'}},ctx)).isError,undefined);
  const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
  assert.equal(preview.structuredContent?.confirmationRequired,true);assert.equal(calls.length,1);
- assert.equal((await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true},ctx)).isError,undefined);
+ assert.equal((await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true,previewId:preview.structuredContent?.previewId},ctx)).isError,undefined);
  assert.deepEqual(calls.map(c=>[c.method,c.url,c.body]),[
   ['POST','https://192.0.2.10/aianalyst/acknowledge','uuid=fixture-uuid'],
   ['POST','https://192.0.2.10/antigena/manual','{"did":1,"action":"quarantine","duration":600}'],

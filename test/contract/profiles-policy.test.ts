@@ -94,7 +94,11 @@ test('writes are invisible and refused without write; with write they execute di
   assert.deepEqual(denied.state,{requests:[],audits:[]});
   const allowed=harness(config({write:true}));
   const preview=await callTool('darktrace_acknowledge_model_breach',{...call,dryRun:true},allowed.ctx);
-  assert.deepEqual(preview.structuredContent,{dryRun:true,operationId:'post_modelbreaches_pbid_acknowledge',method:'POST',parameterNames:['acknowledge','pbid']});
+  const {previewId,...rest}=preview.structuredContent as any;assert.match(previewId,/^[a-f0-9]{32}$/);
+  assert.deepEqual(rest,{dryRun:true,operationId:'post_modelbreaches_pbid_acknowledge',method:'POST',parameterNames:['acknowledge','pbid']});
+  // Optional binding for non-critical writes: a stale/foreign previewId is refused, a matching one is accepted once.
+  assert.equal((await callTool('darktrace_acknowledge_model_breach',{...call,path:{pbid:8},previewId},allowed.ctx)).isError,true);
+  assert.equal(allowed.state.requests.length,0);
   assert.equal(allowed.state.requests.length,0);
   const executed=await callTool('darktrace_acknowledge_model_breach',call,allowed.ctx);
   assert.equal(executed.isError,undefined);assert.deepEqual(JSON.parse(JSON.stringify((executed.structuredContent as any).data)),{response:'SUCCESS'});
@@ -124,8 +128,19 @@ test('critical: refused without critical; preview with confirmation hint without
   }
   assert.deepEqual(h.state,{requests:[],audits:[]});
   for(const confirm of ['true',1,'yes']) assert.equal((await callTool('darktrace_delete_tag',{...call,confirm},h.ctx)).isError,true);
-  const done=await callTool('darktrace_delete_tag',{...call,confirm:true},h.ctx);
+  // confirm:true alone (no previewId) only yields a fresh preview.
+  const first=(await callTool('darktrace_delete_tag',{...call,confirm:true},h.ctx)).structuredContent as any;
+  assert.equal(first.confirmationRequired,true);assert.match(first.previewId,/^[a-f0-9]{32}$/);assert.equal(h.state.requests.length,0);
+  // A previewId bound to different arguments is rejected and consumed.
+  const other=(await callTool('darktrace_delete_tag',{path:{tid:4}},h.ctx)).structuredContent as any;
+  assert.equal(((await callTool('darktrace_delete_tag',{...call,confirm:true,previewId:other.previewId},h.ctx)).structuredContent as any).confirmationRequired,true);
+  assert.equal(((await callTool('darktrace_delete_tag',{path:{tid:4},confirm:true,previewId:other.previewId},h.ctx)).structuredContent as any).confirmationRequired,true);
+  assert.equal(h.state.requests.length,0);
+  const done=await callTool('darktrace_delete_tag',{...call,confirm:true,previewId:first.previewId},h.ctx);
   assert.equal(done.isError,undefined);assert.equal(h.state.requests.length,1);assert.deepEqual(h.state.audits,['delete_tags_tid:start','delete_tags_tid:ok']);
+  // Single use: replaying the same previewId does not execute again.
+  assert.equal(((await callTool('darktrace_delete_tag',{...call,confirm:true,previewId:first.previewId},h.ctx)).structuredContent as any).confirmationRequired,true);
+  assert.equal(h.state.requests.length,1);
 });
 
 test('model arguments never escalate: confirm/profiles/unknown keys are rejected where not in the strict schema',async()=>{
@@ -220,4 +235,25 @@ test('CLI check-config/doctor report effective profiles; invalid profile env exi
   for(const args of [['--write'],['--profiles=all']]){const got=spawnSync(process.execPath,['dist/src/index.js',...args],{env,encoding:'utf8',timeout:4000});assert.equal(got.status,2);assert.equal(got.stdout,'');}
   const help=spawnSync(process.execPath,['dist/src/index.js','--help'],{env,encoding:'utf8',timeout:4000});
   assert.match(help.stdout,/DARKTRACE_PROFILES/);assert.match(help.stdout,/confirm:true/);
+});
+
+test('separate write rate limit: maxWritesPerMinute (default 10, ceiling 60) and 3 critical/min; excess never reaches the client',async()=>{
+  const call={operation:'post_modelbreaches_pbid_acknowledge',path:{pbid:7},body:{acknowledge:true}};
+  const h=harness(config({write:true}));
+  for(let i=0;i<10;i++) assert.equal((await callTool('darktrace_acknowledge_model_breach',call,h.ctx)).isError,undefined);
+  const limited=await callTool('darktrace_acknowledge_model_breach',call,h.ctx);
+  assert.equal(limited.isError,true);assert.equal(limited.structuredContent?.errorCode,'rate_limited');assert.equal(h.state.requests.length,10);
+  assert.equal((await callTool('darktrace_get_status',{},h.ctx)).isError,undefined);
+  const low=harness(parseConfig({...base,profiles:{write:true},limits:{maxWritesPerMinute:2}}));
+  for(let i=0;i<3;i++) await callTool('darktrace_acknowledge_model_breach',call,low.ctx);
+  assert.equal(low.state.requests.length,2);
+  assert.throws(()=>parseConfig({...base,limits:{maxWritesPerMinute:61}}));
+  assert.equal(loadConfig({...env,DARKTRACE_MAX_WRITES_PER_MINUTE:'5'}).limits.maxWritesPerMinute,5);
+  const c=harness(config({write:true,writeCritical:true}));
+  for(let i=0;i<4;i++){
+    const p=(await callTool('darktrace_delete_tag',{path:{tid:i+1}},c.ctx)).structuredContent as any;
+    const r=await callTool('darktrace_delete_tag',{path:{tid:i+1},confirm:true,previewId:p.previewId},c.ctx);
+    assert.equal(r.structuredContent?.errorCode,i<3?undefined:'rate_limited');
+  }
+  assert.equal(c.state.requests.length,3);
 });

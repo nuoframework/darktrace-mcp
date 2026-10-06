@@ -8,7 +8,7 @@ export interface OperationDescriptor {
   execution:string; parameters:any[]; bodies:any[]; bodyRequired:boolean; documentedIn:string; validatedOn:string[];
 }
 export interface Operation extends OperationDescriptor { input:z.ZodObject<any>; }
-export interface OperationArgs { operation?:string; path?:Record<string,unknown>; query?:Record<string,unknown>; body?:unknown; contentType?:string; dryRun?:boolean; confirm?:boolean; }
+export interface OperationArgs { operation?:string; path?:Record<string,unknown>; query?:Record<string,unknown>; body?:unknown; contentType?:string; dryRun?:boolean; confirm?:boolean; previewId?:string; }
 export interface ApiRequest {
   operationId:string; pathParams?:Record<string,string|number>; query?:ReadonlyArray<readonly [string,string]>;
   body?:unknown; contentType?:'application/json'|'application/x-www-form-urlencoded'; signal?:AbortSignal;
@@ -40,7 +40,10 @@ export const operations:Readonly<Record<string,Operation>> = Object.freeze(Objec
     fields.contentType = z.enum(row.bodies.map(b=>b.contentType) as [string,...string[]]).optional();
   }
   // Writes execute by default when the operator profile allows; dryRun:true returns a value-free preview.
-  if (row.tier!=='read') fields.dryRun=z.boolean().default(false).describe('true = preview only; nothing is sent.');
+  if (row.tier!=='read') {
+    fields.dryRun=z.boolean().default(false).describe('true = preview only; nothing is sent.');
+    fields.previewId=z.string().regex(/^[a-f0-9]{32}$/).optional().describe(row.tier==='critical'?'Required with confirm:true: the previewId returned by the preview of these exact arguments.':'Optional: binds execution to an earlier preview of these exact arguments.');
+  }
   // Critical writes additionally need explicit user approval expressed as confirm:true.
   if (row.tier==='critical') fields.confirm=z.boolean().default(false).describe('Must be true, after explicit user approval, to execute this critical action.');
   return [row.operationId,Object.freeze({...row,input:z.strictObject(fields)})];

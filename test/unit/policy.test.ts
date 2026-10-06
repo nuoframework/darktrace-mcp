@@ -81,6 +81,26 @@ test('critical operations never execute without the critical profile and confirm
   const {requests,ctx:base}=context({write:true,writeCritical:true});const ctx={...base,approve:async()=>'accept' as const};
   const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
   assert.equal(preview.structuredContent?.confirmationRequired,true);assert.match(String(preview.structuredContent?.hint),/confirm:true/);assert.equal(requests.length,0);
-  const done=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true},ctx);
+  const done=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true,previewId:preview.structuredContent?.previewId},ctx);
   assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].operationId,'post_antigena_manual');
+});
+
+test('oversized list results keep as many leading records as fit, with returned/total counts',async()=>{
+  const {ctx}=context();
+  const records=Array.from({length:400},(_,i)=>({pbid:i,time:1,model:{name:'m'.repeat(300)}}));
+  const res=await callTool('darktrace_list_model_breaches',{},{...ctx,client:{async request(){return {json:records};}}});
+  const out=res.structuredContent as any;
+  assert.equal(res.isError,undefined);assert.equal(out.truncated,true);assert.equal(out.totalItems,400);
+  assert.ok(out.returnedItems>10&&out.returnedItems<400);assert.equal(out.data.length,out.returnedItems);assert.equal(out.data[0].pbid,0);
+  assert.ok(JSON.stringify(res).length<=60000);
+  const nested=await callTool('darktrace_search_devices',{query:{query:'x'}},{...ctx,client:{async request(){return {json:{totalCount:900,devices:Array.from({length:900},(_,i)=>({did:i,hostname:'h'.repeat(100)}))}};}}});
+  const n=nested.structuredContent as any;assert.equal(n.truncatedField,'devices');assert.equal(n.data.totalCount,900);assert.equal(n.data.devices.length,n.returnedItems);assert.ok(JSON.stringify(nested).length<=60000);
+});
+test('read-only multi-operation tools default to their listing operation',async()=>{
+  const {ctx,requests}=context();
+  assert.equal((await callTool('darktrace_list_model_breaches',{},ctx)).isError,undefined);
+  assert.equal((await callTool('darktrace_list_models',{},ctx)).isError,undefined);
+  assert.deepEqual(requests.map(r=>r.operationId),['get_modelbreaches','get_models']);
+  assert.equal((await callTool('darktrace_list_tags',{},ctx)).isError,true);
+  const w=context({write:true});assert.equal((await callTool('darktrace_acknowledge_model_breach',{path:{pbid:1},body:{acknowledge:true}},w.ctx)).isError,true);assert.equal(w.requests.length,0);
 });
