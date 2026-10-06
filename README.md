@@ -34,9 +34,9 @@ Choose `read`, then pick your clients. The wizard verifies TLS and the tokens wi
 
 `npx` is a one-time bootstrap. The wizard installs a fixed copy and gives clients absolute Node + `dist/src/index.js` paths. Native Windows cannot protect token files: use [.mcpb, Docker or WSL](docs/getting-started.md#windows).
 
-All three paths ship 1.1.1: npm (with provenance), the `.mcpb` on the [v1.1.1 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) and the ghcr image. Prefer to build from source? See the [fallback](docs/getting-started.md#fallback-build-from-source).
+All three paths ship 1.1.2: npm (with provenance), the `.mcpb` on the [v1.1.2 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2) and the ghcr image. Prefer to build from source? See the [fallback](docs/getting-started.md#fallback-build-from-source).
 
-Release 1.1.2 is in progress on **2026-10-06**. [Release status](docs/releases.md#release-status-2026-10-06).
+Release 1.1.2 was published on **2026-10-06**, with signed assets and build provenance. [Release status](docs/releases.md#release-status-2026-10-06).
 
 ### Claude Code and Codex plugin
 
@@ -58,9 +58,9 @@ Download `darktrace-mcp-1.1.2.mcpb` from the [v1.1.2 release](https://github.com
 With Docker installed, pull the pinned image first, then run the wizard. Client launchers use `--pull=never`.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee
 npx -y @nuoframework/darktrace-mcp@1.1.2 setup --runtime docker \
-  --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee
 ```
 
 Multi-arch image (linux/amd64, linux/arm64), pinned by its index digest. Use the digest, not the mutable `1.1.2` tag, in client configuration. [Docker guide](docs/docker.md).

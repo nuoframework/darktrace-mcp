@@ -4,7 +4,7 @@
     "darktrace": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@nuoframework/darktrace-mcp@1.1.1"],
+      "args": ["-y", "@nuoframework/darktrace-mcp@1.1.2"],
       "env": {
         "DARKTRACE_PROFILES": "read"
       }

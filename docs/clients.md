@@ -55,7 +55,7 @@ Run the second command inside the `darktrace-mcp` folder. After the `npx` bootst
 | Claude Desktop | `.mcpb` from the release (below) |
 | Windsurf, OpenCode | JSON snippets below (no CLI) |
 
-Never put `npx` in a client config: every launch would depend on the registry and would silently pick up new code. The wizard always writes absolute paths. The Claude Code [plugin](plugin-distribution.md) follows the same rule: Claude Code installs the package from the plugin's lockfile, pinned to `1.1.1`, when it installs the plugin, and starts `node` on the installed entry file. Only the Codex copy of the plugin starts `npx -y @nuoframework/darktrace-mcp@1.1.1`, pinned to the same version, because Codex has no lockfile install.
+Never put `npx` in a client config: every launch would depend on the registry and would silently pick up new code. The wizard always writes absolute paths. The Claude Code [plugin](plugin-distribution.md) follows the same rule: Claude Code installs the package from the plugin's lockfile, pinned to `1.1.2`, when it installs the plugin, and starts `node` on the installed entry file. Only the Codex copy of the plugin starts `npx -y @nuoframework/darktrace-mcp@1.1.2`, pinned to the same version, because Codex has no lockfile install.
 
 ## Claude Desktop
 
@@ -94,7 +94,7 @@ claude plugin marketplace add nuoframework/darktrace-mcp
 claude plugin install darktrace-mcp@darktrace-mcp
 ```
 
-The plugin installs the npm package pinned to `1.1.1` from its lockfile and adds the `darktrace-investigation` skill. The tokens go to the operating system's credential store; change the profile later in `/config`. It also works in Cowork sessions on your machine, but not in chat on claude.ai. Details, Claude Directory listing and limitations: [plugin distribution](plugin-distribution.md).
+The plugin installs the npm package pinned to `1.1.2` from its lockfile and adds the `darktrace-investigation` skill. The tokens go to the operating system's credential store; change the profile later in `/config`. It also works in Cowork sessions on your machine, but not in chat on claude.ai. Details, Claude Directory listing and limitations: [plugin distribution](plugin-distribution.md).
 
 **Manual.**
 

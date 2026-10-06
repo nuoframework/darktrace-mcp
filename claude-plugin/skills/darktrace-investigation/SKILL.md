@@ -22,7 +22,7 @@ The tools come from the `darktrace` MCP server bundled with this plugin. Their n
 Claude Code asks for the appliance URL, the tokens and the profile when the plugin is enabled; nothing else is needed. Codex does not prompt, so its bundled server stops with `instance.baseUrl must be an HTTPS origin`. In that case, or whenever no `darktrace_*` tool is available, do not guess a configuration and do not ask for tokens in chat. Tell the user that a one-time setup is needed and guide them through this single command, which asks for the URL and both tokens (not echoed), verifies them against the appliance and writes the `darktrace` server entry for Codex and other clients:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 On Codex, also suggest disabling the bundled copy by adding to `~/.codex/config.toml`:

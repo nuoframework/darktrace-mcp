@@ -18,7 +18,7 @@ claude plugin install darktrace-mcp@darktrace-mcp
 ```sh
 codex plugin marketplace add nuoframework/darktrace-mcp
 codex plugin add darktrace-mcp@darktrace-mcp
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 You need Node.js 22 or later, the appliance URL and an API token pair (Darktrace: **System Config → Settings → API Token**).
@@ -35,7 +35,7 @@ When Claude Code installs the plugin, it installs the published npm package `@nu
 node node_modules/@nuoframework/darktrace-mcp/dist/src/index.js
 ```
 
-It needs Node.js 22 or later on your machine. The process speaks MCP over standard input and output; it opens no listening port. Nothing else is downloaded or executed. In Codex the bundled server is started with `npx -y @nuoframework/darktrace-mcp@1.1.1` instead, pinned to the same version.
+It needs Node.js 22 or later on your machine. The process speaks MCP over standard input and output; it opens no listening port. Nothing else is downloaded or executed. In Codex the bundled server is started with `npx -y @nuoframework/darktrace-mcp@1.1.2` instead, pinned to the same version.
 
 ## Where it connects
 

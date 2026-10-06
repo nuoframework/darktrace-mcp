@@ -34,9 +34,9 @@ Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens co
 
 `npx` solo se usa para instalar. El asistente copia una versión fija y configura los clientes con rutas absolutas a Node y `dist/src/index.js`. Windows nativo no puede proteger los archivos de tokens: usa [.mcpb, Docker o WSL](docs/es/getting-started.md#windows).
 
-Las tres vías ya distribuyen 1.1.1: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
+Las tres vías ya distribuyen 1.1.2: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
-La publicación de 1.1.2 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
+La versión 1.1.2 se publicó el **2026-10-06**, con activos firmados y procedencia de compilación. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
 
 ### Plugin para Claude Code y Codex
 
@@ -58,9 +58,9 @@ Descarga `darktrace-mcp-1.1.2.mcpb` de la [release v1.1.2](https://github.com/nu
 Con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee
 npx -y @nuoframework/darktrace-mcp@1.1.2 setup --runtime docker \
-  --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee
 ```
 
 Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.2`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).

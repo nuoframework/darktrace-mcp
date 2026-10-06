@@ -10,20 +10,20 @@ Version 1.1.2 ships what was merged to `main` after 1.1.1 ([changelog](../CHANGE
 
 ## Release status (2026-10-06)
 
-**1.1.0 and 1.1.1 are published** on npm, ghcr and GitHub Release. **1.1.2 is being released on 2026-10-06; publication is in progress.** The installation commands in this repository are pinned to 1.1.2 and work once the npm version is visible; the ghcr digests below are those of the published 1.1.1 and 1.1.0 images.
+**1.1.2 is published** on npm, ghcr and GitHub Release (2026-10-06), as are 1.1.1 and 1.1.0. The installation commands in this repository are pinned to 1.1.2 and the README Docker snippet to its index digest.
 
-## 1.1.2 (publication in progress, 2026-10-06)
+## Published 1.1.2 (2026-10-06)
 
-Filled in after the `release.yml` run for tag `v1.1.2` completes. Until then every row is pending.
+Version 1.1.2 is published on [npm with a provenance attestation](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.2), in ghcr, and as the [v1.1.2 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2). It is the first release whose assets are signed by `release.yml` (one `<asset>.sigstore.json` per asset) and attested with SLSA build provenance. Published by [release run 37536315754](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315754) from the tag; all eight jobs succeeded. The published tarball is byte-identical to the local `release:prepare` candidate recorded in the [release pins](security/release-pins-1.1.2.md) (`e8454c85…fe6a`).
 
 | Artifact | Value |
 |---|---|
-| Release commit (merge of the release PR) | pending |
-| CI run on the release commit (`ci.yml`, both docker jobs) | pending |
-| npm `@nuoframework/darktrace-mcp@1.1.2` | pending (`dist.integrity`, `dist.shasum`, provenance attestation) |
-| ghcr index digest `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | pending (linux/amd64 and linux/arm64 manifests) |
-| GitHub Release `Darktrace MCP v1.1.2` | pending (`.tgz`, `.mcpb`, `SHA256SUMS`, SBOM, evidence, one `<asset>.sigstore.json` per asset, `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json`) |
-| GitHub attestation (provenance) | pending |
+| Release commit (merge of [PR #20](https://github.com/nuoframework/darktrace-mcp/pull/20)) | `126e5ea88224dbbac3b24608f745c38a3d380b7b`, tag `v1.1.2` |
+| CI run on the release commit (`ci.yml`, both docker jobs) | [Run 37536315729](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315729): offline Node 22 and 24, lint, docker amd64 and arm64 all succeeded; consumed by the release run's `docker-gates` job |
+| npm `@nuoframework/darktrace-mcp@1.1.2` | `dist.shasum` `b83bb7b6a1eae79f8bd67c66459901a2a5f13098`, `dist.integrity` `sha512-TIdr8PaJ3/OtItU008JNS+Wq2eRTNkflMhPp+bG3fDl4R+XcZLhRoBdUhEqwmXlKJDoFQ30Wcp0WKv6Fev7E3Q==`, tarball SHA-256 `e8454c85012cf67ae39190f439974af74beda935ea7261db3ee73b6c8c71fe6a`; [npm provenance attestation](https://registry.npmjs.org/-/npm/v1/attestations/@nuoframework%2fdarktrace-mcp@1.1.2) (SLSA v1) |
+| ghcr index digest `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`; image manifests linux/amd64 `sha256:e5735fe678c341ace7b15a6ec5b727866f49ca0538c891ef9b98869e23390ac5`, linux/arm64 `sha256:b79158894172fefa8cd48ee215528e516b9ce2262e099dca1cbcb86961f71493` (the per-architecture push digests in the release notes, `8a7f06cb…` and `2967fab0…`, name the pushed per-architecture indexes that include the buildx attestation manifests) |
+| GitHub Release `Darktrace MCP v1.1.2` | [v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2), published 2026-10-06T21:56:59Z: `nuoframework-darktrace-mcp-1.1.2.tgz`, `darktrace-mcp-1.1.2.mcpb` (SHA-256 `a6bed56e7fd3dcf891a4f13d5c516baeaf701dbec11e47247bd83b7135c67478`), `SHA256SUMS`, SBOM, evidence, one `<asset>.sigstore.json` per asset (11), `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json` |
+| GitHub attestation (provenance) | [attestations/53354910](https://github.com/nuoframework/darktrace-mcp/attestations/53354910); `gh attestation verify nuoframework-darktrace-mcp-1.1.2.tgz --repo nuoframework/darktrace-mcp --signer-workflow nuoframework/darktrace-mcp/.github/workflows/release.yml --source-ref refs/tags/v1.1.2` and the `--bundle` form both succeed; `cosign verify-blob` (cosign 3.1.3) verifies the tarball, the `.mcpb` and `SHA256SUMS` bundles with the identity `.../release.yml@refs/tags/v1.1.2` |
 | Release pins and local Docker check | [release-pins-1.1.2.md](security/release-pins-1.1.2.md) |
 | Security receipt, macOS arm64 (Node 24.14.1), release commit | [`2026-10-06T21-20-32-905Z.json`](../test/security/evidence/2026-10-06T21-20-32-905Z.json), SHA-256 `dc8d1373…0f13`: 1,150 subcases, 1,147 pass, 3 platform skips; source tree `d6d76aa9…6e30` |
 | Security receipt, Linux arm64 (Node 24.18.1), local Docker gate | [`release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`](../test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json), SHA-256 `8f845606…550c`: 1,150 subcases, 1,150 pass, 0 skips; image `sha256:9d71b972…6a23` |
