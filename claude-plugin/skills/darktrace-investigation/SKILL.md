@@ -17,6 +17,23 @@ The tools come from the `darktrace` MCP server bundled with this plugin. Their n
 6. **Never retry a write.** `write_outcome_unknown` means the appliance may have applied it; ask the user to check in the Threat Visualizer. After three failed or unknown writes the server stops all writes until restart.
 7. **Never handle credentials.** Do not ask for, print or guess API tokens or the appliance URL. Configuration is the operator's job.
 
+## First run: no darktrace tools, or the server fails to start
+
+Claude Code asks for the appliance URL, the tokens and the profile when the plugin is enabled; nothing else is needed. Codex does not prompt, so its bundled server stops with `instance.baseUrl must be an HTTPS origin`. In that case, or whenever no `darktrace_*` tool is available, do not guess a configuration and do not ask for tokens in chat. Tell the user that a one-time setup is needed and guide them through this single command, which asks for the URL and both tokens (not echoed), verifies them against the appliance and writes the `darktrace` server entry for Codex and other clients:
+
+```sh
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+```
+
+On Codex, also suggest disabling the bundled copy by adding to `~/.codex/config.toml`:
+
+```toml
+[plugins."darktrace-mcp@darktrace-mcp".mcp_servers.darktrace]
+enabled = false
+```
+
+Then ask the user to restart the client and retry.
+
 ## Typical flow
 
 1. `darktrace_get_status` to confirm the appliance answers and note its version.

@@ -1,0 +1,8 @@
+{
+  "name": "darktrace-mcp-plugin",
+  "private": true,
+  "description": "Dependency lock for the Darktrace MCP plugin: installs the published server package at an exact version.",
+  "dependencies": {
+    "@nuoframework/darktrace-mcp": "1.1.1"
+  }
+}
