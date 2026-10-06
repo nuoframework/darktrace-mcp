@@ -24,3 +24,4 @@ test/security/evidence/**
 !README.md
 !README.es.md
 !SECURITY.md
+!manifest.json

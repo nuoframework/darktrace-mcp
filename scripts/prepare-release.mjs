@@ -14,7 +14,7 @@ mkdirSync(out,{recursive:true});
 assert.equal(readdirSync(out).length,0,'use a new empty external artifact directory');
 const snapshot=mkdtempSync(join(tmpdir(),'darktrace-release-source-'));
 for(const name of ['src','scripts','openapi','docs','test','examples'])cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')&&!/\/docs\/assets\/.*\.(png|jpe?g|webp)$/i.test(p)});
-const rootInputs=['package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md','LICENSE','SECURITY.md','CHANGELOG.md','Dockerfile','.dockerignore'];
+const rootInputs=['package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md','LICENSE','SECURITY.md','CHANGELOG.md','Dockerfile','.dockerignore','manifest.json'];
 for(const name of rootInputs)cpSync(join(root,name),join(snapshot,name));
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 function hashes(dir,prefix=''){const result={};for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const p=join(dir,e.name),n=prefix+e.name;if(e.isDirectory())Object.assign(result,hashes(p,n+'/'));else if(e.isFile())result[n]=digest(readFileSync(p));else throw Error('unexpected symlink '+n);}return result;}
