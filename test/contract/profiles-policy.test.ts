@@ -75,7 +75,10 @@ test('annotations and descriptions follow the operation tiers',()=>{
   assert.equal(tools.length,50);
   for(const tool of tools){
     const ops=tool.operations;
-    assert.deepEqual(tool.annotations,{readOnlyHint:ops.every(o=>o.tier==='read'),destructiveHint:ops.some(o=>o.tier==='high'||o.tier==='critical'),idempotentHint:ops.every(o=>o.method==='GET'),openWorldHint:false});
+    // DR-W-09: the three irreversible medium operations are destructive; reversible medium pairs are not.
+    const irreversible=new Set(['post_modelbreaches_pbid_comments','post_aianalyst_incident_comments','post_aianalyst_investigations']);
+    assert.deepEqual(tool.annotations,{readOnlyHint:ops.every(o=>o.tier==='read'),destructiveHint:ops.some(o=>o.tier==='high'||o.tier==='critical'||irreversible.has(o.operationId)),idempotentHint:ops.every(o=>o.method==='GET'),openWorldHint:false});
+    if(ops.some(o=>irreversible.has(o.operationId))) assert.match(tool.description,/irreversible/);
     // Budget for the code-owned description; the fixed sensitive+write notice is appended on top of it.
     assert.ok(tool.description.replace(' '+SENSITIVE_WRITE_NOTICE,'').length<=600,tool.name+' '+tool.description.length);
     assert.doesNotMatch(tool.description,/this release exposes|consultation operations for this release/i);
@@ -271,7 +274,9 @@ test('environment profiles: list, all shortcut, legacy booleans and file profile
   for(const extra of [{DARKTRACE_PROFILES:'all'},{DARKTRACE_PROFILES:'sensitive,write'},{DARKTRACE_PROFILES:'all',DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE:'false'}]) assert.throws(()=>loadConfig({...env,...extra}),/DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is required/);
   assert.throws(()=>loadConfig({...env,DARKTRACE_PROFILES:'write,critical',DARKTRACE_CRITICAL_APPROVAL:'host'}),/DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true is required/);
   assert.equal(loadConfig({...env,DARKTRACE_PROFILES:'write,critical',DARKTRACE_CRITICAL_APPROVAL:'host',DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL:'true'}).profiles.writeCritical,true);
-  assert.deepEqual(profiles({DARKTRACE_PROFILES:'write',DARKTRACE_WRITE_CRITICAL:'true'}),{read:true,write:true,sensitiveRead:false,writeCritical:true});
+  // DR-W-16: a legacy boolean may agree with or narrow DARKTRACE_PROFILES, never widen it.
+  assert.throws(()=>profiles({DARKTRACE_PROFILES:'write',DARKTRACE_WRITE_CRITICAL:'true'}),/DARKTRACE_WRITE_CRITICAL=true conflicts with DARKTRACE_PROFILES/);
+  assert.deepEqual(profiles({DARKTRACE_PROFILES:'write,critical',DARKTRACE_WRITE_CRITICAL:'true'}),{read:true,write:true,sensitiveRead:false,writeCritical:true});
   assert.deepEqual(profiles({DARKTRACE_PROFILES:'all',DARKTRACE_SENSITIVE_READ:'false'}),{read:true,write:true,sensitiveRead:false,writeCritical:true});
   assert.deepEqual(profiles({DARKTRACE_SENSITIVE_READ:'true'}),{read:true,write:false,sensitiveRead:true,writeCritical:false});
   for(const extra of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'write',DARKTRACE_WRITE_CRITICAL:'maybe'},{DARKTRACE_EMAIL:'1'},{DARKTRACE_EXPORT_DIR:'/tmp'}]) assert.throws(()=>loadConfig({...env,...extra}));
@@ -370,4 +375,33 @@ test('untyped nested schema nodes: scalar lists always pass; free-form maps only
   const agg:ResponseView={kind:'object',fields:{aggregations:{kind:'object',fields:{stats:{kind:'object',fields:{count:{kind:'number'}}}}}}};
   const out=JSON.parse(JSON.stringify(projectResponse(agg,{aggregations:{terms:{buckets:[{key:'443',doc_count:5}]}}},{untypedFallback:true}).value));
   assert.deepEqual(out.aggregations,{terms:{buckets:[{key:'443',doc_count:5}]}});
+});
+
+test('DR-W-08 approval sentences follow the configured channel; host mode never claims a server dialog',()=>{
+  const mode=(criticalApproval:string,writeApproval:string)=>eligibleTools(parseConfig({...base,profiles:{write:true,writeCritical:true,criticalApproval,writeApproval}}));
+  for(const [critical,write] of [['elicitation','host'],['host','host'],['elicitation','elicitation'],['host','elicitation']]){
+    for(const tool of mode(critical,write)){
+      if(tool.operations.every(o=>o.tier==='read')) {assert.doesNotMatch(tool.description,/dialog/);continue;}
+      assert.ok(tool.description.length<=600,tool.name);
+      if(tool.operations.some(o=>o.tier==='critical')){
+        if(critical==='host'){assert.doesNotMatch(tool.description,/accept a confirmation dialog/);assert.match(tool.description,/executes after confirm:true \+ previewId, relying on the host's own tool-permission prompt; no server confirmation dialog\./);}
+        else assert.match(tool.description,/the user must then also accept a confirmation dialog\./);
+      } else if(write==='host'){assert.match(tool.description,/runs immediately;/);assert.doesNotMatch(tool.description,/dialog/);}
+      else {assert.match(tool.description,/: the user must accept a server dialog;/);assert.doesNotMatch(tool.description,/runs immediately/);}
+    }
+  }
+  // Default channel (allTools, no config) keeps the elicitation-critical / host-write wording.
+  for(const tool of allTools()) if(tool.operations.some(o=>o.tier==='critical')) assert.match(tool.description,/accept a confirmation dialog\./);
+});
+
+test('DR-W-09 irreversible medium tools are destructive and say so; reversible medium tools are not',()=>{
+  const tools=new Map(eligibleTools(config({write:true})).map(t=>[t.name,t]));
+  for(const name of ['darktrace_comment_model_breach','darktrace_comment_ai_analyst_incident','darktrace_create_ai_analyst_investigation']){
+    const tool=tools.get(name)!;assert.ok(tool.operations.every(o=>o.tier==='medium'),name);
+    assert.equal(tool.annotations.destructiveHint,true,name);assert.match(tool.description,/Write \(profile "write", irreversible\)/,name);
+  }
+  for(const name of ['darktrace_acknowledge_model_breach','darktrace_acknowledge_ai_analyst_incident','darktrace_pin_ai_analyst_incident']){
+    const tool=tools.get(name)!;assert.ok(tool.operations.every(o=>o.tier==='medium'),name);
+    assert.equal(tool.annotations.destructiveHint,false,name);assert.doesNotMatch(tool.description,/irreversible/,name);
+  }
 });

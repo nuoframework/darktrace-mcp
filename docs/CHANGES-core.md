@@ -52,8 +52,8 @@ read+write+critical 42/60, all 51/78.
 | Setting | Values | Default |
 |---|---|---|
 | `DARKTRACE_PROFILES` | comma list of `read`, `sensitive`, `write`, `critical` (each at most once), or `all` alone (= all four) | unset = `read` |
-| `DARKTRACE_SENSITIVE_READ` | `true`/`false` (legacy override, applied after the list) | – |
-| `DARKTRACE_WRITE_CRITICAL` | `true`/`false` (legacy override, applied after the list) | – |
+| `DARKTRACE_SENSITIVE_READ` | `true`/`false` (legacy; with `DARKTRACE_PROFILES` it may only agree or narrow, §8.12) | – |
+| `DARKTRACE_WRITE_CRITICAL` | `true`/`false` (legacy; with `DARKTRACE_PROFILES` it may only agree or narrow, §8.12) | – |
 | `DARKTRACE_CRITICAL_APPROVAL` / `profiles.criticalApproval` | `elicitation` or `host` | `elicitation` |
 | `DARKTRACE_WRITE_APPROVAL` / `profiles.writeApproval` | `elicitation` or `host` | `host` |
 | `DARKTRACE_MAX_WRITES_PER_MINUTE` / `limits.maxWritesPerMinute` | 1..10 (lower-only) | 10 |
@@ -63,7 +63,8 @@ read+write+critical 42/60, all 51/78.
 | config file `profiles.{read,write,sensitiveRead,writeCritical}` | booleans | read only |
 
 - `read` is always on. When `DARKTRACE_PROFILES` is set it replaces the file's four profile flags, so an
-  operator can narrow without editing the file. The legacy booleans and the approval variables then apply.
+  operator can narrow without editing the file. The approval variables then apply; a legacy boolean that would
+  add a capability missing from the list is a startup error (`... conflicts with DARKTRACE_PROFILES`, §8.12).
 - `critical` requires `write`. `critical` without `write` is a startup error in every mode (stdio, `doctor`,
   `--check-config`). The old rejection "write unavailable in this release" is removed. The sensitive+write
   union (including `all`) starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (§8.9).
@@ -425,3 +426,38 @@ UX key `appliedDefaults` was added to MR2's envelope allowlist.
 - **E11 Contract fixture.** `mcp-tool-contracts-full-api.json` was regenerated (critical descriptions now
   say `dryRun:true`, the union notice, ordinary writes no longer take `previewId`) and needs independent
   review; the pins in `scripts/verify-release.mjs` must be recomputed at release time.
+
+### 8.12 Design-review follow-ups (DR-W-08, DR-W-09, DR-W-16; 2026-10-06)
+
+- **DR-W-16 profile precedence.** When `DARKTRACE_PROFILES` is set, `DARKTRACE_SENSITIVE_READ=true` /
+  `DARKTRACE_WRITE_CRITICAL=true` for a capability the list does not contain is a startup error
+  (`DARKTRACE_SENSITIVE_READ=true conflicts with DARKTRACE_PROFILES`, likewise for critical). `true` for a listed
+  capability is accepted (agree); `false` still narrows. Without `DARKTRACE_PROFILES` the legacy booleans behave
+  as before. Oracles changed deliberately: `MR-06.PROFILES` and the contract profile test no longer accept
+  `read,write` + `SENSITIVE_READ=true` / `write` + `WRITE_CRITICAL=true`; they now require the conflict error.
+  Full combination matrix: `test/unit/config.test.ts` ("DR-W-16 ...").
+- **DR-W-08 approval-channel descriptions.** The approval sentence in write tool descriptions follows the
+  configured channel. Critical tools in `criticalApproval=host` mode say "it then executes after confirm:true +
+  previewId, relying on the host's own tool-permission prompt; no server confirmation dialog." (elicitation
+  mode keeps "the user must then also accept a confirmation dialog."). Ordinary writes in
+  `writeApproval=elicitation` mode say "the user must accept a server dialog" instead of "runs immediately".
+  The default channels (critical elicitation, write host) are unchanged, so these two variants are new pinned
+  entries in `test/security/fixtures/mcp-tool-contracts-full-api.json`: `read+write+critical/critical-host`
+  and `read+write/write-elicitation` (exported as `approvalVariants` from `test/security/mcp-contracts.mjs`,
+  checked by `MR-04.CONTRACT approval-channel ...`). Only descriptions differ from the default-channel
+  contract; schemas and annotations are asserted identical. The server still cannot verify that a host's
+  prompt reached a human.
+- **DR-W-09 irreversible medium tools.** `post_modelbreaches_pbid_comments`,
+  `post_aianalyst_incident_comments` and `post_aianalyst_investigations` (code-owned
+  `IRREVERSIBLE_MEDIUM_OPERATIONS` in `src/tools/index.ts`) now give their tools `destructiveHint:true` and
+  the description prefix `Write (profile "write", irreversible)`. Reversible medium tools (ack/unack,
+  pin/unpin) stay `destructiveHint:false`. MR2-10.ANNOTATIONS and the contract annotation test encode exactly
+  this rule with an independent list of the three ids (and the six reversible ids), not a looser predicate.
+- **Regenerated hashes** (`mcp-tool-contracts-full-api.json`, DR-W-09 only): `read+write` `1820b2b8...`,
+  `read+write+critical` `c5372a1b...`, `all` `90c0a24a...`, `read+sensitive+write` `3ccf0ef5...`; `read` and
+  `read+sensitive` unchanged. New: `read+write+critical/critical-host` `f1b54574...`,
+  `read+write/write-elicitation` `cbd4ac4d...`. Release pins in `scripts/verify-release.mjs` still need
+  recomputation at release time (E11).
+- **DR-W-12 not changed.** `validatedOn` is a version-string array with no per-action/response scope, so
+  operations whose live result was partial (e.g. DELETE answered non-2xx, `clear`/`label`/`responsedata`
+  qualifications in §6) cannot be distinguished without a catalogue data-model change. Left as-is.

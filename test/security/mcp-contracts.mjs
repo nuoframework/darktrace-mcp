@@ -14,6 +14,12 @@ export const profiles = {
   'read+write+critical': { write: true, writeCritical: true },
   all: { sensitiveRead: true, write: true, writeCritical: true },
 };
+// DR-W-08: approval-channel variants whose tool descriptions differ from the default channel (critical elicitation,
+// write host). Pinned in the same fixture next to the five release profiles.
+export const approvalVariants = {
+  'read+write+critical/critical-host': { write: true, writeCritical: true, criticalApproval: 'host' },
+  'read+write/write-elicitation': { write: true, writeApproval: 'elicitation' },
+};
 export function canonical(value) {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
   if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + canonical(value[key])).join(',') + '}';

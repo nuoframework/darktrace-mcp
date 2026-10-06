@@ -248,6 +248,10 @@ test('MR2-10.DESCRIPTIONS namespaced names; descriptions/schema text carry no UR
   }
 });
 const READ_POST = new Set(['post_advancedsearch_api_search', 'post_agemail_api_ep_api_v1_0_emails_search']);
+// DR-W-09: exactly these medium operations are irreversible (posted comments, created investigations); every other
+// medium operation (ack/unack, pin/unpin) is reversible. Pinned here independently of the implementation's set.
+const IRREVERSIBLE_MEDIUM = new Set(['post_modelbreaches_pbid_comments', 'post_aianalyst_incident_comments', 'post_aianalyst_investigations']);
+const REVERSIBLE_MEDIUM = new Set(['post_aianalyst_acknowledge', 'post_aianalyst_unacknowledge', 'post_aianalyst_pin', 'post_aianalyst_unpin', 'post_modelbreaches_pbid_acknowledge', 'post_modelbreaches_pbid_unacknowledge']);
 test('MR2-10.ANNOTATIONS readOnly/destructive/idempotent hints are truthful per eligible operation set in every profile', async () => {
   for (const [name, profile] of Object.entries(profiles)) {
     const config = cfg({ profiles: profile }), listed = new Map((await toolContract(profile)).map(t => [t.name, t.annotations]));
@@ -255,7 +259,11 @@ test('MR2-10.ANNOTATIONS readOnly/destructive/idempotent hints are truthful per 
       const a = listed.get(tool.name), ops = tool.operations;
       assert.equal(a.readOnlyHint, ops.every(op => op.tier === 'read'), name + ' ' + tool.name);
       if (a.readOnlyHint) for (const op of ops) assert.ok(op.method === 'GET' || READ_POST.has(op.operationId), 'readOnlyHint on unreviewed non-GET ' + op.operationId);
-      assert.equal(a.destructiveHint, ops.some(op => op.tier === 'high' || op.tier === 'critical'), name + ' ' + tool.name);
+      for (const op of ops) if (op.tier === 'medium') assert.ok(IRREVERSIBLE_MEDIUM.has(op.operationId) !== REVERSIBLE_MEDIUM.has(op.operationId), 'unclassified medium operation ' + op.operationId);
+      assert.equal(a.destructiveHint, ops.some(op => op.tier === 'high' || op.tier === 'critical' || IRREVERSIBLE_MEDIUM.has(op.operationId)), name + ' ' + tool.name);
+      if (ops.some(op => IRREVERSIBLE_MEDIUM.has(op.operationId))) assert.match(tool.description, /, irreversible\)/, tool.name);
+      else assert.doesNotMatch(tool.description, /irreversible/, tool.name);
+      if (ops.length && ops.every(op => REVERSIBLE_MEDIUM.has(op.operationId))) assert.equal(a.destructiveHint, false, tool.name);
       if (ops.some(op => op.method === 'DELETE')) assert.equal(a.destructiveHint, true, tool.name);
       if (a.idempotentHint) assert.ok(ops.every(op => op.method === 'GET'), tool.name);
       assert.equal(a.openWorldHint, false);

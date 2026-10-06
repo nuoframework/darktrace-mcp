@@ -16,7 +16,7 @@ import { startupVariable } from '../../dist/src/observability/log.js';
 import { runStdio } from '../../dist/src/server/stdio.js';
 import { clientIdentified, approvalChannel, APPROVAL_INPUT_KEY } from '../../dist/src/server/createServer.js';
 import { cfg, env, PUBLIC, PRIVATE, CANARY, noCanaries } from './helpers.mjs';
-import { profiles, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
+import { profiles, approvalVariants, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
 import { forbiddenCommand, distributionIssues } from './mcp-distribution.mjs';
 const hidden = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069\u200b-\u200f\u2060-\u2064\ufeff\u{e0000}-\u{e007f}]/u;
 const points = [[0, 31], [127, 159], [0x202a, 0x202e], [0x2066, 0x2069], [0x200b, 0x200f], [0x2060, 0x2064], [0xfeff, 0xfeff], [0xe0000, 0xe007f]].flatMap(([start, end]) => Array.from({ length: end - start + 1 }, (_, i) => start + i));
@@ -101,8 +101,10 @@ test('MR-06.PROFILES sensitive+write combinations accepted in object/env/file+en
   for (const profile of Object.values(profiles)) assert.doesNotThrow(() => cfg({ profiles: profile }));
   // DR-W-03/16: the sensitive+write union starts only with the explicit operator acknowledgement.
   const ack = { DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE: 'true' };
-  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' })), /DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is required/);
-  assert.deepEqual({ ...loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true', ...ack })).profiles }, { read: true, write: true, sensitiveRead: true, writeCritical: false });
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,sensitive,write' })), /DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is required/);
+  assert.deepEqual({ ...loadConfig(env({ DARKTRACE_PROFILES: 'read,sensitive,write', DARKTRACE_SENSITIVE_READ: 'true', ...ack })).profiles }, { read: true, write: true, sensitiveRead: true, writeCritical: false });
+  // DR-W-16: a legacy boolean can no longer re-widen a DARKTRACE_PROFILES list, even with the acknowledgement.
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true', ...ack })), /DARKTRACE_SENSITIVE_READ=true conflicts with DARKTRACE_PROFILES/);
   assert.throws(() => cfg({ profiles: { writeCritical: true } }), /requires profiles\.write/);
   assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'sensitive,critical' })), /requires profiles\.write/);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr06-')), file = join(directory, 'config.json');
@@ -117,6 +119,21 @@ const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts
 for (const [name, profile] of Object.entries(profiles)) test('MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot ' + name, async () => {
   const tools = await toolContract(profile); assert.equal(digest(tools), contracts[name].sha256); assert.deepEqual(tools, contracts[name].tools); clean(tools);
   for (const tool of tools) { assert.equal(tool.description.includes('<IMPORTANT>'), false); assert.equal(tool.description.includes(PUBLIC), false); assert.equal(tool.description.includes(PRIVATE), false); }
+});
+// DR-W-08: host-mode critical and elicitation-mode write descriptions are pinned and match the configured channel.
+for (const [name, profile] of Object.entries(approvalVariants)) test('MR-04.CONTRACT approval-channel tools/list snapshot ' + name, async () => {
+  const tools = await toolContract(profile); assert.equal(digest(tools), contracts[name].sha256); assert.deepEqual(tools, contracts[name].tools); clean(tools);
+  const base = await toolContract({ write: profile.write, writeCritical: profile.writeCritical ?? false });
+  assert.deepEqual(tools.map(t => [t.name, t.inputSchema, t.annotations]), base.map(t => [t.name, t.inputSchema, t.annotations]), 'only descriptions depend on the approval channel');
+  for (const tool of tools) {
+    if (/CRITICAL write/.test(tool.description)) {
+      if (profile.criticalApproval === 'host') { assert.doesNotMatch(tool.description, /accept a confirmation dialog/); assert.match(tool.description, /relying on the host's own tool-permission prompt; no server confirmation dialog\./); }
+      else assert.match(tool.description, /the user must then also accept a confirmation dialog\./);
+    } else if (/^.*Write \(profile "write"/.test(tool.description)) {
+      if (profile.writeApproval === 'elicitation') { assert.match(tool.description, /: the user must accept a server dialog;/); assert.doesNotMatch(tool.description, /runs immediately/); }
+      else assert.match(tool.description, /runs immediately;/);
+    }
+  }
 });
 const init = (id = 1, version = '2025-11-25') => ({ jsonrpc: '2.0', id, method: 'initialize', params: { protocolVersion: version, capabilities: {}, clientInfo: { name: 'synthetic-defense', version: '1' } } });
 const listed = id => ({ jsonrpc: '2.0', id, method: 'tools/list', params: {} });
