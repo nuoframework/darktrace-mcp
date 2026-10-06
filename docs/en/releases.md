@@ -8,26 +8,30 @@ Where each version is published, how to verify it and how to prepare a reproduci
 
 > Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
 
-## 1.1.2 candidate
+<a id="112-candidate"></a>
+
+## 1.1.2
 
 Version 1.1.2 ships what was merged to `main` after 1.1.1 ([changelog](../../CHANGELOG.md#112--2026-10-06)): the self-service Docker path in `setup`, the URL prompt without a saved default, `uninstall`, the Claude Code plugin bundle with the Codex marketplace layout, signed release assets with SLSA build provenance, the pinned npm fallback, property-based tests, the CodeQL fixes and the zlib 1.3.2-r1 runtime image. The API surface, tool contracts and lab evidence are those of 1.1.1. The [1.1.2 release pins](../security/release-pins-1.1.2.md) record the checks and byte bindings on the release commit. Current [known limitations](../../CHANGELOG.md#known-limitations-in-112). The 1.1.1 and 1.1.0 evidence below is historical.
 
 ## Release status (2026-10-06)
 
-**1.1.0 and 1.1.1 are published** on npm, ghcr and GitHub Release. **1.1.2 is being released on 2026-10-06; publication is in progress.** The installation commands in this repository are pinned to 1.1.2 and work once the npm version is visible; the ghcr digests below are those of the published 1.1.1 and 1.1.0 images.
+**1.1.2 is published** on npm, ghcr and [GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2), checked on 2026-10-06. The [release workflow](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315754) succeeded from `126e5ea`; the release was published at 21:56:59 UTC. Examples pin 1.1.2. The 1.1.1 and 1.1.0 sections retain their own historical digests.
 
-## 1.1.2 (publication in progress, 2026-10-06)
+<a id="112-publication-in-progress-2026-10-06"></a>
 
-Publication details will be filled in after `release.yml` completes for `v1.1.2`. Channels remain pending; local receipts retain their exact scope.
+## Published 1.1.2 (2026-10-06)
+
+Values observed in npm, the ghcr manifest and GitHub Release after `release.yml` completed. Use the verification commands below to check signatures and provenance; local receipts retain their exact scope.
 
 | Artifact | Value |
 |---|---|
 | Release commit (merge of the release PR) | `126e5ea` |
-| CI run on the release commit (`ci.yml`, both docker jobs) | pending |
-| npm `@nuoframework/darktrace-mcp@1.1.2` | pending (`dist.integrity`, `dist.shasum`, provenance attestation) |
-| ghcr index digest `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | pending (linux/amd64 and linux/arm64 manifests) |
-| GitHub Release `Darktrace MCP v1.1.2` | pending (`.tgz`, `.mcpb`, `SHA256SUMS`, SBOM, evidence, one `<asset>.sigstore.json` per asset, `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json`) |
-| GitHub attestation (provenance) | pending |
+| CI run on the release commit (`ci.yml`, both docker jobs) | [Successful CI](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315729), including both Docker jobs |
+| npm `@nuoframework/darktrace-mcp@1.1.2` | Published; `dist.shasum` `b83bb7b6a1eae79f8bd67c66459901a2a5f13098`; `dist.integrity` `sha512-TIdr8PaJ3/OtItU008JNS+Wq2eRTNkflMhPp+bG3fDl4R+XcZLhRoBdUhEqwmXlKJDoFQ30Wcp0WKv6Fev7E3Q==`; SLSA v1 provenance metadata available |
+| ghcr index digest `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee` (linux/amd64 and linux/arm64) |
+| GitHub Release `Darktrace MCP v1.1.2` | [Darktrace MCP v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2): `.tgz`, `.mcpb`, checksums, SBOM, evidence, per-asset signatures and both provenance files |
+| GitHub attestation (provenance) | Published `darktrace-mcp-1.1.2.provenance.sigstore.json` (SHA-256 `7946e0d529b98c8d5332aaf6801a6eb170f687d02471454e4df68a216c754a84`) and `darktrace-mcp-1.1.2.intoto.jsonl` |
 | Release pins and local Docker check | [release-pins-1.1.2.md](../security/release-pins-1.1.2.md) |
 | Security receipt, macOS arm64 (Node 24.14.1), release commit | [`2026-10-06T21-20-32-905Z.json`](../../test/security/evidence/2026-10-06T21-20-32-905Z.json), SHA-256 `dc8d1373…0f13`: 1,150 subcases, 1,147 pass, 3 platform skips; source tree `d6d76aa9…6e30` |
 | Security receipt, Linux arm64 (Node 24.18.1), local Docker gate | [`release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`](../../test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json), SHA-256 `8f845606…550c`: 1,150 subcases, 1,150 pass, 0 skips; image `sha256:9d71b972…6a23` |

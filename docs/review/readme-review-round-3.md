@@ -77,3 +77,5 @@ Fecha: 2026-10-06. Revisión propia del borrador documental; la revisión indepe
 - Las referencias a versión e instalación se actualizarán tras la fusión de la release 1.1.2 (#20) y de #18, en ese orden; las novedades de #18 se documentarán para 1.1.3.
 
 - Rebase sobre la release 1.1.2 fusionada en `126e5ea`: comandos, copias fijas, extensión y botones fijados a 1.1.2. Se incorporó el estado y la evidencia de la release en ambos idiomas; los canales siguen marcados en publicación hasta verificarlos. #21 llega heredada de `main`, con enlace a su registro de roles en el índice.
+
+- Publicación 1.1.2 verificada el 2026-10-06: npm visible con procedencia SLSA, ghcr amd64/arm64 y digest `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`, GitHub Release publicada a las 21:56:59 UTC con 24 archivos; workflow `37536315754` y CI `37536315729` correctos. Las tablas de versiones ya contienen valores observados, no marcadores pendientes.

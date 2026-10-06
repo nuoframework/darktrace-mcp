@@ -12,7 +12,7 @@ Dónde se publica cada versión, cómo verificarla y cómo preparar una release 
 
 <a id="112-candidate"></a>
 
-## Candidata 1.1.2
+## 1.1.2
 
 1.1.2 distribuye lo fusionado en `main` después de 1.1.1 ([cambios](../CHANGELOG.md#112--2026-10-06)): asistente Docker autoservicio, pregunta de dirección sin valor guardado, `uninstall`, plugin Claude Code con estructura de marketplace Codex, firmas de archivos con procedencia SLSA, alternativa npm fijada, pruebas basadas en propiedades, correcciones CodeQL e imagen con zlib 1.3.2-r1. La API, contratos y evidencia de laboratorio son los de 1.1.1. Los [valores fijados 1.1.2](security/release-pins-1.1.2.md) recogen las comprobaciones y vinculación de bytes. [Limitaciones actuales](../CHANGELOG.md#known-limitations-in-112). La evidencia de 1.1.1 y 1.1.0 siguiente es histórica.
 
@@ -20,22 +20,22 @@ Dónde se publica cada versión, cómo verificarla y cómo preparar una release 
 
 ## Estado de publicación (2026-10-06)
 
-**1.1.0 y 1.1.1 están publicadas** en npm, ghcr y GitHub Release. **1.1.2 está en proceso de publicación el 2026-10-06.** Los comandos del repositorio se fijan a 1.1.2 y funcionan cuando la versión es visible en npm; los digests siguientes pertenecen a las imágenes publicadas 1.1.1 y 1.1.0.
+**1.1.2 está publicada** en npm, ghcr y [GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2), comprobado el 2026-10-06. La [publicación](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315754) terminó correctamente a partir de `126e5ea`; la release se publicó a las 21:56:59 UTC. Los ejemplos se fijan a 1.1.2. Las secciones de 1.1.1 y 1.1.0 conservan sus propios digests históricos.
 
 <a id="112-publication-in-progress-2026-10-06"></a>
 
-## 1.1.2 (publicación en curso, 2026-10-06)
+## 1.1.2 publicada (2026-10-06)
 
-Los datos de publicación se completarán cuando termine `release.yml` para `v1.1.2`. Los canales siguen pendientes; los registros locales se conservan con su alcance exacto.
+Valores observados en npm, el manifiesto ghcr y GitHub Release tras completar `release.yml`. Las firmas y la procedencia se comprueban con los comandos de verificación de esta guía; los registros locales conservan su alcance exacto.
 
 | Archivo o comprobación | Valor |
 |---|---|
 | Commit de release (fusión de su PR) | `126e5ea` |
-| CI sobre el commit de release (`ci.yml`, ambos trabajos Docker) | Pendiente |
-| npm `@nuoframework/darktrace-mcp@1.1.2` | Pendiente (`dist.integrity`, `dist.shasum`, atestación de procedencia) |
-| Digest del índice ghcr `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | Pendiente (manifiestos linux/amd64 y linux/arm64) |
-| GitHub Release `Darktrace MCP v1.1.2` | Pendiente (`.tgz`, `.mcpb`, `SHA256SUMS`, SBOM, evidencia, un `<asset>.sigstore.json` por archivo, `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json`) |
-| Atestación GitHub (procedencia) | Pendiente |
+| CI sobre el commit de release (`ci.yml`, ambos trabajos Docker) | [CI correcta](https://github.com/nuoframework/darktrace-mcp/actions/runs/37536315729), incluidos ambos trabajos Docker |
+| npm `@nuoframework/darktrace-mcp@1.1.2` | Publicada; `dist.shasum` `b83bb7b6a1eae79f8bd67c66459901a2a5f13098`; `dist.integrity` `sha512-TIdr8PaJ3/OtItU008JNS+Wq2eRTNkflMhPp+bG3fDl4R+XcZLhRoBdUhEqwmXlKJDoFQ30Wcp0WKv6Fev7E3Q==`; metadatos de procedencia SLSA v1 disponibles |
+| Digest del índice ghcr `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee` (linux/amd64 y linux/arm64) |
+| GitHub Release `Darktrace MCP v1.1.2` | [Darktrace MCP v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2): `.tgz`, `.mcpb`, sumas, SBOM, evidencia, firmas por archivo y los dos archivos de procedencia |
+| Atestación GitHub (procedencia) | Publicado `darktrace-mcp-1.1.2.provenance.sigstore.json` (SHA-256 `7946e0d529b98c8d5332aaf6801a6eb170f687d02471454e4df68a216c754a84`) y `darktrace-mcp-1.1.2.intoto.jsonl` |
 | Valores fijados y comprobación Docker local | [release-pins-1.1.2.md](security/release-pins-1.1.2.md) |
 | Seguridad macOS arm64 (Node 24.14.1), origen de la release | [`2026-10-06T21-20-32-905Z.json`](../test/security/evidence/2026-10-06T21-20-32-905Z.json), SHA-256 `dc8d1373…0f13`: 1.150 subcasos, 1.147 correctos, 3 omisiones de plataforma; origen `d6d76aa9…6e30` |
 | Seguridad Linux arm64 (Node 24.18.1), comprobación Docker local | [`release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`](../test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json), SHA-256 `8f845606…550c`: 1.150 subcasos, todos correctos, ninguna omisión; imagen `sha256:9d71b972…6a23` |
