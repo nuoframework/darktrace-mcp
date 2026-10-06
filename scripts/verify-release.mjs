@@ -10,41 +10,42 @@ import {resolveExternalOutput} from './release-path.mjs';
 const checkout=fileURLToPath(new URL('../',import.meta.url));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const canonical=value=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value&&typeof value==='object'?'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}':JSON.stringify(value);
-// Separate first-stable oracle: root pins this ONLY after independent acceptance.
-const fixturePath='test/security/fixtures/mcp-tool-contracts-first-stable.json';
-const fixtureSha256='6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c'; // Independently reviewed external validated19 candidate; explicit root pin required before shared application.
+// Full-API oracle: complete tools/list contracts for every supported operator profile combination.
+const fixturePath='test/security/fixtures/mcp-tool-contracts-full-api.json';
+const fixtureSha256='__FULL_API_FIXTURE_SHA256__'; // Generated for the full-API release; requires independent review before shared application.
+// Historical oracles stay byte-pinned provenance; they no longer describe the shipped surface.
+const firstStableFixturePath='test/security/fixtures/mcp-tool-contracts-first-stable.json';
+const firstStableFixtureSha256='6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c';
 const alphaFixturePath='test/security/fixtures/mcp-tool-contracts.json';
 const alphaFixtureSha256='37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72';
 const capabilityPath='src/policy/release-capability.ts';
-const capabilityValue=Object.freeze({write:false,writeCritical:false});
-const fixtureCapability=Object.freeze({...capabilityValue,sensitiveRead:'operator opt-in; cannot expand the validated consultation ceiling'});
-const profileHashes=Object.freeze({read:'cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3','read+sensitive':'cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3'}); // Full contracts independently accepted, with explicit root pin authorization.
-// Independent user-approved scope; never derive the oracle from generated eligibility.
-const validatedTools=Object.freeze({
- darktrace_get_status:['get_status'],darktrace_get_devices:['get_devices'],darktrace_list_subnets:['get_subnets'],
- darktrace_get_ai_analyst_stats:['get_aianalyst_stats'],darktrace_get_intel_feed:['get_intelfeed'],
- darktrace_list_model_breaches:['get_modelbreaches'],darktrace_search_devices:['get_devicesearch'],
- darktrace_get_similar_devices:['get_similardevices'],darktrace_list_ai_analyst_incidents:['get_aianalyst_groups','get_aianalyst_incidentevents'],
- darktrace_list_ai_analyst_investigations:['get_aianalyst_investigations'],darktrace_get_model_breach_comments:['get_mbcomments'],
- darktrace_get_connection_details:['get_details'],darktrace_list_tags:['get_tags_entities','get_tags_tid','get_tags_tid_entities'],
- darktrace_get_endpoint_details:['get_endpointdetails'],darktrace_list_antigena_actions:['get_antigena','get_antigena_summary'],
-});
-function assertValidatedTools(tools){
- assert.equal(tools.length,15);assert.deepEqual(tools.map(t=>t.name).sort(),Object.keys(validatedTools).sort());
+const capabilityValue=Object.freeze({read:true,sensitiveRead:true,write:true,writeCritical:true});
+const fixtureCapability=Object.freeze({...capabilityValue,grantedBy:'operator profiles only; model arguments cannot grant or escalate'});
+const profileHashes=Object.freeze(__PROFILE_HASHES__);
+// Independent oracle from the owner request: tools/operations per profile and the six critical operations.
+const profileShape=Object.freeze({read:[27,38],'read+sensitive':[36,56],'read+write':[36,54],'read+write+critical':[42,60],all:[51,78]});
+const criticalOperations=Object.freeze(['delete_tags_tid','post_agemail_api_ep_api_v1_0_emails_uuid_action','post_antigena','post_antigena_manual','post_intelfeed','post_subnets']);
+function selectors(schema){const values=[];const walk=node=>{if(!node||typeof node!=='object')return;const op=node.properties?.operation;if(op?.const)values.push(op.const);if(op?.enum)values.push(...op.enum);for(const key of ['anyOf','oneOf','allOf'])for(const child of node[key]??[])walk(child);};walk(schema);return values;}
+function assertProfileTools(name,tools){
+ const [toolCount,operationCount]=profileShape[name];assert.equal(tools.length,toolCount,'tool count '+name);
  const all=[];
- function selectors(schema){const values=[];const walk=node=>{if(!node||typeof node!=='object')return;const op=node.properties?.operation;if(op?.const)values.push(op.const);if(op?.enum)values.push(...op.enum);for(const key of ['anyOf','oneOf','allOf'])for(const child of node[key]??[])walk(child);};walk(schema);return values;}
- for(const tool of tools){const ids=selectors(tool.inputSchema);assert.deepEqual(ids.sort(),[...validatedTools[tool.name]].sort(),'validated selector branches: '+tool.name);all.push(...ids);
-  assert.deepEqual((tool.description.match(/\b(?:get|post|delete)_[a-zA-Z0-9_]+\b/g)??[]).sort(),ids,'filtered description: '+tool.name);
-  assert.deepEqual(tool.annotations,{readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false});
+ for(const tool of tools){const ids=selectors(tool.inputSchema).sort();all.push(...ids);
+  assert.deepEqual([...new Set(tool.description.match(/\b(?:get|post|delete)_[a-zA-Z0-9_]+\b/g)??[])].sort(),ids,'description lists exactly its operations: '+tool.name);
+  assert(tool.description.length<=600,'concise description: '+tool.name);
+  const critical=ids.some(id=>criticalOperations.includes(id)),reads=ids.every(id=>id.startsWith('get_')||id==='post_advancedsearch_api_search'||id==='post_agemail_api_ep_api_v1_0_emails_search');
+  assert.equal(Boolean(tool.inputSchema.properties?.confirm),critical,'confirm only on critical: '+tool.name);
+  if(critical) assert.match(tool.description,/confirm:true/);
+  assert.equal(tool.annotations.readOnlyHint,reads,'readOnlyHint: '+tool.name);assert.equal(tool.annotations.openWorldHint,false);
+  assert.equal(tool.annotations.idempotentHint,ids.every(id=>id.startsWith('get_')),'idempotentHint: '+tool.name);
  }
- assert.equal(all.length,19);assert.equal(new Set(all).size,19);
+ assert.equal(all.length,operationCount,'operation count '+name);assert.equal(new Set(all).size,operationCount);assert(!all.includes('get_aianalyst_incidents'));
+ assert.equal(all.some(id=>criticalOperations.includes(id)),['read+write+critical','all'].includes(name),'critical scope '+name);
 }
 const forbiddenProfiles=Object.freeze({
- 'read+write':{profiles:{write:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
- 'read+writeCritical':{profiles:{write:true,writeCritical:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
  'critical-without-write':{profiles:{writeCritical:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
+ 'sensitive+critical-without-write':{profiles:{sensitiveRead:true,writeCritical:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
 });
-export function assertReviewedReleaseContractReady(){assert(typeof fixtureSha256==='string'&&/^[a-f0-9]{64}$/.test(fixtureSha256)&&Object.values(profileHashes).every(value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)),'first-stable MR-04 fixture approval/pin pending; no release pipeline authorized');}
+export function assertReviewedReleaseContractReady(){assert(typeof fixtureSha256==='string'&&/^[a-f0-9]{64}$/.test(fixtureSha256)&&Object.values(profileHashes).every(value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value)),'full-API MR-04 fixture approval/pin pending; no release pipeline authorized');}
 function regularBytes(path){assert(lstatSync(path).isFile()&&!lstatSync(path).isSymbolicLink(),'reviewed input must be a regular file');return readFileSync(path);}
 export function verifyFirstStableContractContent(fixture){
  assertReviewedReleaseContractReady();
@@ -52,18 +53,18 @@ export function verifyFirstStableContractContent(fixture){
  assert.equal(fixture.canonicalization,'Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON');
  assert.deepEqual(Object.keys(fixture.contracts).sort(),Object.keys(profileHashes).sort());
  assert.deepEqual(fixture.releaseCapability,fixtureCapability);assert.equal(fixture.alphaFixtureSha256,alphaFixtureSha256);assert.deepEqual(fixture.rejectedProfiles,forbiddenProfiles);
- assert.deepEqual(fixture.contracts.read,fixture.contracts['read+sensitive'],'sensitiveRead cannot expand the consultation ceiling');
- for(const [name,digest] of Object.entries(profileHashes)){assert.deepEqual(Object.keys(fixture.contracts[name]).sort(),['sha256','tools']);assertValidatedTools(fixture.contracts[name].tools);assert.equal(sha(canonical(fixture.contracts[name].tools)),digest,'reviewed profile '+name);assert.equal(fixture.contracts[name].sha256,digest);}
+ for(const [name,digest] of Object.entries(profileHashes)){assert.deepEqual(Object.keys(fixture.contracts[name]).sort(),['sha256','tools']);assertProfileTools(name,fixture.contracts[name].tools);assert.equal(sha(canonical(fixture.contracts[name].tools)),digest,'reviewed profile '+name);assert.equal(fixture.contracts[name].sha256,digest);}
 }
 function reviewedFixture(base){
  assertReviewedReleaseContractReady();
  assert.equal(sha(regularBytes(join(base,alphaFixturePath))),alphaFixtureSha256,'historical alpha fixture changed');
- const bytes=regularBytes(join(base,fixturePath));assert.equal(sha(bytes),fixtureSha256,'reviewed first-stable MR-04 fixture changed; independent review required');
+ assert.equal(sha(regularBytes(join(base,firstStableFixturePath))),firstStableFixtureSha256,'historical first-stable fixture changed');
+ const bytes=regularBytes(join(base,fixturePath));assert.equal(sha(bytes),fixtureSha256,'reviewed full-API MR-04 fixture changed; independent review required');
  const fixture=JSON.parse(bytes);verifyFirstStableContractContent(fixture);
  return {bytes,fixture};
 }
 function expectedStartupChecks(){return Object.fromEntries(Object.keys(forbiddenProfiles).map(name=>[name,{objectRejected:true,contractRejectedBeforeSdk:true,productionModes:['stdio','doctor','--check-config'],exitStatus:1,stdoutEmpty:true,networkSigningGuardTriggered:false}]));}
-function contractMetadata(fixture){return {asset:'mcp-tool-contracts.json',assetSha256:fixtureSha256,reviewedFixture:fixturePath,fixtureSha256,historicalAlphaFixture:{path:alphaFixturePath,sha256:alphaFixtureSha256},releaseCapability:fixture.releaseCapability,rejectedProfiles:fixture.rejectedProfiles,startupChecks:expectedStartupChecks(),canonicalization:fixture.canonicalization,profiles:Object.fromEntries(Object.entries(fixture.contracts).map(([name,value])=>[name,{sha256:value.sha256,tools:value.tools.length}]))};}
+function contractMetadata(fixture){return {asset:'mcp-tool-contracts.json',assetSha256:fixtureSha256,reviewedFixture:fixturePath,fixtureSha256,historicalAlphaFixture:{path:alphaFixturePath,sha256:alphaFixtureSha256},historicalFirstStableFixture:{path:firstStableFixturePath,sha256:firstStableFixtureSha256},releaseCapability:fixture.releaseCapability,rejectedProfiles:fixture.rejectedProfiles,startupChecks:expectedStartupChecks(),canonicalization:fixture.canonicalization,profiles:Object.fromEntries(Object.entries(fixture.contracts).map(([name,value])=>[name,{sha256:value.sha256,tools:value.tools.length}]))};}
 export function verifyHistoricalArchive(base){
  const prefix='test/historical/alpha-read-write/',manifestPath=prefix+'provenance.json';
  const manifestSha256='2d9bffe6f1c462b04d5bef68607fe335d699e0fcdc37673f8e10dbe299538d60';
@@ -103,8 +104,9 @@ export function verifyValidatedPredecessorArchives(base){
 export async function captureReviewedContracts(base){
  const {bytes,fixture}=reviewedFixture(base),helper=await import(pathToFileURL(join(base,'test/security/mcp-contracts.mjs')));
  const capability=await import(pathToFileURL(join(base,'dist/src/policy/release-capability.js')));assert.deepEqual(capability.RELEASE_CAPABILITY,capabilityValue);assert(Object.isFrozen(capability.RELEASE_CAPABILITY));
- assert(Object.isFrozen(capability.RELEASE_CONSULTATION_OPERATIONS));assert.deepEqual([...capability.RELEASE_CONSULTATION_OPERATIONS].sort(),Object.values(validatedTools).flat().sort());
- const {productionOperationDescriptors}=await import(pathToFileURL(join(base,'dist/src/server/stdio.js')));assert(Object.isFrozen(productionOperationDescriptors));assert.deepEqual(productionOperationDescriptors.map(o=>o.operationId).sort(),Object.values(validatedTools).flat().sort());assert(productionOperationDescriptors.every(o=>Object.isFrozen(o)&&o.method==='GET'));
+ const {productionOperationDescriptors}=await import(pathToFileURL(join(base,'dist/src/server/stdio.js')));assert(Object.isFrozen(productionOperationDescriptors));assert.equal(productionOperationDescriptors.length,78);
+ assert(productionOperationDescriptors.every(o=>Object.isFrozen(o)&&['GET','POST','DELETE'].includes(o.method)));assert(!productionOperationDescriptors.some(o=>o.operationId==='get_aianalyst_incidents'));
+ for(const id of criticalOperations)assert(productionOperationDescriptors.some(o=>o.operationId===id),'critical route registered: '+id);
  assert.deepEqual(Object.keys(helper.releaseProfiles).sort(),Object.keys(profileHashes).sort());assert.deepEqual(helper.forbiddenReleaseProfiles,forbiddenProfiles);
  const contracts={};for(const [name,profile] of Object.entries(helper.releaseProfiles)){const tools=await helper.toolContract(profile);contracts[name]={sha256:helper.digest(tools),tools};}
  assert.equal(canonical(contracts),canonical(fixture.contracts),'generated complete tools/list contract differs from reviewed first-stable MR-04 oracle');
@@ -126,18 +128,18 @@ export function verifyReleaseEvidence(archive,out,base=checkout){
  const read=name=>JSON.parse(readFileSync(join(out,name))),build=read('build-evidence.json'),source=read('source-files.sha256.json'),verification=read('verification.json');
  assert.equal(build.schemaVersion,3);assert.equal(build.archive,archiveName);assert.equal(build.archiveSha256,sha(readFileSync(archive)));assert.equal(verification.archiveSha256,build.archiveSha256);assert.equal(build.reproducibleTwoBuilds,true);
  assert.equal(build.sourceTreeSha256,sha(JSON.stringify(source)),'source evidence binding');
- for(const name of ['docs/operation-inventory.json','openapi/darktrace-threat-visualizer.yaml','scripts/build.mjs','scripts/generate-catalogue.ts','package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md','Dockerfile','.dockerignore'])assert.match(source[name]??'',/^[a-f0-9]{64}$/,'missing source input: '+name);
- assert.equal(source[fixturePath],fixtureSha256);assert.equal(source[alphaFixturePath],alphaFixtureSha256);
+ for(const name of ['docs/operation-inventory.json','openapi/darktrace-threat-visualizer.yaml','openapi/darktrace-sdk.yaml','scripts/build.mjs','scripts/generate-catalogue.ts','package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md','Dockerfile','.dockerignore'])assert.match(source[name]??'',/^[a-f0-9]{64}$/,'missing source input: '+name);
+ assert.equal(source[fixturePath],fixtureSha256);assert.equal(source[alphaFixturePath],alphaFixtureSha256);assert.equal(source[firstStableFixturePath],firstStableFixtureSha256);
  const historical=verifyHistoricalArchive(base);assert.deepEqual(build.historicalAlphaTests,historical);assert.equal(source[historical.manifestPath],historical.manifestSha256);for(const [name,digest]of Object.entries(historical.files))assert.equal(source[name],digest);assert.equal(source[historical.supplement.manifestPath],historical.supplement.manifestSha256);assert.equal(source[historical.supplement.filePath],historical.supplement.fileSha256);
  const predecessor=verifyValidatedPredecessorArchives(base);assert.deepEqual(build.historicalValidatedPredecessors,predecessor);
  for(const archive of Object.values(predecessor)){assert.equal(source[archive.manifestPath],archive.manifestSha256);for(const [name,digest] of Object.entries(archive.files))assert.equal(source[name],digest,'source-bound validated predecessor: '+name);}
  assert.deepEqual(build.releaseCapability.value,capabilityValue);assert.equal(build.releaseCapability.sourcePath,capabilityPath);assert.equal(build.releaseCapability.sourceSha256,source[capabilityPath]);assert.equal(source[capabilityPath],sha(regularBytes(join(base,capabilityPath))));assert.deepEqual(verification.releaseCapability,build.releaseCapability);
- for(const name of ['scripts/prepare-release.mjs','scripts/verify-release.mjs','scripts/validate-examples.mjs','test/security/mcp-contracts.mjs','test/security/diagnostic-guard.mjs','src/tools/index.ts','src/policy/guard.ts','src/config/load.ts','src/config/schema.ts','src/server/stdio.ts'])assert.equal(source[name],sha(regularBytes(join(base,name))),'source-bound release guard: '+name);
+ for(const name of ['scripts/prepare-release.mjs','scripts/verify-release.mjs','scripts/validate-examples.mjs','test/security/mcp-contracts.mjs','test/security/diagnostic-guard.mjs','src/tools/index.ts','src/tools/descriptions.ts','src/policy/guard.ts','src/policy/profiles.ts','src/config/load.ts','src/config/schema.ts','src/server/stdio.ts'])assert.equal(source[name],sha(regularBytes(join(base,name))),'source-bound release guard: '+name);
  assert.deepEqual(build.mcpToolContracts,verifyContractAsset(out,base));assert.deepEqual(verification.mcpToolContracts,build.mcpToolContracts);
  assert.equal(verification.readmeEsSha256,source['README.es.md']);assert.equal(verification.checks.readmeEsSourceBinding,true);
  assert.equal(build.sourceProductionTreeSha256,sha(JSON.stringify(Object.fromEntries(Object.entries(source).filter(([p])=>p.startsWith('src/')).map(([p,h])=>[p.slice(4),h])))));
- const receipt=read('security-receipt.json');assert.equal(receipt.receiptComplete,true);assert.equal(receipt.build.status,0);assert.equal(receipt.tests.status,0);assert.equal(receipt.sourceTreeSha256,build.sourceProductionTreeSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts-first-stable.json'],fixtureSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts.json'],alphaFixtureSha256);
- for(const check of ['tarAllowlist','regularFiles','private','noLifecycle','installedBytes','exactThreeDependencies','shrinkwrapSRI','downloadedDependencySRI','help','version','doctor','checkConfig','writeProfilesRejected'])assert.equal(verification.checks[check],true);
+ const receipt=read('security-receipt.json');assert.equal(receipt.receiptComplete,true);assert.equal(receipt.build.status,0);assert.equal(receipt.tests.status,0);assert.equal(receipt.sourceTreeSha256,build.sourceProductionTreeSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts-full-api.json'],fixtureSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts-first-stable.json'],firstStableFixtureSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts.json'],alphaFixtureSha256);
+ for(const check of ['tarAllowlist','regularFiles','private','noLifecycle','installedBytes','exactThreeDependencies','shrinkwrapSRI','downloadedDependencySRI','help','version','doctor','checkConfig','invalidProfilesRejected'])assert.equal(verification.checks[check],true);
  assert.equal(verification.checks.binMode,'0755');
  return {archive:archiveName,archiveSha256:build.archiveSha256,checksums:expected.length,mcpToolContracts:build.mcpToolContracts,networkProbe:false};
 }
@@ -191,16 +193,16 @@ for(const [path,p] of wanted){const key=actual[path]?path:'node_modules/darktrac
 const entry=join(root,'dist/src/index.js');
 const cliEnv={PATH:process.env.PATH};
 assert.equal(run(process.execPath,[entry,'--version'],work,cliEnv).trim(),pkg.version);
-const help=run(process.execPath,[entry,'--help'],work,cliEnv);assert.match(help,/Usage:/);assert.match(help,/consultation only/);assert(!help.includes('Writes require an operator profile'));
+const help=run(process.execPath,[entry,'--help'],work,cliEnv);assert.match(help,/Usage:/);assert.match(help,/DARKTRACE_PROFILES/);assert.match(help,/confirm:true/);
 for(const [name,value] of [['public-token','offline-public-canary'],['private-token','offline-private-canary']]){writeFileSync(join(work,name),value,{mode:0o600});chmodSync(join(work,name),0o600);}
 const doctorEnv={...cliEnv,DARKTRACE_URL:'https://darktrace.example.internal',DARKTRACE_PUBLIC_TOKEN_FILE:join(work,'public-token'),DARKTRACE_PRIVATE_TOKEN_FILE:join(work,'private-token'),DARKTRACE_PROFILES:'read'};
-for(const flag of ['doctor','--check-config']){const result=JSON.parse(run(process.execPath,[entry,flag],work,doctorEnv));assert.equal(result.ok,true);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);}
-for(const variables of [{DARKTRACE_PROFILES:'read,write'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'read,write',DARKTRACE_WRITE_CRITICAL:'true'}])for(const flag of [[],['doctor'],['--check-config']]){const got=spawnSync(process.execPath,[entry,...flag],{cwd:work,env:{...doctorEnv,...variables},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});assert.equal(got.status,1);assert.equal(got.stdout,'');assert(!got.stderr.includes('offline-public-canary')&&!got.stderr.includes('offline-private-canary'));const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);}
+for(const [profiles,expected] of [['read',{read:true,sensitive:false,write:false,critical:false}],['all',{read:true,sensitive:true,write:true,critical:true}]])for(const flag of ['doctor','--check-config']){const result=JSON.parse(run(process.execPath,[entry,flag],work,{...doctorEnv,DARKTRACE_PROFILES:profiles}));assert.equal(result.ok,true);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);assert.deepEqual(result.profiles,expected);}
+for(const variables of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'superuser'}])for(const flag of [[],['doctor'],['--check-config']]){const got=spawnSync(process.execPath,[entry,...flag],{cwd:work,env:{...doctorEnv,...variables},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});assert.equal(got.status,1);assert.equal(got.stdout,'');assert(!got.stderr.includes('offline-public-canary')&&!got.stderr.includes('offline-private-canary'));const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);}
 const rootComponent={type:'application','bom-ref':pkg.name,name:pkg.name,version:pkg.version,licenses:[{license:{id:pkg.license}}],hashes:[{alg:'SHA-256',content:hash(readFileSync(archive))}]};
 const sbom={bomFormat:'CycloneDX',specVersion:'1.5',version:1,metadata:{component:rootComponent},components,dependencies:[{ref:pkg.name,dependsOn:['@modelcontextprotocol/server','zod']},{ref:'@modelcontextprotocol/server',dependsOn:['@modelcontextprotocol/core','zod']},{ref:'@modelcontextprotocol/core',dependsOn:['zod']},{ref:'zod',dependsOn:[]}]};
 writeFileSync(join(out,'runtime-sbom.cdx.json'),JSON.stringify(sbom,null,2)+'\n');
 writeFileSync(join(out,'runtime-files.sha256.json'),JSON.stringify(inventories,null,2)+'\n');
-const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readFileSync(readmeEs)),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,private:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,writeProfilesRejected:true},work};
+const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readFileSync(readmeEs)),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,private:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,invalidProfilesRejected:true},work};
 writeFileSync(join(out,'verification.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await main();

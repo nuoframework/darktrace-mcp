@@ -28,7 +28,7 @@ export const TOOL_SUMMARIES: Readonly<Record<string, string>> = Object.freeze({
   darktrace_list_tags: 'Tags and tagged entities: list tags, one tag, or which devices carry which tags.',
   darktrace_list_pcaps: 'List packet captures and their status.',
   darktrace_download_pcap: 'Download a finished packet capture file (base64, size-bounded, never written to disk).',
-  darktrace_advanced_search: 'Advanced Search (log/event search) and its analyze/graph views. Query is a base64 JSON search document.',
+  darktrace_advanced_search: 'Advanced Search (log/event search) plus analyze/graph views. query/hash = standard base64 of JSON {"search":"<query>","fields":[],"timeframe":"3600"} (timeframe seconds, max 604800; optional offset, size).',
   darktrace_email_dashboard: 'Darktrace/EMAIL dashboard statistics.',
   darktrace_email_reference_data: 'Darktrace/EMAIL reference data: tags, actions, filters, audit event types.',
   darktrace_email_decode_link: 'Darktrace/EMAIL: decode a rewritten link.',

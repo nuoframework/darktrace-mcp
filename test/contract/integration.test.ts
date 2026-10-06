@@ -29,7 +29,7 @@ function wired(profiles:Record<string,boolean>,respond:(url:string)=>Response=()
  const client=createHttpClient(config,{testOnly:true,operations:productionOperationDescriptors,now:()=>Date.UTC(2026,0,2,3,4,5),fetch:async(input,init)=>{
   calls.push({url:String(input),method:String(init?.method),...(init?.body===undefined?{}:{body:Buffer.from(init.body as Uint8Array).toString()}),headers:new Headers(init?.headers)});return respond(String(input));
  }});
- return {calls,ctx:{cfg:config,client,audit:{async record(){}}}};
+ return {calls,ctx:{cfg:config,client,audit:{async record(){}},approve:async()=>'accept' as const}};
 }
 test('production client registry accepts every released operation and still refuses the deprecated one',()=>{
  assert.equal(productionOperationDescriptors.length,78);

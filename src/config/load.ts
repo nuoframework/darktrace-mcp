@@ -15,7 +15,7 @@ const KNOWN_DARKTRACE_ENV = new Set([
   'DARKTRACE_PUBLIC_TOKEN_FILE', 'DARKTRACE_PRIVATE_TOKEN', 'DARKTRACE_PRIVATE_TOKEN_FILE',
   'DARKTRACE_TIMEOUT_MS', 'DARKTRACE_DESTINATION_ALLOWLIST', 'DARKTRACE_DATE_FORMAT',
   'DARKTRACE_QUERY_SIGNATURE_ENCODING', 'DARKTRACE_PROFILES', 'DARKTRACE_WRITE_CRITICAL',
-  'DARKTRACE_SENSITIVE_READ', 'DARKTRACE_MAX_RESPONSE_BYTES', 'DARKTRACE_MAX_TOOL_INPUT_BYTES',
+  'DARKTRACE_SENSITIVE_READ', 'DARKTRACE_CRITICAL_APPROVAL', 'DARKTRACE_WRITE_APPROVAL', 'DARKTRACE_MAX_RESPONSE_BYTES', 'DARKTRACE_MAX_TOOL_INPUT_BYTES',
   'DARKTRACE_MAX_TOOL_INPUT_DEPTH', 'DARKTRACE_MAX_TOOL_INPUT_ELEMENTS', 'DARKTRACE_MAX_TOOL_OUTPUT_CHARS',
   'DARKTRACE_MAX_CONCURRENT_REQUESTS', 'DARKTRACE_MAX_QUEUED_REQUESTS', 'DARKTRACE_MAX_PAGES',
   'DARKTRACE_RATE_LIMIT_PER_MINUTE', 'DARKTRACE_MAX_GET_RETRIES', 'DARKTRACE_MAX_RETRY_AFTER_MS',
@@ -223,6 +223,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   if (sensitiveRead !== undefined) merged.profiles = { ...asObject(merged.profiles), sensitiveRead };
   const critical = envBoolean(env.DARKTRACE_WRITE_CRITICAL, 'DARKTRACE_WRITE_CRITICAL');
   if (critical !== undefined) merged.profiles = { ...asObject(merged.profiles), writeCritical: critical };
+  for (const [variable, key] of [['DARKTRACE_CRITICAL_APPROVAL', 'criticalApproval'], ['DARKTRACE_WRITE_APPROVAL', 'writeApproval']] as const) {
+    const value = env[variable];
+    if (value === undefined) continue;
+    if (value !== 'elicitation' && value !== 'host') throw new ConfigValidationError(`${variable} must be elicitation or host`);
+    merged.profiles = { ...asObject(merged.profiles), [key]: value };
+  }
 
   const environmentLimits: ReadonlyArray<readonly [string, string]> = [
     ['DARKTRACE_MAX_RESPONSE_BYTES', 'limits.maxResponseBytes'],

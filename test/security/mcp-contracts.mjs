@@ -6,11 +6,13 @@ import { Client } from '@modelcontextprotocol/client';
 import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer } from '../../dist/src/server/createServer.js';
 import { cfg, env, noCanaries } from './helpers.mjs';
+// Full-API release: every supported operator profile combination has a reviewed full contract.
 export const profiles = {
   read: {},
   'read+sensitive': { sensitiveRead: true },
   'read+write': { write: true },
-  'read+writeCritical': { write: true, writeCritical: true },
+  'read+write+critical': { write: true, writeCritical: true },
+  all: { sensitiveRead: true, write: true, writeCritical: true },
 };
 export function canonical(value) {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -30,21 +32,20 @@ export async function toolContract(profile) {
   } finally { await client.close(); await server.close(); }
 }
 
-// The original four profiles above remain alpha provenance and active denial cases.
-// First-stable release captures only supported full contracts, never empty write lists.
-export const releaseProfiles=Object.freeze({read:Object.freeze({}),'read+sensitive':Object.freeze({sensitiveRead:true})});
+// The alpha and first-stable fixtures remain historical provenance; the full-API oracle covers all five profiles.
+export const releaseProfiles=Object.freeze(Object.fromEntries(Object.entries(profiles).map(([name,value])=>[name,Object.freeze({...value})])));
+// The only unsupported grant shape left: critical without write (startup error in every overlay and mode).
 export const forbiddenReleaseProfiles=Object.freeze({
- 'read+write':Object.freeze({profiles:Object.freeze({write:true}),errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true}),
- 'read+writeCritical':Object.freeze({profiles:Object.freeze({write:true,writeCritical:true}),errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true}),
  'critical-without-write':Object.freeze({profiles:Object.freeze({writeCritical:true}),errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true}),
+ 'sensitive+critical-without-write':Object.freeze({profiles:Object.freeze({sensitiveRead:true,writeCritical:true}),errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true}),
 });
 export async function verifyRejectedReleaseProfiles(){
  const startupChecks={};
  for(const [name,row]of Object.entries(forbiddenReleaseProfiles)){
-  const rejects=error=>{assert.equal(error.name,row.errorClass);assert.match(error.message,/read-only release/);noCanaries(error.message);return true;};
+  const rejects=error=>{assert.equal(error.name,row.errorClass);assert.match(error.message,/requires profiles\.write/);noCanaries(error.message);return true;};
   assert.throws(()=>cfg({profiles:row.profiles}),rejects);
   await assert.rejects(()=>toolContract(row.profiles),rejects);
-  const variables={...(row.profiles.write?{DARKTRACE_PROFILES:'read,write'}:{}),...(row.profiles.writeCritical?{DARKTRACE_WRITE_CRITICAL:'true'}:{})};
+  const variables={...(row.profiles.sensitiveRead?{DARKTRACE_SENSITIVE_READ:'true'}:{}),...(row.profiles.writeCritical?{DARKTRACE_WRITE_CRITICAL:'true'}:{})};
   for(const args of [[],['doctor'],['--check-config']]){
    const got=spawnSync(process.execPath,['--import',fileURLToPath(new URL('./diagnostic-guard.mjs',import.meta.url)),fileURLToPath(new URL('../../dist/src/index.js',import.meta.url)),...args],{env:env(variables),input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});
    assert.equal(got.error,undefined);assert.equal(got.status,1);assert.equal(got.stdout,'');noCanaries(got.stderr);assert(!got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'));

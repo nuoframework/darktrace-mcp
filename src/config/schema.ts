@@ -2,6 +2,7 @@ import { canonicalIpAddress } from './address.js';
 
 export type DateFormat = 'compact' | 'spaced';
 export type QuerySignatureEncoding = 'encoded' | 'unencoded';
+export type ApprovalMode = 'elicitation' | 'host';
 
 export interface Config {
   readonly instance: {
@@ -20,6 +21,15 @@ export interface Config {
     readonly write: boolean;
     readonly sensitiveRead: boolean;
     readonly writeCritical: boolean;
+  };
+  /**
+   * Human approval channel. 'elicitation': the server asks the user through MCP elicitation and executes
+   * only on an explicit accept (fails closed when the client cannot elicit). 'host': the operator relies
+   * on the MCP host's own per-tool approval prompt. Never settable from model arguments.
+   */
+  readonly approval: {
+    readonly critical: ApprovalMode;
+    readonly write: ApprovalMode;
   };
   readonly limits: {
     /** Applied independently to cumulative response wire and decoded bytes. */
@@ -54,6 +64,8 @@ export interface ConfigSource {
     readonly write?: unknown;
     readonly sensitiveRead?: unknown;
     readonly writeCritical?: unknown;
+    readonly criticalApproval?: unknown;
+    readonly writeApproval?: unknown;
     readonly export?: unknown;
     readonly email?: unknown;
   };
@@ -261,7 +273,7 @@ export function parseConfig(source: unknown): Config {
   assertKeys(root, ['instance', 'auth', 'profiles', 'limits', 'transport', 'compat'], 'config');
   assertKeys(instance, ['baseUrl', 'timeoutMs', 'destinationAllowlist', 'tlsRejectUnauthorized', 'tlsInsecure', 'caFile'], 'instance');
   assertKeys(auth, ['publicToken', 'privateToken', 'dateFormat', 'querySignatureEncoding'], 'auth');
-  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'export', 'email'], 'profiles');
+  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'criticalApproval', 'writeApproval', 'export', 'email'], 'profiles');
   assertKeys(limits, Object.keys(CEILINGS).filter((key) => key !== 'timeoutMs'), 'limits');
   assertKeys(transport, ['kind', 'http'], 'transport');
   assertKeys(compat, ['assumeVersion'], 'compat');
@@ -293,6 +305,13 @@ export function parseConfig(source: unknown): Config {
   const sensitiveRead = boolean(profiles.sensitiveRead, false, 'profiles.sensitiveRead');
   const writeCritical = boolean(profiles.writeCritical, false, 'profiles.writeCritical');
   if (writeCritical && !write) throw new ConfigValidationError('profiles.writeCritical requires profiles.write');
+  const approvalMode = (value: unknown, fallback: ApprovalMode, label: string): ApprovalMode => {
+    if (value === undefined) return fallback;
+    if (value !== 'elicitation' && value !== 'host') throw new ConfigValidationError(`${label} must be elicitation or host`);
+    return value;
+  };
+  const criticalApproval = approvalMode(profiles.criticalApproval, 'elicitation', 'profiles.criticalApproval');
+  const writeApproval = approvalMode(profiles.writeApproval, 'host', 'profiles.writeApproval');
 
   return Object.freeze({
     instance: Object.freeze({
@@ -302,6 +321,7 @@ export function parseConfig(source: unknown): Config {
     }),
     auth: Object.freeze({ publicToken, privateToken, dateFormat, querySignatureEncoding }),
     profiles: Object.freeze({ read: true as const, write, sensitiveRead, writeCritical }),
+    approval: Object.freeze({ critical: criticalApproval, write: writeApproval }),
     limits: Object.freeze({
       maxResponseBytes: boundedInteger(limits.maxResponseBytes, DEFAULT_LIMITS.maxResponseBytes, 'maxResponseBytes'),
       maxToolInputBytes: boundedInteger(limits.maxToolInputBytes, DEFAULT_LIMITS.maxToolInputBytes, 'maxToolInputBytes'),

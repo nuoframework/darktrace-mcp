@@ -84,7 +84,7 @@ test('annotations and descriptions follow the operation tiers',()=>{
 
 function harness(cfg:Config,response:unknown={json:{response:'SUCCESS'}}) {
   const state={requests:[] as any[],audits:[] as string[]};
-  return {state,ctx:{cfg,client:{async request(r:any){state.requests.push(r);return response;}},audit:{async record(id:string,outcome:string){state.audits.push(id+':'+outcome);}}}};
+  return {state,ctx:{cfg,client:{async request(r:any){state.requests.push(r);return response;}},audit:{async record(id:string,outcome:string){state.audits.push(id+':'+outcome);}},approve:async()=>'accept' as const}};
 }
 
 test('writes are invisible and refused without write; with write they execute directly and dryRun previews',async()=>{

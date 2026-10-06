@@ -5,7 +5,7 @@ import { Buffer } from 'node:buffer';
 import { redactValue } from '../observability/redact.js';
 import type { Config } from '../config/schema.js';
 import { operations, buildRequest, validateOperation, BINARY_OPERATIONS, type Operation, type OperationArgs, type OperationClient } from '../api/operations.js';
-import { authorize, isEligible, requiresPreview, preview } from '../policy/guard.js';
+import { authorize, isEligible, requiresPreview, preview, approvalMode, approvalMessage, approvalRefusal } from '../policy/guard.js';
 import { releaseAllowsOperation } from '../policy/release-capability.js';
 import { createAudit, type Audit } from '../observability/audit.js';
 import responseViews from '../api/response-views.generated.json' with {type:'json'};
@@ -13,7 +13,10 @@ import { projectResponse, selectResponseView, type ResponseView } from '../api/r
 import { neutralizeToolValue } from '../shape/output.js';
 import { requiredProfiles } from '../policy/profiles.js';
 import { OPERATION_PURPOSES, TOOL_SUMMARIES } from './descriptions.js';
-export interface ToolContext { cfg:Config; client:OperationClient; audit?:Audit; shape?:(value:unknown)=>unknown; }
+export type ApprovalDecision='accept'|'decline'|'cancel'|'unsupported';
+/** Human approval channel supplied by the MCP server layer (MCP elicitation). Never reachable from model arguments. */
+export type Approver=(message:string)=>Promise<ApprovalDecision>;
+export interface ToolContext { cfg:Config; client:OperationClient; audit?:Audit; shape?:(value:unknown)=>unknown; approve?:Approver; }
 export interface ToolDefinition {name:string; operations:Operation[]; inputSchema:z.ZodType<any>; description:string; annotations:{readOnlyHint:boolean;destructiveHint:boolean;idempotentHint:boolean;openWorldHint:boolean};}
 export interface ToolResult { [key:string]:unknown;content:Array<{type:'text';text:string}>;structuredContent?:Record<string,unknown>;isError?:boolean;}
 export function allTools():ToolDefinition[] {
@@ -29,7 +32,7 @@ function toolDescription(name:string,ops:Operation[]):string {
     lines.push('Time ranges: at most 7 days; default last hour when omitted.');
   const profiles=new Set(ops.flatMap(op=>requiredProfiles(op)));
   if (ops.every(op=>op.tier==='read')) lines.push(profiles.has('sensitive')?'Read-only; returns sensitive data (operator profile "sensitive").':'Read-only.');
-  else if (ops.some(op=>op.tier==='critical')) lines.push('CRITICAL write (profiles "write"+"critical"): without confirm:true it only returns a preview; set confirm:true only after the user explicitly approves. dryRun:true always previews.');
+  else if (ops.some(op=>op.tier==='critical')) lines.push('CRITICAL write (profiles "write"+"critical"): without confirm:true it only returns a preview. Set confirm:true only after the user explicitly approves; the user must then also accept a confirmation dialog. dryRun:true always previews.');
   else lines.push(`Changes appliance state (profile "write"${ops.some(op=>op.tier==='high')?', high impact':''}); executes immediately, dryRun:true previews. Never retry a write whose outcome is unknown.`);
   const unvalidated=ops.filter(op=>op.validatedOn.length===0);
   if (unvalidated.length===ops.length) lines.push('Not lab-validated.');
@@ -113,6 +116,16 @@ export async function callTool(name:string,raw:unknown,ctx:ToolContext,signal?:A
     authorize(op,ctx.cfg);
     const args=validateOperation(op,raw,ctx.cfg.limits);
     if (requiresPreview(op,args)) return result(preview(op,args));
+    if (approvalMode(op,ctx.cfg)==='elicitation') {
+      // Human-in-the-loop: the user (not the model) must accept a code-owned summary before anything is sent.
+      let decision:ApprovalDecision='unsupported';
+      if (ctx.approve) {
+        const message=approvalMessage(op,args,[ctx.cfg.auth.publicToken,ctx.cfg.auth.privateToken]);
+        try {decision=await ctx.approve(message);} catch {decision='cancel';}
+      }
+      if (decision!=='accept') return result(approvalRefusal(op,args,decision,ctx.cfg));
+      authorize(op,ctx.cfg);
+    }
     if (op.tier!=='read') { await audit.record(op.operationId,'start',requestId);audited=op; }
     // A second guard makes this boundary safe even for calls bypassing registration.
     authorize(op,ctx.cfg);

@@ -78,7 +78,7 @@ test('critical operations never execute without the critical profile and confirm
     assert.equal((await callTool(op.tool!,{confirm:true},writeOnly.ctx)).isError,true);
   }
   assert.equal(writeOnly.requests.length,0);
-  const {requests,ctx}=context({write:true,writeCritical:true});
+  const {requests,ctx:base}=context({write:true,writeCritical:true});const ctx={...base,approve:async()=>'accept' as const};
   const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
   assert.equal(preview.structuredContent?.confirmationRequired,true);assert.match(String(preview.structuredContent?.hint),/confirm:true/);assert.equal(requests.length,0);
   const done=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true},ctx);
