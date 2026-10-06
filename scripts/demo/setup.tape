@@ -1,11 +1,14 @@
+# Setup wizard demo. The wizard shows a banner, "Step n of 5" headers, a spinner on the appliance
+# check and an aligned summary with file modes, so the window is taller than the other tapes.
+# Regenerate the GIF after any wizard change: see scripts/demo/README.md.
 Output docs/assets/demo/setup.gif
 Require node
 Require asciinema
 Set Shell "bash"
 Set FontFamily "Menlo"
 Set FontSize 18
-Set Width 1120
-Set Height 690
+Set Width 1180
+Set Height 860
 Set Padding 20
 Set Theme "GitHub Dark"
 Set TypingSpeed 45ms
@@ -41,7 +44,8 @@ Sleep 1500ms
 Type "opencode"
 Sleep 350ms
 Enter
-Sleep 5s
+# Hold the summary table and the "Next: open OpenCode and ask" hint.
+Sleep 6s
 Hide
 Type "exit"
 Enter
