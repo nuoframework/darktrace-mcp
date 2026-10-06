@@ -143,3 +143,25 @@ These are local candidate hashes; `release.yml` rebuilds and re-verifies the can
 - `test/security/evidence/2026-10-06T21-20-32-905Z.json`, `test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`
 
 `claude-plugin/**` is deliberately unchanged: its exact pin moves to 1.1.2 only after the npm registry shows the version ([plugin distribution](../plugin-distribution.md#bump-the-pinned-version-at-each-release)).
+
+## Pending: branch `feat/install-everywhere` (easy install everywhere)
+
+Measured on 2026-10-06 after the last production source change on this branch (commit `52d5b8a`, docs-only commits follow), then re-run after rebasing on `main` at `a287e3a` (PR #15, #16, #17 merged; `src/` unchanged by them). These values supersede the tables above once this branch merges; the release orchestrator updates `.github/workflows/ci.yml` (this branch does not edit workflows).
+
+Production source changed: `src/cli/clients.ts`, `src/cli/entry.ts`, `src/cli/help.ts`, `src/cli/main.ts`, `src/cli/online.ts`, `src/cli/setup.ts`, `src/cli/uninstall.ts`, `src/cli/ui.ts` (new), `src/cli/yamlBlock.ts` (new), `src/config/load.ts`, `src/index.ts`, `src/observability/log.ts`, `src/server/setupServer.ts` (new), `src/server/stdio.ts`. Tool contracts, profile `tools/list` hashes and profile tool/operation counts are unchanged: `src/tools`, `src/policy`, `src/client` and `src/server/createServer.ts` did not change, and the setup-mode server is only reachable when no connection variable is set (never in the pinned profile captures).
+
+Receipt: [2026-10-06T20-59-49-940Z.json](../../test/security/evidence/2026-10-06T20-59-49-940Z.json), SHA-256 `73d9ab678a012fabc6a3c179653a192ea5b9cfa5e330bcf2bc0b2af27b6ea0be`; `receiptComplete:true`, test status 0, 1150 subcases, 101 runtime hashes. The runtime aggregate was recomputed directly from `dist/src` with the CI hashing function and matches.
+
+| Pin | Current CI value → measured on this branch | Locations |
+|---|---|---|
+| Functional tests / Linux passes | 245 → **287** (267 after the supply-chain section above, plus the 20 tests below) | `.github/workflows/ci.yml` |
+| Security tests / Linux passes / receipt subcases | 1150 → 1150 (unchanged) | `.github/workflows/ci.yml` |
+| Production source tree SHA-256 | `98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad` → **`a9258eca5ff70e7382a80b44d6d9821fd96b33a70ffef057bef7e33235a5f0a9`** | `.github/workflows/ci.yml` |
+| Runtime files | 95 → **101** | `.github/workflows/ci.yml` (assertion and `byte-binding.json`) |
+| Runtime aggregate SHA-256 | `3eb5f9740d4c995849d736160bbdfed98c90433bdfda42f47cc6877e511e38ad` → **`5ba75fa837b884f92ec84baa62ce5bae17338f75a27c6d14b658ef97defb5496`** | `.github/workflows/ci.yml` |
+| Full-API fixture SHA-256 | `86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6` (unchanged) | `.github/workflows/ci.yml`, `scripts/verify-release.mjs` |
+| First-stable fixture SHA-256 | `6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c` (unchanged) | `.github/workflows/ci.yml` |
+
+The 20 new functional tests: `test/mcp/setup-mode.test.ts` (5), `test/cli/ui.test.ts` (4), `test/cli/more-clients.test.ts` (7), `test/cli/badges.test.ts` (4). The six new runtime files are the compiled `.js` and `.d.ts` of `src/cli/ui.ts`, `src/cli/yamlBlock.ts` and `src/server/setupServer.ts`. One existing test was not changed in meaning: `test/mcp/corrections.test.ts` (G4) still finds exactly one `runStdio(cfg)` call in `src/index.ts`; the unconfigured branch calls `runSetupStdio()` with no configuration object.
+
+Local checks on macOS arm64: `npm run lint`, `npm run typecheck`, `npm test` (287 / 287 / 0 / 0 after the rebase; 265 before PR #15 added 22 property tests), `npm run test:security` (1150 / 1147 / 0 / 3, the three existing macOS setgid skips), `node scripts/validate-examples.mjs` (9 JSON examples, 1 TOML example, 8 documents). Linux CI and the Docker gates were not run locally. If the documentation track merges first and moves guides, recompute only the functional count if it adds tests; the source and runtime pins above depend on `src/` only.
