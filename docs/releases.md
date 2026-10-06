@@ -8,19 +8,44 @@ Dónde se publica cada versión, cómo verificarla y cómo preparar una release 
 
 <a id="releases-and-distribution"></a>
 
-> Para instalar, usa el [asistente](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`. Esta página explica los canales y el procedimiento del propietario. v1.0.0 contiene la compilación anterior de solo lectura (15 herramientas); la API completa y los perfiles del README se distribuyen desde 1.1.0.
+> Para instalar, usa el [asistente](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`. Esta página explica los canales y el procedimiento del propietario. v1.0.0 contiene la compilación anterior de solo lectura (15 herramientas); la API completa y los perfiles del README se distribuyen desde 1.1.0.
 
-<a id="111-candidate"></a>
+<a id="112-candidate"></a>
 
-## 1.1.1
+## Candidata 1.1.2
 
-La [campaña de cobertura](security/lab-gap-campaign-1.1.1.md) eleva la evidencia a 59 operaciones, 6 parciales. Los [valores fijados de 1.1.1](security/release-pins-1.1.1.md) recogen las comprobaciones y la vinculación de bytes. Las [limitaciones](../CHANGELOG.md#known-limitations-in-111) incluyen Email, CVE, tipos de filtro y errores DELETE del gateway. La evidencia 1.1.0 siguiente es histórica.
+1.1.2 distribuye lo fusionado en `main` después de 1.1.1 ([cambios](../CHANGELOG.md#112--2026-10-06)): asistente Docker autoservicio, pregunta de dirección sin valor guardado, `uninstall`, plugin Claude Code con estructura de marketplace Codex, firmas de archivos con procedencia SLSA, alternativa npm fijada, pruebas basadas en propiedades, correcciones CodeQL e imagen con zlib 1.3.2-r1. La API, contratos y evidencia de laboratorio son los de 1.1.1. Los [valores fijados 1.1.2](security/release-pins-1.1.2.md) recogen las comprobaciones y vinculación de bytes. [Limitaciones actuales](../CHANGELOG.md#known-limitations-in-112). La evidencia de 1.1.1 y 1.1.0 siguiente es histórica.
 
 <a id="release-status-2026-10-06"></a>
 
 ## Estado de publicación (2026-10-06)
 
-**1.1.1 está publicada en npm, ghcr y GitHub Release**, comprobado el 2026-10-06. npm devuelve la versión `1.1.1`; la [release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) es pública e incluye `.mcpb`, paquete, sumas y evidencia. El índice ghcr para linux/amd64 y linux/arm64 es `sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1`. La sección siguiente conserva 1.1.0 por separado; no uses su digest para fijar 1.1.1.
+**1.1.0 y 1.1.1 están publicadas** en npm, ghcr y GitHub Release. **1.1.2 está en proceso de publicación el 2026-10-06.** Los comandos del repositorio se fijan a 1.1.2 y funcionan cuando la versión es visible en npm; los digests siguientes pertenecen a las imágenes publicadas 1.1.1 y 1.1.0.
+
+<a id="112-publication-in-progress-2026-10-06"></a>
+
+## 1.1.2 (publicación en curso, 2026-10-06)
+
+Los datos de publicación se completarán cuando termine `release.yml` para `v1.1.2`. Los canales siguen pendientes; los registros locales se conservan con su alcance exacto.
+
+| Archivo o comprobación | Valor |
+|---|---|
+| Commit de release (fusión de su PR) | `126e5ea` |
+| CI sobre el commit de release (`ci.yml`, ambos trabajos Docker) | Pendiente |
+| npm `@nuoframework/darktrace-mcp@1.1.2` | Pendiente (`dist.integrity`, `dist.shasum`, atestación de procedencia) |
+| Digest del índice ghcr `ghcr.io/nuoframework/darktrace-mcp:1.1.2` | Pendiente (manifiestos linux/amd64 y linux/arm64) |
+| GitHub Release `Darktrace MCP v1.1.2` | Pendiente (`.tgz`, `.mcpb`, `SHA256SUMS`, SBOM, evidencia, un `<asset>.sigstore.json` por archivo, `darktrace-mcp-1.1.2.intoto.jsonl`, `darktrace-mcp-1.1.2.provenance.sigstore.json`) |
+| Atestación GitHub (procedencia) | Pendiente |
+| Valores fijados y comprobación Docker local | [release-pins-1.1.2.md](security/release-pins-1.1.2.md) |
+| Seguridad macOS arm64 (Node 24.14.1), origen de la release | [`2026-10-06T21-20-32-905Z.json`](../test/security/evidence/2026-10-06T21-20-32-905Z.json), SHA-256 `dc8d1373…0f13`: 1.150 subcasos, 1.147 correctos, 3 omisiones de plataforma; origen `d6d76aa9…6e30` |
+| Seguridad Linux arm64 (Node 24.18.1), comprobación Docker local | [`release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json`](../test/security/evidence/release-1.1.2-linux-arm64-2026-10-06T21-24-16-470Z.json), SHA-256 `8f845606…550c`: 1.150 subcasos, todos correctos, ninguna omisión; imagen `sha256:9d71b972…6a23` |
+
+<a id="published-111-2026-10-06"></a>
+<a id="111-candidate"></a>
+
+## 1.1.1 publicada (2026-10-06)
+
+1.1.1 está publicada en [npm](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.1), ghcr y [GitHub Release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) (`.mcpb`, paquete npm, `SHA256SUMS`, SBOM y evidencia; las firmas se pueden añadir después con `sign-release.yml`). Digest del índice ghcr: `sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1`, con linux/amd64 y linux/arm64. Comprobaciones y bytes en los [valores fijados 1.1.1](security/release-pins-1.1.1.md) y la [campaña de huecos](security/lab-gap-campaign-1.1.1.md).
 
 <a id="published-110-2026-10-06"></a>
 

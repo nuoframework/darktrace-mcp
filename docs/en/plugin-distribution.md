@@ -26,7 +26,7 @@ The tokens go to the operating system's credential store, not to a settings file
 ```sh
 codex plugin marketplace add nuoframework/darktrace-mcp
 codex plugin add darktrace-mcp@darktrace-mcp
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 Codex does not prompt for configuration values. Its bundled copy of the server receives only `DARKTRACE_PROFILES`, `PLUGIN_ROOT` and `PLUGIN_DATA`; variables exported in your shell and `env` overrides under `[plugins."darktrace-mcp@darktrace-mcp".mcp_servers.darktrace]` are not passed to it (Codex CLI 0.160.1), so that copy exits at startup with `instance.baseUrl must be an HTTPS origin` and Codex logs `MCP server startup failed server_name="darktrace"` (visible only with `RUST_LOG=info`); the model sees no `darktrace_*` tools and the skill then guides you to the wizard. The wizard writes a complete `mcp_servers.darktrace` entry with absolute paths and token files into `~/.codex/config.toml`. Afterwards disable the bundled copy and keep the skill:
@@ -47,7 +47,7 @@ OpenAI's public plugin directory accepts only remote (HTTPS) MCP servers, so thi
 | `claude-plugin/package.json`, `claude-plugin/package-lock.json` | Claude Code | Lockfile install: `@nuoframework/darktrace-mcp` at the exact published version plus its three runtime dependencies, with registry URLs and integrity hashes. Claude Code runs the install with `--ignore-scripts` when it copies the plugin into its cache |
 | `claude-plugin/.mcp.json` | Claude Code, Cowork | One stdio server `darktrace` that runs `node ${CLAUDE_PLUGIN_ROOT}/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js` with the `DARKTRACE_*` variables filled from `${user_config.*}` |
 | `claude-plugin/plugin.json` | Codex | Portable manifest (Agent Plugins schema) with the OpenAI listing fields under `extensions.com.openai.interface` |
-| `claude-plugin/mcp.json` | Codex | Portable MCP file declaring the same server with `type: "stdio"`, started as `npx -y @nuoframework/darktrace-mcp@1.1.1` because Codex has no lockfile install, and only `DARKTRACE_PROFILES=read` in its environment |
+| `claude-plugin/mcp.json` | Codex | Portable MCP file declaring the same server with `type: "stdio"`, started as `npx -y @nuoframework/darktrace-mcp@1.1.2` because Codex has no lockfile install, and only `DARKTRACE_PROFILES=read` in its environment |
 | `claude-plugin/skills/darktrace-investigation/SKILL.md` | All | Investigation skill: read-only first, small responses, previews and approval before critical actions, appliance data treated as untrusted, and the first-run guidance to the wizard when no tools are available |
 | `claude-plugin/README.md`, `claude-plugin/LICENSE` | Claude Directory, people | Listing description and license (a copy of the root `LICENSE`) |
 | `.claude-plugin/marketplace.json` | Claude Code | Repository marketplace `darktrace-mcp` with one entry whose source is `./claude-plugin` |
@@ -140,7 +140,7 @@ Replace the address placeholder locally before testing; it is not an executable 
 ```sh
 DARKTRACE_URL='https://<your-appliance>' DARKTRACE_PUBLIC_TOKEN=dummy DARKTRACE_PRIVATE_TOKEN=dummy \
 DARKTRACE_PROFILES=read DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=false DARKTRACE_DATE_FORMAT=compact \
-npx -y @nuoframework/darktrace-mcp@1.1.1 --check-config
+npx -y @nuoframework/darktrace-mcp@1.1.2 --check-config
 ```
 
 Run it outside a checkout of this repository: inside one, `npx` resolves the package name to the local, unbuilt project and fails with `darktrace-mcp: command not found`.

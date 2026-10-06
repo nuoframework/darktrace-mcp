@@ -22,7 +22,7 @@ Two commands. First install Docker and start it:
 Then run the wizard and choose `2) docker` when it asks how clients should start the server:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 The wizard:
@@ -72,7 +72,7 @@ This is not a zero-CVE claim, and it is not stable-release approval.
 1. **Public image on GitHub Container Registry (easiest; v1.1.0 and later).** Built by `.github/workflows/release.yml` on the reviewed tag, natively on amd64 and arm64 runners, and combined into one tag. The manifest digest is recorded in the workflow summary and in the release notes.
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup --runtime docker
 ```
 
    The wizard pulls the image when needed and resolves it ([Install](#install)). Compare the digest it prints with the release notes. Client entries use the local image ID with `--pull=never`, so clients only ever start the inspected bytes; a tag is mutable, an ID is not. To pin a digest you checked beforehand, pass `--image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>`. For a manual snippet use the local image ID (`docker image inspect --format '{{.Id}}'`) as shown under [MCP client configuration](#mcp-client-configuration).

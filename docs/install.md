@@ -6,12 +6,12 @@
 
 Instala el servidor con un comando y elige la vía adecuada para tu cliente.
 
-> **Alcance por versión.** Los ocho clientes originales del asistente están en npm 1.1.1. Los 13 adaptadores adicionales, la ruta nueva de Windsurf y la herramienta del modo de configuración describen la [PR de instalación #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Usa sus fragmentos manuales con 1.1.1; los identificadores nuevos de `setup --client` requieren ese cambio y una versión nueva publicada. El comando fijado a 1.1.1 no los incluye.
+> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores nuevos, `darktrace_setup_status` y la ruta Windsurf nueva están propuestos en la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), todavía sin fusionar, para 1.1.3. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
 
 Un comando inicia el proceso. Pide los datos, comprueba el appliance con una petición firmada, guarda tokens en archivos privados y configura los clientes detectados:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 Reinicia el cliente y pide: **«lista mis dispositivos Darktrace»**.
@@ -20,7 +20,7 @@ Necesitas Node.js 22+, la dirección `https://<tu-appliance>` y el par de tokens
 
 ## Elige tu cliente
 
-Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuoframework/darktrace-mcp@1.1.1` salvo instalación global; los identificadores nuevos necesitan la versión futura indicada arriba. `config <cliente>` muestra el fragmento con tus rutas reales y sin secretos.
+Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuoframework/darktrace-mcp@1.1.2` salvo instalación global; los identificadores nuevos necesitan la versión futura indicada arriba. `config <cliente>` muestra el fragmento con tus rutas reales y sin secretos.
 
 | Cliente | Vía más corta | Dónde se guarda |
 |---|---|---|
@@ -30,7 +30,7 @@ Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuofram
 | **Cursor** | Botón del [README](../README.md#instalación-en-1-minuto), después `setup`; o `setup --client cursor` | `~/.cursor/mcp.json` ([detalles](clients.md#cursor)) |
 | **VS Code (modo agente Copilot)** | Botón de VS Code (pide dirección y tokens y los guarda en su almacén secreto); o `setup --client vscode` | `mcp.json` de usuario ([detalles](clients.md#vs-code)) |
 | **VS Code Insiders** | Botón Insiders, con las mismas preguntas | `mcp.json` de usuario |
-| **Windsurf (Devin Desktop)** | `setup --client windsurf` | Próxima ruta `~/.config/devin/mcp_config.json`; ruta anterior en 1.1.1 ([detalles](clients.md#windsurf)) |
+| **Windsurf (Devin Desktop)** | `setup --client windsurf` | Próxima ruta `~/.config/devin/mcp_config.json`; ruta anterior en 1.1.2 ([detalles](clients.md#windsurf)) |
 | **OpenCode** | `setup --client opencode` | `~/.config/opencode/opencode.json` ([detalles](clients.md#opencode)) |
 | **Gemini CLI** | `setup --client gemini` | `~/.gemini/settings.json` ([detalles](clients.md#gemini-cli)) |
 | **Zed** (1.1.3) | `setup --client zed` (si hay comentarios, muestra un fragmento para pegar) | `~/.config/zed/settings.json` → `context_servers` ([detalles](clients.md#zed)) |
@@ -56,19 +56,19 @@ El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o
 Un botón del README no conoce tus rutas ni tokens: añade `darktrace` con la versión npm fijada, `npx`, perfil `read` y nada más. En el cambio de instalación pendiente, un servidor sin conexión expone solo `darktrace_setup_status`, que indica qué falta y el comando:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
-Con el botón Cursor que instala la versión publicada 1.1.1, ejecuta `setup` antes de arrancar: esa versión no incluye el modo de configuración. El asistente reescribe la entrada con Node absoluto, copia fija y archivos de token; las herramientas aparecen tras reiniciar. Los botones VS Code piden dirección y tokens en el propio cliente y funcionan sin `setup`. Los botones con versión fijada son excepciones explícitas de arranque inicial. Las entradas normales del asistente usan rutas absolutas para evitar depender del registro en cada arranque. Si se borra la caché npm, una entrada creada por botón vuelve a necesitar el registro.
+Con el botón Cursor que instala la versión 1.1.2, ejecuta `setup` antes de arrancar: esa versión no incluye el modo de configuración. El asistente reescribe la entrada con Node absoluto, copia fija y archivos de token; las herramientas aparecen tras reiniciar. Los botones VS Code piden dirección y tokens en el propio cliente y funcionan sin `setup`. Los botones con versión fijada son excepciones explícitas de arranque inicial. Las entradas normales del asistente usan rutas absolutas para evitar depender del registro en cada arranque. Si se borra la caché npm, una entrada creada por botón vuelve a necesitar el registro.
 
 ## Fijar la versión
 
-Omitir la versión en `npx -y @nuoframework/darktrace-mcp setup` descarga la última publicada; la comprobación del registro del 2026-10-06 devuelve 1.1.1. Fija siempre una versión exacta para reproducir los mismos bytes entre máquinas, en scripts, botones y entradas de cliente. El asistente nunca escribe `npx` en la configuración.
+Omitir la versión en `npx -y @nuoframework/darktrace-mcp setup` descarga la última publicada; consulta el [estado por canal](releases.md#release-status-2026-10-06) antes de instalar. Fija siempre una versión exacta para reproducir los mismos bytes entre máquinas, en scripts, botones y entradas de cliente. El asistente nunca escribe `npx` en la configuración.
 
 ## Otras vías
 
-- **Docker.** `setup --runtime docker` comprueba el daemon, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.1`, descarga con permiso y escribe una entrada protegida con ID inmutable y `--pull=never`. [Guía](docker.md#install).
-- **Extensión Claude Desktop.** `darktrace-mcp-1.1.1.mcpb` de GitHub Release o `npm run pack:mcpb` desde el checkout. [Detalles](clients.md#claude-desktop).
+- **Docker.** `setup --runtime docker` comprueba el daemon, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.2`, descarga con permiso y escribe una entrada protegida con ID inmutable y `--pull=never`. [Guía](docker.md#install).
+- **Extensión Claude Desktop.** `darktrace-mcp-1.1.2.mcpb` de GitHub Release o `npm run pack:mcpb` desde el checkout. [Detalles](clients.md#claude-desktop).
 - **Plugin y marketplace Codex.** Consulta la [guía de instalación y distribución](plugin-distribution.md).
 - **Manual.** `darktrace-mcp config <cliente>` muestra rutas reales; [Clientes](clients.md) detalla archivos y formatos.
 - **Desde fuentes.** [Alternativa](getting-started.md#fallback-build-from-source).
@@ -80,10 +80,10 @@ Windows nativo no permite demostrar que un token sea privado mediante la API de 
 ## Comprobar y desinstalar
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 test
-npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall
+npx -y @nuoframework/darktrace-mcp@1.1.2 test
+npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
-`test` hace un `GET /status` firmado e indica qué corregir. `uninstall` muestra un plan, pregunta una vez y borra entradas `darktrace` (con copias de seguridad), tokens y copias fijas. [Solución de problemas](troubleshooting.md).
+`test` hace un `GET /status` firmado e indica qué corregir. `uninstall` muestra un plan, pregunta una vez y borra entradas `darktrace` de los clientes admitidos por la versión instalada (con copias de seguridad), tokens y copias fijas. [Solución de problemas](troubleshooting.md).
 
 El asistente usa ámbito de usuario. Antes de confiar en un archivo `.mcp.json` de proyecto, revisa sus comandos y variables: se ejecutan para quienes confían en ese repositorio.

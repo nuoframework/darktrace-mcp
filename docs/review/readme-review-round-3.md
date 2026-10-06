@@ -75,3 +75,5 @@ Fecha: 2026-10-06. Revisión propia del borrador documental; la revisión indepe
 - Dos appliances confirmados por el propietario: lab A para 1.1.0, lab B para 1.1.1; CHANGELOG y generador alineados. El registro Email incorpora únicamente los metadatos del 503 confirmados por el propietario.
 - El saneamiento de atribuciones de los registros históricos se gestiona por separado en #21 por decisión del propietario; no forma parte de estas correcciones.
 - Las referencias a versión e instalación se actualizarán tras la fusión de la release 1.1.2 (#20) y de #18, en ese orden; las novedades de #18 se documentarán para 1.1.3.
+
+- Rebase sobre la release 1.1.2 fusionada en `126e5ea`: comandos, copias fijas, extensión y botones fijados a 1.1.2. Se incorporó el estado y la evidencia de la release en ambos idiomas; los canales siguen marcados en publicación hasta verificarlos. #21 llega heredada de `main`, con enlace a su registro de roles en el índice.

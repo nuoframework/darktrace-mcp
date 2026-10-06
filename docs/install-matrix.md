@@ -6,7 +6,7 @@
 
 Auditoría fechada de las vías de instalación por cliente, sistema operativo y método de distribución.
 
-> **Alcance por versión.** Los ocho clientes originales del asistente están en npm 1.1.1. Los 13 adaptadores adicionales, la nueva ruta Windsurf y el modo de configuración describen la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Sus nuevos identificadores requieren ese cambio y una versión publicada que lo incluya; con 1.1.1 usa configuración manual.
+> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores nuevos, `darktrace_setup_status` y la ruta Windsurf nueva están propuestos en la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), todavía sin fusionar, para 1.1.3. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
 
 Auditoría del **2026-10-06**. «Antes» es `origin/main` en `7ccfa79`; «Después» es la rama de instalación. El responsable de esa rama contrastó cada cliente con la documentación del fabricante en esa fecha; la última columna enlaza a la página consultada. Si el fabricante no documenta un archivo, el asistente muestra JSON para pegar en lugar de adivinar una ruta.
 
@@ -16,8 +16,8 @@ Regla del propietario: instalación fácil en cada cliente, IDE y vía. No se su
 
 | Vía | En qué consiste | Pasos |
 |---|---|---|
-| **Asistente** | `npx -y @nuoframework/darktrace-mcp@1.1.1 setup` | Un comando, preguntas de configuración (cinco numeradas en la presentación nueva), reiniciar |
-| **Botón de instalación** | Añade `darktrace` con paquete fijado y `npx`; el cambio pendiente incorpora un modo de configuración cuya única herramienta indica ejecutar `setup` | Botón → confirmar → `setup` una vez → reiniciar; en 1.1.1 ejecuta `setup` antes de arrancar |
+| **Asistente** | `npx -y @nuoframework/darktrace-mcp@1.1.2 setup` | Un comando, preguntas de configuración (cinco numeradas en la presentación nueva), reiniciar |
+| **Botón de instalación** | Añade `darktrace` con paquete fijado y `npx`; el cambio pendiente incorpora un modo de configuración cuya única herramienta indica ejecutar `setup` | Botón → confirmar → `setup` una vez → reiniciar; en 1.1.2 ejecuta `setup` antes de arrancar |
 | **Plugin / marketplace** | Plugin y marketplace Codex, otro trabajo en `claude-plugin/`, `.claude-plugin/`, `.agents/` | Fuera de esta auditoría |
 | **`.mcpb`** | Extensión Claude Desktop de GitHub Release; tokens al llavero | Descargar, abrir, completar formulario |
 | **Docker** | `setup --runtime docker`, ID fijado con `--pull=never` | Un comando y `Pull it now? [Y/n]` |
@@ -66,7 +66,7 @@ Cada entrada **W** hace copia `<file>.bak-<timestamp>`, escritura atómica, ruta
 
 | Dificultad | Antes | Después |
 |---|---|---|
-| Entrada sin dirección o tokens (botón, copia manual, falta `setup`) | `startup_error` y servidor detenido | **Modo de configuración** pendiente de publicación: solo `darktrace_setup_status`, con descripción y respuesta que indican `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`; una línea `setup_required` en stderr |
+| Entrada sin dirección o tokens (botón, copia manual, falta `setup`) | `startup_error` y servidor detenido | **Modo de configuración** pendiente de publicación: solo `darktrace_setup_status`, con descripción y respuesta que indican `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`; una línea `setup_required` en stderr |
 | Cliente ausente del asistente | 13 de los 21 exigían JSON manual | Todos tienen ID; uno solo muestra JSON porque no hay archivo documentado |
 | Qué archivo y clave usar | Prosa por cliente en `docs/clients.md` | `docs/install.md` empieza por elegir cliente; resumen del asistente con archivo, estado y modo |
 | Terminal de 80 columnas | Texto sin estructura | Cabecera, `Step n of 5`, marcadores y resumen alineado; ASCII sin TTY o con `NO_COLOR` |

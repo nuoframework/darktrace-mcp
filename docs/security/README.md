@@ -85,3 +85,4 @@ Los documentos originales se conservan **en inglés**, con sus fechas, alcance y
 | [validated-consultations-release-helpers.md](validated-consultations-release-helpers.md) | Scripts de preparación de la entrega de consultas validadas. |
 | [validated-consultations-release-plan.md](validated-consultations-release-plan.md) | Plan de publicación de consultas validadas. |
 | [validated-consultations-test-migration.md](validated-consultations-test-migration.md) | Migración de pruebas al alcance de consultas validadas. |
+| [review-roles.md](review-roles.md) | Registro del cambio a roles neutrales en atribuciones de revisión, sin alterar resultados ni evidencia técnica. |

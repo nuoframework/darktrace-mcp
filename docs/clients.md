@@ -41,7 +41,7 @@ node -p 'process.execPath'
 node -p 'require("node:path").resolve("dist/src/index.js")'
 ```
 
-Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranque con `npx`, la entrada es `~/.local/share/darktrace-mcp/1.1.1/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`.
+Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranque con `npx`, la entrada es `~/.local/share/darktrace-mcp/1.1.2/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`.
 
 <a id="one-line-install-per-client"></a>
 
@@ -61,11 +61,11 @@ Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranqu
 | Claude Desktop | `.mcpb` de la release (abajo) |
 | Windsurf, OpenCode | Fragmentos JSON de abajo (sin CLI) |
 
-Usa rutas absolutas en la configuración manual del cliente; el asistente las escribe automáticamente. El plugin Claude Code también evita el registro al arrancar: instala la versión 1.1.1 desde su bloqueo y ejecuta `node` sobre la entrada instalada. La copia Codex usa `npx -y @nuoframework/darktrace-mcp@1.1.1`, porque ese cliente no instala desde bloqueo. Los [botones de instalación](install.md#qué-hace-el-botón) son otra excepción explícita con versión fijada.
+Usa rutas absolutas en la configuración manual del cliente; el asistente las escribe automáticamente. El plugin Claude Code también evita el registro al arrancar: instala la versión 1.1.2 desde su bloqueo y ejecuta `node` sobre la entrada instalada. La copia Codex usa `npx -y @nuoframework/darktrace-mcp@1.1.2`, porque ese cliente no instala desde bloqueo. Los [botones de instalación](install.md#qué-hace-el-botón) son otra excepción explícita con versión fijada.
 
 ## Claude Desktop
 
-**Automática.** Ejecuta `darktrace-mcp setup` o instala la extensión: descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) (o constrúyela desde un checkout con `npm run pack:mcpb`) y haz doble clic. Claude Desktop pide la URL, los tokens y el perfil, y guarda los tokens en el llavero del sistema.
+**Automática.** Ejecuta `darktrace-mcp setup` o instala la extensión: descarga `darktrace-mcp-1.1.2.mcpb` de la [release v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2) (o constrúyela desde un checkout con `npm run pack:mcpb`) y haz doble clic. Claude Desktop pide la URL, los tokens y el perfil, y guarda los tokens en el llavero del sistema.
 
 **Manual.** Settings → Developer → Edit Config. Añade esto dentro de `mcpServers`, sin borrar tus otros servidores:
 
@@ -93,7 +93,7 @@ Cierra Claude Desktop por completo y vuelve a abrirlo.
 
 **Automática.** `darktrace-mcp setup` añade un servidor con ámbito de usuario.
 
-**Plugin.** El repositorio es un marketplace de plugins. El plugin instala el paquete npm fijado a `1.1.1` desde su archivo de bloqueo y lo arranca con Node, añade la skill `darktrace-investigation` y, al activarlo, pide la URL del appliance, los dos tokens (guardados en el almacén de credenciales del sistema) y el perfil; el perfil se cambia después en `/config`. También funciona en sesiones de Cowork en tu máquina, pero no en el chat de claude.ai. Detalles, ficha en el Claude Directory y limitaciones: [distribución del plugin ](plugin-distribution.md).
+**Plugin.** El repositorio es un marketplace de plugins. El plugin instala el paquete npm fijado a `1.1.2` desde su archivo de bloqueo y lo arranca con Node, añade la skill `darktrace-investigation` y, al activarlo, pide la URL del appliance, los dos tokens (guardados en el almacén de credenciales del sistema) y el perfil; el perfil se cambia después en `/config`. También funciona en sesiones de Cowork en tu máquina, pero no en el chat de claude.ai. Detalles, ficha en el Claude Directory y limitaciones: [distribución del plugin ](plugin-distribution.md).
 
 ```sh
 claude plugin marketplace add nuoframework/darktrace-mcp
@@ -296,11 +296,11 @@ o añade a `~/.gemini/settings.json`:
 
 No pongas `"trust": true`: mantén la confirmación de Gemini en cada llamada.
 
-> Los adaptadores adicionales siguientes corresponden a la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Sus identificadores no están en el asistente npm 1.1.1: usa los fragmentos manuales hasta que se publique una versión que los incluya. Rutas y fuentes de fabricantes: [matriz de instalación](install-matrix.md).
+> Los adaptadores adicionales siguientes corresponden a la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Sus identificadores no están en el asistente npm 1.1.2: usa los fragmentos manuales hasta que se publique una versión que los incluya. Rutas y fuentes de fabricantes: [matriz de instalación](install-matrix.md).
 
 ## Zed
 
-**Automática.** `darktrace-mcp setup --client zed`. `settings.json` de Zed es JSONC; si contiene comentarios, el asistente muestra el fragmento en lugar de reescribirlo.
+**Automática (1.1.3).** `darktrace-mcp setup --client zed`. `settings.json` de Zed es JSONC; si contiene comentarios, el asistente muestra el fragmento en lugar de reescribirlo.
 
 **Manual.** Añade a `~/.config/zed/settings.json` (o Settings → AI → MCP Servers → Add Local Server):
 
@@ -325,7 +325,7 @@ Comprueba que aparece en Settings → AI → MCP Servers.
 
 ## Cline
 
-**Automática.** `darktrace-mcp setup --client cline` escribe `cline_mcp_settings.json` en el almacenamiento VS Code de Cline (consulta la matriz de instalación). Cline lo vuelve a cargar al cambiar.
+**Automática (1.1.3).** `darktrace-mcp setup --client cline` escribe `cline_mcp_settings.json` en el almacenamiento VS Code de Cline (consulta la matriz de instalación). Cline lo vuelve a cargar al cambiar.
 
 **Manual.** Panel Cline → MCP Servers → Configure → Configure MCP Servers; añade bajo `mcpServers`:
 
@@ -352,7 +352,7 @@ Mantén `autoApprove` vacío para que Cline pregunte antes de cada llamada. Su C
 
 ## Roo Code
 
-**Automática.** `darktrace-mcp setup --client roo` escribe `mcp_settings.json` global (consulta la matriz).
+**Automática (1.1.3).** `darktrace-mcp setup --client roo` escribe `mcp_settings.json` global (consulta la matriz).
 
 **Manual.** Roo Code → MCP Servers → Edit Global MCP; añade bajo `mcpServers`:
 
@@ -379,7 +379,7 @@ El `.roo/mcp.json` de proyecto sustituye la entrada global; revísalo como cualq
 
 ## Continue
 
-**Automática.** `darktrace-mcp setup --client continue` inserta un elemento delimitado por marcadores al principio de `mcpServers` en `~/.continue/config.yaml` (Windows `%USERPROFILE%\.continue\config.yaml`) sin tocar el resto. Si ya existe `darktrace` o `mcpServers` no es una lista simple, muestra el fragmento para pegar.
+**Automática (1.1.3).** `darktrace-mcp setup --client continue` inserta un elemento delimitado por marcadores al principio de `mcpServers` en `~/.continue/config.yaml` (Windows `%USERPROFILE%\.continue\config.yaml`) sin tocar el resto. Si ya existe `darktrace` o `mcpServers` no es una lista simple, muestra el fragmento para pegar.
 
 **Manual.** Añade a `config.yaml`:
 
@@ -401,7 +401,7 @@ Las herramientas MCP están disponibles en el modo agente de Continue. Compruéb
 
 ## Kiro
 
-**Automática.** `darktrace-mcp setup --client kiro` escribe `~/.kiro/settings/mcp.json`. `darktrace-mcp config kiro` también muestra un enlace `https://kiro.dev/launch/mcp/add?…`; Kiro pide confirmación antes de escribir.
+**Automática (1.1.3).** `darktrace-mcp setup --client kiro` escribe `~/.kiro/settings/mcp.json`. `darktrace-mcp config kiro` también muestra un enlace `https://kiro.dev/launch/mcp/add?…`; Kiro pide confirmación antes de escribir.
 
 **Manual.** Añade a `~/.kiro/settings/mcp.json`:
 
@@ -428,7 +428,7 @@ Kiro carga el archivo al guardarlo; el servidor aparece en MCP Servers.
 
 ## Amp
 
-**Automática.** `darktrace-mcp setup --client amp` escribe `~/.config/amp/settings.json` (usa la variante `.jsonc` si es la única; nunca reescribe comentarios).
+**Automática (1.1.3).** `darktrace-mcp setup --client amp` escribe `~/.config/amp/settings.json` (usa la variante `.jsonc` si es la única; nunca reescribe comentarios).
 
 **Manual.** Añade a `~/.config/amp/settings.json`:
 
@@ -453,7 +453,7 @@ Comprueba con `amp mcp list`.
 
 ## GitHub Copilot CLI
 
-**Automática.** `darktrace-mcp setup --client copilot-cli` escribe `~/.copilot/mcp-config.json` (respeta `COPILOT_HOME`).
+**Automática (1.1.3).** `darktrace-mcp setup --client copilot-cli` escribe `~/.copilot/mcp-config.json` (respeta `COPILOT_HOME`).
 
 **Manual.** Usa `/mcp add` dentro de Copilot CLI o añade a `~/.copilot/mcp-config.json`:
 
@@ -480,7 +480,7 @@ Copilot CLI solo pasa las variables de `env` y `PATH` al servidor. Comprueba con
 
 ## Warp
 
-**Automática.** `darktrace-mcp setup --client warp` escribe `~/.warp/.mcp.json`.
+**Automática (1.1.3).** `darktrace-mcp setup --client warp` escribe `~/.warp/.mcp.json`.
 
 **Manual.** Settings → Agents → MCP servers → añade un servidor CLI y pega; o añade a `~/.warp/.mcp.json`:
 
@@ -505,7 +505,7 @@ Arranca el servidor desde esa misma página de ajustes.
 
 ## Goose
 
-**Automática.** `darktrace-mcp setup --client goose` inserta `darktrace` delimitado por marcadores bajo `extensions` en `~/.config/goose/config.yaml` (Windows `%APPDATA%\Block\goose\config\config.yaml`) sin tocar el resto. No reescribe una entrada `darktrace` existente ajena al asistente: muestra el fragmento.
+**Automática (1.1.3).** `darktrace-mcp setup --client goose` inserta `darktrace` delimitado por marcadores bajo `extensions` en `~/.config/goose/config.yaml` (Windows `%APPDATA%\Block\goose\config\config.yaml`) sin tocar el resto. No reescribe una entrada `darktrace` existente ajena al asistente: muestra el fragmento.
 
 **Manual.** `goose configure` → Add Extension → Command-line Extension, o añade bajo `extensions:`:
 
@@ -530,7 +530,7 @@ Los enlaces `goose://extension` solo aceptan `npx`, `uvx`, `jbang`, `goosed` o `
 
 ## LM Studio
 
-**Automática.** `darktrace-mcp setup --client lmstudio` escribe `~/.lmstudio/mcp.json`. `darktrace-mcp config lmstudio` también muestra un enlace `lmstudio://add_mcp?…` (LM Studio 0.3.17 o posterior).
+**Automática (1.1.3).** `darktrace-mcp setup --client lmstudio` escribe `~/.lmstudio/mcp.json`. `darktrace-mcp config lmstudio` también muestra un enlace `lmstudio://add_mcp?…` (LM Studio 0.3.17 o posterior).
 
 **Manual.** Program → Install → Edit mcp.json; añade bajo `mcpServers` (notación Cursor):
 
@@ -555,7 +555,7 @@ Guardar el archivo carga el servidor. Los modelos locales pueden tener ventanas 
 
 ## Antigravity
 
-**Automática.** `darktrace-mcp setup --client antigravity` escribe `~/.gemini/config/mcp_config.json`.
+**Automática (1.1.3).** `darktrace-mcp setup --client antigravity` escribe `~/.gemini/config/mcp_config.json`.
 
 **Manual.** Agent panel → … → MCP Servers → Manage MCP Servers → View raw config; añade:
 
@@ -580,7 +580,7 @@ Antigravity usa Ask por defecto; consérvalo para perfiles de escritura.
 
 ## JetBrains Junie
 
-**Automática.** `darktrace-mcp setup --client junie` escribe `~/.junie/mcp/mcp.json`, compartido por plugin y CLI de Junie. También se lee `.junie/mcp/mcp.json` de proyecto.
+**Automática (1.1.3).** `darktrace-mcp setup --client junie` escribe `~/.junie/mcp/mcp.json`, compartido por plugin y CLI de Junie. También se lee `.junie/mcp/mcp.json` de proyecto.
 
 **Manual.** Settings → Tools → Junie → MCP Settings → Add (abre el mismo archivo); añade:
 
@@ -612,15 +612,15 @@ JetBrains no documenta un archivo de configuración de AI Assistant; el asistent
 Sirve para cualquier cliente que acepte `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Con Docker instalado y en marcha, ejecuta el asistente y elige `2) docker`:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
-El asistente comprueba que el daemon de Docker responde, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (la versión del paquete), ofrece descargarla si falta y escribe la entrada endurecida con el ID local de la imagen y `--pull=never`. Muestra el ID de la imagen y el digest del registro y guarda ambos en `~/.config/darktrace-mcp/setup.json`; compara el digest con las notas de la versión. Sin preguntas: `setup --yes --runtime docker --pull --url https://<tu-appliance> --tokens-from-stdin`. `--image` también acepta otra etiqueta, un digest `nombre@sha256:…` o un ID local `sha256:…`. `darktrace-mcp config <cliente>` reutiliza el ID guardado, y `darktrace-mcp test` ejecuta primero `--check-config` en el contenedor con los mismos montajes y usuario (sin red) y después comprueba el appliance desde el host. Detalles: [guía de Docker](docker.md#install).
+El asistente comprueba que el daemon de Docker responde, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.2` (la versión del paquete), ofrece descargarla si falta y escribe la entrada endurecida con el ID local de la imagen y `--pull=never`. Muestra el ID de la imagen y el digest del registro y guarda ambos en `~/.config/darktrace-mcp/setup.json`; compara el digest con las notas de la versión. Sin preguntas: `setup --yes --runtime docker --pull --url https://<tu-appliance> --tokens-from-stdin`. `--image` también acepta otra etiqueta, un digest `nombre@sha256:…` o un ID local `sha256:…`. `darktrace-mcp config <cliente>` reutiliza el ID guardado, y `darktrace-mcp test` ejecuta primero `--check-config` en el contenedor con los mismos montajes y usuario (sin red) y después comprueba el appliance desde el host. Detalles: [guía de Docker](docker.md#install).
 
 **Manual.** Obtén el ID de la imagen (o usa el digest `nombre@sha256:…` anterior):
 
 ```sh
-docker image inspect --format '{{.Id}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
+docker image inspect --format '{{.Id}}' ghcr.io/nuoframework/darktrace-mcp:1.1.2
 command -v docker
 ```
 
@@ -659,7 +659,7 @@ Los archivos de token deben pertenecer al UID 1000 (o cambia `--user` para que c
 darktrace-mcp uninstall
 ```
 
-Muestra un plan y pregunta una vez (`--yes` omite la pregunta, `--dry-run` solo muestra el plan). Quita la entrada `darktrace` de todos los clientes (antes guarda una copia de cada archivo), borra los tokens guardados, `setup.json` y `~/.config/darktrace-mcp`, y borra las copias fijas de `~/.local/share/darktrace-mcp/<versión>/` (`--keep-copies` las conserva). Con el runtime Docker, `--docker` borra además el único ID de imagen que registró setup, nunca otras imágenes. Si el paquete está instalado globalmente, muestra el comando `npm uninstall -g @nuoframework/darktrace-mcp` para que lo ejecutes tú. Nunca toca enlaces simbólicos ni archivos desconocidos. `remove --all` es el mismo comando. Sin instalación global, ejecútalo como `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall`.
+Muestra un plan y pregunta una vez (`--yes` omite la pregunta, `--dry-run` solo muestra el plan). Quita la entrada `darktrace` de todos los clientes (antes guarda una copia de cada archivo), borra los tokens guardados, `setup.json` y `~/.config/darktrace-mcp`, y borra las copias fijas de `~/.local/share/darktrace-mcp/<versión>/` (`--keep-copies` las conserva). Con el runtime Docker, `--docker` borra además el único ID de imagen que registró setup, nunca otras imágenes. Si el paquete está instalado globalmente, muestra el comando `npm uninstall -g @nuoframework/darktrace-mcp` para que lo ejecutes tú. Nunca toca enlaces simbólicos ni archivos desconocidos. `remove --all` es el mismo comando. Sin instalación global, ejecútalo como `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`.
 
 <a id="several-clients-one-setup"></a>
 

@@ -6,7 +6,7 @@
 
 Dated audit of installation paths by client, operating system and delivery method.
 
-> **Version scope.** The eight original wizard clients are available in npm 1.1.1. The additional 13 client adapters, updated Windsurf path and setup-mode tool below describe [installation PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pending release. Use their manual snippets with 1.1.1; the new `setup --client` IDs require that change and a newly published version. Do not expect the pinned 1.1.1 command to include them.
+> **Version scope.** 1.1.2 includes the eight original clients, `uninstall` and the Docker wizard. The 13 additional adapters, `darktrace_setup_status` and the new Windsurf path are proposed in [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), still unmerged, for 1.1.3. They are not in npm 1.1.2: use the manual snippets for those clients.
 
 Audit of every installation path per client, operating system and method, dated **2026-10-06**. "Before" is the state at `origin/main` commit `7ccfa79`; "After" is this branch. The installation track checked every client row against the vendor's current documentation on that date; the URL in the last column is the page that was read. Where a vendor documents no file path, the matrix says so and the wizard prints JSON to paste instead of guessing.
 
@@ -16,8 +16,8 @@ Owner rule applied throughout: installation must be easy on every client, IDE an
 
 | Path | What it is | Steps for the user |
 |---|---|---|
-| **Wizard** | `npx -y @nuoframework/darktrace-mcp@1.1.1 setup` | 1 command, configuration questions (five numbered steps in the new presentation), restart the client |
-| **One-click badge** | README badge opens the client, which adds a `darktrace` entry running the pinned package through `npx`; the pending change adds setup mode and its only tool says to run `setup` | badge → confirm in client → run `setup` once → restart; on 1.1.1, run setup before starting |
+| **Wizard** | `npx -y @nuoframework/darktrace-mcp@1.1.2 setup` | 1 command, configuration questions (five numbered steps in the new presentation), restart the client |
+| **One-click badge** | README badge opens the client, which adds a `darktrace` entry running the pinned package through `npx`; the pending change adds setup mode and its only tool says to run `setup` | badge → confirm in client → run `setup` once → restart; on 1.1.2, run setup before starting |
 | **Plugin / marketplace** | Claude plugin bundle and Codex marketplace, built by another track in `claude-plugin/`, `.claude-plugin/`, `.agents/` | out of scope here |
 | **`.mcpb`** | Claude Desktop extension bundle from the GitHub release; tokens go to the OS keychain | download, double-click, fill the form |
 | **Docker** | `setup --runtime docker`, pinned image ID with `--pull=never` | 1 command plus `Pull it now? [Y/n]` |
@@ -66,7 +66,7 @@ Every **W** entry: backup of the existing file (`<file>.bak-<timestamp>`), atomi
 
 | Friction | Before | After |
 |---|---|---|
-| A client entry exists but has no URL or tokens (badge, manual copy, forgotten `setup`) | the server exited with `startup_error`; the client showed a dead server | pending release: the server starts in **setup mode** with one read-only tool, `darktrace_setup_status`, whose description and result name the exact command: `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`; stderr gets one `setup_required` line |
+| A client entry exists but has no URL or tokens (badge, manual copy, forgotten `setup`) | the server exited with `startup_error`; the client showed a dead server | pending release: the server starts in **setup mode** with one read-only tool, `darktrace_setup_status`, whose description and result name the exact command: `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`; stderr gets one `setup_required` line |
 | Client not in the wizard | 13 of the 21 clients above needed hand-written JSON | every client has an id; one is paste-only because the vendor documents no file |
 | Which client file, which key | per-client prose in `docs/clients.md` | `docs/install.md` starts with "pick your client" and gives 1 to 3 lines each; the wizard summary prints file, status and mode |
 | Wizard output on a 80-column terminal | unstructured text | banner, `Step n of 5`, markers, aligned summary; plain ASCII without a TTY or with `NO_COLOR` |
