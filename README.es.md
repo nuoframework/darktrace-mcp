@@ -45,9 +45,9 @@ Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.0](https://github.com/nu
 Con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
-  --image ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 ```
 
 Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.0`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).

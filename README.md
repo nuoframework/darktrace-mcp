@@ -45,9 +45,9 @@ Download `darktrace-mcp-1.1.1.mcpb` from the [v1.1.0 release](https://github.com
 With Docker installed, pull the pinned image first, then run the wizard. Client launchers use `--pull=never`.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
-  --image ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 ```
 
 Multi-arch image (linux/amd64, linux/arm64), pinned by its index digest. Use the digest, not the mutable `1.1.0` tag, in client configuration. [Docker guide](docs/docker.md).
