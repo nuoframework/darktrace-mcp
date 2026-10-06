@@ -15,7 +15,7 @@ export function approvalAnswer(answer:unknown):ApprovalDecision {
   if (answer.action==='accept') return plainObject(answer.content)&&answer.content.approved===true?'accept':'decline';
   return answer.action==='decline'?'decline':'cancel';
 }
-export const VERSION='1.1.0';
+export const VERSION='1.1.1';
 const plainObject=(value:unknown):value is Record<string,unknown>=>value!==null&&typeof value==='object'&&!Array.isArray(value);
 /** Revisions whose clients identify themselves per request (`server/discover` + `_meta` envelope, no `initialize`).
  * Must match what the SDK advertises in server/discover; a test pins it. */

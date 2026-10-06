@@ -28,7 +28,7 @@ This page explains, in plain terms, how the server protects your appliance and y
 
 ## Lab validation
 
-56 operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06); for 11 of them the evidence is partial (for example, Antigena `clear` only, subnet label only, Advanced Search GET forms tested before their encoding changed). The rest, including every Darktrace/Email read, are marked **not lab-validated**. Most write evidence predates the final write controls. The [tool reference](tools.md) shows the status of each operation, and the [known limitations](../CHANGELOG.md#known-limitations-in-110) list what is not covered. Test writes on a non-production appliance first.
+59 operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06); for 6 of them the evidence is partial (for example, manual Antigena `connection` blocks only, subnet `label` and `uniqueHostnames` only). The rest, including every Darktrace/Email read and the three tag DELETE operations (applied, but the lab gateway answers HTTP 502), are marked **not lab-validated**. Some write evidence predates the final write controls; the [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows under them. The [tool reference](tools.md) shows the status of each operation, and the [known limitations](../CHANGELOG.md#known-limitations-in-110) list what is not covered. Test writes on a non-production appliance first.
 
 ## Runtime notes
 

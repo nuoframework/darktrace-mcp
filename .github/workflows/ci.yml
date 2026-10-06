@@ -176,12 +176,12 @@ jobs:
             const shapes={
               "read":{"profile":"read","tools":27,"hash":"734a9e33dd8632df6efa4ec7b81c3f313d85dfbb478af3128bd3aec4f0b6833a","flags":{"read":true,"sensitive":false,"write":false,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
               "read,sensitive":{"profile":"read+sensitive","tools":36,"hash":"d885ce0e247f9dc7d55c7f27ed67be4396ffd8b35b2c7a6faf18d3f6a051b046","flags":{"read":true,"sensitive":true,"write":false,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
-              "read,write":{"profile":"read+write","tools":36,"hash":"1820b2b88e685e8058a79d26d97acf9f19f3d47a90cfd9e0862f4b37ce294f22","flags":{"read":true,"sensitive":false,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
-              "read,write,critical":{"profile":"read+write+critical","tools":41,"hash":"c5372a1b21079709f4f2766df8c298bd8e91151aa5c417fc2703c734d12c0aae","flags":{"read":true,"sensitive":false,"write":true,"critical":true},"approval":{"critical":"elicitation","write":"host"}},
-              "all":{"profile":"all","tools":50,"hash":"90c0a24a18ed849bec6bb8f6c9a6a7a2a2672121c0ed5d1fcbe8fad206e5f53d","flags":{"read":true,"sensitive":true,"write":true,"critical":true},"approval":{"critical":"elicitation","write":"host"}},
-              "read,sensitive,write":{"profile":"read+sensitive+write","tools":45,"hash":"3ccf0ef5ace7817dfb69fdb83893dab1baa36911bf3cbb906062dae26ca5b64b","flags":{"read":true,"sensitive":true,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
-              "read,write,critical/critical-host":{"profile":"read+write+critical/critical-host","tools":41,"hash":"f1b5457452b52acb25a9fe37df152d1a88f542580d3b8eadd73bae183a7ae646","flags":{"read":true,"sensitive":false,"write":true,"critical":true},"approval":{"critical":"host","write":"host"}},
-              "read,write/write-elicitation":{"profile":"read+write/write-elicitation","tools":36,"hash":"cbd4ac4d9f9f904591ad905f8c3be9244614c982a8d511b9f1102457a968e5bd","flags":{"read":true,"sensitive":false,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"elicitation"}},
+              "read,write":{"profile":"read+write","tools":36,"hash":"c5daa9f8890a23059a4f55715244a83d9e8dacb22cd4c32ba06b70edcefa7ff2","flags":{"read":true,"sensitive":false,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
+              "read,write,critical":{"profile":"read+write+critical","tools":41,"hash":"c358306affc356ca3719c614c9f1777f7582ecb20d7c0b0b932a472949450615","flags":{"read":true,"sensitive":false,"write":true,"critical":true},"approval":{"critical":"elicitation","write":"host"}},
+              "all":{"profile":"all","tools":50,"hash":"de987c3b3285bb1e53e4e8d0c806d739a31cc9ff864ba4f3aca02c336a79955e","flags":{"read":true,"sensitive":true,"write":true,"critical":true},"approval":{"critical":"elicitation","write":"host"}},
+              "read,sensitive,write":{"profile":"read+sensitive+write","tools":45,"hash":"e00ecf4a4c348d837bba433e50e88e316e58646bc5537f4dcdf998f87589dbe8","flags":{"read":true,"sensitive":true,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"host"}},
+              "read,write,critical/critical-host":{"profile":"read+write+critical/critical-host","tools":41,"hash":"4fd0a1ea10bc225b9fc450dbf12479e865eb4318f5b59c7f8ca8121cde82f2d9","flags":{"read":true,"sensitive":false,"write":true,"critical":true},"approval":{"critical":"host","write":"host"}},
+              "read,write/write-elicitation":{"profile":"read+write/write-elicitation","tools":36,"hash":"3a706c271a515f3f3f2f311acdc86cb8d0ad24e496c4e93e6cbd017de97b7186","flags":{"read":true,"sensitive":false,"write":true,"critical":false},"approval":{"critical":"elicitation","write":"elicitation"}},
             };
             const shape=shapes[process.env.DARKTRACE_SMOKE_PROFILES];
             assert.ok(shape,'unknown smoke profile');
@@ -233,7 +233,7 @@ jobs:
               const { tools } = await Promise.race([listing, timeout]);
               assert.ok(Array.isArray(tools), 'SDK listTools must return an array');
               const fixtureBytes=readFileSync('contract.json');
-              assert.equal(createHash('sha256').update(fixtureBytes).digest('hex'),'df8ca493e50a9f8eef2dd883c8e7a4f3b36b2effa0cba72cf36ed07ab488ded5');
+              assert.equal(createHash('sha256').update(fixtureBytes).digest('hex'),'86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6');
               const fixture=JSON.parse(fixtureBytes);
               assert.equal(tools.length,shape.tools);
               const captured=tools.map(({name,description,inputSchema,annotations})=>({name,description,inputSchema,annotations}));
@@ -303,12 +303,12 @@ jobs:
           const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
-          a.equal(r.sourceTreeSha256,'23113051be498f0043c53078723b3441155c19c0d252fa1a0563591795cbedc7');
+          a.equal(r.sourceTreeSha256,'b4b5d68c4fe26b4c4db52b5ed1b8863d6228fa182970779e2e07bea6fe8a7eb3');
           a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,1150);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
           a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,91);
-          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'d52f2a6305e6c08f5c6610dd5be3e8a3dd25e29b8f1f3399888d81dde251ba3c');
-          a.equal(r.fixtureHashes['mcp-tool-contracts-full-api.json'],'df8ca493e50a9f8eef2dd883c8e7a4f3b36b2effa0cba72cf36ed07ab488ded5');
+          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'6fa8d03ebf3e95003ca63213c074605248bfb691c8d3e76898f4e6fb75823972');
+          a.equal(r.fixtureHashes['mcp-tool-contracts-full-api.json'],'86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6');
           a.equal(r.fixtureHashes['mcp-tool-contracts-first-stable.json'],'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
           f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:91,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-full-api.json'],historicalFirstStableFixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
           NODE

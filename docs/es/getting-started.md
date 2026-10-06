@@ -24,25 +24,25 @@ Da al token solo los permisos de Darktrace que quieras que tenga el modelo. El s
 ### macOS, Linux y Windows
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-`npx` descarga la versión publicada exacta `1.1.0` (npm comprueba su integridad) y lanza el asistente (paso 2). Como la caché de `npx` es temporal, el asistente copia primero el paquete y sus tres dependencias fijadas a un directorio estable y registra esa ruta absoluta en tus clientes:
+`npx` descarga la versión publicada exacta `1.1.1` (npm comprueba su integridad) y lanza el asistente (paso 2). Como la caché de `npx` es temporal, el asistente copia primero el paquete y sus tres dependencias fijadas a un directorio estable y registra esa ruta absoluta en tus clientes:
 
 | Sistema | Copia fija |
 |---|---|
-| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.0/` (o `$XDG_DATA_HOME/darktrace-mcp/1.1.0/`) |
-| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.0\` |
+| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.1/` (o `$XDG_DATA_HOME/darktrace-mcp/1.1.1/`) |
+| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.1\` |
 
 Los clientes arrancan el servidor como `/ruta/absoluta/a/node …/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`; nunca ejecutan `npx` ni vuelven a necesitar el registro. Repetir el comando reutiliza la copia.
 
 Si quieres un comando `darktrace-mcp` en tu `PATH` (opcional), instálalo globalmente con la misma versión fijada:
 
 ```sh
-npm install -g @nuoframework/darktrace-mcp@1.1.0
+npm install -g @nuoframework/darktrace-mcp@1.1.1
 ```
 
-Si no, donde esta guía diga `darktrace-mcp …`, ejecuta `npx -y @nuoframework/darktrace-mcp@1.1.0 …`.
+Si no, donde esta guía diga `darktrace-mcp …`, ejecuta `npx -y @nuoframework/darktrace-mcp@1.1.1 …`.
 
 ### Windows
 

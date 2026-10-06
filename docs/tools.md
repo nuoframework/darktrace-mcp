@@ -6,7 +6,7 @@
 
 **50 tools** cover **77 executable operations** out of the 79 in the API inventory (Darktrace Threat Visualizer API 6.1). The other 2 are [not available](#not-available): 1 excluded (the email action) and 1 deprecated (`GET /aianalyst/incidents`).
 
-**Lab evidence.** 56 operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06). For 11 of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all 13 Darktrace/Email reads (the lab token got HTTP 403). Most write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. After those controls, only the intel-feed critical flow, a `post_tags` preview, the `confirmation_required` refusal and POST Advanced Search were re-checked live.
+**Lab evidence.** 59 operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06). For 6 of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all 13 Darktrace/Email reads (the lab token got HTTP 403). Some write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. The [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and the device, investigation, PCAP and tag writes under those controls.
 
 ## Which profile do I need?
 
@@ -40,10 +40,10 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_get_cves` | `GET /cves` | read | `read` | not lab-validated | CVEs for OT devices (Darktrace/OT only). |
+| `darktrace_get_cves` | `GET /cves` | read | `read` | not lab-validated: the lab appliance answers HTTP 500 (Darktrace/OT only) | CVEs for OT devices (Darktrace/OT only). |
 | `darktrace_get_network_stats` | `GET /network` | read | `read` | yes | Connectivity between devices or subnets. |
-| `darktrace_get_reference_data` | `GET /enums` | read | `read` | partial: passed only with `responsedata`; the full list returns `too_large` | Text values for numeric codes used in API responses. |
-| `darktrace_get_reference_data` | `GET /filtertypes` | read | `read` | not lab-validated | Filters available in the Model Editor. |
+| `darktrace_get_reference_data` | `GET /enums` | read | `read` | partial: passes with `responsedata`; the full list returns `response_limit_exceeded` | Text values for numeric codes used in API responses. |
+| `darktrace_get_reference_data` | `GET /filtertypes` | read | `read` | not lab-validated: the lab appliance answers with a redirect (HTTP 302), which is never followed | Filters available in the Model Editor. |
 | `darktrace_get_status` | `GET /status` | read | `read` | yes | System health and version of the appliance. |
 | `darktrace_get_summary_statistics` | `GET /summarystatistics` | read | `read` | yes | Device counts, bandwidth and active response actions. |
 
@@ -59,7 +59,7 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_get_metric_data` | `GET /metricdata` | read | `read` | yes | Time-series metric data for a device. |
 | `darktrace_get_similar_devices` | `GET /similardevices` | read | `read` | yes | Devices that behave like a given device. |
 | `darktrace_search_devices` | `GET /devicesearch` | read | `read` | yes | Search devices with filters. |
-| `darktrace_update_device` | `POST /devices` | high | `write` | not lab-validated | Change a device label, priority or type. |
+| `darktrace_update_device` | `POST /devices` | high | `write` | yes | Change a device label, priority or type. |
 
 ## Model breaches
 
@@ -77,11 +77,11 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_list_components` | `GET /components` | read | `read` | partial: passed only with `responsedata`; the full list returns `too_large` | List model components. |
+| `darktrace_list_components` | `GET /components` | read | `read` | partial: passes with `responsedata`; the full list returns `response_limit_exceeded` | List model components. |
 | `darktrace_list_components` | `GET /components/{cid}` | read | `read` | yes | One model component by `cid`. |
 | `darktrace_list_metrics` | `GET /metrics` | read | `read` | yes | List available metrics. |
 | `darktrace_list_metrics` | `GET /metrics/{mlid}` | read | `read` | yes | One metric by `mlid`. |
-| `darktrace_list_models` | `GET /models` | read | `read` | partial: passed only with `responsedata`; the full list returns `too_large` | List models. |
+| `darktrace_list_models` | `GET /models` | read | `read` | partial: passes with `responsedata`; the full list returns `response_limit_exceeded` | List models. |
 | `darktrace_list_models` | `GET /models/{pid}` | read | `read` | yes | One model by `pid`. |
 
 ## AI Analyst
@@ -91,7 +91,7 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/acknowledge` | medium | `write` | yes | Acknowledge AI Analyst incident events. |
 | `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/unacknowledge` | medium | `write` | yes | Unacknowledge AI Analyst incident events. |
 | `darktrace_comment_ai_analyst_incident` | `POST /aianalyst/incident/comments` | medium | `write` | yes | Add a comment to an AI Analyst incident event. |
-| `darktrace_create_ai_analyst_investigation` | `POST /aianalyst/investigations` | medium | `write` | not lab-validated | Start a manual AI Analyst investigation. |
+| `darktrace_create_ai_analyst_investigation` | `POST /aianalyst/investigations` | medium | `write` | yes | Start a manual AI Analyst investigation. |
 | `darktrace_get_ai_analyst_incident_comments` | `GET /aianalyst/incident/comments` | read | `read` | yes | Comments on an AI Analyst incident event. |
 | `darktrace_get_ai_analyst_stats` | `GET /aianalyst/stats` | read | `read` | yes | AI Analyst statistics. |
 | `darktrace_list_ai_analyst_incidents` | `GET /aianalyst/groups` | read | `read` | yes | List AI Analyst incidents (groups). |
@@ -104,8 +104,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_antigena_action` | `POST /antigena` | critical | `critical` | partial: only `clear` ran live (not activate, extend or reactivate) | Activate, extend, clear or reactivate a response action. |
-| `darktrace_antigena_manual_action` | `POST /antigena/manual` | critical | `critical` | partial: one manual `connection` block ran live | Create a manual response action (for example, block a connection). |
+| `darktrace_antigena_action` | `POST /antigena` | critical | `critical` | yes | Activate, extend, clear or reactivate a response action. |
+| `darktrace_antigena_manual_action` | `POST /antigena/manual` | critical | `critical` | partial: only manual `connection` blocks ran live; `pol`, `gpol` and `quarantineOutgoing` got HTTP 400 on a client-sensor device; `quarantine` and `quarantineIncoming` were not run | Create a manual response action (for example, block a connection). |
 | `darktrace_list_antigena_actions` | `GET /antigena` | read | `read` | yes | List Autonomous Response (Antigena) actions. |
 | `darktrace_list_antigena_actions` | `GET /antigena/summary` | read | `read` | yes | Summary of active and pending response actions. |
 
@@ -113,15 +113,15 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_delete_tag` | `DELETE /tags/{tid}` | critical | `critical` | not lab-validated | Delete a tag. |
+| `darktrace_delete_tag` | `DELETE /tags/{tid}` | critical | `critical` | not lab-validated: applied live (read-back confirms) but the lab gateway answers HTTP 502, reported as `write_outcome_unknown` | Delete a tag. |
 | `darktrace_list_tags` | `GET /tags` | read | `read` | yes | List tags. |
 | `darktrace_list_tags` | `GET /tags/{tid}` | read | `read` | yes | One tag by `tid`. |
 | `darktrace_list_tags` | `GET /tags/{tid}/entities` | read | `read` | yes | Devices with one tag. |
 | `darktrace_list_tags` | `GET /tags/entities` | read | `read` | yes | Tags on a device, or devices with a tag. |
 | `darktrace_manage_tags` | `POST /tags` | high | `write` | yes | Create a tag. |
 | `darktrace_manage_tags` | `POST /tags/{tid}/entities` | high | `write` | yes | Add a tag to a device by tag ID. |
-| `darktrace_manage_tags` | `DELETE /tags/{tid}/entities/{teid}` | high | `write` | not lab-validated | Remove one tag assignment. |
-| `darktrace_manage_tags` | `DELETE /tags/entities` | high | `write` | not lab-validated | Remove a tag from a device. |
+| `darktrace_manage_tags` | `DELETE /tags/{tid}/entities/{teid}` | high | `write` | not lab-validated: applied live (read-back confirms) but the lab gateway answers HTTP 502, reported as `write_outcome_unknown` | Remove one tag assignment. |
+| `darktrace_manage_tags` | `DELETE /tags/entities` | high | `write` | not lab-validated: applied live (read-back confirms) but the lab gateway answers HTTP 502, reported as `write_outcome_unknown` | Remove a tag from a device. |
 | `darktrace_manage_tags` | `POST /tags/entities` | high | `write` | yes | Add a tag to a device. |
 
 ## Intel feed and subnets
@@ -130,25 +130,25 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 |---|---|---|---|---|---|
 | `darktrace_get_intel_feed` | `GET /intelfeed` | read | `read` | yes | Read Watched Domains (intel feed). |
 | `darktrace_list_subnets` | `GET /subnets` | read | `read` | yes | List subnets. |
-| `darktrace_update_intel_feed` | `POST /intelfeed` | critical | `critical` | partial: only add and remove of one entry ran live | Add or remove Watched Domains entries. |
-| `darktrace_update_subnet` | `POST /subnets` | critical | `critical` | partial: only a subnet label change ran live | Change subnet settings. |
+| `darktrace_update_intel_feed` | `POST /intelfeed` | critical | `critical` | partial: `addentry`, `addlist`, `expiry` (entry expired on time) and `removeentry` ran live; `hostname:true` was accepted but not read back; `iagn` and `removeall` were not run | Add or remove Watched Domains entries. |
+| `darktrace_update_subnet` | `POST /subnets` | critical | `critical` | partial: only `label` and `uniqueHostnames` changes ran live | Change subnet settings. |
 
 ## Packet captures
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_download_pcap` | `GET /pcaps/{filename}` | read | `sensitive` | partial: tested live under an earlier partial-result contract; the current full-or-error contract was not tested live, and that 79,725-byte capture would now be refused | Download a packet capture as Base64, whole or not at all: captures above about 45 KB are refused with `output_limit_exceeded` (size and SHA-256 only). |
+| `darktrace_download_pcap` | `GET /pcaps/{filename}` | read | `sensitive` | yes | Download a packet capture as Base64, whole or not at all: captures above about 45 KB are refused with `output_limit_exceeded` (size and SHA-256 only). |
 | `darktrace_list_pcaps` | `GET /pcaps` | read | `read` | yes | List packet captures. |
-| `darktrace_request_pcap` | `POST /pcaps` | high | `write` | not lab-validated | Request a new packet capture. |
+| `darktrace_request_pcap` | `POST /pcaps` | high | `write` | yes | Request a new packet capture. |
 
 ## Advanced Search
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
 |---|---|---|---|---|---|
-| `darktrace_advanced_search` | `GET /advancedsearch/api/analyze/{field}/{analysis}/{query}` | read | `sensitive` | partial: passed live before the path encoding changed (CR-02); the current encoding has probe evidence for `=` only | Advanced Search field analysis. |
-| `darktrace_advanced_search` | `GET /advancedsearch/api/graph/{graphmode}/{interval}/{query}` | read | `sensitive` | partial: passed live before the path encoding changed (CR-02); the current encoding has probe evidence for `=` only | Advanced Search graph data. |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/analyze/{field}/{analysis}/{query}` | read | `sensitive` | yes | Advanced Search field analysis. |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/graph/{graphmode}/{interval}/{query}` | read | `sensitive` | yes | Advanced Search graph data. |
 | `darktrace_advanced_search` | `POST /advancedsearch/api/search` | read | `sensitive` | yes | Advanced Search query (POST form). |
-| `darktrace_advanced_search` | `GET /advancedsearch/api/search/{query}` | read | `sensitive` | partial: passed live before the path encoding changed (CR-02); the current encoding has probe evidence for `=` only | Advanced Search query (GET form). |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/search/{query}` | read | `sensitive` | yes | Advanced Search query (GET form). |
 
 ## Darktrace/Email
 
