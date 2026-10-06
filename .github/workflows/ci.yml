@@ -77,6 +77,14 @@ jobs:
               assert.ok(lines.includes(`ℹ ${key} ${value}`)||lines.includes(`# ${key} ${value}`),`${name}: ${key} ${value} required`);
           }
           NODE
+      - name: Show vendor gate failures
+        if: failure()
+        shell: bash
+        run: |
+          for f in typecheck functional security; do
+            echo "== $f.log"
+            grep -nE "✖|not ok|Error|AssertionError|error TS|ℹ (tests|pass|fail|skipped)" "$RUNNER_TEMP/vendor-results/$f.log" 2>/dev/null | tail -n 60 || true
+          done
       - name: Pin the just-built image ID for offline runtime checks
         run: echo "DARKTRACE_IMAGE_ID=$(docker image inspect --format '{{.Id}}' darktrace-mcp:ci)" >> "$GITHUB_ENV"
       - name: Check image configuration has no ports or operator secrets
