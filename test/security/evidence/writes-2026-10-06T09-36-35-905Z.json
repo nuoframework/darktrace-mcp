@@ -1,0 +1,4889 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06T09:36:35.905Z",
+  "receipt": "test/security/evidence/2026-10-06T09-36-35-892Z.json",
+  "receiptSha256": "784e091198dec8a62163406af0710ec4f74367d0de0c5efdf0802c4f44009518",
+  "node": "v24.14.1",
+  "platform": "darwin",
+  "arch": "arm64",
+  "commands": {
+    "build": [
+      "/Users/nuofrwk/.nvm/versions/node/v24.14.1/bin/node",
+      "scripts/build.mjs"
+    ],
+    "test": [
+      "/Users/nuofrwk/.nvm/versions/node/v24.14.1/bin/node",
+      "--import",
+      "./dist/test/security/test-runtime-argv.js",
+      "--import",
+      "./test/security/assertion-counter.mjs",
+      "--test",
+      "--test-reporter=spec",
+      "--test-concurrency=1",
+      "test/security/config.test.mjs",
+      "test/security/limits-retries.test.mjs",
+      "test/security/mcp-defense.test.mjs",
+      "test/security/network.test.mjs",
+      "test/security/policy-sinks.test.mjs",
+      "test/security/signer-client.test.mjs",
+      "test/security/stdio.test.mjs",
+      "test/security/writes.test.mjs"
+    ]
+  },
+  "snapshot": "/var/folders/tl/x0ps4dwd14x4qhyyh6x0lmgw0000gn/T/darktrace-adversarial-3M03Bq",
+  "buildStatus": 0,
+  "sourceTreeSha256": "a489010f3d65f1cdd814c9e3a5edc1a80871c9b4990b51effb4eb25871a31a3a",
+  "runtimeTreeSha256": "074de2c0ba3195c0cc6b2db19152dfdcb078fceb4b32849d539ea9a898aa4415",
+  "runtimeFiles": 75,
+  "harnessHashes": {
+    "test/security/fixtures/writes-hmac-vectors.json": "ac14b586d335f6451a7e6ca239a3a730c09d2972247b4612e6d1e316859e12dc",
+    "test/security/writes-evidence.mjs": "3ad80dc8c0cf4c73bb65178169519c1379e47c95c56b4950216a212aa349c2df",
+    "test/security/writes-helpers.mjs": "0585a9bdc95ba268653838782403c4922fabfd3e79450f9c34d72ab852cfda67",
+    "test/security/writes-loader.mjs": "7fb49282ccb8f5954ef38b92184f0a52567c0065a0c66ebd0d94ece69947944e",
+    "test/security/writes-preload.mjs": "e03cc764ad80cc123488b6c2f41db7c9632ecc662766c3e1d8b6dfad9cd16052",
+    "test/security/writes-transport.mjs": "ac01a75c437969f924ec96083f50f42fbcd924b0863d1ac5ba214e5f4875ab2c",
+    "test/security/writes-vectors.py": "6026a6117082e0aadf86594a945b14a129ee702369e5fbb9fcd244872f8be5d3",
+    "test/security/writes.test.mjs": "8223b0de5e9df73987888913372d96fccba177c93b888a8c2af0c8df63726f24"
+  },
+  "fixtureHashes": {
+    "ca.pem": "9be9fd4e7fcc491a35a8dcff5ea220a3443cb411962eac1c66ca4108234d5367",
+    "expired-cert.pem": "81ce259f1a8ff73b887ebb840f943dfe5074045bc291fa4bf33a38ceb07c6827",
+    "expired-key.pem": "ce1e34d1ad93bed37d059270b5af42ffb1637ba324a76cda44ee08732f4475aa",
+    "hmac-vectors.json": "2cc1485514a0ea7dfe7ea69070ae138dcd7888e7ec4b36aed6348e9ac7d76e5c",
+    "mcp-tool-contracts-first-stable.json": "6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c",
+    "mcp-tool-contracts-full-api.json": "c95104ced1955b7a1bdc72a6e19bc79c3d1a3e0ee39114e7eabf7fa71545fd3b",
+    "mcp-tool-contracts.json": "37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518b13a917f72",
+    "trusted-cert.pem": "5f1ca0c7f76679124e6e125ca8fa5138b52eb29ea21d15927883a04065bd6c7b",
+    "trusted-key.pem": "eba88591275becd566e2b1517795ea418c6fb32ca54d0b894b9313a986f307ed",
+    "untrusted-cert.pem": "d9d7d141479149acd9200ed1e2249d8e8e51f8fd35ce1e7538b452a72a130503",
+    "untrusted-key.pem": "19f7e287295d6d486a84220f07d8e53801b5a6c5854df3c49500b93ded144ccf",
+    "writes-hmac-vectors.json": "ac14b586d335f6451a7e6ca239a3a730c09d2972247b4612e6d1e316859e12dc",
+    "wronghostname-cert.pem": "f356cb2d417416bb797bd27e4231d4c8b15ad5779c4a3b8524d1768bfe94dbf1",
+    "wronghostname-key.pem": "501225b95797c9560bf18466daeb4bfe6e0c8486615d5830a290f66a54976b04"
+  },
+  "assertionInvocations": 44999,
+  "all": {
+    "tests": 1127,
+    "pass": 854,
+    "fail": 270,
+    "skip": 3
+  },
+  "writes": {
+    "tests": 797,
+    "pass": 527,
+    "fail": 270,
+    "skip": 0
+  },
+  "cases": [
+    {
+      "name": "ST-17.MANIFEST exactly 79 classified rows, 78 active, deprecated excluded",
+      "status": "PASSED",
+      "durationMs": 3.230166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read delete_tags_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 5.990125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read delete_tags_tid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.047,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read delete_tags_tid_entities_teid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.869625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_advancedsearch_api_analyze_field_analysis_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.939583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_advancedsearch_api_graph_graphmode_interval_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.704791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_advancedsearch_api_search_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.561167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_admin_decode_link [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.740583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_dash_action_summary [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.69975,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_dash_dash_stats [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.702417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_dash_data_loss [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 3.195541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_dash_user_anomaly [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.527,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_emails_uuid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.522292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_emails_uuid_download [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.522959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_resources_actions [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.513333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_resources_filters [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.454209,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_resources_tags [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.926875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_system_audit_events [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.363625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_agemail_api_ep_api_v1_0_system_audit_eventTypes [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.277959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_groups [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.922916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.788292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_incidentevents [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.759625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_incidents [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.263958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.863167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_aianalyst_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.878125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.908792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_antigena_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.873208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_components [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.880542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_components_cid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.879666,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_cves [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.878667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_details [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.915583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_deviceinfo [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.0305,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.972708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_devicesearch [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.925917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_devicesummary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.911084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_endpointdetails [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.91125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_enums [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.903292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_filtertypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.901542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.885917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_mbcomments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.868917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_metricdata [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.738959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_metrics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.699,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_metrics_mlid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.792167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_modelbreaches [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.783834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_modelbreaches_pbid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.731333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.748416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_models [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.748333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_models_pid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.724375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_network [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.745625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.742417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_pcaps_filename [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.265167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_similardevices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.747708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_status [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.737292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.725333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_summarystatistics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.732958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.592042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.631625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.617292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read get_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.586084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_advancedsearch_api_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.099417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_agemail_api_ep_api_v1_0_emails_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.980084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.989625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_acknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.010708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.014791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.971334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_pin [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.962333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_unacknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.964292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_aianalyst_unpin [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 5.463875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_antigena [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 2.027917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_antigena_manual [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 2.025375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_devices [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 2.902708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_intelfeed [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.149417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_modelbreaches_pbid_acknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.065542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.015083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_modelbreaches_pbid_unacknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.088666,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_pcaps [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.016917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_subnets [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_tags [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.967709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_tags_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.979542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read post_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.015125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive delete_tags_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.08175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive delete_tags_tid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.076375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive delete_tags_tid_entities_teid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.048334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_advancedsearch_api_analyze_field_analysis_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.703792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_advancedsearch_api_graph_graphmode_interval_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.721333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_advancedsearch_api_search_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.682042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_admin_decode_link [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.668834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_dash_action_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.659125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_dash_dash_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.540959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_dash_data_loss [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.738792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_dash_user_anomaly [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.686375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_emails_uuid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.674708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_emails_uuid_download [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.682167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_resources_actions [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.673875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_resources_filters [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.751083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_resources_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.716583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_system_audit_events [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.825292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_agemail_api_ep_api_v1_0_system_audit_eventTypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.795,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_groups [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.812042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.769292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_incidentevents [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.688625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_incidents [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.103959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.668458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_aianalyst_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.678,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.698709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_antigena_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.668083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_components [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.671583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_components_cid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.670541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_cves [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.653,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_details [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.655042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_deviceinfo [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.649708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.722458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_devicesearch [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.720625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_devicesummary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.663292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_endpointdetails [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.659792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_enums [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.792959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_filtertypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.726708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.68425,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_mbcomments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.678625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_metricdata [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.683458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_metrics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.650541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_metrics_mlid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.643833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_modelbreaches [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.642958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_modelbreaches_pbid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.645083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.652292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_models [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.656875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_models_pid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.658291,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_network [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.658041,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.68975,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_pcaps_filename [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 13.205333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_similardevices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.711417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_status [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.707375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.635458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_summarystatistics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.623416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.642333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.6335,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.661542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive get_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.626375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_advancedsearch_api_search [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.634667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_agemail_api_ep_api_v1_0_emails_search [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.026542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_acknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.989084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.570375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_pin [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.009375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_unacknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.980291,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_aianalyst_unpin [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.09625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_antigena [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.06575,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_antigena_manual [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.020708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_devices [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_intelfeed [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.987167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_modelbreaches_pbid_acknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 5.550667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_modelbreaches_pbid_unacknowledge [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.036583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_pcaps [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.0415,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_subnets [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_tags [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.964042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_tags_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.96975,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+sensitive post_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.953959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write delete_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.657334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write delete_tags_tid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.967667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write delete_tags_tid_entities_teid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.611833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_advancedsearch_api_analyze_field_analysis_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.8585,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_advancedsearch_api_graph_graphmode_interval_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.117292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_advancedsearch_api_search_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.027958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_admin_decode_link [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.97975,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_dash_action_summary [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.954834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_dash_dash_stats [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.945,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_dash_data_loss [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.034125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_dash_user_anomaly [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.018834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_emails_uuid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.96275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_emails_uuid_download [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.017042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_resources_actions [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.822084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_resources_filters [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.973583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_resources_tags [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.970458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_system_audit_events [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.976459,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_agemail_api_ep_api_v1_0_system_audit_eventTypes [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.946791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_groups [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.64025,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.611792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_incidentevents [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.609541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_incidents [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.969625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.624334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_aianalyst_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.623709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.620875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_antigena_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 5.2275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_components [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.173208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_components_cid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.121542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_cves [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.109333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_details [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 2.706125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_deviceinfo [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.718084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.695541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_devicesearch [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.64,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_devicesummary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.627292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_endpointdetails [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.623459,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_enums [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.639667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_filtertypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.757917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.620916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_mbcomments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.625584,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_metricdata [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.620709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_metrics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.63175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_metrics_mlid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.616625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_modelbreaches [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.661458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_modelbreaches_pbid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.667958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.62575,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_models [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.645667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_models_pid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.645959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_network [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.662875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.619041,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_pcaps_filename [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.0315,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_similardevices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.625792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_status [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.611208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.584208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_summarystatistics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.672833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.623292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.612083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.60525,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write get_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.615875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_advancedsearch_api_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.1175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_agemail_api_ep_api_v1_0_emails_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.003375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.047583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.790625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.635125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_pin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.625875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.659083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_aianalyst_unpin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.616042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_antigena [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.997625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_antigena_manual [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.975583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.61875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_intelfeed [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.975458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_modelbreaches_pbid_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.608208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.627125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_modelbreaches_pbid_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.60525,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.67175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_subnets [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.009625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.866125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.689042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write post_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.628,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical delete_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.631834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical delete_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.638542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical delete_tags_tid_entities_teid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.620458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_advancedsearch_api_analyze_field_analysis_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.020416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_advancedsearch_api_graph_graphmode_interval_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.995375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_advancedsearch_api_search_query [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.974125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_admin_decode_link [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.981125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_dash_action_summary [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 5.075875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_dash_dash_stats [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.059833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_dash_data_loss [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.9615,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_dash_user_anomaly [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.973208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_emails_uuid [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.9655,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_emails_uuid_download [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.967333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_resources_actions [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.95275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_resources_filters [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.925,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_resources_tags [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.95275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_system_audit_events [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.988167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_agemail_api_ep_api_v1_0_system_audit_eventTypes [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.036208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_groups [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 7.310708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.622875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_incidentevents [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_incidents [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.934,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.592583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_aianalyst_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.59275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.598333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_antigena_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.5975,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_components [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.585708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_components_cid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.59475,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_cves [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.591959,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_details [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.59475,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_deviceinfo [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.60125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.470792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_devicesearch [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.657542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_devicesummary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.611083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_endpointdetails [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.638125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_enums [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.608375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_filtertypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.615166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.60475,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_mbcomments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.612208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_metricdata [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.60325,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_metrics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.599459,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_metrics_mlid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.583625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_modelbreaches [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.589875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_modelbreaches_pbid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.605792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.609,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_models [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.594334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_models_pid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.858542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_network [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.64625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.594875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_pcaps_filename [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.984042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_similardevices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.590458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_status [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.584333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.584333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_summarystatistics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.586334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.586917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.580583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.589292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical get_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.582542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_advancedsearch_api_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 0.963916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_agemail_api_ep_api_v1_0_emails_search [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 4.316583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.63175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.614209,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.582709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.578333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_pin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.581458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.58875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_aianalyst_unpin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.5875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.584583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_antigena_manual [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.580416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.577667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.581292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_modelbreaches_pbid_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.578292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.581917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_modelbreaches_pbid_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.589292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.939625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.677125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.641833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.617916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX read+write+critical post_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.603,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all delete_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.69275,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all delete_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.673791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all delete_tags_tid_entities_teid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.676625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_advancedsearch_api_analyze_field_analysis_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.682083,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_advancedsearch_api_graph_graphmode_interval_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.684917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_advancedsearch_api_search_query [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.696208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_admin_decode_link [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.673792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_dash_action_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.690792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_dash_dash_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.667166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_dash_data_loss [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 6.781916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_dash_user_anomaly [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.264125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_emails_uuid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.224708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_emails_uuid_download [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.22425,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_resources_actions [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 1.2075,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_resources_filters [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 2.639708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_resources_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.773666,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_system_audit_events [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.698792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_agemail_api_ep_api_v1_0_system_audit_eventTypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.667792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_groups [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.651208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.649042,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_incidentevents [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_incidents [AD-W-01 on denied contract]",
+      "status": "FAIL",
+      "durationMs": 1.038792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.822709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_aianalyst_stats [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.666833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.65425,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_antigena_summary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.675916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_components [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_components_cid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.716209,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_cves [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.675291,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_details [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.667291,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_deviceinfo [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.69075,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.738667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_devicesearch [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.702208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_devicesummary [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.660666,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_endpointdetails [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 3.675917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_enums [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.724,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_filtertypes [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.680583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.672292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_mbcomments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.707167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_metricdata [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.718833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_metrics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.73775,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_metrics_mlid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.704208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_modelbreaches [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.497084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_modelbreaches_pbid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.770166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.684,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_models [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.670458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_models_pid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.659916,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_network [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.655875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.647375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_pcaps_filename [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.671542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_similardevices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.646625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_status [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.654834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.662375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_summarystatistics [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.65375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.664,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.645167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_tags_tid [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.666166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all get_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.717542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_advancedsearch_api_search [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.893292,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_agemail_api_ep_api_v1_0_emails_search [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.710584,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.668417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.658334,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_incident_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.656167,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_investigations [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.6525,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_pin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.659791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.660875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_aianalyst_unpin [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.652583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_antigena [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.65025,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_antigena_manual [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.6465,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_devices [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.649041,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_intelfeed [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 4.12225,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_modelbreaches_pbid_acknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.685542,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_modelbreaches_pbid_comments [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.653666,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_modelbreaches_pbid_unacknowledge [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.653834,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_pcaps [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.645917,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_subnets [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.648792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_tags [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.65175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_tags_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.646584,
+      "note": ""
+    },
+    {
+      "name": "ST-17.MATRIX all post_tags_tid_entities [AD-W-01 on denied contract]",
+      "status": "PASSED",
+      "durationMs": 0.646,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate delete_tags_entities [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 5.12525,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact delete_tags_entities [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.268709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate delete_tags_tid [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 0.781875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact delete_tags_tid [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.982208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate delete_tags_tid_entities_teid [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.093291,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact delete_tags_tid_entities_teid [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.543375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 0.777791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_agemail_api_ep_api_v1_0_emails_uuid_action [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 4.045417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_acknowledge [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.21875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_acknowledge [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.667709,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_incident_comments [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.997458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_incident_comments [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.632208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_investigations [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.0205,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_investigations [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.701416,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_pin [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.869625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_pin [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.589375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_unacknowledge [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.812708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_unacknowledge [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.574166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_aianalyst_unpin [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.788541,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_aianalyst_unpin [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.694208,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_antigena [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 0.881084,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_antigena [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.800875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_antigena_manual [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 0.898583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_antigena_manual [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.967833,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_devices [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.067458,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_devices [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 4.06375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_intelfeed [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 1.017166,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_intelfeed [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.97375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_modelbreaches_pbid_acknowledge [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.971667,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_modelbreaches_pbid_acknowledge [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.581,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_modelbreaches_pbid_comments [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.798792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_modelbreaches_pbid_comments [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.57025,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_modelbreaches_pbid_unacknowledge [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.72875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_modelbreaches_pbid_unacknowledge [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.510875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_pcaps [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.042708,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_pcaps [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.948209,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_subnets [AD-W-02 for critical]",
+      "status": "FAIL",
+      "durationMs": 0.82875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_subnets [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.031625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_tags [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 1.057583,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_tags [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.768375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_tags_entities [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.887375,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_tags_entities [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.68675,
+      "note": ""
+    },
+    {
+      "name": "ST-17.WRITE direct ordinary / critical gate post_tags_tid_entities [AD-W-02 for critical]",
+      "status": "PASSED",
+      "durationMs": 0.929792,
+      "note": ""
+    },
+    {
+      "name": "ST-17.PREVIEW unsigned exact post_tags_tid_entities [AD-W-02,AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 3.916,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED profile [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.763625,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED profiles [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.481958,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED approval [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.454541,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED approvalMode [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.447875,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED approved [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.460083,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED identity [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.456125,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED confirmString [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.505291,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED confirmNumber [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.440541,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED previewObject [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.465625,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED method [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.486917,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED url [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.447166,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED headers [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.436667,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED pathOverride [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.43025,
+      "note": ""
+    },
+    {
+      "name": "ST-18.FORGED schema [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.428083,
+      "note": ""
+    },
+    {
+      "name": "ST-18.GATES missing-confirm [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.453833,
+      "note": ""
+    },
+    {
+      "name": "ST-18.GATES false-confirm [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.44525,
+      "note": ""
+    },
+    {
+      "name": "ST-18.GATES missing-preview [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.4495,
+      "note": ""
+    },
+    {
+      "name": "ST-18.GATES random-preview [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.456875,
+      "note": ""
+    },
+    {
+      "name": "ST-17.HIDDEN unknown_operation [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.418459,
+      "note": ""
+    },
+    {
+      "name": "ST-17.HIDDEN get_status_alias [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.407625,
+      "note": ""
+    },
+    {
+      "name": "ST-17.HIDDEN get_aianalyst_incidents [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.401417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.TARGET operator protected target policy exists [AD-W-03]",
+      "status": "FAIL",
+      "durationMs": 0.05175,
+      "note": ""
+    },
+    {
+      "name": "ST-17.BULK every write has fixed numeric manifest bound [AD-W-03]",
+      "status": "FAIL",
+      "durationMs": 0.046125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.ACL synthetic 403 is determinate refusal, one signer/request [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.016292,
+      "note": ""
+    },
+    {
+      "name": "ST-18.REPLIES \"decline\" zero execution and consumed [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 1.107334,
+      "note": ""
+    },
+    {
+      "name": "ST-18.REPLIES \"cancel\" zero execution and consumed [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 4.190875,
+      "note": ""
+    },
+    {
+      "name": "ST-18.REPLIES \"unsupported\" zero execution and consumed [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.838333,
+      "note": ""
+    },
+    {
+      "name": "ST-18.REPLIES {\"action\":\"accept\"} zero execution and consumed [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.792625,
+      "note": ""
+    },
+    {
+      "name": "ST-18.REPLIES null zero execution and consumed [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.786459,
+      "note": ""
+    },
+    {
+      "name": "ST-18.CAPABILITY absent channel zero builder/sign/network/audit-start [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.811375,
+      "note": ""
+    },
+    {
+      "name": "ST-18.HOST trusted startup delegation still requires confirm and preview; records host mode [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.118958,
+      "note": ""
+    },
+    {
+      "name": "ST-18.HOST configuration legacy critical-without-write rejects before dispatch",
+      "status": "PASSED",
+      "durationMs": 0.131209,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING target changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.824,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING body changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 1.285333,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING unicode changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 1.198542,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING number-string changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 1.042,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING absent-null changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.834208,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING empty-false changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 0.804875,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING array-order changed args no effects [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 4.1685,
+      "note": ""
+    },
+    {
+      "name": "ST-19.BINDING reordered object keys preserve binding and execute once",
+      "status": "PASSED",
+      "durationMs": 1.557708,
+      "note": ""
+    },
+    {
+      "name": "ST-19.HASH normative canonical JSON, code point ordering, repeated query order [AD-W-04]",
+      "status": "FAIL",
+      "durationMs": 0.132458,
+      "note": ""
+    },
+    {
+      "name": "ST-19.DEFAULT omitted versus explicit reviewed default equal",
+      "status": "PASSED",
+      "durationMs": 0.939709,
+      "note": ""
+    },
+    {
+      "name": "ST-19.WRONG_OPERATION bound handle cannot execute a different critical route [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 1.035958,
+      "note": ""
+    },
+    {
+      "name": "ST-19.SESSION handle from independent server context must be rejected [AD-W-05]",
+      "status": "FAIL",
+      "durationMs": 1.188709,
+      "note": ""
+    },
+    {
+      "name": "ST-19.POLICY_EPOCH changed operator configuration invalidates preview [AD-W-05]",
+      "status": "FAIL",
+      "durationMs": 1.071833,
+      "note": ""
+    },
+    {
+      "name": "ST-19.EXPIRY t+299999 [AD-W-02 at expiry]",
+      "status": "PASSED",
+      "durationMs": 1.115459,
+      "note": ""
+    },
+    {
+      "name": "ST-19.EXPIRY t+300000 [AD-W-02 at expiry]",
+      "status": "FAIL",
+      "durationMs": 0.821084,
+      "note": ""
+    },
+    {
+      "name": "ST-19.EXPIRY t+300001 [AD-W-02 at expiry]",
+      "status": "FAIL",
+      "durationMs": 0.785125,
+      "note": ""
+    },
+    {
+      "name": "ST-19.APPROVAL_EXPIRY accept after TTL must recheck expiry [AD-W-06]",
+      "status": "FAIL",
+      "durationMs": 1.022958,
+      "note": ""
+    },
+    {
+      "name": "ST-19.TOCTOU caller object mutation after preview and during approval preserves frozen request",
+      "status": "PASSED",
+      "durationMs": 1.449875,
+      "note": ""
+    },
+    {
+      "name": "ST-19.RACE one handle at most one execution; loser preview_used [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 37.581292,
+      "note": ""
+    },
+    {
+      "name": "ST-19.INVALID_BEFORE_RESERVATION changed args must not consume original preview [AD-W-04]",
+      "status": "FAIL",
+      "durationMs": 2.453417,
+      "note": ""
+    },
+    {
+      "name": "ST-19.UPSTREAM_STATE preview cannot guarantee persistence or prevent concurrent appliance changes",
+      "status": "PASSED",
+      "durationMs": 1.886625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.56075,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.391083,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.342334,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 6.796125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.349,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_entities cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.241292,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.176458,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.139334,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.148875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.133666,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.144667,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.136833,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.138834,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.124709,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.137416,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.134125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.139792,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET delete_tags_tid_entities_teid cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.169458,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.659958,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.256875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.192625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.458291,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.188041,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_advancedsearch_api_search cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.182875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.246833,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.13375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.126167,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.128459,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.140625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_search cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.120542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.182916,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.236042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.176542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.153875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.142209,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_agemail_api_ep_api_v1_0_emails_uuid_action cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.145,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.280416,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.195083,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.196792,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.195208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.167584,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_acknowledge cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.183375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.205833,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.179375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.177667,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.167458,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.192834,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_incident_comments cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.170542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.229375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.198833,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.205667,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.200167,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.194541,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_investigations cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.18925,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.18025,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.161541,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.158292,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.165791,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.154542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_pin cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.154584,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.16475,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.156417,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.157583,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.157208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.152917,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unacknowledge cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.166291,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.196041,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.1585,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.155583,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.154208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.153167,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_aianalyst_unpin cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.154417,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.307042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.283541,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.288375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.2545,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.235333,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.246542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.419875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.326125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.486875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.423375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.340125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_antigena_manual cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.358333,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.284209,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.244458,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.260666,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.26425,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.250625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_devices cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.24075,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.358292,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.326333,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.365042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.327084,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.305708,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_intelfeed cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.320625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.168416,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.145083,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.138792,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.133208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.13025,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_acknowledge cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.133042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.187083,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.148917,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.149416,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.147375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.149875,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_comments cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.145041,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.154083,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.133,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.14075,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.136542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.127583,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_modelbreaches_pbid_unacknowledge cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.134917,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.363791,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.335459,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.331167,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.320375,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.331291,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_pcaps cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.344625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.38925,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.327041,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.314791,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.296,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.298458,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_subnets cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.296583,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.259125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.243834,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.242167,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.253333,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.271208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.247542,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.233625,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.22225,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.223042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.207583,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.214834,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_entities cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.21325,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities 429 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.316667,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities 500 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.237208,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities 503 one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.225125,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities reset one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.244209,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities timeout one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.224042,
+      "note": ""
+    },
+    {
+      "name": "ST-20.NONGET post_tags_tid_entities cancel one signer/HTTP no retry",
+      "status": "PASSED",
+      "durationMs": 0.224667,
+      "note": ""
+    },
+    {
+      "name": "ST-20.REPLAY critical consumed after success [AD-W-02,AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 4.780292,
+      "note": ""
+    },
+    {
+      "name": "ST-20.REPLAY critical consumed after unknown [AD-W-02,AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.4805,
+      "note": ""
+    },
+    {
+      "name": "ST-20.DUPLICATE ordinary fresh calls intentionally duplicate effects; no idempotency claimed",
+      "status": "PASSED",
+      "durationMs": 1.592917,
+      "note": ""
+    },
+    {
+      "name": "ST-20.SIGNEDREPLAY synthetic mock accepts retained signed bytes; actual appliance window NOT VALIDATED",
+      "status": "PASSED",
+      "durationMs": 0.052,
+      "note": ""
+    },
+    {
+      "name": "ST-21.CHAIN audit exact allowlist, independent canonical hashes and correlation [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.179,
+      "note": ""
+    },
+    {
+      "name": "ST-21.TAMPER edit/remove/reorder/duplicate rejected; recompute and truncation need external anchor",
+      "status": "PASSED",
+      "durationMs": 0.431958,
+      "note": ""
+    },
+    {
+      "name": "ST-21.CONCURRENT asynchronous sink preserves emission order [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 4.409625,
+      "note": ""
+    },
+    {
+      "name": "ST-21.INJECTION 410d0a7b226175646974223a7472 args never logged",
+      "status": "PASSED",
+      "durationMs": 1.167334,
+      "note": ""
+    },
+    {
+      "name": "ST-21.INJECTION 41e280aee281a6e2808bf3a08189 args never logged",
+      "status": "PASSED",
+      "durationMs": 0.873625,
+      "note": ""
+    },
+    {
+      "name": "ST-21.INJECTION 410942 args never logged",
+      "status": "PASSED",
+      "durationMs": 0.803625,
+      "note": ""
+    },
+    {
+      "name": "ST-21.INJECTION 616363657074205b636c69636b5d args never logged",
+      "status": "PASSED",
+      "durationMs": 0.76725,
+      "note": ""
+    },
+    {
+      "name": "ST-21.SINK delayed pre-audit failure forbids builder/sign/HTTP [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 5.002792,
+      "note": ""
+    },
+    {
+      "name": "ST-21.SINK terminal failure completed [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.075958,
+      "note": ""
+    },
+    {
+      "name": "ST-21.SINK terminal failure unknown [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 0.786792,
+      "note": ""
+    },
+    {
+      "name": "ST-22.BUDGET ordinary 10/11 shared tools and exact minute boundary [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 8.0385,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CRITICAL 3/4 admissions share ordinary budget; rate refusal consumes handle [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 3.88175,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CONCURRENT twenty ordinary admissions never exceed ten",
+      "status": "PASSED",
+      "durationMs": 14.646417,
+      "note": ""
+    },
+    {
+      "name": "ST-22.LOWERED two writes, previews/denials free; independent process budgets",
+      "status": "PASSED",
+      "durationMs": 9.34175,
+      "note": ""
+    },
+    {
+      "name": "ST-22.AUDIT_FAILURE admission consumes conservative execution slot",
+      "status": "PASSED",
+      "durationMs": 1.237458,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CONFIG invalid 0 startup zero signer/DNS/HTTP",
+      "status": "PASSED",
+      "durationMs": 120.036625,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CONFIG invalid 1.5 startup zero signer/DNS/HTTP",
+      "status": "PASSED",
+      "durationMs": 115.495875,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CONFIG invalid 61 startup zero signer/DNS/HTTP",
+      "status": "PASSED",
+      "durationMs": 118.913042,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CEILING plan lower-only 10 conflicts with implemented config 60 [AD-W-09]",
+      "status": "FAIL",
+      "durationMs": 0.149292,
+      "note": ""
+    },
+    {
+      "name": "ST-22.BREAKER three unknowns stop next write; read remains available [AD-W-10]",
+      "status": "FAIL",
+      "durationMs": 3.362417,
+      "note": ""
+    },
+    {
+      "name": "ST-17.INJECTION corpus 0 no secondary dispatch or policy changes",
+      "status": "PASSED",
+      "durationMs": 3.991125,
+      "note": ""
+    },
+    {
+      "name": "ST-17.INJECTION corpus 1 no secondary dispatch or policy changes",
+      "status": "PASSED",
+      "durationMs": 7.392333,
+      "note": ""
+    },
+    {
+      "name": "ST-17.INJECTION corpus 2 no secondary dispatch or policy changes",
+      "status": "PASSED",
+      "durationMs": 3.298958,
+      "note": ""
+    },
+    {
+      "name": "ST-17.INJECTION corpus 3 no secondary dispatch or policy changes",
+      "status": "PASSED",
+      "durationMs": 3.495791,
+      "note": ""
+    },
+    {
+      "name": "ST-17.INJECTION corpus 4 no secondary dispatch or policy changes",
+      "status": "PASSED",
+      "durationMs": 7.6515,
+      "note": ""
+    },
+    {
+      "name": "ST-23.TOXIC post_aianalyst_incident_comments message authorized copy exposure; sensitive-only refuses",
+      "status": "PASSED",
+      "durationMs": 1.390458,
+      "note": ""
+    },
+    {
+      "name": "ST-23.TOXIC post_modelbreaches_pbid_comments message authorized copy exposure; sensitive-only refuses",
+      "status": "PASSED",
+      "durationMs": 1.274291,
+      "note": ""
+    },
+    {
+      "name": "ST-23.TOXIC post_tags data.description authorized copy exposure; sensitive-only refuses",
+      "status": "PASSED",
+      "durationMs": 1.29325,
+      "note": ""
+    },
+    {
+      "name": "ST-23.TOXIC post_intelfeed description authorized copy exposure; sensitive-only refuses",
+      "status": "PASSED",
+      "durationMs": 1.85975,
+      "note": ""
+    },
+    {
+      "name": "ST-23.TOXIC post_agemail_api_ep_api_v1_0_emails_uuid_action note authorized copy exposure; sensitive-only refuses",
+      "status": "PASSED",
+      "durationMs": 1.431209,
+      "note": ""
+    },
+    {
+      "name": "ST-23.ISOLATION write-only cannot read sensitive data; investigations accept only documented fields",
+      "status": "PASSED",
+      "durationMs": 0.829583,
+      "note": ""
+    },
+    {
+      "name": "ST-23.INVALID ordinary sink label bounds [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.668709,
+      "note": ""
+    },
+    {
+      "name": "ST-23.INVALID ordinary sink arbitrary bounds [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.454625,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIST read fixed complete hash and repeated handshake",
+      "status": "PASSED",
+      "durationMs": 52.789791,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIST read+sensitive fixed complete hash and repeated handshake",
+      "status": "PASSED",
+      "durationMs": 10.327042,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIST read+write fixed complete hash and repeated handshake",
+      "status": "PASSED",
+      "durationMs": 13.51925,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIST read+write+critical fixed complete hash and repeated handshake",
+      "status": "PASSED",
+      "durationMs": 11.447792,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIST all fixed complete hash and repeated handshake",
+      "status": "PASSED",
+      "durationMs": 14.317458,
+      "note": ""
+    },
+    {
+      "name": "ST-24.LIFECYCLE forged initialized cannot unlock tool dispatch [AD-W-11]",
+      "status": "FAIL",
+      "durationMs": 163.885666,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S4 SDK-derived KAT SDK unencoded exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.687792,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S4 SDK-derived KAT encoded option exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.143,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S5 SDK-derived KAT SDK unencoded exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.112084,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S5 SDK-derived KAT encoded option exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.074833,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S6 SDK-derived KAT SDK unencoded exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.073459,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S6 SDK-derived KAT encoded option exact HMAC and wire",
+      "status": "PASSED",
+      "durationMs": 0.06375,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"//evil.invalid/x\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.049708,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x/../y\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.021208,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x/%2e/y\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.016042,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x/%2E%2e/y\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.015,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x/\\\\y\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.067334,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x?evil\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.01825,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x#evil\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.013792,
+      "note": ""
+    },
+    {
+      "name": "ST-25.PATH rejects \"/x\\n\" before HMAC",
+      "status": "PASSED",
+      "durationMs": 0.020208,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL ../capture.pcap tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.845875,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL //evil.invalid/capture tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.519667,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL %2e%2e tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.4595,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL %252e%252e tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.439541,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL https://evil.invalid tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.436208,
+      "note": ""
+    },
+    {
+      "name": "ST-25.TRAVERSAL x\\y tool denies before builder/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.441,
+      "note": ""
+    },
+    {
+      "name": "ST-25.S6 all three routes retain +/= literal and validate decoded search document",
+      "status": "PASSED",
+      "durationMs": 2.112583,
+      "note": ""
+    },
+    {
+      "name": "ST-25.401 no alternate signature, no retry [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.144,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL_PIN every email operation has reviewed schema digest/version provenance [AD-W-12]",
+      "status": "FAIL",
+      "durationMs": 0.103125,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_admin_decode_link unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.557834,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_dash_action_summary unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.467917,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_dash_dash_stats unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.457333,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_dash_data_loss unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.581583,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_dash_user_anomaly unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.54025,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_emails_uuid unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.555834,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_emails_uuid_download unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.481667,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_resources_actions unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.426,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_resources_filters unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.432709,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_resources_tags unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.447042,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_system_audit_events unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.43525,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL get_agemail_api_ep_api_v1_0_system_audit_eventTypes unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.749791,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL post_agemail_api_ep_api_v1_0_emails_search unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.452959,
+      "note": ""
+    },
+    {
+      "name": "ST-26.EMAIL post_agemail_api_ep_api_v1_0_emails_uuid_action unknown model overrides zero effects [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.474917,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY long-string denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.554666,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY long-array denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.509,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY unsafe-key denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.4945,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY key-length denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.437042,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY prototype denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.426583,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY nonfinite denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.471667,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY depth denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.434709,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY byte-budget denies before preview/sign/network [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 1.0475,
+      "note": ""
+    },
+    {
+      "name": "ST-26.BODY exact freeform string/array/key boundaries accepted but require approval",
+      "status": "PASSED",
+      "durationMs": 0.741,
+      "note": ""
+    },
+    {
+      "name": "ST-26.RESPONSE essential email shape/version mismatch [AD-W-12] object",
+      "status": "FAIL",
+      "durationMs": 0.491083,
+      "note": ""
+    },
+    {
+      "name": "ST-26.RESPONSE essential email shape/version mismatch [AD-W-12] string",
+      "status": "FAIL",
+      "durationMs": 0.415083,
+      "note": ""
+    },
+    {
+      "name": "ST-26.VIEWS raw credentials/email/body fields omitted without sensitive permission",
+      "status": "PASSED",
+      "durationMs": 5.005417,
+      "note": ""
+    },
+    {
+      "name": "ST-26.UNKNOWN_FIELDS sensitive email projection excludes secret nonessential field [AD-W-12]",
+      "status": "FAIL",
+      "durationMs": 0.505792,
+      "note": ""
+    },
+    {
+      "name": "ST-27.UI code-owned bounded summary neutralizes controls and redacts tokens",
+      "status": "PASSED",
+      "durationMs": 0.112958,
+      "note": ""
+    },
+    {
+      "name": "ST-27.DIGEST approval summary must include canonical digest and every effective target [AD-W-13]",
+      "status": "FAIL",
+      "durationMs": 0.071167,
+      "note": ""
+    },
+    {
+      "name": "ST-27.OVERLONG effective target hidden by summary must deny before elicitation [AD-W-13]",
+      "status": "FAIL",
+      "durationMs": 1.755708,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_MODEL preview then execute waits for correlated human acceptance",
+      "status": "PASSED",
+      "durationMs": 170.559709,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_REPLY decline consumed without signer/HTTP [AD-W-01,AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 165.243417,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_REPLY cancel consumed without signer/HTTP [AD-W-01,AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 172.388291,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_REPLY approved-false consumed without signer/HTTP [AD-W-01,AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 169.647541,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_REPLY missing-approved consumed without signer/HTTP [AD-W-01,AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 172.06575,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_REPLY malformed consumed without signer/HTTP [AD-W-01,AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 165.59725,
+      "note": ""
+    },
+    {
+      "name": "ST-27.STDIO_SCHEMA human prompt has code-owned approved:boolean required schema [AD-W-14]",
+      "status": "FAIL",
+      "durationMs": 165.174542,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_CAPABILITY {} zero sign/HTTP [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 163.480125,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_CAPABILITY {\"elicitation\":{\"url\":{}}} zero sign/HTTP [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 165.260208,
+      "note": ""
+    },
+    {
+      "name": "ST-28.EOF pending approval clears child with no orphan signing/execution",
+      "status": "PASSED",
+      "durationMs": 163.518708,
+      "note": ""
+    },
+    {
+      "name": "ST-28.PENDING second same-session approval denied without another prompt [AD-W-15]",
+      "status": "FAIL",
+      "durationMs": 2.072542,
+      "note": ""
+    },
+    {
+      "name": "ST-28.PROCESS fifth pending across sessions denied; maximum four [AD-W-15]",
+      "status": "FAIL",
+      "durationMs": 9.915708,
+      "note": ""
+    },
+    {
+      "name": "ST-28.CANCEL accepted reply after caller cancellation cannot execute [AD-W-15]",
+      "status": "FAIL",
+      "durationMs": 2.078125,
+      "note": ""
+    },
+    {
+      "name": "ST-28.TIMEOUT min 30s / expiry with fake timers; late accept cannot execute [AD-W-16]",
+      "status": "FAIL",
+      "durationMs": 12.869625,
+      "note": ""
+    },
+    {
+      "name": "ST-29.BASE64 arbitrary fixture bytes decode exactly; size/hash correct and no filesystem mutations",
+      "status": "PASSED",
+      "durationMs": 1.705917,
+      "note": ""
+    },
+    {
+      "name": "ST-29.ENVELOPE exact pcap structured schema and no duplicated binary text [AD-W-17]",
+      "status": "FAIL",
+      "durationMs": 0.899583,
+      "note": ""
+    },
+    {
+      "name": "ST-29.STREAM 2097152 bytes Content-Length=absent cumulative cap before return",
+      "status": "PASSED",
+      "durationMs": 0.724417,
+      "note": ""
+    },
+    {
+      "name": "ST-29.STREAM 2097152 bytes Content-Length=lying cumulative cap before return",
+      "status": "PASSED",
+      "durationMs": 0.66225,
+      "note": ""
+    },
+    {
+      "name": "ST-29.STREAM 2097153 bytes Content-Length=absent cumulative cap before return",
+      "status": "PASSED",
+      "durationMs": 0.464625,
+      "note": ""
+    },
+    {
+      "name": "ST-29.STREAM 2097153 bytes Content-Length=lying cumulative cap before return",
+      "status": "PASSED",
+      "durationMs": 0.452708,
+      "note": ""
+    },
+    {
+      "name": "ST-29.OUTPUT binary over output budget denies without partial Base64 [AD-W-17]",
+      "status": "FAIL",
+      "durationMs": 0.860542,
+      "note": ""
+    },
+    {
+      "name": "ST-29.ENCODING unexpected gzip aborts stream, no retry/files [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.615625,
+      "note": ""
+    },
+    {
+      "name": "ST-29.PERMISSION missing sensitive profile zero signing/network/audit-start [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.448416,
+      "note": ""
+    },
+    {
+      "name": "ST-21.DENIAL_AUDIT invalid one safe chained error with no execution [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.498167,
+      "note": ""
+    },
+    {
+      "name": "ST-21.DENIAL_AUDIT profile one safe chained error with no execution [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 0.443333,
+      "note": ""
+    },
+    {
+      "name": "ST-21.PREVIEW_HASH preview and execute share digest with distinct IDs [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 1.28175,
+      "note": ""
+    },
+    {
+      "name": "ST-21.DIAGNOSTIC terminal sink failure emits fixed audit_sink_failed metadata [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.155875,
+      "note": ""
+    },
+    {
+      "name": "ST-19.EXPIRED_USED state precedence retains consumed tombstone [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 1.515833,
+      "note": ""
+    },
+    {
+      "name": "ST-19.RESTART preview cannot survive real child restart [AD-W-02 error contract]",
+      "status": "FAIL",
+      "durationMs": 198.851166,
+      "note": ""
+    },
+    {
+      "name": "ST-19.QUERY_ORDER optional ordinary preview binds repeated query values and encoding [AD-W-04]",
+      "status": "FAIL",
+      "durationMs": 0.175959,
+      "note": ""
+    },
+    {
+      "name": "ST-20.UNKNOWN response lost after acceptance is correlated and never reported safe to retry [AD-W-08]",
+      "status": "FAIL",
+      "durationMs": 1.366709,
+      "note": ""
+    },
+    {
+      "name": "ST-22.CONCURRENT critical admissions never exceed three",
+      "status": "PASSED",
+      "durationMs": 6.284292,
+      "note": ""
+    },
+    {
+      "name": "ST-22.SLOTS unknown upstream failures consume ordinary budget without retries",
+      "status": "PASSED",
+      "durationMs": 2.138,
+      "note": ""
+    },
+    {
+      "name": "ST-22.RESET success resets failure streak; third later failure opens circuit [AD-W-10]",
+      "status": "FAIL",
+      "durationMs": 8.417416,
+      "note": ""
+    },
+    {
+      "name": "ST-22.BREAKER read still permitted and new trusted server can restart [AD-W-10]",
+      "status": "FAIL",
+      "durationMs": 3.791125,
+      "note": ""
+    },
+    {
+      "name": "ST-24.UNION read+sensitive+write registry exactly follows manifest and remains immutable",
+      "status": "PASSED",
+      "durationMs": 7.718708,
+      "note": ""
+    },
+    {
+      "name": "ST-24.UNION_HASH supported sensitive+write union needs a reviewed fixed snapshot [AD-W-18]",
+      "status": "FAIL",
+      "durationMs": 0.105625,
+      "note": ""
+    },
+    {
+      "name": "ST-25.AMBIGUOUS_PATH /x//y rejects before HMAC [AD-W-19]",
+      "status": "FAIL",
+      "durationMs": 0.1025,
+      "note": ""
+    },
+    {
+      "name": "ST-25.AMBIGUOUS_PATH /x/%252e%252e/y rejects before HMAC [AD-W-19]",
+      "status": "FAIL",
+      "durationMs": 0.037708,
+      "note": ""
+    },
+    {
+      "name": "ST-25.IMMUTABLE mutation while connector initialization pending cannot change signed wire",
+      "status": "PASSED",
+      "durationMs": 1.156375,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_admin_decode_link descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.651667,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_dash_action_summary descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.473916,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_dash_dash_stats descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.45125,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_dash_data_loss descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.441459,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_dash_user_anomaly descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.447125,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_emails_uuid descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.453875,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_emails_uuid_download descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.566959,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_resources_actions descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.557584,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_resources_filters descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.470667,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_resources_tags descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.451334,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_system_audit_events descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.454709,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED get_agemail_api_ep_api_v1_0_system_audit_eventTypes descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.444084,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED post_agemail_api_ep_api_v1_0_emails_search descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 0.484583,
+      "note": ""
+    },
+    {
+      "name": "ST-26.AUTHORIZED post_agemail_api_ep_api_v1_0_emails_uuid_action descriptor-owned request exactly once",
+      "status": "PASSED",
+      "durationMs": 1.085625,
+      "note": ""
+    },
+    {
+      "name": "ST-26.MALFORMED raw HTML/JSON cannot become a tool or policy instruction [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.473458,
+      "note": ""
+    },
+    {
+      "name": "ST-27.CONTROLS every MR-01 display code point stays visibly neutralized",
+      "status": "PASSED",
+      "durationMs": 0.610167,
+      "note": ""
+    },
+    {
+      "name": "ST-18.STDIO_DUPLICATE repeated human response cannot execute consumed preview again [AD-W-02]",
+      "status": "FAIL",
+      "durationMs": 171.236709,
+      "note": ""
+    },
+    {
+      "name": "ST-18.HOST_STDIO startup host delegation zero elicitation and audit approvalMode host [AD-W-07]",
+      "status": "FAIL",
+      "durationMs": 167.562916,
+      "note": ""
+    },
+    {
+      "name": "ST-24.DUPLICATE_KEYS raw escaped duplicate confirm fields denied before dispatch",
+      "status": "PASSED",
+      "durationMs": 194.60725,
+      "note": ""
+    },
+    {
+      "name": "ST-29.CANCEL pre-cancelled binary operation zero builder/sign/network/audit-start [AD-W-15]",
+      "status": "FAIL",
+      "durationMs": 1.056042,
+      "note": ""
+    },
+    {
+      "name": "ST-29.ALLOCATION output-budget refusal precedes large Base64 allocation [AD-W-17]",
+      "status": "FAIL",
+      "durationMs": 0.883958,
+      "note": ""
+    },
+    {
+      "name": "ST-29.RETAINED raw chunks plus consolidated buffer must fit byte cap [AD-W-20]",
+      "status": "FAIL",
+      "durationMs": 0.43875,
+      "note": ""
+    },
+    {
+      "name": "ST-29.TOOL_CAP plus-one stream abort returns response_limit_exceeded [AD-W-01]",
+      "status": "FAIL",
+      "durationMs": 0.851,
+      "note": ""
+    },
+    {
+      "name": "ST-29.NOTICE base64 appliance data is forwarded to host/provider [AD-W-21]",
+      "status": "FAIL",
+      "durationMs": 0.367208,
+      "note": ""
+    }
+  ],
+  "findingIds": [
+    "AD-W-01",
+    "AD-W-02",
+    "AD-W-03",
+    "AD-W-04",
+    "AD-W-05",
+    "AD-W-06",
+    "AD-W-07",
+    "AD-W-08",
+    "AD-W-09",
+    "AD-W-10",
+    "AD-W-11",
+    "AD-W-12",
+    "AD-W-13",
+    "AD-W-14",
+    "AD-W-15",
+    "AD-W-16",
+    "AD-W-17",
+    "AD-W-18",
+    "AD-W-19",
+    "AD-W-20",
+    "AD-W-21"
+  ],
+  "externalNetwork": false,
+  "applianceAclValidated": false,
+  "humanIdentityValidated": false,
+  "contract": "docs/security/security-test-plan-writes.md",
+  "threats": "docs/security/threat-model-writes.md"
+}
