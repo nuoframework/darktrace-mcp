@@ -262,6 +262,11 @@ assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink 
 const archive=join(output,arch), downloaded=join(output,'vendor-sources');
 mkdirSync(join(archive,'apks'),{recursive:true});mkdirSync(downloaded,{recursive:true});
 function run(argv){const r=spawnSync(argv[0],argv.slice(1),{stdio:'inherit'});if(r.error)throw r.error;assert.equal(r.status,0,`${argv[0]} failed`);}
+const expected=new Map(pins.trim().split('\n').map(l=>l.split(/  /)));
+const pinnedFetch=[...expected.values()].map(name=>{
+ assert.match(name,/^[a-zA-Z0-9_.+-]+\.apk$/);
+ return `wget -q -O /archive/apks/${name} ${repository}/${arch==='arm64'?'aarch64':'x86_64'}/${name}`;
+}).join('\n');
 // apk update authenticates APKINDEX with the keys in the digest-pinned base.
 // apk verify authenticates every archive; SHA-256 also rejects any revision change.
 const fetchScript=`set -eu
@@ -270,13 +275,13 @@ apk update
 cp /etc/apk/keys/* /archive/
 cp /etc/apk/repositories /archive/repositories
 cp /var/cache/apk/* /archive/ 2>/dev/null || true
-apk fetch --recursive --output /archive/apks nodejs=24.18.1-r0 libssl3=3.5.9-r0 libcrypto3=3.5.9-r0 ca-certificates-bundle=20260909-r0
+# Fetch committed filenames: the current index may supersede a pinned revision.
+${pinnedFetch}
 apk verify /archive/apks/*.apk
 chown -R ${uid}:${gid} /archive
 `;
 run(['docker','run','--rm','--platform',`linux/${arch}`,'--mount',`type=bind,src=${archive},dst=/archive`,base,'sh','-ec',fetchScript]);
 writeFileSync(join(archive,'SHA256SUMS'),pins);
-const expected=new Map(pins.trim().split('\n').map(l=>l.split(/  /)));
 assert.equal(readdirSync(join(archive,'apks')).length,expected.size);
 for(const [hash,name] of expected)assert.equal(createHash('sha256').update(readFileSync(join(archive,'apks',name))).digest('hex'),hash,name);
 const maximumDownloadBytes=128*1024*1024;
