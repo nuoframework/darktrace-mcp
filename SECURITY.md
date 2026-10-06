@@ -17,6 +17,8 @@ Use GitHub private vulnerability reporting: open the repository's **Security** t
 
 If the form is not available, open a public issue titled "Security contact request" that contains **only** a request for a private channel: no affected component, impact, credentials, appliance data or exploit details. A maintainer will reply with a private route. Never put vulnerability details, tokens or raw appliance data in public issues, discussions or pull requests. The complaints address below is not a vulnerability-reporting channel. No response time is guaranteed.
 
+**Response times.** The maintainer acknowledges a private vulnerability report within 14 days, agrees a fix or mitigation plan with the reporter, and publishes an advisory and a fixed release when the fix is available; confirmed vulnerabilities are fixed as quickly as possible and at most within 60 days of confirmation unless the reporter agrees otherwise.
+
 Include the affected commit/version, runtime, minimal reproduction with synthetic data, observed impact and suggested mitigation. Rotate any exposed appliance tokens through the authorized operator; redact logs before sharing. No external report is sent by this project automatically.
 
 ## Complaints, trademark and branding contact
