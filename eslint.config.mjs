@@ -15,7 +15,7 @@ export default tseslint.config(
   {
     // First-party code only. Tests, generated output, vendored OpenAPI
     // specs, Python tooling and historical fixtures are out of scope.
-    ignores: [
+    ignores: ['.claude/**', 
       'dist/', 'coverage/', 'release/', '.lab/', 'exports/', 'docs-src/',
       'test/', 'tools/', 'docs/', 'examples/', 'openapi/',
       '**/*.{js,cjs}', 'scripts/**/*.ts',
