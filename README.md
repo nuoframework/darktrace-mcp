@@ -9,151 +9,148 @@
 
 **Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.**
 
-Use the Darktrace Threat Visualizer API from Claude, Codex, Cursor, VS Code and other MCP clients: investigate devices, model breaches and AI Analyst incidents, and, if you allow it, take action.
+Investigate your Darktrace appliance from your MCP client. Start read-only; choose when to allow changes.
 
-<p>
-  <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-en.svg" alt="transport: stdio only"></a>
-  <a href="package.json"><img src="docs/assets/badges/node-22-en.svg" alt="runtime: Node.js 22+"></a>
-  <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-en.svg" alt="license: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: local build or ghcr.io image, pinned image ID"></a>
-  <a href="docs/security.md"><img src="docs/assets/badges/security-tests-en.svg" alt="security tests: offline"></a>
-  <!-- OpenSSF badges: placeholders, kept commented out until the project has a published Scorecard
-       result and a bestpractices.dev entry. Replace <BESTPRACTICES_ID> with the numeric project id.
-       See docs/security/supply-chain-checks.md before enabling (they load from external badge services).
-  <a href="https://scorecard.dev/viewer/?uri=github.com/nuoframework/darktrace-mcp"><img src="https://api.scorecard.dev/projects/github.com/nuoframework/darktrace-mcp/badge" alt="OpenSSF Scorecard"></a>
-  <a href="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>"><img src="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>/badge" alt="OpenSSF Best Practices"></a>
-  -->
-</p>
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2563EB)](LICENSE)
+[![Node.js 22+](https://img.shields.io/badge/node-22%2B-339933?logo=nodedotjs&logoColor=white)](docs/getting-started.md)
+[![MCP 2026-07-28](https://img.shields.io/badge/MCP-2026--07--28-7C3AED)](docs/configuration.md#human-approval)
+[![CI](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml)
+[![OpenSSF Scorecard: pending](https://img.shields.io/badge/OpenSSF%20Scorecard-pending-64748B)](docs/releases.md#openssf-badge-placeholders)
+[![OpenSSF Best Practices: pending](https://img.shields.io/badge/OpenSSF%20Best%20Practices-pending-64748B)](docs/releases.md#openssf-badge-placeholders)
+<!-- npm badge will 404 until the package is published. No publication claim is made here. -->
+[![npm version](https://img.shields.io/npm/v/@nuoframework/darktrace-mcp)](docs/releases.md#distribution-channels-110-and-later)
 
-[Getting started](docs/getting-started.md) · [Clients](docs/clients.md) · [Tools](docs/tools.md) · [Configuration](docs/configuration.md) · [Troubleshooting](docs/troubleshooting.md)
+[Get started](docs/getting-started.md) · [Tools](docs/tools.md) · [Configuration](docs/configuration.md) · [Security](docs/security.md) · [Troubleshooting](docs/troubleshooting.md)
 
-## Quick start
+## See it work
 
-You need: the HTTPS address of your Darktrace appliance, a **public** and a **private** API token, and Node.js 22 or later.
+Three recordings against a **synthetic HTTPS mock**, with dummy tokens and no production data. These demonstrate the workflow, not appliance compatibility. [Sources, transcripts and re-recording guide](scripts/demo/README.md).
 
-### 1. Setup wizard (macOS, Linux, Windows)
+**1 · Connect once.** Enter the URL and hidden tokens, pick `read`, then choose a client. The wizard checks TLS/authentication and shows what it wrote.
 
-```sh
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+![Setup wizard selecting read-only access and writing a temporary OpenCode configuration](docs/assets/demo/setup.gif)
+
+**2 · Ask an analyst question.** Claude Code calls the device and model-breach tools, then suggests what to inspect next. The recording formats actual headless client output.
+
+![Claude Code retrieves synthetic devices and model breaches through MCP, then recommends investigation steps](docs/assets/demo/analyst.gif)
+
+**3 · Keep control of critical actions.** Preview → confirm → server confirmation dialog → decline. This minimal demo host renders the real MCP dialog; it is not a Claude Code screenshot. No action executes.
+
+![Critical Antigena preview with previewId, confirmation dialog showing exact values, and approval_denied after decline](docs/assets/demo/approval.gif)
+
+## Install in 60 seconds
+
+Have your appliance's HTTPS origin and API token pair ready. The wizard needs **Node.js 22+**. These 1.1.0 distribution paths become available when the release is published; see [release status and source-install fallback](docs/getting-started.md).
+
+<table>
+<tr><th>npm → setup wizard</th><th>Claude Desktop → .mcpb</th><th>Docker → pinned image</th></tr>
+<tr><td valign="top">
+<pre>npx -y \
+  @nuoframework/darktrace-mcp@1.1.0 \
+  setup</pre>
+Choose <code>read</code> and your clients.
+</td><td valign="top">
+Open <a href="https://github.com/nuoframework/darktrace-mcp/releases">Releases</a>.<br>
+Download <code>darktrace-mcp-1.1.0.mcpb</code>.<br>
+Double-click; enter URL and tokens.<br>
+Claude Desktop keeps tokens in the OS keychain.
+</td><td valign="top">
+<pre>docker pull \
+  ghcr.io/nuoframework/darktrace-mcp:1.1.0</pre>
+<a href="docs/clients.md#docker">Resolve the digest and run the Docker wizard</a>.<br>
+Pin the digest, never the moving tag.
+</td></tr>
+</table>
+
+`npx` is a one-time bootstrap. The wizard installs a fixed copy and gives clients absolute Node + `dist/src/index.js` paths. Native Windows cannot protect token files: use [.mcpb, Docker or WSL](docs/getting-started.md#windows). [Full installation guide](docs/getting-started.md).
+
+## Compatible clients
+
+The wizard configures these clients; each badge links to its setup guide. Dialog support depends on the client and protocol. [Critical-action approval](docs/clients.md#claude-code).
+
+[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-desktop)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-code)
+[![Codex](https://img.shields.io/badge/Codex-412991?style=flat-square)](docs/clients.md#codex)
+[![Cursor](https://img.shields.io/badge/Cursor-111111?style=flat-square&logo=cursor&logoColor=white)](docs/clients.md#cursor)
+[![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square)](docs/clients.md#vs-code)
+[![Windsurf](https://img.shields.io/badge/Windsurf-087F8C?style=flat-square&logo=windsurf&logoColor=white)](docs/clients.md#windsurf)
+[![OpenCode](https://img.shields.io/badge/OpenCode-222222?style=flat-square&logo=opencode&logoColor=white)](docs/clients.md#opencode)
+[![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](docs/clients.md#gemini-cli)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](docs/clients.md#docker)
+
+Product names and logos identify compatibility only; they belong to their respective owners and imply no endorsement.
+
+## What you can do
+
+**50 tools · 77 executable operations.** Start with `read` (38 operations). Add `sensitive` (18), `write` (16), or `write,critical` (5 critical operations) as needed. Your appliance token permissions still set the ceiling.
+
+| Area | Tools / ops | Examples | Profiles | Lab: ✓ / ◐ / — |
+|---|---:|---|---|---:|
+| [System and reference data](docs/tools.md#system-and-reference-data) | 5 / 6 | Health, network statistics, enums | `read` | 3 / 1 / 2 |
+| [Devices](docs/tools.md#devices) | 9 / 9 | Search, connections, metrics, labels | `read`, `write` | 8 / 0 / 1 |
+| [Model breaches](docs/tools.md#model-breaches) | 4 / 7 | Read, acknowledge, comment | `read`, `write` | 7 / 0 / 0 |
+| [Models and metrics](docs/tools.md#models-and-metrics) | 3 / 6 | Model, component and metric definitions | `read` | 4 / 2 / 0 |
+| [AI Analyst](docs/tools.md#ai-analyst) | 8 / 11 | Incidents, pinning, investigations | `read`, `write` | 10 / 0 / 1 |
+| [Autonomous Response (Antigena)](docs/tools.md#autonomous-response-antigena) | 3 / 4 | List, activate, extend, clear | `read`, `critical` | 2 / 2 / 0 |
+| [Tags](docs/tools.md#tags) | 3 / 10 | List, create, assign, remove, delete | `read`, `write`, `critical` | 7 / 0 / 3 |
+| [Intel feed and subnets](docs/tools.md#intel-feed-and-subnets) | 4 / 4 | Watched Domains, subnet settings | `read`, `critical` | 2 / 2 / 0 |
+| [Packet captures](docs/tools.md#packet-captures) | 3 / 3 | List, request, download | `read`, `sensitive`, `write` | 1 / 1 / 1 |
+| [Advanced Search](docs/tools.md#advanced-search) | 1 / 4 | Queries, field analysis, graphs | `sensitive` | 1 / 3 / 0 |
+| [Darktrace/Email](docs/tools.md#darktraceemail) | 7 / 13 | Dashboards, metadata, search, audit | `sensitive` | 0 / 0 / 13 |
+
+Counts come from [docs/tools.md](docs/tools.md). **✓** = lab evidence; **◐** = partial evidence; **—** = not lab-validated. 56 operations have evidence from the first 7.1.0 lab, including 11 partial. Most write evidence predates the final controls; see the per-operation limits and later lab checks there. All 13 Email reads remain unvalidated (403); email download returns size and SHA-256 only. The Email action is excluded and `GET /aianalyst/incidents` is unavailable.
+
+Try asking:
+
+- “Find devices named finance and show their recent connections.” (`read`)
+- “Summarize the highest-scoring model breaches from the last 24 hours.” (`read`)
+- “Show AI Analyst incidents for this device and the existing analyst comments.” (`read`)
+- “Preview a triage tag for device 42 before changing anything.” (`write`)
+- “Search traffic for this domain and summarize the matching connections.” (`sensitive`)
+- “Preview clearing Antigena action 123. Wait for my approval.” (`write,critical`)
+
+## Safety by design
+
+```mermaid
+flowchart LR
+    P[Profiles + target policy] --> V[Critical preview: previewId]
+    V --> C[confirm: true + same arguments]
+    C --> H{Human approval dialog}
+    H -->|Accept| W[Write to appliance]
+    H -->|Decline| R[Refuse]
+    V -.-> A[Hash-chained audit on stderr]
+    W --> A
+    R --> A
 ```
 
-The wizard asks for the URL and tokens (typed hidden), saves the tokens to files only you can read, copies the package to `~/.local/share/darktrace-mcp/1.1.0/` and configures the clients it finds with absolute paths, so clients never start the server through `npx`. Windows cannot protect token files: prefer the `.mcpb` extension, Docker or WSL ([details](docs/getting-started.md#windows)).
+- **Profiles:** `read` by default; opt into sensitive data and changes. Ordinary writes run without a preview unless you set `dryRun:true`; their approval defaults to the host's tool prompt.
+- **Critical approval:** a single-use `previewId` (5 minutes), then `confirm:true` with the same arguments, then the default server dialog. Decline/cancel refuses the action. The server cannot prove that a human answered; auto-allow rules weaken this control.
+- **Write limits:** up to 10 writes/minute, 3 critical; three consecutive failed/unknown writes open the circuit breaker until restart. Limits and state are per process. Writes are never retried automatically.
+- **Protected targets:** opt-in, exact literal matching plus per-operation target caps. Antigena action protection matches `codeid`, not the device.
+- **Audit:** writes, previews and refusals have hash-chained records on stderr. Sensitive reads are not audited; chains have no external anchor or boot identity.
+- **Bounded output:** field selection, size limits and instruction neutralization reduce exposure. They do not guarantee removal of every sensitive field or defeat every prompt injection. PCAPs over about 45 KB are refused with size/digest only.
+- **Transport:** local stdio; verified TLS, HMAC-signed requests, a pinned destination and no proxies or redirects.
+- **Explicit acknowledgements:** `all` or `sensitive` + `write` needs `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (no taint control). Critical `host` approval needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`.
 
-### 2. Claude Desktop extension (.mcpb)
+> **Data leaves your network.** Results reach your MCP client and its model provider, including inline Base64 PCAP data and email metadata. Assess provider **eligibility, retention and residency** before connecting a production appliance.
 
-Download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and double-click it. Claude Desktop asks for the URL and tokens and keeps the tokens in your OS keychain.
+[Security overview](docs/security.md) · [Configuration and approval modes](docs/configuration.md#human-approval) · [Report a vulnerability](SECURITY.md)
 
-### 3. Docker (ghcr.io)
+## How it was validated
 
-```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
-```
+- Threat model [TM-18…31](docs/security/threat-model-writes.md), [independent design review](docs/security/design-review-writes.md) and [adversarial suites](docs/security/adversarial-results-writes.md).
+- Recorded release pins: **230 functional tests / 1,150 security subcases**. Linux receipts report 1,150 passes; macOS has three platform skips. These are dated evidence, not a certification. [Pins and receipts](docs/security/release-pins-1.1.0.md).
+- [Two Darktrace 7.1.0 labs](docs/security/final-lab-campaign-1.1.0.md), with narrower coverage than the offline suites; [Docker gates on arm64 and amd64](docs/security/release-pins-1.1.0.md#ci-closure-for-b1--b7-2026-10-06) at the recorded commit. The later installer change has separate pins.
+- The [final gate review](docs/security/final-gate-review-1.1.0.md) records blockers and [residual risks](docs/security/final-gate-review-1.1.0.md#4-residual-risks-to-disclose-in-the-release-notes); [dated owner decisions](docs/security/owner-decisions-1.1.0.md) accept specific residuals. Neither removes them. There is no zero-CVE claim or recorded 1.1.0 runtime scan.
 
-The image is built for linux/amd64 and linux/arm64. Pin the digest, never the tag. For 1.1.0, the arm64 image passed the local Docker gates; amd64 is verified by CI on the release commit ([status](docs/docker.md#110-image-verification-status)).
+## Documentation and contributing
 
-### Fallback: build from source
+[Getting started](docs/getting-started.md) · [Clients](docs/clients.md) · [Tools](docs/tools.md) · [Configuration](docs/configuration.md) · [Docker](docs/docker.md) · [Architecture](docs/architecture.md) · [Troubleshooting](docs/troubleshooting.md) · [Releases](docs/releases.md) · [Changelog](CHANGELOG.md)
 
-```sh
-curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh
-less install.sh && sh install.sh
-```
+Open source under [Apache-2.0](LICENSE). [Contributions](CONTRIBUTING.md) are welcome. Distribution channels are described in [Releases](docs/releases.md); availability follows publication of each version.
 
-`install.sh` clones this repository, builds it and starts the same wizard. Windows: `scripts/install.ps1`.
+## Trademarks and contact
 
-### Check it works
+The Darktrace name and logo belong to Darktrace. The banner uses the [unmodified official wordmark](docs/assets/brand/darktrace/Darktrace-white.svg) to identify the integrated product ([provenance](docs/assets/brand/darktrace/README.md)). **Logo use does not imply authorization or official status.**
 
-```sh
-darktrace-mcp --check-config
-darktrace-mcp test
-```
-
-`--check-config` checks your settings offline. `test` makes one real call (`GET /status`) to your appliance. Without a global install, run these as `npx -y @nuoframework/darktrace-mcp@1.1.0 test`.
-
-## Supported clients
-
-`darktrace-mcp setup` configures these automatically. Each link shows the manual snippet too.
-
-| Client | Automatic | Manual guide |
-|---|---|---|
-| Claude Desktop | `setup` or `.mcpb` | [Claude Desktop](docs/clients.md#claude-desktop) |
-| Claude Code | `setup` | [Claude Code](docs/clients.md#claude-code) |
-| Codex (CLI and IDE) | `setup` | [Codex](docs/clients.md#codex) |
-| Cursor | `setup` or one-click link | [Cursor](docs/clients.md#cursor) |
-| VS Code (Copilot) | `setup` or one-click link | [VS Code](docs/clients.md#vs-code) |
-| Windsurf | `setup` | [Windsurf](docs/clients.md#windsurf) |
-| OpenCode | `setup` | [OpenCode](docs/clients.md#opencode) |
-| Gemini CLI | `setup` | [Gemini CLI](docs/clients.md#gemini-cli) |
-| Any client, via Docker | `setup --runtime docker` | [Docker](docs/clients.md#docker) |
-| One-line per client | `claude mcp add`, `codex mcp add`, `code --add-mcp`, `gemini mcp add`, Cursor link | [One-liners](docs/clients.md#one-line-install-per-client) |
-
-## What it can do
-
-77 of the 79 API operations are executable, grouped into 50 tools. The Darktrace/Email action (hold, release and similar) is excluded from this release, and the deprecated `GET /aianalyst/incidents` is not available. Full list: [tool reference](docs/tools.md).
-
-| Area | Examples | Profile needed |
-|---|---|---|
-| Devices | list, search, similar devices, connection details, metrics | `read` |
-| Model breaches | list, comments | `read` |
-| | acknowledge, comment | `write` |
-| AI Analyst | incidents, events, investigations, stats | `read` |
-| | acknowledge, pin, comment, start an investigation | `write` |
-| Autonomous Response (Antigena) | list actions, summary | `read` |
-| | activate, extend, clear, manual actions | `critical` |
-| Tags | list tags and tagged devices | `read` |
-| | create, assign, remove | `write` |
-| | delete a tag | `critical` |
-| Intel feed and subnets | read | `read` |
-| | change | `critical` |
-| Packet captures | list | `read` |
-| | request a capture | `write` |
-| | download a capture | `sensitive` |
-| Advanced Search | queries, analysis, graphs | `sensitive` |
-| Darktrace/Email | dashboards, reference data, email metadata, search, audit events | `sensitive` |
-| Models, metrics, status | models, components, metrics, status, statistics | `read` |
-
-56 operations have evidence from one Darktrace 7.1.0 lab; for 11 of them it is partial (for example, Antigena `clear` only). Email reads are **not lab-validated** (the lab token got 403). The [tool reference](docs/tools.md) shows the status of each operation.
-
-## Permissions and safety
-
-You choose what the model may do with `DARKTRACE_PROFILES` (the wizard asks you). The default is `read`.
-
-| Profile | Allows | Extra safety |
-|---|---|---|
-| `read` (default) | Normal reads | — |
-| `sensitive` | Advanced Search, email metadata and search, PCAP download, audit events | — |
-| `write` | Acknowledge, comment, pin, tags, device labels, PCAP requests, investigations | `dryRun:true` shows a preview without changing anything. Without it the write runs, relying on your client's tool-permission prompt |
-| `critical` | Antigena actions, intel feed, subnets, deleting a tag | `dryRun:true` returns a preview with a `previewId`. It runs only when repeated with `confirm:true` and that `previewId`, and (by default) after you accept the server's dialog. Without `confirm:true` the call is refused |
-| `all` | Everything above | Same rules as each profile. Starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
-
-Combine profiles with commas, for example `DARKTRACE_PROFILES=read,write`. Any list with both `sensitive` and `write` needs the same acknowledgement as `all`. `DARKTRACE_CRITICAL_APPROVAL=host` (skip the server dialog) needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` ([details](docs/configuration.md#human-approval)). Every write and critical call is audited. Your Darktrace token permissions still apply: the server cannot do more than the token allows.
-
-> **Data leaves your network.** Results go to your MCP client and its model provider. Check provider eligibility, retention and residency for your organization before you connect a production appliance. PCAP downloads are returned inline as Base64 and are forwarded to the host and its model provider like any other result.
-
-More: [security overview](docs/security.md) · [security policy](SECURITY.md).
-
-## Documentation
-
-| Guide | What you find there |
-|---|---|
-| [Getting started](docs/getting-started.md) | Step-by-step install, tokens, first test |
-| [Clients](docs/clients.md) | Automatic and manual setup for each client |
-| [Configuration](docs/configuration.md) | Environment variables, config file, profiles, limits |
-| [Tools](docs/tools.md) | Every tool and API operation, with its profile |
-| [Troubleshooting](docs/troubleshooting.md) | Authentication, clock, TLS, permissions, proxies |
-| [Docker](docs/docker.md) | Image, hardened run options |
-| [Security](docs/security.md) | Safety model and links to detailed reviews |
-| [Architecture](docs/architecture.md) | How a request flows, design decisions |
-| [Releases](docs/releases.md) · [Changelog](CHANGELOG.md) | Versions and changes |
-| [History](docs/history/README.md) | Past review and release records |
-
-## Project status
-
-Public repository. From v1.1.0 the release workflow publishes [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance) and `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry; the server is described for the MCP Registry as `io.github.nuoframework/darktrace-mcp`. Each channel is live only once the v1.1.0 release is published ([releases](docs/releases.md)). Known limitations: [changelog](CHANGELOG.md#known-limitations-in-110). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Trademarks, logo and contact
-
-**Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.** The Darktrace name and logo belong to Darktrace. The cover shows the [unmodified official wordmark](docs/assets/brand/darktrace/Darktrace-white.svg) from the public [Brand Hub logo pack](https://brandhub.darktrace.com/visual-identity/logo) ([provenance](docs/assets/brand/darktrace/README.md), [visual identity](docs/visual-identity.md)). It identifies the product this project integrates with. **Logo use does not imply authorization or official status.**
-
-Complaints, trademark or branding claims, including requests to remove the logo: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). This address is not for security reports; see the [security policy](SECURITY.md). This project never sends mail on its own.
+Branding or removal requests: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). Security reports: [SECURITY.md](SECURITY.md). This project never sends mail on its own.

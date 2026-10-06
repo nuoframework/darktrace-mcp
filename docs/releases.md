@@ -51,6 +51,14 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 
    `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
 
+## OpenSSF badge placeholders
+
+The README's **OpenSSF Scorecard: pending** and **OpenSSF Best Practices: pending** badges are static placeholders, not scores, registrations or certifications. Replace them only after a public Scorecard result and a Best Practices project record exist; link each badge to that project's evidence. No numeric score or passing level is claimed.
+
+The npm version badge is live data from Shields.io and may show an error (or 404) until `@nuoframework/darktrace-mcp` is published. The CI badge links to `ci.yml`; its latest status does not replace the commit-specific release receipts above.
+
+Client badge logos were checked against the [Simple Icons catalog](https://simpleicons.org) and its [slug list](https://github.com/simple-icons/simple-icons/blob/develop/slugs.md) on 2026-10-06: `anthropic`, `cursor`, `windsurf`, `opencode`, `googlegemini`, `docker`. Codex and VS Code use plain badges because `openai` and `visualstudiocode` are absent from that catalog snapshot. The runtime badge uses `nodedotjs`. Names/logos state compatibility only, not endorsement.
+
 ### OpenSSF Best Practices registration (owner, one-time)
 
 1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
