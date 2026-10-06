@@ -5,6 +5,7 @@ This policy covers the public `nuoframework/darktrace-mcp` repository. For how t
 | Version | Scope |
 |---|---|
 | 1.1.1 (release in progress, 2026-10-06) | Publication is in progress; see [release status](docs/releases.md#release-status-2026-10-06) for channel availability and version-specific evidence |
+| 1.1.1 (published 2026-10-06) | Same surface as 1.1.0 (77 executable operations in 50 tools; Darktrace/Email action excluded). 59 operations have Darktrace 7.1.0 lab evidence from two lab appliances, 6 of them only partial; email reads are not lab-validated (HTTP 403: the lab tokens lacked the Email Logs permission). Tolerates npm registry propagation in the release workflow. See [known limitations](CHANGELOG.md#111--2026-10-06). |
 | 1.1.0 (published 2026-10-06) | Full API surface behind operator-chosen profiles (`read`, `sensitive`, `write`, `critical`): 77 executable operations in 50 tools. The Darktrace/Email action is excluded and the deprecated `GET /aianalyst/incidents` is not available. 56 operations have Darktrace 7.1.0 lab evidence, 11 of them only partial; email reads are not lab-validated. See [known limitations](CHANGELOG.md#known-limitations-in-110) |
 | 1.0.0 | 15 read-only tools covering 19 lab-validated GET operations |
 

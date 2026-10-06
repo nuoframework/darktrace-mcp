@@ -6,7 +6,7 @@
 
 **50 tools** cover **77 executable operations** out of the 79 in the API inventory (Darktrace Threat Visualizer API 6.1). The other 2 are [not available](#not-available): 1 excluded (the email action) and 1 deprecated (`GET /aianalyst/incidents`).
 
-**Lab evidence.** 59 operations have evidence from one Darktrace 7.1.0 lab appliance (2026-10-06). For 6 of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all 13 Darktrace/Email reads (the lab token got HTTP 403). Some write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. The [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and the device, investigation, PCAP and tag writes under those controls.
+**Lab evidence.** 59 operations have evidence from two Darktrace 7.1.0 lab appliances (2026-10-06). For 6 of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all 13 Darktrace/Email reads (the lab token got HTTP 403). Some write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. The [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and the device, investigation, PCAP and tag writes under those controls.
 
 ## Which profile do I need?
 
