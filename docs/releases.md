@@ -8,6 +8,16 @@
 
 The [lab gap campaign](security/lab-gap-campaign-1.1.1.md) increases lab evidence to 59 operations, 6 partial. The [1.1.1 release pins](security/release-pins-1.1.1.md) record the current checks and byte bindings. Current [known limitations](../CHANGELOG.md#known-limitations-in-111) cover Email, CVEs, filter types and the DELETE gateway errors. The 1.1.0 evidence below is historical.
 
+## Release status (2026-10-06)
+
+**1.1.0 is published** on npm, ghcr and GitHub Release. **1.1.1 is being released on 2026-10-06; publication is in progress.** The installation commands and digest below remain pinned to the published 1.1.0 artifacts.
+
+## Published 1.1.0 (2026-10-06)
+
+Version 1.1.0 is published on [npm with a provenance attestation](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.0), in ghcr, and as the [v1.1.0 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0). The release includes the `.mcpb`, npm tarball, `SHA256SUMS`, runtime SBOM and evidence files. Publication status was checked on 2026-10-06; the dated gate reviews below retain their original scope and findings.
+
+The ghcr index digest is `sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511`, with linux/amd64 and linux/arm64 manifests. Use `ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511` for pulls and client configuration; per-platform image IDs are not interchangeable with registry manifest digests.
+
 ## Distribution channels (1.1.0 and later)
 
 | Channel | Name | Produced by |
@@ -23,7 +33,7 @@ The 1.1.0 candidate gates pin six operator profile contracts (including `read+se
 
 ### 1.1.0 evidence files
 
-What exists for the 1.1.0 candidate, and what does not yet. The [final gate review](security/final-gate-review-1.1.0.md) decides release readiness; nothing here is release approval.
+Evidence for the published 1.1.0 release. Each receipt is bound to its recorded source and runtime bytes; see the [final gate review](security/final-gate-review-1.1.0.md) and [dated owner decisions](security/owner-decisions-1.1.0.md). Publication does not remove the disclosed residual risks.
 
 | Evidence | File | Covers |
 |---|---|---|
@@ -35,7 +45,15 @@ What exists for the 1.1.0 candidate, and what does not yet. The [final gate revi
 | Signing probe | [lab-signing-evidence.md](security/lab-signing-evidence.md) and its [JSON](security/evidence/lab-signing-evidence-2026-10-06T09-17-38-944Z.json) | Which request-signing shapes the 7.1.0 appliance accepts |
 | Lab results per operation | [CHANGES-core §6](CHANGES-core.md#6-live-lab-validation-darktrace-710-2026-10-06) and the [tool reference](tools.md) | 56 operations with lab evidence, 11 partial; email not validated |
 
-Not yet available: CI receipts for Linux amd64, the Node 22 leg and the amd64 Docker job; a vulnerability scan of the 1.1.0 runtime; dated owner decisions on the residual risks; and the published release assets. The [known limitations](../CHANGELOG.md#known-limitations-in-110) go into the release notes.
+Additional available evidence:
+
+| Evidence | Record | Scope |
+|---|---|---|
+| Release-commit CI | [Run 37497433186](https://github.com/nuoframework/darktrace-mcp/actions/runs/37497433186), commit `f95e798bf3ed3f0dcedb91ff86e84849f1b12acb` | Node 22 and 24 offline jobs, lint, and native Docker jobs on amd64 and arm64 all succeeded |
+| Residual-risk decisions | [Owner decisions, 2026-10-06](security/owner-decisions-1.1.0.md) | Recorded acceptance of specific residuals; acceptance does not remove them |
+| Published assets | [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) | `.mcpb`, tarball, `SHA256SUMS`, SBOM and evidence files |
+
+A vulnerability scan of the 1.1.0 runtime is still not recorded here. CI is evidence for the source-built images it tested; the published ghcr images are rebuilt separately. The [known limitations](../CHANGELOG.md#known-limitations-in-110) remain disclosed in the release notes.
 
 ### Release naming
 
@@ -61,11 +79,19 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 
    `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
 
+## OpenSSF badge placeholders
+
+OpenSSF badges are omitted from both READMEs until a public Scorecard result and a Best Practices project record exist. The former **OpenSSF Scorecard: pending** and **OpenSSF Best Practices: pending** labels were static placeholders, not scores, registrations or certifications. Add badges only with links to the project's public evidence. No numeric score or passing level is claimed.
+
+The npm version and GitHub Release badges use live data from Shields.io. Version 1.1.0 is published in both channels. The CI badge links to `ci.yml`; its latest status does not replace the commit-specific release receipts above.
+
+Client badge logos were checked against the [Simple Icons catalog](https://simpleicons.org) and its [slug list](https://github.com/simple-icons/simple-icons/blob/develop/slugs.md) on 2026-10-06: `anthropic`, `cursor`, `windsurf`, `opencode`, `googlegemini`, `docker`. Codex and VS Code use plain badges because `openai` and `visualstudiocode` are absent from that catalog snapshot. The runtime badge uses `nodedotjs`. Names/logos state compatibility only, not endorsement.
+
 ### OpenSSF Best Practices registration (owner, one-time)
 
 1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
 2. Answer the "passing" criteria. Most answers point to existing files: `SECURITY.md` (vulnerability reporting), `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, the CI workflows (tests, `lint`, CodeQL) and [supply-chain checks](security/supply-chain-checks.md) (static analysis, dependency updates).
-3. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). In `README.md` and `README.es.md`, replace `<BESTPRACTICES_ID>` in the commented-out badge with that id and uncomment the badge once the project reaches a level worth showing. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
+3. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). Add a badge linked to that project in `README.md` and `README.es.md` once it reaches a level worth showing; no placeholder badge is currently displayed. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
 4. Both READMEs are release inputs, so this edit belongs in a release commit (the release pins change).
 
 ## v1.0.0 (previous release, private)
