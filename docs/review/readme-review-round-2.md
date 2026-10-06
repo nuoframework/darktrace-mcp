@@ -41,7 +41,7 @@ Reviewed only for integration, as instructed.
 
 ## Residual suggestions (non-blocking)
 
-1. **Duplicate guide link in Install.** EN line 31 ends with "[Full guide](docs/getting-started.md)" and line 33 ends with "[Full installation guide](docs/getting-started.md)". Same in ES ("[Guía completa]" twice, lines 31 and 33). Drop the second one.
+1. **Duplicate guide link in Install.** EN line 31 ends with "[Full guide](../getting-started.md)" and line 33 ends with "[Full installation guide](../getting-started.md)". Same in ES ("[Guía completa]" twice, lines 31 and 33). Drop the second one.
 2. **"Other ways" layout.** The bold label "**Other ways.**" stands alone, then two bullets, then the Docker code block sits outside the list. Either indent the fence under the Docker bullet or turn the two options into `### Claude Desktop` / `### Docker` mini-headings. Pure scannability.
 3. **Alt text mention of the motif (optional).** If you want screen-reader parity with the SVG `<desc>`, insert "with a decorative network graph" after "Darktrace MCP —" in both languages. Not required.
 4. **GIF first frames** (carried from round 1, item 11): add the title banner to the setup and approval recordings at the next re-record so all three open on a titled frame rather than an empty prompt.
