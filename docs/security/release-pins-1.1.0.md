@@ -129,3 +129,14 @@ Two earlier amd64 failures (runs 37470095768, 37473477924, 37474709434) were the
 suite exceeding the harness's 120 s child timeout on the 2-vCPU amd64 runner (no summary line was
 written); the budget is now 10 minutes (`test/security/run-isolated.mjs`). The Linux runs report
 1150/1150 security and 224/224 functional tests with zero skips on both architectures.
+
+## Update after the installer date-format probe (2026-10-06, later)
+
+| Pin | Previous | Final |
+|---|---|---|
+| Functional tests (`ci.yml`) | 224 | 230 |
+| Security subcases | 1150 | 1150 (unchanged) |
+| Production source tree SHA-256 | `b384f88a…674e` | `23113051be498f0043c53078723b3441155c19c0d252fa1a0563591795cbedc7` |
+| Runtime files / aggregate | 91 / `cc156c03…` | 91 / `d52f2a6305e6c08f5c6610dd5be3e8a3dd25e29b8f1f3399888d81dde251ba3c` |
+
+Receipt: `test/security/evidence/2026-10-06T16-15-55-312Z.json`.

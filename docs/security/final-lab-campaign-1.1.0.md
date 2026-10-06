@@ -72,3 +72,8 @@ The first lab expired during the day; the owner provisioned a second Darktrace 7
 - **Docker 1.1.0-rc (`sha256:7e5a2a41…6aad`, hardened run, Docker Desktop with
   `DARKTRACE_TOKEN_FILE_OWNER=root-or-current`):** the same campaign, all reads and the write
   preview PASS; critical without `confirm` refused.
+- **Clients against lab B** (registered by `darktrace-mcp setup`, `read` profile, date format
+  probed as `compact` at that time): Codex CLI answered status, devices seen in the last hour (20),
+  tags (224) and subnets (7) with 27 tools and no error fields; Claude Code answered the same set,
+  used `totalItems` when the tag list was cut by the output budget (161 of 224 records returned),
+  and reported 27 read-only tools.
