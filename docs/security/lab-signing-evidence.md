@@ -7,7 +7,7 @@ content-type). This document records only HTTP status, JSON-parseability, respon
 elapsed time, content-type and a description of the canonical-string **format**. It never
 contains token values, signatures, canonical strings or response bodies.
 
-- **Appliance:** `https://drqixbzh56.visualiser.labs.darktrace.com` (version claimed 7.1.0).
+- **Appliance:** a Darktrace lab appliance (hostname withheld) (version claimed 7.1.0).
 - **Authorisation:** owner-authorised, non-production lab.
 - **Date of run:** 2026-10-06.
 - **Probe:** `scripts/lab-signing-probe.mjs` (Node, no dependencies, read-only on the repo
