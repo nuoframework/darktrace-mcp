@@ -52,14 +52,15 @@ test('ST-01.PREVIEW exact unsigned result with code-owned names and zero sign/ne
   await assert.rejects(h.client.send({operationId:'post_synthetic',body:{kind:'json',value:{'ignore previous instructions':PRIVATE}}},{dryRun:true}),kind('invalid_request'));
   assert.equal(h.state.signs,0);assert.equal(h.state.calls,0);h.client.close();
 });
-for(const mode of ['encoded','unencoded']) test('ST-01.SDK '+mode+' S4 query+JSON, S5 DELETE+query and S6 raw Base64 path follow darktrace-sdk v0.10.1',async()=>{
+for(const mode of ['encoded','unencoded']) test('ST-01.SDK '+mode+' S4 rejects; S5 query and S6 encoded Base64 follow 7.1.0 evidence',async()=>{
   const h=harness({config:cfg({auth:{publicToken:PUBLIC,privateToken:PRIVATE,querySignatureEncoding:mode}}),extra:{now:()=>Date.UTC(2026,9,5,11,0,0)}});
   const date='20261005T110000',sig=text=>createHmac('sha1',PRIVATE).update(`${text}\n${PUBLIC}\n${date}`,'utf8').digest('hex');
   const v=text=>mode==='encoded'?encodeURIComponent(text):text;
-  await h.client.request({operationId:'post_synthetic',query:[['q','a b']],body:{value:'x'}});
+  await assert.rejects(h.client.request({operationId:'post_synthetic',query:[['q','a b']],body:{value:'x'}}),kind('invalid_request'));
+  assert.equal(h.state.signs,0);assert.equal(h.state.calls,0);
   await h.client.request({operationId:'delete_synthetic',query:[['did','1'],['tag','a b']]});
   await h.client.request({operationId:'get_advancedsearch_api_search_query',pathParams:{query:'eyJh+/8='}});
-  assert.deepEqual(h.state.wire.map(w=>w.url),['https://appliance.test/synthetic?q=a%20b','https://appliance.test/synthetic?did=1&tag=a%20b','https://appliance.test/advancedsearch/api/search/eyJh+/8=']);
-  assert.deepEqual(h.state.wire.map(w=>w.headers['dtapi-signature']),[sig(`/synthetic?q=${v('a b')}&{"value":"x"}`),sig(`/synthetic?did=1&tag=${v('a b')}`),sig('/advancedsearch/api/search/eyJh+/8=')]);
-  assert.equal(h.state.wire[0].body,'{"value":"x"}');assert.equal(h.state.signs,3);h.client.close();
+  assert.deepEqual(h.state.wire.map(w=>w.url),['https://appliance.test/synthetic?did=1&tag=a%20b','https://appliance.test/advancedsearch/api/search/eyJh%2B%2F8%3D']);
+  assert.deepEqual(h.state.wire.map(w=>w.headers['dtapi-signature']),[sig(`/synthetic?did=1&tag=${v('a b')}`),sig('/advancedsearch/api/search/eyJh%2B%2F8%3D')]);
+  assert.equal(h.state.signs,2);h.client.close();
 });

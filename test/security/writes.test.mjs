@@ -419,7 +419,14 @@ test('ST-24.LIFECYCLE forged initialized cannot unlock tool dispatch [AD-W-11]',
   assert.equal(p.stderr().includes('adWriteWire'), false);
 });
 
-for (const vector of fixture.vectors) test(`ST-25.${vector.shape} SDK-derived KAT ${vector.encoded ? 'encoded option' : 'SDK unencoded'} exact HMAC and wire`, async t => {
+const s6Raw = fixture.vectors.find(v => v.shape === 'S6');
+const s6EncodedPath = '/advancedsearch/api/search/eyJzZWFyY2giOiI%2FPz8%2BPz8%2FIiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0%3D';
+const s6ExpectedFirst = s6EncodedPath;
+const s6ExpectedHmac = `${s6ExpectedFirst}\n${PUBLIC}\n2026-10-06 12:00:00`;
+const s6ExpectedSignature = 'e2ea8ed33ad3d68f47c8f87db638f0dd0ab55e49';
+for (const sourceVector of fixture.vectors.filter(v => v.shape !== 'S4')) test(`ST-25.${sourceVector.shape} evidence-aligned KAT ${sourceVector.encoded ? 'encoded option' : 'SDK unencoded'} exact HMAC and wire`, async t => {
+  const vector = sourceVector.shape === 'S6' ? { ...sourceVector, path: s6EncodedPath,
+    firstComponent: s6ExpectedFirst, hmacInput: s6ExpectedHmac, signature: s6ExpectedSignature, wirePath: s6EncodedPath } : sourceVector;
   const signer = createSigner(PUBLIC, PRIVATE, { encodeQueryInSignature: vector.encoded });
   const input = { method: vector.method, path: vector.path, query: vector.query, date: vector.date,
     ...(vector.jsonText === null ? {} : { body: { kind: 'json', bytes: Buffer.from(vector.jsonText) } }) };
@@ -442,6 +449,19 @@ for (const vector of fixture.vectors) test(`ST-25.${vector.shape} SDK-derived KA
   const wireSign = signer.sign({ ...input, ...(wireBody === null ? {} : { body: { kind: 'json', bytes: Buffer.from(wireBody) } }) });
   assert.equal(wire[0].headers['DTAPI-Signature'], wireSign.headers['DTAPI-Signature']);
 });
+test('ST-25.S4 7.1.0 query+JSON form rejects before signing or network [CR-03]', async t => {
+  let signCalls = 0, initializeCalls = 0, requestCalls = 0;
+  const hmacBefore = globalThis.__writeSpies.hmac;
+  const client = createHttpClient(cfg(), { testOnly: true,
+    operations: [{ operationId: 'synthetic_s4', method: 'POST', pathTemplate: '/synthetic' }],
+    signer: { sign() { signCalls += 1; throw new Error('must not sign'); } },
+    connector: { async initialize() { initializeCalls += 1; }, async request() { requestCalls += 1; return response(); }, close() {} },
+  }); t.after(() => client.close());
+  await assert.rejects(client.request({ operationId: 'synthetic_s4', query: [['responsedata', 'name']],
+    body: { message: 'synthetic' }, contentType: 'application/json' }), error => error?.kind === 'invalid_request');
+  assert.equal(signCalls, 0); assert.equal(initializeCalls, 0); assert.equal(requestCalls, 0);
+  assert.equal(globalThis.__writeSpies.hmac, hmacBefore);
+});
 for (const path of ['//evil.invalid/x', '/x/../y', '/x/%2e/y', '/x/%2E%2e/y', '/x/\\y', '/x?evil', '/x#evil', '/x\n'])
   test(`ST-25.PATH rejects ${JSON.stringify(path)} before HMAC`, () => {
     const before = checkpoint({ state: { auditAttempts: [], calls: [], prompts: [], audits: [] } });
@@ -449,15 +469,17 @@ for (const path of ['//evil.invalid/x', '/x/../y', '/x/%2e/y', '/x/%2E%2e/y', '/
     assert.equal(globalThis.__writeSpies.hmac, before.hmac);
     assert.equal(globalThis.__writeSpies.http, before.http); assert.equal(globalThis.__writeSpies.socket, before.socket);
   });
-for (const filename of ['../capture.pcap', '//evil.invalid/capture', '%2e%2e', '%252e%252e', 'https://evil.invalid', 'x\\y'])
+for (const filename of ['../capture.pcap', '//evil.invalid/capture', '%2e%2e', '%252e%252e', 'a%2F..%2Fb', 'a%252F..%252Fb', 'https://evil.invalid', 'x\\y'])
   test(`ST-25.TRAVERSAL ${filename} tool denies before builder/sign/network [AD-W-01]`, t => denied(t, 'get_pcaps_filename', { path: { filename } }, 'invalid_arguments'));
-test('ST-25.S6 all three routes retain +/= literal and validate decoded search document', async t => {
-  const query = fixture.vectors.find(v => v.shape === 'S6').path.split('/search/')[1];
+test('ST-25.S6 all three routes percent-encode standard Base64 as signed and sent; decoded search document validates', async t => {
+  const query = s6Raw.path.slice('/advancedsearch/api/search/'.length);
+  const encodedQuery = encodeURIComponent(query);
   for (const id of ['get_advancedsearch_api_search_query', 'get_advancedsearch_api_analyze_field_analysis_query', 'get_advancedsearch_api_graph_graphmode_interval_query']) {
     const h = own(t, {}), op = operations[id], args = validArgs(op); args.path.query = query;
     if (Object.hasOwn(args.path, 'interval')) args.path.interval = 60;
     const result = await invoke(h, id, args); assert.equal(result.isError, undefined, id); assert.equal(h.state.wires.length, 1);
-    assert.ok(h.state.wires[0].url.pathname.endsWith(query));
+    assert.ok(h.state.wires[0].url.pathname.endsWith(encodedQuery));
+    assert.equal(h.state.wires[0].url.pathname.includes(query), false);
   }
 });
 test('ST-25.401 no alternate signature, no retry [AD-W-08]', async t => {
@@ -654,7 +676,11 @@ for (const size of [2097152, 2097153]) for (const length of ['absent', 'lying'])
       { 'content-type': 'application/vnd.tcpdump.pcap', ...(length === 'lying' ? { 'content-length': '1' } : {}) });
     const h = own(t, { wireResponse: () => stream });
     const request = { operationId: 'get_pcaps_filename', pathParams: { filename: 'synthetic.pcap' }, accept: 'binary' };
-    if (size <= 2097152) { const result = await h.http.request(request); assert.equal(result.bytes.length, size); }
+    if (size <= 2097152) {
+      const result = await h.http.request(request);
+      assert.deepEqual(result.outputLimitExceeded, { errorCode: 'output_limit_exceeded', size, sha256: sha(bytes) });
+      assert.equal('bytes' in result, false);
+    }
     else { await assert.rejects(h.http.request(request), error => error.kind === 'too_large'); assert.equal(stream.state.cancelled, 1); }
     assert.equal(h.state.wires.length, 1); assert.deepEqual(writes, []);
   });
@@ -823,12 +849,13 @@ test('ST-29.ALLOCATION output-budget refusal precedes large Base64 allocation [A
   finally { Buffer.prototype.toString = original; }
   assert.ok(allocations.every(n => n <= 60000)); assert.equal(h.state.wires.length, 1); denial(result, 'output_limit_exceeded');
 });
-test('ST-29.RETAINED raw chunks plus consolidated buffer must fit byte cap [AD-W-20]', async t => {
+test('ST-29.RETAINED bounded raw buffer fits byte cap and over-budget output carries only size and hash [AD-W-20]', async t => {
   const bytes = Buffer.alloc(2097152, 7), h = own(t, { wireResponse: () => response([bytes.subarray(0, 1048576), bytes.subarray(1048576)], 200,
     { 'content-type': 'application/vnd.tcpdump.pcap' }) });
   const first = globalThis.__writeBufferPeaks.length;
   const result = await h.http.request({ operationId: 'get_pcaps_filename', pathParams: { filename: 'synthetic.pcap' }, accept: 'binary' });
-  assert.equal(result.bytes.length, bytes.length);
+  assert.deepEqual(result.outputLimitExceeded, { errorCode: 'output_limit_exceeded', size: bytes.length, sha256: sha(bytes) });
+  assert.equal('bytes' in result, false);
   const peaks = globalThis.__writeBufferPeaks.slice(first); assert.ok(peaks.length > 0, 'allocation probes absent');
   assert.ok(peaks.every(n => n <= 2097152), 'readBounded retains chunk copies and full result simultaneously');
 });

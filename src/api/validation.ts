@@ -5,6 +5,7 @@ import catalogue from './catalogue.generated.json' with { type: 'json' };
 type Schema = Record<string, any>;
 const schemas: Record<string, Schema> = catalogue.schemas;
 const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
+const MAX_PATH_DECODE_PASSES = 16;
 export function inputUnit(raw:Schema,name:string):string {
   const text=String(raw.description??'');
   if (/millisecond/i.test(text)) return 'milliseconds';
@@ -168,6 +169,18 @@ export function validateSearchHash(hash: string): void {
   if (parsed.timeframe === 'custom' && !parsed.time) throw new Error('Custom search requires bounded time');
   checkRanges(parsed.time ?? {});
   if (parsed.timeframe === 'custom' && !(('starttime' in (parsed.time??{}) && 'endtime' in (parsed.time??{})) || ('from' in (parsed.time??{}) && 'to' in (parsed.time??{})))) throw new Error('Time pair required');
+}
+/** Path values are one URL segment: reject separators and traversal at every decoding layer. */
+export function validatePathSegment(value: string): void {
+  let candidate=value;
+  for(let pass=0;pass<MAX_PATH_DECODE_PASSES;pass++) {
+    if(candidate==='.'||candidate==='..'||/[\\/?#\u0000-\u001f\u007f]/.test(candidate)) throw new Error('Invalid path segment');
+    let decoded:string;
+    try {decoded=decodeURIComponent(candidate);} catch {throw new Error('Invalid path segment');}
+    if(decoded===candidate) return;
+    candidate=decoded;
+  }
+  throw new Error('Ambiguous path encoding');
 }
 export const SUMMARY_HOURLY_RULE:ValidationRule=Object.freeze({id:'summary_hourly_anchor',description:'Only get_summarystatistics eventtype=loginput permits standalone endtime milliseconds or to UTC datetime; explicit integer hours 1..168, one anchor, no csensor/mitreTactics mode; no implicit range expansion'});
 export function summaryAnchorParameter(operationId:string,name:string):boolean {return operationId==='get_summarystatistics'&&['endtime','to'].includes(name);}
