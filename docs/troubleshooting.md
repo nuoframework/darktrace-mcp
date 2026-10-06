@@ -1,27 +1,138 @@
+**English** · [Español](es/troubleshooting.md)
+
 # Troubleshooting
 
-[README](../README.md) · [Configuration](configuration.md) · [Clients](clients.md)
+[README](../README.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Clients](clients.md)
 
-| Symptom | Check/action |
+Start with these two commands. Use the same environment your client uses.
+
+```sh
+darktrace-mcp --check-config
+darktrace-mcp test
+```
+
+`--check-config` finds local problems (URL, token files, profiles). `test` calls `GET /status` and finds network, TLS, clock and token problems. Error messages never include token values.
+
+## Quick table
+
+| Symptom | Likely cause | Go to |
+|---|---|---|
+| Client shows the server as failed or "disconnected" | Wrong Node or entrypoint path, or a config error | [Server does not start](#server-does-not-start) |
+| `401`, `403`, "authentication failed" | Wrong token, token lacks permission, or clock skew | [Authentication errors](#authentication-errors) |
+| Works for a while, then `401` | Clock drift | [Clock skew](#clock-skew) |
+| "unable to verify the first certificate", "self-signed certificate" | Private CA not trusted | [TLS and private CA](#tls-and-private-ca) |
+| "token file must be owned by…", "mode 0600" | Token file permissions | [Token file permissions](#token-file-permissions) |
+| "proxy environment is not supported" | Proxy variables in your environment | [Proxy variables are rejected](#proxy-variables-are-rejected) |
+| A tool you expect is missing | Its profile is not enabled | [A tool is missing](#a-tool-is-missing) |
+| Critical action refused with `confirmation_required` or `preview_required` | `confirm:true` or the `previewId` from a `dryRun:true` preview is missing | [Writes and critical actions](#writes-and-critical-actions) |
+| Startup error naming `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` or `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (or `sensitive` + `write`), or `DARKTRACE_CRITICAL_APPROVAL=host`, without its acknowledgement | [Server does not start](#server-does-not-start) |
+| "response too large" | Result exceeds the size limit | [Large results](#large-results) |
+| `FAIL bad_request` (HTTP 400) on `GET /status` from `test`, or `setup` stops with HTTP 400 | The appliance accepts only the other signature date format | Rerun `darktrace-mcp setup` (it probes both), or set `DARKTRACE_DATE_FORMAT=spaced` (or `compact`); see [signature date format](configuration.md#signature-date-format) |
+
+## Server does not start
+
+1. Run the exact `command` and `args` from your client config in a terminal, adding `--check-config`.
+2. Use absolute paths. Desktop apps do not see your shell `PATH`, so `node` alone may fail. Get the full path with `node -p 'process.execPath'`.
+3. Make sure you built the project: `dist/src/index.js` must exist (`npm run build`).
+4. Check the JSON or TOML syntax. On Windows, backslashes in JSON must be doubled.
+5. Profile `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. `DARKTRACE_CRITICAL_APPROVAL=host` with `critical` starts only with `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. Add the variable to the client's `env` only after reading what it accepts ([profiles](configuration.md#profiles), [human approval](configuration.md#human-approval)).
+6. Look at the client's MCP log. Server messages go to stderr. A configuration problem prints one line such as `{"event":"startup_error","reason":"could not read private token file"}`; `reason` names the setting, never its value. Other startup failures print only the event.
+
+A server that seems "idle" is normal: it waits for the client.
+
+## Authentication errors
+
+Darktrace signs each request with your private token and the current time.
+
+| Check | How |
 |---|---|
-| Host cannot launch Node | Use the actual absolute Node path and compiled entrypoint; build with `npm run build`. GUI hosts may not inherit your shell PATH. |
-| Local startup fails | Run `--check-config` with the same environment as the host. Check HTTPS origin and separate token-file paths, permissions, owner, size and absence of symlinks. Errors deliberately omit secret details. |
-| Node `--env-file` handling | Node reads the env file before startup; the server does not verify its owner/mode/type/symlinks/size. `NODE_OPTIONS` preloads execute before server checks, and `NODE_EXTRA_CA_CERTS` extends TLS trust. Review both in the trusted launcher before startup; protect the env file externally (operator-owned `0600`, trusted non-symlink location), use only non-secret settings/token-file paths and never token values. Prefer protected JSON plus separate token files. |
-| JSON or TOML parsing error | Compare with `examples/`; preserve wrappers (`mcpServers`, VS Code `servers`, Codex `mcp_servers`) and quote absolute paths. Windows JSON backslashes need escaping. |
-| TLS trust failure | Use an approved PEM via `NODE_EXTRA_CA_CERTS` before startup; check hostname/expiry and the runtime's file access. Never disable TLS verification. |
-| Authentication denied | Check token ACLs, clock and the operator-selected date/signature mode. No signing fallback is attempted; 7.1 signing is unvalidated. |
-| Advanced Search hidden | Advanced Search is excluded by the validated-only release policy, even with `DARKTRACE_SENSITIVE_READ=true`; both profiles stay at 15 tools / 19 GET selectors. |
-| Write tools hidden | Read-only is default. Operator `write` profile exposes eligible medium/high operations, which still default to dry-run. |
-| Critical call cannot execute | Expected. Five critical operations may preview with write + writeCritical; no confirm field or model approval enables execution. |
-| Email/export/HTTP rejected | Expected baseline behavior. Do not use a flag or source presence as an activation mechanism. |
-| Mutation times out/disconnects | Outcome may be unknown. Inspect appliance state and audit before deciding on a new authorized action; never automatically retry POST/DELETE. |
-| Large response is rejected | Lower limits/output scope or narrow the request. Limits cannot be raised above the baseline ceilings. |
-| Stdio seems idle | Normal: the server waits for the host's MCP handshake. Do not print debugging text to stdout. |
+| Public and private tokens are not swapped | Open each file. The public token goes in `..._PUBLIC_TOKEN_FILE` |
+| No extra spaces or Windows line endings in the files | `od -c public-token \| tail -3` should end with the token, optionally `\n`, not `\r\n` |
+| Token has API permission for what you ask | Check the token in Darktrace System Config |
+| Clock is correct | See [clock skew](#clock-skew) |
+| Signing format | If `test` still fails, try `DARKTRACE_DATE_FORMAT=spaced` or `DARKTRACE_QUERY_SIGNATURE_ENCODING=encoded`, one at a time |
 
-`--help`, `--version`, `--check-config` and `doctor` are the supported diagnostics. Configuration checks perform no network probe and do not certify token validity, deployment eligibility or compatibility. Share only redacted stderr and synthetic reproductions; host logs can contain appliance results even when server diagnostics are redacted.
+## Clock skew
 
-## Output and destination boundaries
+Darktrace rejects signatures when your clock differs from the appliance by more than a few minutes.
 
-Runtime output uses code-owned conservative views, with up to eight selected principal fields. `minimized:true` and `unmodeledFieldsOmitted:true` describe projection, not proof that all arbitrary nested sensitive data was removed. Unknown objects and maps are summarized. Known secret values and supported one-step encodings are redacted; arbitrary transformed encodings are outside that guarantee. The MCP host/model provider can still receive sensitive information in retained fields.
+```sh
+date -u
+```
 
-The HTTPS connector pins an approved startup DNS snapshot. The standard NAT64 ranges (`64:ff9b::/96`, `64:ff9b:1::/48`), 6to4 (`2002::/16`) and Teredo (`2001::/32`) addresses are always blocked, including translations that appear to target public IPv4. A prohibited DNS answer causes a terminal connector failure until the server process restarts; fixing DNS does not reopen that running connector. Operator-specific NAT64 prefixes cannot be detected generically; exact destination allowlists and deployment network review remain necessary. This fail-closed behavior may require changing the deployment's DNS/network design. Actual private-network pinning and appliance behavior remain unvalidated.
+Compare with the appliance time. Turn on automatic time sync (NTP) on the machine that runs the server. In Docker, the container uses the host clock.
+
+## TLS and private CA
+
+TLS verification is always on and cannot be turned off. If your appliance uses a certificate from a private CA:
+
+```sh
+export NODE_EXTRA_CA_CERTS=/absolute/path/to/company-ca.pem
+darktrace-mcp test
+```
+
+In a client config, add `NODE_EXTRA_CA_CERTS` to the `env` block. In Docker, mount the PEM file read-only and point `NODE_EXTRA_CA_CERTS` at the path inside the container.
+
+Also check that the URL hostname matches the certificate, and that the certificate has not expired.
+
+## Token file permissions
+
+The server refuses token files that others could read.
+
+```sh
+ls -l /absolute/private/darktrace/
+chmod 600 /absolute/private/darktrace/public-token /absolute/private/darktrace/private-token
+```
+
+| Message mentions | Fix |
+|---|---|
+| mode | `chmod 600 <file>` |
+| owner | The file must belong to the user that runs the server. In Docker, to UID 1000 or the `--user` you set |
+| symlink | Point the variable at the real file, not a link |
+| size | One token per file, under 4 KiB |
+| relative path | Use an absolute path |
+
+**Windows.** Native Windows file permissions cannot be checked the same way, so the server may refuse the files. Run the server inside WSL and use Linux paths there.
+
+**Docker Desktop.** On macOS and Windows, bind-mounted files show as owned by root inside the container, so `could not read ... token file` appears even with correct host permissions. Add `-e DARKTRACE_TOKEN_FILE_OWNER=root-or-current` to the `docker run` arguments (see [Docker guide](docker.md)) and run `--check-config` in the container. Never loosen the mode.
+
+## Proxy variables are rejected
+
+The server talks directly to the appliance and stops if it sees proxy settings: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (any case) or `NODE_USE_ENV_PROXY`. Remove them for this server only:
+
+```sh
+env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u NO_PROXY \
+  -u http_proxy -u https_proxy -u all_proxy -u no_proxy \
+  -u NODE_USE_ENV_PROXY \
+  darktrace-mcp --check-config
+```
+
+If your network only allows traffic through a proxy, ask your network team for a direct route to the appliance. Do not change your system-wide proxy policy.
+
+## A tool is missing
+
+Tools appear only when their profile is on. Check `DARKTRACE_PROFILES` in the client config, then restart the client.
+
+| Missing tools | Add profile |
+|---|---|
+| Advanced Search, email content, PCAP download, email audit | `sensitive` |
+| Acknowledge, comment, pin, tags, PCAP request, investigations | `write` |
+| Antigena actions, intel feed, subnet changes, delete tag | `critical` |
+
+The Darktrace/Email action (`darktrace_email_action`) is excluded from this release and never appears. The deprecated `GET /aianalyst/incidents` is never available. Use `darktrace_list_ai_analyst_incidents`.
+
+## Writes and critical actions
+
+- **Preview first.** Add `dryRun:true` to any write to see what would happen. Without it, an ordinary write runs (by default after your client's own permission prompt).
+- **Critical actions** need three steps: a `dryRun:true` preview that returns a `previewId` (valid 5 minutes, once); the same call repeated with `confirm:true` and that `previewId`; and, by default, your acceptance in the server's dialog. A call without `confirm:true` is refused with `confirmation_required`, and one without a `previewId` with `preview_required` (an expired, used or mismatched one gives `preview_expired`, `preview_used` or `preview_invalid`).
+- **All writes refused after failures.** Three failed or unknown writes in a row stop all writes until the server restarts. Reads keep working. On some appliances DELETE answers 502 after applying the change, which counts as unknown.
+- **Timeout or disconnect during a write.** The result is unknown. Check in Darktrace whether it happened before trying again. Writes are never retried automatically.
+- **Darktrace returns 403 on a write.** Your token lacks that permission. Profiles cannot override token permissions.
+
+## Large results
+
+Responses over 2 MiB and tool output over 60,000 characters are refused. Narrow the request: shorter time range, a specific device, fewer fields.
+
+## Still stuck
+
+Collect the output of `darktrace-mcp --check-config` and `darktrace-mcp --version`, remove any internal hostnames, and open an issue in the repository. Never share tokens or raw appliance data. Security problems: see [SECURITY.md](../SECURITY.md).

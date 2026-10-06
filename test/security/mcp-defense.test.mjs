@@ -14,8 +14,9 @@ import { assertSafeNetworkEnvironment, ConfigValidationError } from '../../dist/
 import { loadConfig } from '../../dist/src/config/load.js';
 import { startupVariable } from '../../dist/src/observability/log.js';
 import { runStdio } from '../../dist/src/server/stdio.js';
+import { clientIdentified, approvalChannel, APPROVAL_INPUT_KEY } from '../../dist/src/server/createServer.js';
 import { cfg, env, PUBLIC, PRIVATE, CANARY, noCanaries } from './helpers.mjs';
-import { profiles, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
+import { profiles, approvalVariants, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
 import { forbiddenCommand, distributionIssues } from './mcp-distribution.mjs';
 const hidden = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069\u200b-\u200f\u2060-\u2064\ufeff\u{e0000}-\u{e007f}]/u;
 const points = [[0, 31], [127, 159], [0x202a, 0x202e], [0x2066, 0x2069], [0x200b, 0x200f], [0x2060, 0x2064], [0xfeff, 0xfeff], [0xe0000, 0xe007f]].flatMap(([start, end]) => Array.from({ length: end - start + 1 }, (_, i) => start + i));
@@ -83,53 +84,180 @@ for (const mode of modes) test('MR-02/06.STARTUP ' + (mode[0] ?? 'stdio') + ' gu
   for (const [extra, injected, expected] of [
     [{ SSL_CERT_FILE: CANARY }, {}, 'SSL_CERT_FILE'], [{ SSL_CERT_DIR: CANARY }, {}, 'SSL_CERT_DIR'], [{ OPENSSL_CONF: CANARY }, {}, 'OPENSSL_CONF'],
     ...flags.map(flag => [{}, { NODE_OPTIONS: '"' + flag + '=' + CANARY + '"' }, 'NODE_OPTIONS']),
-    [{ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,email' }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,' + CANARY }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,critical' }, {}, undefined],
   ]) {
     // Inject Node flags only AFTER native startup, so this tests our app guard rather than Node's option parser.
     const script = 'process.argv=' + JSON.stringify([process.execPath, resolve('dist/src/index.js'), ...mode]) + ';Object.assign(process.env,' + JSON.stringify(injected) + ');await import(' + JSON.stringify(resolve('dist/src/index.js')) + ');';
     const got = spawnSync(process.execPath, ['--import', resolve('test/security/diagnostic-guard.mjs'), '--input-type=module', '-e', script], { env: env(extra), input: '', encoding: 'utf8', timeout: 4000 });
     assert.equal(got.error, undefined); assert.equal(got.status, 1); assert.equal(got.stdout, ''); noCanaries(got.stderr);
-    const row = JSON.parse(got.stderr); assert.equal(row.event, 'startup_error'); assert.equal(row.variable, expected); assert.deepEqual(Object.keys(row).sort(), expected ? ['event', 'ts', 'variable'] : ['event', 'ts']);
+    const row = JSON.parse(got.stderr); assert.equal(row.event, 'startup_error'); assert.equal(row.variable, expected); assert.deepEqual(Object.keys(row).sort(), expected ? ['event', 'reason', 'ts', 'variable'] : ['event', 'reason', 'ts']); assert.equal(typeof row.reason, 'string'); if (expected) assert.ok(row.reason.startsWith(expected === 'NODE_OPTIONS' ? '--' : expected));
     assert.equal(got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false);
   }
 });
-test('MR-06.PROFILES toxic sensitive+write combinations rejected in object/env/file+env overlays; independent profiles accepted', () => {
-  for (const writeCritical of [false, true]) assert.throws(() => cfg({ profiles: { sensitiveRead: true, write: true, writeCritical } }), /read-only release/);
-  for (const profile of Object.values(profiles)) {if(profile.write)assert.throws(()=>cfg({profiles:profile}),/read-only release/);else assert.doesNotThrow(()=>cfg({profiles:profile}));}
-  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' })), /read-only release/);
+test('MR-06.PROFILES sensitive+write combinations accepted in object/env/file+env overlays; critical without write rejected everywhere', () => {
+  for (const writeCritical of [false, true]) assert.doesNotThrow(() => cfg({ profiles: { sensitiveRead: true, write: true, writeCritical } }));
+  for (const profile of Object.values(profiles)) assert.doesNotThrow(() => cfg({ profiles: profile }));
+  // DR-W-03/16: the sensitive+write union starts only with the explicit operator acknowledgement.
+  const ack = { DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE: 'true' };
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,sensitive,write' })), /DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is required/);
+  assert.deepEqual({ ...loadConfig(env({ DARKTRACE_PROFILES: 'read,sensitive,write', DARKTRACE_SENSITIVE_READ: 'true', ...ack })).profiles }, { read: true, write: true, sensitiveRead: true, writeCritical: false });
+  // DR-W-16: a legacy boolean can no longer re-widen a DARKTRACE_PROFILES list, even with the acknowledgement.
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true', ...ack })), /DARKTRACE_SENSITIVE_READ=true conflicts with DARKTRACE_PROFILES/);
+  assert.throws(() => cfg({ profiles: { writeCritical: true } }), /requires profiles\.write/);
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'sensitive,critical' })), /requires profiles\.write/);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr06-')), file = join(directory, 'config.json');
-  for (const [profile, extra] of [[{ write: true }, { DARKTRACE_SENSITIVE_READ: 'true' }], [{ sensitiveRead: true }, { DARKTRACE_PROFILES: 'read,write' }]]) {
+  for (const [profile, extra, ok] of [[{ write: true }, { DARKTRACE_SENSITIVE_READ: 'true' }, true], [{ sensitiveRead: true }, { DARKTRACE_PROFILES: 'read,write' }, true],
+    [{ writeCritical: true }, { DARKTRACE_SENSITIVE_READ: 'true' }, false], [{ write: true, writeCritical: true }, { DARKTRACE_PROFILES: 'read,critical' }, false]]) {
     writeFileSync(file, JSON.stringify({ profiles: profile }), { mode: 0o600 });
-    assert.throws(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra })), /read-only release/);
+    if (ok) assert.doesNotThrow(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra, ...ack })));
+    else assert.throws(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra })), /requires profiles\.write/);
   }
 });
-const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-first-stable.json', import.meta.url), 'utf8')).contracts;
+const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json', import.meta.url), 'utf8')).contracts;
 for (const [name, profile] of Object.entries(profiles)) test('MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot ' + name, async () => {
-  if(profile.write){assert.throws(()=>cfg({profiles:profile}),/read-only release/);await assert.rejects(()=>toolContract(profile),/read-only release/);return;}
   const tools = await toolContract(profile); assert.equal(digest(tools), contracts[name].sha256); assert.deepEqual(tools, contracts[name].tools); clean(tools);
   for (const tool of tools) { assert.equal(tool.description.includes('<IMPORTANT>'), false); assert.equal(tool.description.includes(PUBLIC), false); assert.equal(tool.description.includes(PRIVATE), false); }
+});
+// DR-W-08: host-mode critical and elicitation-mode write descriptions are pinned and match the configured channel.
+for (const [name, profile] of Object.entries(approvalVariants)) test('MR-04.CONTRACT approval-channel tools/list snapshot ' + name, async () => {
+  const tools = await toolContract(profile); assert.equal(digest(tools), contracts[name].sha256); assert.deepEqual(tools, contracts[name].tools); clean(tools);
+  const base = await toolContract({ write: profile.write, writeCritical: profile.writeCritical ?? false });
+  assert.deepEqual(tools.map(t => [t.name, t.inputSchema, t.annotations]), base.map(t => [t.name, t.inputSchema, t.annotations]), 'only descriptions depend on the approval channel');
+  for (const tool of tools) {
+    if (/CRITICAL write/.test(tool.description)) {
+      if (profile.criticalApproval === 'host') { assert.doesNotMatch(tool.description, /accept a confirmation dialog/); assert.match(tool.description, /relying on the host's own tool-permission prompt; no server confirmation dialog\./); }
+      else assert.match(tool.description, /the user must then also accept a confirmation dialog\./);
+    } else if (/^.*Write \(profile "write"/.test(tool.description)) {
+      if (profile.writeApproval === 'elicitation') { assert.match(tool.description, /: the user must accept a server dialog;/); assert.doesNotMatch(tool.description, /runs immediately/); }
+      else assert.match(tool.description, /runs immediately;/);
+    }
+  }
 });
 const init = (id = 1, version = '2025-11-25') => ({ jsonrpc: '2.0', id, method: 'initialize', params: { protocolVersion: version, capabilities: {}, clientInfo: { name: 'synthetic-defense', version: '1' } } });
 const listed = id => ({ jsonrpc: '2.0', id, method: 'tools/list', params: {} });
 const called = id => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name: 'darktrace_get_status', arguments: {} } });
 const initialized = { jsonrpc: '2.0', method: 'notifications/initialized' };
-function session(t) {
+function session(t, config = cfg()) {
   const stdin = new PassThrough(), stdout = new PassThrough(), signals = new EventEmitter(), state = { calls: 0, closed: 0 }, waiters = new Map(), frames = []; let text = '';
   stdout.on('data', chunk => { text += chunk; let end; while ((end = text.indexOf('\n')) >= 0) { const frame = JSON.parse(text.slice(0, end)); text = text.slice(end + 1); assert.equal(frame.jsonrpc, '2.0'); frames.push(frame); waiters.get(frame.id)?.(frame); waiters.delete(frame.id); } });
-  const handle = runStdio(cfg(), { testOnly: true, stdin, stdout, signals, client: { async request() { state.calls++; return { json: { version: attack } }; }, close() { state.closed++; } } });
+  const handle = runStdio(config, { testOnly: true, stdin, stdout, signals, client: { async request() { state.calls++; return { json: { version: attack } }; }, close() { state.closed++; } } });
   t.after(() => handle.close());
   const send = value => stdin.write(typeof value === 'string' ? value + '\n' : JSON.stringify(value) + '\n');
   const request = value => new Promise((resolveReply, reject) => { const timeout = setTimeout(() => { waiters.delete(value.id); reject(new Error('Synthetic protocol reply timeout')); }, 3000); waiters.set(value.id, reply => { clearTimeout(timeout); resolveReply(reply); }); send(value); });
   return { stdin, handle, state, frames, send, request };
 }
-test('MR-05.LIFECYCLE pre-init tools/list/call and forged initialized reject with zero client; later proper init succeeds', async t => {
+test('MR-05.LIFECYCLE pre-init and malformed-init tools/list/call and forged initialized reject with zero client; completed initialize unlocks without the notification', async t => {
   const s = session(t); s.send(initialized);
   for (const frame of [listed(10), called(11)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
+  const malformed = await s.request({ jsonrpc: '2.0', id: 9, method: 'initialize', params: { protocolVersion: '2025-11-25' } }); assert.ok(malformed.error); assert.equal(malformed.result, undefined);
+  for (const frame of [listed(16), called(17)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
   const reply = await s.request(init()); assert.ok(reply.result.serverInfo);
-  for (const frame of [listed(12), called(13)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(s.state.calls, 0); }
-  s.send(initialized); assert.ok((await s.request(listed(14))).result.tools.length); assert.equal(s.state.calls, 0);
-  const result = await s.request(called(15)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1); clean(result.result); noCanaries(s.frames);
+  // Claude Code sends tools/list right after the initialize response, before notifications/initialized.
+  assert.ok((await s.request(listed(12))).result.tools.length); assert.equal(s.state.calls, 0);
+  const early = await s.request(called(13)); assert.equal(early.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1);
+  s.send(initialized); assert.ok((await s.request(listed(14))).result.tools.length); assert.equal(s.state.calls, 1);
+  const result = await s.request(called(15)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 2); clean(result.result); noCanaries(s.frames);
 });
+test('MR-05.ENVELOPE 2026-07-28 clients identify per request; missing/malformed envelopes and forged initialized reject with zero client', async t => {
+  const PV = 'io.modelcontextprotocol/protocolVersion', CAPS = 'io.modelcontextprotocol/clientCapabilities', INFO = 'io.modelcontextprotocol/clientInfo';
+  const good = { [PV]: '2026-07-28', [INFO]: { name: 'synthetic-modern', version: '1' }, [CAPS]: {} };
+  const enveloped = (frame, meta) => ({ ...frame, params: { ...frame.params, _meta: meta } });
+  const s = session(t);
+  const discovered = await s.request({ jsonrpc: '2.0', id: 'discover', method: 'server/discover', params: { _meta: good } }); assert.deepEqual(discovered.result.supportedVersions, ['2026-07-28']);
+  s.send(initialized);
+  let id = 40;
+  for (const meta of [undefined, { [PV]: '2026-07-28' }, { [CAPS]: {} }, { [PV]: '2026-07-28', [CAPS]: null }, { [PV]: '2026-07-28', [CAPS]: [] }, { [PV]: '2025-11-25', [CAPS]: {} },
+    { [PV]: CANARY, [CAPS]: {} }, { ...good, [INFO]: CANARY }, { ...good, [PV]: ['2026-07-28'] }]) {
+    for (const frame of [listed(id++), called(id++)]) { const reply = await s.request(meta === undefined ? frame : enveloped(frame, meta)); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
+  }
+  assert.ok((await s.request(enveloped(listed(60), good))).result.tools.length); assert.equal(s.state.calls, 0);
+  const result = await s.request(enveloped(called(61), good)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1); clean(result.result); noCanaries(s.frames);
+  const missing = await s.request(called(62)); assert.ok(missing.error); assert.equal(s.state.calls, 1);
+  const none = { capabilities: undefined, clientInfo: undefined, version: undefined };
+  assert.equal(clientIdentified(none, undefined), false); assert.equal(clientIdentified(none, good), true);
+  assert.equal(clientIdentified({ capabilities: {}, clientInfo: undefined, version: '2025-11-25' }, undefined), false);
+  assert.equal(clientIdentified({ capabilities: {}, clientInfo: { name: 'x', version: '1' }, version: '2025-11-25' }, undefined), true);
+});
+{
+  // Frame shapes recorded from Claude Code 2.1.289 (protocol 2026-07-28): server/discover, then every request
+  // carries the client envelope plus Claude Code's own _meta keys; no initialize.
+  const PV = 'io.modelcontextprotocol/protocolVersion', CAPS = 'io.modelcontextprotocol/clientCapabilities', INFO = 'io.modelcontextprotocol/clientInfo';
+  const claudeCode = (capabilities) => ({ [PV]: '2026-07-28', [INFO]: { name: 'claude-code', title: 'Claude Code', version: '2.1.289' }, [CAPS]: capabilities });
+  const ELICIT = { roots: { listChanged: true }, elicitation: { form: {}, url: {} } };
+  const critical = cfg({ profiles: { write: true, writeCritical: true } });
+  async function modern(t, capabilities = ELICIT) {
+    const s = session(t, critical); let id = 100, tool = 0;
+    const meta = () => ({ ...claudeCode(capabilities), 'claudecode/toolUseId': 'toolu_synthetic_' + ++tool, progressToken: tool });
+    assert.deepEqual((await s.request({ jsonrpc: '2.0', id: 'server-discover-probe-1', method: 'server/discover', params: { _meta: claudeCode(capabilities) } })).result.supportedVersions, ['2026-07-28']);
+    const call = (args, extra = {}) => s.request({ method: 'tools/call', params: { name: 'darktrace_delete_tag', arguments: args, _meta: meta(), ...extra }, jsonrpc: '2.0', id: id++ });
+    const confirmed = async (tid = 9) => { const preview = (await call({ path: { tid }, dryRun: true })).result.structuredContent; assert.match(preview.previewId, /^[a-f0-9]{32}$/); return { path: { tid }, confirm: true, previewId: preview.previewId }; };
+    return { s, call, confirmed };
+  }
+  test('MR-05.APPROVAL 2026-07-28 envelope elicitation: approval requested as input_required; accept executes once, decline/cancel send nothing', async t => {
+    const { s, call, confirmed } = await modern(t);
+    const args = await confirmed(), asked = (await call(args)).result;
+    assert.equal(asked.resultType, 'input_required'); assert.equal(s.state.calls, 0); assert.equal(typeof asked.requestState, 'string');
+    const prompt = asked.inputRequests[APPROVAL_INPUT_KEY]; assert.equal(prompt.method, 'elicitation/create'); assert.equal(prompt.params.mode, 'form');
+    assert.match(prompt.params.message, /CRITICAL action/); assert.match(prompt.params.message, /delete_tags_tid \(DELETE \/tags\/\{tid\}\)/); noCanaries(asked);
+    assert.deepEqual(prompt.params.requestedSchema, { type: 'object', properties: { approved: { type: 'boolean' } }, required: ['approved'] });
+    // Unsolicited answers without this server's state never count: the server asks again and nothing executes.
+    const accept = { [APPROVAL_INPUT_KEY]: { action: 'accept', content: { approved: true } } };
+    const unsolicited = (await call(args, { inputResponses: accept })).result;
+    assert.equal(unsolicited.resultType, 'input_required'); assert.equal(s.state.calls, 0);
+    // An accept without the code-owned approved:true is not consent (CR-09); the preview is then spent.
+    const missing = await confirmed(), missingState = (await call(missing)).result.requestState;
+    const bare = (await call(missing, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept', content: {} } }, requestState: missingState })).result.structuredContent;
+    assert.equal(bare.error.code, 'approval_denied'); assert.equal(s.state.calls, 0);
+    const accepted = (await call(args, { inputResponses: accept, requestState: asked.requestState })).result;
+    assert.equal(accepted.isError, undefined, JSON.stringify(accepted)); assert.equal(s.state.calls, 1);
+    // Single use: replaying the accepted retry cannot execute again (the preview and the approval state are spent).
+    const replay = (await call(args, { inputResponses: accept, requestState: asked.requestState })).result;
+    assert.equal(replay.structuredContent.error.code, 'preview_used'); assert.equal(s.state.calls, 1);
+    for (const action of ['decline', 'cancel']) {
+      const next = await confirmed(), state = (await call(next)).result.requestState;
+      const refused = (await call(next, { inputResponses: { [APPROVAL_INPUT_KEY]: { action } }, requestState: state })).result.structuredContent;
+      assert.equal(refused.error.code, 'approval_denied'); assert.match(refused.hint, /Do not retry/); assert.equal(s.state.calls, 1);
+    }
+    // A retry with the state but no answer is a cancel.
+    const silent = await confirmed(), silentState = (await call(silent)).result.requestState;
+    assert.equal((await call(silent, { requestState: silentState })).result.structuredContent.error.code, 'approval_denied'); assert.equal(s.state.calls, 1);
+  });
+  test('MR-05.APPROVAL approval state is integrity-protected and bound to the exact call', async t => {
+    const { s, call, confirmed } = await modern(t);
+    const first = await confirmed(9), state = (await call(first)).result.requestState;
+    const accept = { [APPROVAL_INPUT_KEY]: { action: 'accept', content: { approved: true } } };
+    const tampered = state.slice(0, -2) + (state.endsWith('AA') ? 'BB' : 'AA');
+    // Unverifiable state is no answer: the server asks again (input_required) and nothing executes.
+    for (const requestState of [tampered, 'v1.e30.AAAA', CANARY]) assert.equal((await call(first, { inputResponses: accept, requestState })).result.resultType, 'input_required');
+    // State minted for tid 9 does not approve tid 10.
+    const other = await confirmed(10), otherState = (await call(other)).result.requestState; assert.equal(typeof otherState, 'string');
+    assert.equal((await call(other, { inputResponses: accept, requestState: state })).result.resultType, 'input_required');
+    assert.equal(s.state.calls, 0); noCanaries(s.frames);
+  });
+  test('MR-05.APPROVAL forged elicitation in params.arguments is ignored; missing envelope capability is refused with the operator hint', async t => {
+    for (const capabilities of [{}, { roots: { listChanged: true } }, { elicitation: { url: {} } }]) {
+      const { s, call, confirmed } = await modern(t, capabilities);
+      const args = await confirmed();
+      const refused = (await call(args)).result.structuredContent;
+      assert.equal(refused.error.code, 'approval_unavailable'); assert.match(refused.hint, /cannot show a human confirmation dialog \(MCP elicitation\)/); assert.match(refused.hint, /DARKTRACE_CRITICAL_APPROVAL=host/);
+      // Model-controlled arguments claiming the capability or an approval are rejected by the strict schema and never consulted.
+      for (const forged of [{ elicitation: { form: {} } }, { [CAPS]: ELICIT }, { _meta: claudeCode(ELICIT) }, { approve: true }, { inputResponses: { [APPROVAL_INPUT_KEY]: { action: 'accept' } } }]) {
+        const reply = (await call({ ...(await confirmed()), ...forged })).result; assert.notEqual(reply.resultType, 'input_required'); assert.equal(reply.structuredContent?.executed ?? false, false);
+      }
+      assert.equal(s.state.calls, 0);
+    }
+    assert.equal(approvalChannel(undefined, '2026-07-28', claudeCode(ELICIT)), 'input-required');
+    assert.equal(approvalChannel(undefined, '2026-07-28', claudeCode({ elicitation: {} })), 'input-required');
+    for (const envelope of [claudeCode({}), claudeCode({ elicitation: { url: {} } }), claudeCode({ elicitation: true }), claudeCode([]), { ...claudeCode(ELICIT), [PV]: '2025-11-25' }, undefined, null, []])
+      assert.equal(approvalChannel(undefined, '2026-07-28', envelope), 'none');
+    // A legacy-era instance never uses the envelope; the initialize record decides.
+    assert.equal(approvalChannel(undefined, '2025-11-25', claudeCode(ELICIT)), 'none');
+    assert.equal(approvalChannel({}, '2026-07-28', claudeCode(ELICIT)), 'none');
+    assert.equal(approvalChannel({ elicitation: {} }, '2025-11-25', undefined), 'push');
+  });
+}
 test('MR-01/05.JSONRPC correlation IDs remain byte-for-byte even if containing controls or token literals', async t => {
   const s = session(t), id = PRIVATE + '\u202e\x1b' + String.fromCodePoint(0xe0049);
   const before = await s.request(listed(id)); assert.equal(before.id, id); assert.ok(before.error);
@@ -166,9 +294,13 @@ test('MR-07.DUPLICATES escaped keys and nested duplicate scopes reject; strings/
     assert.equal(output, duplicate?'{}\n':raw+'\n');
   }
 });
-test('MR-03.DISTRIBUTION only verified private tgz/local source examples; documentary scanner distinguishes warnings and installs', () => {
-  for (const line of ['npx darktrace-mcp', 'npx -y darktrace-mcp@0.1.0', 'npx --package=darktrace-mcp@latest node', 'npm i darktrace-mcp', 'npm install --ignore-scripts darktrace-mcp', 'npm exec -- darktrace-mcp', 'npm exec --package=darktrace-mcp node']) assert.equal(forbiddenCommand(line), true, line);
-  for (const line of ['Do not run npx darktrace-mcp', '# npx darktrace-mcp is forbidden', 'npm ci --ignore-scripts', 'npm install --ignore-scripts ./darktrace-mcp-0.1.tgz', 'npm install /absolute/private/darktrace-mcp.tgz', 'node /absolute/path/dist/src/index.js']) assert.equal(forbiddenCommand(line), false, line);
+test('MR-03.DISTRIBUTION only the scoped published package, pinned exactly, and never as a client launcher; documentary scanner distinguishes warnings and installs', () => {
+  for (const line of ['npx darktrace-mcp', 'npx -y darktrace-mcp@0.1.0', 'npx --package=darktrace-mcp@latest node', 'npm i darktrace-mcp', 'npm install --ignore-scripts darktrace-mcp', 'npm exec -- darktrace-mcp', 'npm exec --package=darktrace-mcp node',
+    'npx -y @nuoframework/darktrace-mcp setup', 'npx -y @nuoframework/darktrace-mcp@latest setup', 'npm install -g @nuoframework/darktrace-mcp@^1', 'npx --package=@nuoframework/darktrace-mcp@1 darktrace-mcp']) assert.equal(forbiddenCommand(line), true, line);
+  for (const line of ['Do not run npx darktrace-mcp', '# npx darktrace-mcp is forbidden', 'npm ci --ignore-scripts', 'npm install --ignore-scripts ./darktrace-mcp-0.1.tgz', 'npm install /absolute/private/darktrace-mcp.tgz', 'node /absolute/path/dist/src/index.js',
+    'npx -y @nuoframework/darktrace-mcp@1.1.0 setup', 'npm install -g @nuoframework/darktrace-mcp@1.1.0']) assert.equal(forbiddenCommand(line), false, line);
+  // Client configurations must launch an absolute executable: even the exactly pinned package is not a launcher.
+  for (const line of ['npx -y @nuoframework/darktrace-mcp@1.1.0', 'npm exec --package=@nuoframework/darktrace-mcp@1.1.0 darktrace-mcp']) assert.equal(forbiddenCommand(line, true), true, line);
   assert.deepEqual(distributionIssues(resolve('.')), []);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr03-')); mkdirSync(join(directory, 'docs')); mkdirSync(join(directory, 'examples'));
   writeFileSync(join(directory, 'README.es.md'), 'No ejecutar paquetes no verificados.\n');
@@ -176,6 +308,8 @@ test('MR-03.DISTRIBUTION only verified private tgz/local source examples; docume
   writeFileSync(join(directory, 'docs/unsafe.md'), '```sh\nnpx -y darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 1);
   writeFileSync(join(directory, 'examples/unsafe.json'), JSON.stringify({ mcpServers: { unsafe: { command: 'npx', args: ['-y', 'darktrace-mcp'] } } })); assert.equal(distributionIssues(directory).length, 2);
   writeFileSync(join(directory, 'README.es.md'), '```sh\nnpm install darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 3);
+  writeFileSync(join(directory, 'examples/pinned-launcher.json'), JSON.stringify({ mcpServers: { darktrace: { command: '/usr/local/bin/npx', args: ['-y', '@nuoframework/darktrace-mcp@1.1.0'] } } })); assert.equal(distributionIssues(directory).length, 4);
+  writeFileSync(join(directory, 'docs/bootstrap.md'), '```sh\nnpx -y @nuoframework/darktrace-mcp@1.1.0 setup\n```\n'); assert.equal(distributionIssues(directory).length, 4);
 });
 
 // IR-01/02 supplements: all preceding 62 cases remain byte-for-byte unchanged.
@@ -267,11 +401,11 @@ for (const mode of modes) for (const value of ['', '0', '1', CANARY]) test('IR-0
   const got = spawnSync(process.execPath, ['--import', resolve('test/security/diagnostic-guard.mjs'), 'dist/src/index.js', ...mode], { env: env({ NODE_USE_SYSTEM_CA: value, NODE_EXTRA_CA_CERTS: resolve('test/security/fixtures/ca.pem') }), input: '', encoding: 'utf8', timeout: 4000 });
   assert.equal(got.error, undefined); assert.equal(got.status, 1); assert.equal(got.stdout, ''); noCanaries(got.stderr);
   assert.equal(got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false); const row = irStartupMetadata(got.stderr, value);
-  assert.equal(row.event, 'startup_error'); assert.equal(row.variable, 'NODE_USE_SYSTEM_CA'); assert.deepEqual(Object.keys(row).sort(), ['event', 'ts', 'variable']);
+  assert.equal(row.event, 'startup_error'); assert.equal(row.variable, 'NODE_USE_SYSTEM_CA'); assert.deepEqual(Object.keys(row).sort(), ['event', 'reason', 'ts', 'variable']); assert.equal(row.reason, 'NODE_USE_SYSTEM_CA is unsupported; private CAs use NODE_EXTRA_CA_CERTS');
 });
 
 test('MR-04.STABLE forbidden release profile matrix rejects objects, SDK capture and production startup with zero sinks',async()=>{
- const expected=JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-first-stable.json',import.meta.url),'utf8'));
+ const expected=JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json',import.meta.url),'utf8'));
  const checked=await verifyRejectedReleaseProfiles();assert.deepEqual(checked.rejectedProfiles,expected.rejectedProfiles);assert.deepEqual(Object.keys(checked.startupChecks).sort(),Object.keys(expected.rejectedProfiles).sort());
  for(const row of Object.values(checked.startupChecks)){assert.equal(row.objectRejected,true);assert.equal(row.contractRejectedBeforeSdk,true);assert.equal(row.stdoutEmpty,true);assert.equal(row.networkSigningGuardTriggered,false);assert.deepEqual(row.productionModes,['stdio','doctor','--check-config']);}
 });

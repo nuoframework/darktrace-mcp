@@ -19,22 +19,28 @@ export function validateServer(server,label){
   for(const token of ['public-token','private-token'])assert(mounts.some(v=>typeof v==='string'&&/type=bind(?:,|$)/.test(v)&&/(?:^|,)(?:src|source)=\//.test(v)&&v.includes('=/run/secrets/'+token)&&/(?:^|,)readonly(?:=true)?(?:,|$)/.test(v)),label+': read-only token-file bind');
   assert(!mounts.some(v=>v.includes('docker.sock')),label+': no daemon socket mount');
   const env=args.flatMap((v,i)=>v==='-e'||v==='--env'?[args[i+1]]:[]);
-  assert(env.includes('DARKTRACE_PROFILES=read')&&env.includes('DARKTRACE_SENSITIVE_READ=false'),label+': read-only example');
+  assert(env.includes('DARKTRACE_PROFILES=read')&&env.filter(value=>value.startsWith('DARKTRACE_SENSITIVE_READ=')).every(value=>value==='DARKTRACE_SENSITIVE_READ=false'),label+': read-only example');
   const envNames=env.map(value=>value.split('=',1)[0]);assert.equal(new Set(envNames).size,envNames.length,label+': no duplicate environment overrides');
   assert(env.filter(value=>value.startsWith('DARKTRACE_PROFILES=')).every(value=>value==='DARKTRACE_PROFILES=read'),label+': no write profile override');
   assert(env.filter(value=>value.startsWith('DARKTRACE_WRITE_CRITICAL=')).every(value=>value==='DARKTRACE_WRITE_CRITICAL=false'),label+': no write-critical grant in consultation examples');
+  assert(!env.some(value=>/^DARKTRACE_ACKNOWLEDGE_(?:SENSITIVE_WRITE|HOST_APPROVAL)=/.test(value)),label+': consultation examples never pre-set a risk acknowledgement');
   for(const value of env)assert(!/^DARKTRACE_(?:PUBLIC|PRIVATE)_TOKEN=/.test(value)&&!/^NODE_TLS_REJECT_UNAUTHORIZED=/.test(value),label+': no token values/TLS bypass');
  }else{
   assert(server.command.endsWith('/node'),label+': fixed Node executable');
   assert(isAbsolute(server.args[0])&&server.args[0].endsWith('/dist/src/index.js'),label+': absolute compiled production entrypoint');
   assert.equal(server.args.length,1,label+': production stdio, no diagnostic or arbitrary arguments');
-  assert.equal(server.env?.DARKTRACE_PROFILES,'read');assert.equal(server.env?.DARKTRACE_SENSITIVE_READ,'false');
+  assert.equal(server.env?.DARKTRACE_PROFILES,'read');assert(server.env?.DARKTRACE_SENSITIVE_READ===undefined||server.env.DARKTRACE_SENSITIVE_READ==='false',label+': no sensitive-read grant in consultation examples');
   assert(server.env?.DARKTRACE_WRITE_CRITICAL===undefined||server.env.DARKTRACE_WRITE_CRITICAL==='false',label+': no write-critical grant in consultation examples');
+  assert(!Object.keys(server.env).some(key=>/^DARKTRACE_ACKNOWLEDGE_/.test(key)),label+': consultation examples never pre-set a risk acknowledgement');
   for(const key of ['DARKTRACE_PUBLIC_TOKEN_FILE','DARKTRACE_PRIVATE_TOKEN_FILE'])assert(isAbsolute(server.env?.[key]??''),label+': token-file path');
   assert(!Object.hasOwn(server.env,'DARKTRACE_PUBLIC_TOKEN')&&!Object.hasOwn(server.env,'DARKTRACE_PRIVATE_TOKEN'));
  }
 }
 function validateConfig(value,label){
+ // OpenCode: {"mcp":{"darktrace":{"type":"local","command":[exe,...args],"environment":{...}}}}
+ const local=value.mcp?.darktrace;
+ if(local){assert.equal(local.type,'local',label+': OpenCode local server');assert(Array.isArray(local.command),label+': OpenCode command array');
+  validateServer({command:local.command[0],args:local.command.slice(1),env:local.environment??{}},label);return;}
  const server=value.mcpServers?.darktrace??value.servers?.darktrace??value.mcp_servers?.darktrace??(value.command?value:undefined);
  if(server)validateServer(server,label);
 }
@@ -46,7 +52,11 @@ export function lintMarkdown(text,label){
   if(language==='json')validateConfig(JSON.parse(body),label+': JSON fence');
   if(['sh','shell','bash','zsh','console'].includes(language)&&!warning){
    const commands=body.split('\n').filter(line=>!line.trim().startsWith('#')).join('\n').replace(/\\\n\s*/g,' ');
-   assert(!/\b(?:npx\s+(?:-[^\s]+\s+)*|npm\s+(?:exec|install|i|add)\s+(?:-[^\s]+\s+)*)darktrace-mcp(?:@[^\s]+)?(?:\s|$)/.test(commands),label+': no unpublished registry project invocation');
+   // Published package policy: only the scoped name, always pinned to an exact version (never latest or a range).
+   for(const [,name,spec] of commands.matchAll(/\b(?:npx\s+(?:-[^\s]+\s+)*|npm\s+(?:exec|install|i|add)\s+(?:-[^\s]+\s+)*)((?:@nuoframework\/)?darktrace-mcp)(@[^\s]+)?(?=\s|$)/g)){
+    assert.equal(name,'@nuoframework/darktrace-mcp',label+': only the scoped published package name (unscoped darktrace-mcp is not ours)');
+    assert.match(spec??'',/^@\d+\.\d+\.\d+$/,label+': pin an exact published version, never latest or a range');
+   }
    for(const line of commands.split('\n'))if(/\bclaude\s+mcp\s+add\b/.test(line))assert(/--scope(?:=|\s+)user\b/.test(line),label+': explicit user scope for protected MCP setup');
   }
  }

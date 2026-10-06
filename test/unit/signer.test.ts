@@ -38,12 +38,11 @@ test('query encoding handles spaces, quotes, plus signs, and repeated keys deter
   assert.equal(repeated.headers['DTAPI-Signature'], 'aa56a1eb79b0d56d6b99a3f4c1e17d572a7e5650');
 });
 
-test('JSON body bytes are signed unchanged and returned as a defensive copy', () => {
+test('JSON body bytes are signed unchanged on the path-only appliance form and copied defensively', () => {
   const source = new TextEncoder().encode('{"count":2}');
   const signed = createSigner('public', 'secret', { encodeQueryInSignature: true }).sign({
     method: 'POST',
     path: '/devices',
-    query: [['x', '1']],
     body: { kind: 'json', bytes: source },
     date,
   });
@@ -51,7 +50,11 @@ test('JSON body bytes are signed unchanged and returned as a defensive copy', ()
   source[0] = 0;
   assert.equal(new TextDecoder().decode(signed.bodyBytes), '{"count":2}');
   assert.equal(signed.headers['Content-Type'], 'application/json');
-  assert.equal(signed.headers['DTAPI-Signature'], 'db557ef732b97f9b21cce730a07cad047a7a5aad');
+  assert.equal(signed.headers['DTAPI-Signature'], '116e0ddda47eac8dc12409859280baef03c31148');
+  assert.throws(() => createSigner('public', 'secret', { encodeQueryInSignature: true }).sign({
+    method: 'POST', path: '/devices', query: [['x', '1']],
+    body: { kind: 'json', bytes: new TextEncoder().encode('{"count":2}') }, date,
+  }), /query plus JSON/);
 });
 
 test('form bodies use one encoded representation for transport and signing', () => {
@@ -66,15 +69,16 @@ test('form bodies use one encoded representation for transport and signing', () 
   assert.equal(signed.headers['DTAPI-Signature'], '493040df7c5d4ea1975778fafed8ed7c62076325');
 });
 
-test('DELETE query and Advanced Search base64 path values are signed without method-dependent mutation', () => {
+test('DELETE query and encoded Advanced Search Base64 path preserve the signed wire bytes', () => {
   const signer = createSigner('public', 'secret', { encodeQueryInSignature: true });
   const deleted = signer.sign({ method: 'DELETE', path: '/tags/entities', query: [['did', '4'], ['tag', 'ops']], date });
-  const search = signer.sign({ method: 'GET', path: '/advancedsearch/api/search/a%2Bb%2F%3D', date });
+  const search = signer.sign({ method: 'GET', path: '/advancedsearch/api/search/%2B%2F8%3D', date });
 
   assert.equal(deleted.url, '/tags/entities?did=4&tag=ops');
   assert.equal(deleted.headers['DTAPI-Signature'], 'af076e45f77433e8edf52e2953793f40dcfe20c6');
-  assert.equal(search.url, '/advancedsearch/api/search/a%2Bb%2F%3D');
-  assert.equal(search.headers['DTAPI-Signature'], '25fc3ddb099b38f6ffbbbabb6cfc0864d00ebe34');
+  assert.equal(search.url, '/advancedsearch/api/search/%2B%2F8%3D');
+  assert.equal(search.headers['DTAPI-Signature'], 'ca53f70e5801972fe73e92fd920813b4592ec678');
+  assert.throws(() => signer.sign({ method: 'GET', path: '/advancedsearch/api/search/+/8=', date }), /S6 path/);
 });
 
 test('date formatting is stable in UTC for both supported formats', () => {
@@ -88,6 +92,20 @@ test('signer rejects unsafe paths, invalid dates, and non-compact JSON bodies', 
   assert.throws(() => signer.sign({ method: 'GET', path: 'https://host.example/path', date }), /safe absolute-path/);
   assert.throws(() => signer.sign({ method: 'GET', path: '/devices?x=1', date }), /safe absolute-path/);
   assert.throws(() => signer.sign({ method: 'GET', path: '/devices/../tags', date }), /traversal/);
+  for (const path of ['/x//y', '/x/a%2Fb', '/x/%252F', '/x/%252e%252e/y']) {
+    assert.throws(() => signer.sign({ method: 'GET', path, date }), /safe absolute|ambiguous|traversal/);
+  }
   assert.throws(() => signer.sign({ method: 'GET', path: '/devices', date: 'not-a-date' }), /DTAPI-Date/);
   assert.throws(() => signer.sign({ method: 'POST', path: '/devices', body: { kind: 'json', bytes: new TextEncoder().encode('{\n"ok":true}') }, date }), /compact serialization/);
+});
+
+test('V-W-01: the POST Advanced Search route signs without an S6 path segment; GET without a Base64 segment and POST variants are rejected', () => {
+  const signer = createSigner('pub', 'priv', { encodeQueryInSignature: false });
+  const date = '20260101T000000';
+  const body = { kind: 'json' as const, bytes: new TextEncoder().encode('{"hash":"eyJ9"}') };
+  const signed = signer.sign({ method: 'POST', path: '/advancedsearch/api/search', body, date });
+  assert.equal(signed.url, '/advancedsearch/api/search');
+  assert.throws(() => signer.sign({ method: 'GET', path: '/advancedsearch/api/search', date }), /S6 path/);
+  assert.throws(() => signer.sign({ method: 'POST', path: '/advancedsearch/api/search/eyJ9', body, date }), /exact/);
+  assert.throws(() => signer.sign({ method: 'DELETE', path: '/advancedsearch/api/search', date }), /limited to GET/);
 });

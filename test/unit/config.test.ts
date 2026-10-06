@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import '../security/test-runtime-argv.js';
 import test from 'node:test';
-import { loadConfig } from '../../src/config/load.js';
+import { assertPrivateFile, loadConfig } from '../../src/config/load.js';
 import { assertSafeNetworkEnvironment, ConfigValidationError, parseConfig } from '../../src/config/schema.js';
 import { canonicalIpAddress, isForbiddenDestination } from '../../src/config/address.js';
 
@@ -33,6 +33,7 @@ test('config defaults are conservative and every public limit has a hard ceiling
     rateLimitPerMinute: 120,
     maxGetRetries: 2,
     maxRetryAfterMs: 2_000,
+    maxWritesPerMinute: 10,
   });
 });
 
@@ -73,7 +74,8 @@ test('strict config rejects unknown keys, unsupported profiles, HTTP, export, an
   assert.throws(() => config({ instance: { baseUrl: 'https://darktrace.example', proxy: 'http://proxy' } }), /unsupported field/);
   assert.throws(() => config({ profiles: { sensitiveRead: true, export: false } }), /email and export/);
   assert.throws(() => config({ profiles: { email: false } }), /email and export/);
-  assert.throws(() => config({ profiles: { writeCritical: true } }), /read-only release/);
+  assert.throws(() => config({ profiles: { writeCritical: true } }), /requires profiles.write/);
+  assert.doesNotThrow(() => config({ profiles: { sensitiveRead: true, write: true, writeCritical: true } }));
   assert.throws(() => config({ transport: { kind: 'http' } }), /only stdio/);
   assert.throws(() => config({ transport: { kind: 'stdio', http: { port: 8080 } } }), /HTTP transport/);
   assert.throws(() => config({ compat: { assumeVersion: '7.1' } }), /compatibility overrides/);
@@ -113,7 +115,6 @@ test('loadConfig supports token files, the base URL alias, lower-only env limits
       DARKTRACE_BASE_URL: 'https://darktrace.example:8443/',
       DARKTRACE_PUBLIC_TOKEN_FILE: publicFile,
       DARKTRACE_PRIVATE_TOKEN_FILE: privateFile,
-      DARKTRACE_PROFILES: 'read',
       DARKTRACE_SENSITIVE_READ: 'true',
       DARKTRACE_QUERY_SIGNATURE_ENCODING: 'encoded',
       DARKTRACE_DESTINATION_ALLOWLIST: '10.0.0.4,fd12::1',
@@ -163,6 +164,64 @@ test('token files reject symlinks, broad permissions, CRLF, and oversized data w
       assert.equal(created.status, 0);
       assert.throws(() => loadConfig({ ...base, DARKTRACE_PRIVATE_TOKEN_FILE: fifo }), /could not read private token file/);
     }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('token file owner rule: default rejects foreign owners; root-or-current accepts only uid 0 and keeps mode checks', { skip: process.platform === 'win32' }, () => {
+  const uid = process.getuid!();
+  const foreign = uid === 4242 ? 4243 : 4242;
+  for (const owner of [undefined, 'current'] as const) {
+    assert.doesNotThrow(() => assertPrivateFile(0o100600, uid, 'private token file', owner));
+    assert.throws(() => assertPrivateFile(0o100600, foreign, 'private token file', owner), /must be owned by the current user$/);
+    if (uid !== 0) assert.throws(() => assertPrivateFile(0o100600, 0, 'private token file', owner), /must be owned by the current user$/);
+  }
+  assert.doesNotThrow(() => assertPrivateFile(0o100600, 0, 'private token file', 'root-or-current'));
+  assert.doesNotThrow(() => assertPrivateFile(0o100400, 0, 'private token file', 'root-or-current'));
+  assert.doesNotThrow(() => assertPrivateFile(0o100600, uid, 'private token file', 'root-or-current'));
+  assert.throws(() => assertPrivateFile(0o100600, foreign, 'private token file', 'root-or-current'), /must be owned by the current user or root/);
+  for (const mode of [0o100644, 0o100640, 0o100700, 0o104600, 0o102600, 0o101600, 0o100200]) {
+    assert.throws(() => assertPrivateFile(mode, 0, 'private token file', 'root-or-current'), /owner-only/);
+  }
+
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'darktrace-owner-'));
+  try {
+    const token = path.join(dir, 'token');
+    writeFileSync(token, 'synthetic-owner-token\n', { mode: 0o600 });
+    const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'public-token', DARKTRACE_PRIVATE_TOKEN_FILE: token };
+    for (const value of ['current', 'root-or-current']) {
+      assert.equal(loadConfig({ ...base, DARKTRACE_TOKEN_FILE_OWNER: value }).auth.privateToken, 'synthetic-owner-token');
+    }
+    for (const value of ['root', 'any', '', 'ROOT-OR-CURRENT', 'root-or-current ']) {
+      assert.throws(() => loadConfig({ ...base, DARKTRACE_TOKEN_FILE_OWNER: value }), (error: unknown) =>
+        error instanceof ConfigValidationError && error.message === 'DARKTRACE_TOKEN_FILE_OWNER must be current or root-or-current');
+    }
+    const file = path.join(dir, 'config.json');
+    writeFileSync(file, JSON.stringify({ auth: { tokenFileOwner: 'root-or-current' } }), { mode: 0o600 });
+    assert.equal(loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file }).auth.privateToken, 'synthetic-owner-token');
+    assert.throws(() => loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file, DARKTRACE_TOKEN_FILE_OWNER: 'current' }), /conflicts with auth\.tokenFileOwner/);
+    writeFileSync(file, JSON.stringify({ auth: { tokenFileOwner: 'nobody' } }), { mode: 0o600 });
+    assert.throws(() => loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file }), /auth\.tokenFileOwner must be current or root-or-current/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('DARKTRACE_TOKEN_FILE_OWNER=root-or-current logs one fixed secret-free startup warning', { skip: process.platform === 'win32' }, () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'darktrace-owner-log-'));
+  try {
+    const token = path.join(dir, 'token');
+    writeFileSync(token, 'synthetic-warning-token\n', { mode: 0o600 });
+    const script = `import { loadConfig } from ${JSON.stringify(path.resolve('dist/src/config/load.js'))}; loadConfig(process.env);`;
+    const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'synthetic-public', DARKTRACE_PRIVATE_TOKEN_FILE: token };
+    const relaxed = spawnSync(process.execPath, ['--input-type=module', '-e', script], { env: { ...base, DARKTRACE_TOKEN_FILE_OWNER: 'root-or-current' }, encoding: 'utf8' });
+    assert.equal(relaxed.status, 0, relaxed.stderr);
+    const lines = relaxed.stderr.trim().split('\n');
+    assert.equal(lines.length, 1);
+    const warning = JSON.parse(lines[0]);
+    assert.deepEqual(Object.keys(warning).sort(), ['event', 'ts']);
+    assert.equal(warning.event, 'token_file_owner_relaxed');
+    for (const secret of ['synthetic-warning-token', 'synthetic-public', token]) assert.equal(relaxed.stderr.includes(secret), false);
+    const strict = spawnSync(process.execPath, ['--input-type=module', '-e', script], { env: base, encoding: 'utf8' });
+    assert.equal(strict.status, 0, strict.stderr);
+    assert.equal(strict.stderr, '');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -247,7 +306,7 @@ test('network environment rejects TLS, proxy, and known NODE_OPTIONS bypasses wi
   assert.throws(() => assertSafeNetworkEnvironment({ NODE_OPTIONS: '--tls-min-v1.0' }, []), /--tls-min-v1.0/);
   assert.throws(() => assertSafeNetworkEnvironment({ NODE_OPTIONS: '"--use-env-proxy"' }, []), /--use-env-proxy/);
   assert.throws(() => loadConfig({ DARKTRACE_HTTP_PORT: '8080' }), /DARKTRACE_HTTP_PORT/);
-  assert.throws(() => loadConfig({ DARKTRACE_PROFILES: 'read,email' }), /email\/export/);
+  assert.throws(() => loadConfig({ DARKTRACE_PROFILES: 'read,email' }), /DARKTRACE_PROFILES must be/);
   assert.doesNotThrow(() => assertSafeNetworkEnvironment({ NODE_EXTRA_CA_CERTS: '/trusted/ca.pem' }, []));
 });
 
@@ -261,4 +320,35 @@ test('config validation errors never echo token values', () => {
     assert.equal(error.message.includes(secret), false);
     return true;
   });
+});
+
+test('DR-W-16 legacy booleans may only agree with or narrow DARKTRACE_PROFILES; widening is a startup error', () => {
+  const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'public-value', DARKTRACE_PRIVATE_TOKEN: 'private-value' };
+  const ack = { DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE: 'true' };
+  const lists = ['read', 'read,sensitive', 'read,write', 'read,sensitive,write', 'write,critical', 'read,sensitive,write,critical', 'all'];
+  for (const list of lists) {
+    const listed = { sensitiveRead: list === 'all' || list.includes('sensitive'), writeCritical: list === 'all' || list.includes('critical') };
+    for (const sensitive of [undefined, 'true', 'false'] as const) for (const critical of [undefined, 'true', 'false'] as const) {
+      const env: Record<string, string> = { ...base, ...ack, DARKTRACE_PROFILES: list };
+      if (sensitive !== undefined) env.DARKTRACE_SENSITIVE_READ = sensitive;
+      if (critical !== undefined) env.DARKTRACE_WRITE_CRITICAL = critical;
+      const widensSensitive = sensitive === 'true' && !listed.sensitiveRead;
+      const widensCritical = critical === 'true' && !listed.writeCritical;
+      if (widensSensitive || widensCritical) {
+        assert.throws(() => loadConfig(env), (error: Error) => error instanceof ConfigValidationError &&
+          new RegExp(`^${widensSensitive ? 'DARKTRACE_SENSITIVE_READ' : 'DARKTRACE_WRITE_CRITICAL'}=true conflicts with DARKTRACE_PROFILES$`).test(error.message), `${list} ${sensitive} ${critical}`);
+        continue;
+      }
+      const loaded = loadConfig(env).profiles;
+      assert.equal(loaded.sensitiveRead, sensitive === 'false' ? false : listed.sensitiveRead, `${list} ${sensitive} ${critical}`);
+      assert.equal(loaded.writeCritical, critical === 'false' ? false : listed.writeCritical, `${list} ${sensitive} ${critical}`);
+      assert.equal(loaded.write, list === 'all' || list.includes('write'));
+    }
+  }
+  // The DR-W-16 reproduction from the design review: narrowing promise holds.
+  assert.throws(() => loadConfig({ ...base, ...ack, DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' }), /DARKTRACE_SENSITIVE_READ=true conflicts with DARKTRACE_PROFILES/);
+  // Legacy-only configurations keep working unchanged.
+  assert.deepEqual(loadConfig({ ...base, DARKTRACE_SENSITIVE_READ: 'true' }).profiles, { read: true, write: false, sensitiveRead: true, writeCritical: false });
+  assert.deepEqual(loadConfig({ ...base, DARKTRACE_SENSITIVE_READ: 'false', DARKTRACE_WRITE_CRITICAL: 'false' }).profiles, { read: true, write: false, sensitiveRead: false, writeCritical: false });
+  assert.throws(() => loadConfig({ ...base, DARKTRACE_WRITE_CRITICAL: 'true' }), /requires profiles\.write/);
 });

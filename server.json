@@ -1,0 +1,122 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.nuoframework/darktrace-mcp",
+  "title": "Darktrace Threat Visualizer (unofficial)",
+  "description": "Hardened local stdio MCP server for the Darktrace Threat Visualizer API (unofficial).",
+  "version": "1.1.0",
+  "websiteUrl": "https://github.com/nuoframework/darktrace-mcp#readme",
+  "repository": {
+    "url": "https://github.com/nuoframework/darktrace-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@nuoframework/darktrace-mcp",
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DARKTRACE_URL",
+          "description": "HTTPS origin of the Darktrace appliance, for example https://darktrace.example.internal",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PUBLIC_TOKEN",
+          "description": "Darktrace API public token (or set DARKTRACE_PUBLIC_TOKEN_FILE to an owner-only file)",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PRIVATE_TOKEN",
+          "description": "Darktrace API private token (or set DARKTRACE_PRIVATE_TOKEN_FILE to an owner-only file)",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PROFILES",
+          "description": "Capability profiles: read (default), sensitive, write, critical or all, comma separated. all, or sensitive with write, also needs DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "read"
+        },
+        {
+          "name": "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE",
+          "description": "Set to true only to run all, or a profile list with both sensitive and write; the server refuses to start that combination without it. Sensitive results are untrusted content and write free-text fields can carry them out: an exfiltration risk",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean",
+          "default": "false"
+        }
+      ]
+    },
+    {
+      "registryType": "oci",
+      "registryBaseUrl": "https://ghcr.io",
+      "identifier": "ghcr.io/nuoframework/darktrace-mcp:1.1.0",
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "docker",
+      "runtimeArguments": [
+        { "type": "positional", "value": "run", "isRepeated": false },
+        { "type": "named", "name": "--rm", "isRepeated": false },
+        { "type": "named", "name": "-i", "isRepeated": false },
+        { "type": "named", "name": "--init", "isRepeated": false },
+        { "type": "named", "name": "--read-only", "isRepeated": false },
+        { "type": "named", "name": "--cap-drop=ALL", "isRepeated": false },
+        { "type": "named", "name": "--security-opt=no-new-privileges", "isRepeated": false },
+        { "type": "named", "name": "--pids-limit=64", "isRepeated": false },
+        { "type": "named", "name": "--memory=256m", "isRepeated": false }
+      ],
+      "environmentVariables": [
+        {
+          "name": "DARKTRACE_URL",
+          "description": "HTTPS origin of the Darktrace appliance",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PUBLIC_TOKEN",
+          "description": "Darktrace API public token",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PRIVATE_TOKEN",
+          "description": "Darktrace API private token",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DARKTRACE_PROFILES",
+          "description": "Capability profiles: read (default), sensitive, write, critical or all. all, or sensitive with write, also needs DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "read"
+        },
+        {
+          "name": "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE",
+          "description": "Set to true only to run all, or a profile list with both sensitive and write; the server refuses to start that combination without it. Sensitive results are untrusted content and write free-text fields can carry them out: an exfiltration risk",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean",
+          "default": "false"
+        }
+      ]
+    }
+  ]
+}

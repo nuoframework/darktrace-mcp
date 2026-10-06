@@ -1,6 +1,64 @@
-# Versioned private GitHub Releases
+# Releases and distribution
 
-## Current private stable: v1.0.0
+[README](../README.md) · [Getting started](getting-started.md) · [Changelog](../CHANGELOG.md)
+
+> Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.0 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
+
+## Distribution channels (1.1.0 and later)
+
+| Channel | Name | Produced by |
+|---|---|---|
+| npm (public) | [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp), exact versions only | `publish-npm` job: publishes the byte-verified `release:prepare` tarball with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, `id-token: write`) and `--provenance --access public` |
+| GitHub Container Registry (public) | `ghcr.io/nuoframework/darktrace-mcp:<version>`, linux/amd64 + linux/arm64, pin by digest | `publish-ghcr` (one native build per architecture, pushed by digest) and `publish-ghcr-manifest` (one `<version>` tag; no `latest` tag is ever moved) |
+| GitHub Release assets | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM, evidence | owner, from the `darktrace-mcp-release-candidate` workflow artifact |
+| MCP Registry | `io.github.nuoframework/darktrace-mcp` ([`server.json`](../server.json), `mcpName` in `package.json`) | owner, with `mcp-publisher` (below) |
+
+The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
+
+The 1.1.0 candidate gates pin six operator profile contracts (including `read+sensitive+write`, AD-W-18) and two approval-description variants. The [release pin evidence](security/release-pins-1.1.0.md) records the final counts and byte bindings. The independent content review of the regenerated full-API fixture required by [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) is recorded as ACCEPT in the [1.1.0 final gate review](security/final-gate-review-1.1.0.md#15-e11-independent-review-of-the-full-api-contract-fixture-o) §1.5.
+
+### 1.1.0 evidence files
+
+What exists for the 1.1.0 candidate, and what does not yet. The [final gate review](security/final-gate-review-1.1.0.md) decides release readiness; nothing here is release approval.
+
+| Evidence | File | Covers |
+|---|---|---|
+| Security receipt, Linux arm64 (Node 24.18.1) | [`release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json`](../test/security/evidence/release-1.1.0-linux-arm64-2026-10-06T12-43-25-292Z.json), SHA-256 `cd71cecd…dad9` | 1,150 security subcases, 1,150 pass; source tree `5b1208f1…fdc503e` |
+| Security receipt, macOS arm64 (Node 24.14.1) | [`release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json`](../test/security/evidence/release-1.1.0-macos-arm64-2026-10-06T13-06-41-906Z.json), SHA-256 `5699ae23…0736` | 1,150 subcases, 1,147 pass, 3 platform skips (setgid file modes) |
+| Earlier receipt (superseded) | [`2026-10-06T11-44-04-525Z.json`](../test/security/evidence/2026-10-06T11-44-04-525Z.json) | Before the V-W-01 fix: 6 Advanced Search POST failures |
+| Release pins and local Docker check | [release-pins-1.1.0.md](security/release-pins-1.1.0.md) | Every CI/verify pin, `release:prepare` output hashes, arm64 image `sha256:7e5a2a41…6aad` |
+| Live lab checks after the write controls | [final-lab-campaign-1.1.0.md](security/final-lab-campaign-1.1.0.md) | 50 tools listed; reads, POST search, `post_tags` preview, `confirmation_required`, the intel-feed critical flow |
+| Signing probe | [lab-signing-evidence.md](security/lab-signing-evidence.md) and its [JSON](security/evidence/lab-signing-evidence-2026-10-06T09-17-38-944Z.json) | Which request-signing shapes the 7.1.0 appliance accepts |
+| Lab results per operation | [CHANGES-core §6](CHANGES-core.md#6-live-lab-validation-darktrace-710-2026-10-06) and the [tool reference](tools.md) | 56 operations with lab evidence, 11 partial; email not validated |
+
+Not yet available: CI receipts for Linux amd64, the Node 22 leg and the amd64 Docker job; a vulnerability scan of the 1.1.0 runtime; dated owner decisions on the residual risks; and the published release assets. The [known limitations](../CHANGELOG.md#known-limitations-in-110) go into the release notes.
+
+### Publishing a version (owner)
+
+1. Set the same `version` in `package.json`, `package-lock.json`, `npm-shrinkwrap.json`, `manifest.json` and `server.json`, update `CHANGELOG.md`, commit, then create and push the tag `v<version>` on the reviewed commit. `release.yml` refuses a tag that does not match the package version.
+2. The workflow runs `prepare` exactly as before (clean install, typecheck, tests, security suite, two reproducible builds, tarball verification). Only when it passes do `publish-npm` and `publish-ghcr*` run, both from the verified bytes.
+3. **npm trusted publisher (one-time).** On npmjs.com open the package → Settings → Trusted publisher → GitHub Actions: organization `nuoframework`, repository `darktrace-mcp`, workflow filename `release.yml`, no environment, allow `npm publish`. Until this exists (for example for the very first publish of the package name) the job falls back to an `NPM_TOKEN` repository secret (granular access token, publish-only, scoped to this package) and prints a warning; delete the secret once the trusted publisher works. Provenance statements are generated either way.
+4. **ghcr visibility (one-time).** The first push creates the package as private. In the organization's Packages settings set `darktrace-mcp` to public and confirm it is linked to this repository (the image carries `org.opencontainers.image.source`). Copy the digest from the `publish-ghcr-manifest` summary or the `ghcr-image-digest` artifact into the release notes.
+5. **Release assets.** Download the `darktrace-mcp-release-candidate` artifact, verify `SHA256SUMS`, build the extension from the tag (`npm ci --ignore-scripts && npm run pack:mcpb`), then create the release with `gh release create v<version> --verify-tag --draft --notes-file release-notes.md <assets>` and publish it after inspection.
+6. **MCP Registry.** After the npm version is live (the registry checks `mcpName` in the published `package.json`):
+
+```sh
+curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+./mcp-publisher validate server.json
+./mcp-publisher login github
+./mcp-publisher publish
+```
+
+   `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
+
+### OpenSSF Best Practices registration (owner, one-time)
+
+1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
+2. Answer the "passing" criteria. Most answers point to existing files: `SECURITY.md` (vulnerability reporting), `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, the CI workflows (tests, `lint`, CodeQL) and [supply-chain checks](security/supply-chain-checks.md) (static analysis, dependency updates).
+3. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). In `README.md` and `README.es.md`, replace `<BESTPRACTICES_ID>` in the commented-out badge with that id and uncomment the badge once the project reaches a level worth showing. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
+4. Both READMEs are release inputs, so this edit belongs in a release commit (the release pins change).
+
+## v1.0.0 (previous release, private)
 
 Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.
 
@@ -11,7 +69,7 @@ The first stable provides 15 read-only tools covering 19 lab-validated GET selec
 The following procedure describes the immutable earlier alpha release, not the current stable. For v1.0.0, use the installation above.
 
 
-The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](release-preparation-docker-mcp.md).
+The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](history/release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](history/release-preparation-docker-mcp.md).
 
 This is the distribution procedure for private releases of `nuoframework/darktrace-mcp`. Version `0.1.0-alpha.0` uses tag `v0.1.0-alpha.0`. No release is created by the preparation scripts or workflows. The owner publishes only after independent source review and artifact review. `package.private:true` remains set; neither npm publication nor container publication is used.
 
@@ -78,7 +136,7 @@ Inspect the draft's assets and checksums before manually removing draft status. 
 
 The published `0.1.0-alpha.0` is immutable history. It predates the 15-tool / 19-selector contract and the patched runtime.
 
-`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#current-candidate-at-a-glance).
+`1.0.0` runs on Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9 (the CVE-2026-35189 fix) on arm64 and amd64. See the [Docker guide](docker.md#v100-image-at-a-glance-previous-release).
 
 - **CI:** [run 37423665585](https://github.com/nuoframework/darktrace-mcp/actions/runs/37423665585) on commit `2adb84b` passed every job: Node 22/24 offline, plus native Docker on amd64 and arm64 with 130 + 325 tests and 0 skipped. The release tag may point to a later commit that changes only documentation and keeps the production, build and shipped-document files identical.
 - **Lab:** on 2026-10-06, arm64 image `sha256:8cd85604…` passed [19/19 real queries](security/patched-runtime-lab-checkpoint.md). The lab is closed. 1.0.0 differs only in the production version literal and was not retested live.

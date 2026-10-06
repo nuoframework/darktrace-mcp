@@ -53,7 +53,7 @@ test('SA-03 invalid IP, calendar, decimal count/offset and documented text ceili
 });
 test('SA-05 catalogue generation succeeds without architecture Markdown and preserves code-owned mapping',()=>{
   const work=mkdtempSync(join(tmpdir(),'sa05-mapping-'));for(const name of ['openapi','docs','src/api'])mkdirSync(join(work,name),{recursive:true});
-  for(const file of ['openapi/darktrace-threat-visualizer.yaml','docs/operation-inventory.json','src/api/tool-groups.json','src/api/response-fields.json'])copyFileSync(file,join(work,file));
+  for(const file of ['openapi/darktrace-threat-visualizer.yaml','openapi/darktrace-sdk.yaml','docs/operation-inventory.json','src/api/tool-groups.json','src/api/response-fields.json'])copyFileSync(file,join(work,file));
   const result=spawnSync(process.execPath,[resolve('dist/scripts/generate-catalogue.js')],{cwd:work,encoding:'utf8'});assert.equal(result.status,0,result.stderr);
   const actual=JSON.parse(readFileSync(join(work,'src/api/catalogue.generated.json'),'utf8'));
   const mapping=JSON.parse(readFileSync('src/api/tool-groups.json','utf8'));assert.equal(actual.operations.length,79);

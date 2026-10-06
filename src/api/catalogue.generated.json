@@ -9,9 +9,9 @@
       "tool": "darktrace_manage_tags",
       "tier": "high",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "did",
@@ -37,7 +37,9 @@
       "bodyRequired": false,
       "documentedIn": "6.1",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "write"
+      ]
     },
     {
       "operationId": "delete_tags_tid",
@@ -48,7 +50,7 @@
       "sensitivity": "low",
       "status": "implemented",
       "reason": null,
-      "execution": "preview-only",
+      "execution": "confirm-required",
       "parameters": [
         {
           "name": "tid",
@@ -67,7 +69,7 @@
       "validatedOn": [],
       "requiredProfiles": [
         "write",
-        "writeCritical"
+        "critical"
       ]
     },
     {
@@ -117,9 +119,9 @@
       "tool": "darktrace_advanced_search",
       "tier": "read",
       "sensitivity": "medium",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "field",
@@ -159,8 +161,13 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
-      "requiredProfiles": []
+      "validatedOn": [
+        "7.1"
+      ],
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_advancedsearch_api_graph_graphmode_interval_query",
@@ -169,9 +176,9 @@
       "tool": "darktrace_advanced_search",
       "tier": "read",
       "sensitivity": "medium",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "graphmode",
@@ -210,8 +217,13 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
-      "requiredProfiles": []
+      "validatedOn": [
+        "7.1"
+      ],
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_advancedsearch_api_search_query",
@@ -220,9 +232,9 @@
       "tool": "darktrace_advanced_search",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "query",
@@ -238,8 +250,13 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
-      "requiredProfiles": []
+      "validatedOn": [
+        "7.1"
+      ],
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_admin_decode_link",
@@ -248,15 +265,31 @@
       "tool": "darktrace_email_decode_link",
       "tier": "read",
       "sensitivity": "medium",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "link",
+          "in": "query",
+          "required": true,
+          "description": "Encoded link to decode (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1, not in portal 6.1 docs).",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "e1d1bf01af0eba21ab9240252f8f08c4b891f1d6e4a925f249673450f22edfd3",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1admin~1decode_link",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_action_summary",
@@ -265,15 +298,40 @@
       "tool": "darktrace_email_dashboard",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "Number of days to include (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "fc37c12318ad1cbe030c8b04c258ce794461b2d63c899306201d0a8ca4d04464",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1dash~1action_summary",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_dash_stats",
@@ -282,15 +340,40 @@
       "tool": "darktrace_email_dashboard",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "Number of days to include (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "ed1233814a45cbd8a1f70833e50243856421ffd9b9f3678381fc78ced5cc4c96",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1dash~1dash_stats",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_data_loss",
@@ -299,15 +382,40 @@
       "tool": "darktrace_email_dashboard",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "Number of days to include (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "e9bc70f86d6fc1eba68fc5edf0c19599a64656b899f2b215ea9405a6759b3967",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1dash~1data_loss",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_user_anomaly",
@@ -316,15 +424,40 @@
       "tool": "darktrace_email_dashboard",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "days",
+          "in": "query",
+          "required": false,
+          "description": "Number of days to include (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "954737261feece12b113ddb6186803dbbf2f7d76f057ed7a6afbaea8f50f35f5",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1dash~1user_anomaly",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_emails_uuid",
@@ -333,9 +466,9 @@
       "tool": "darktrace_email_get",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "uuid",
@@ -345,13 +478,28 @@
           "schema": {
             "type": "string"
           }
+        },
+        {
+          "name": "include_headers",
+          "in": "query",
+          "required": false,
+          "description": "Include email headers in the response (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "boolean"
+          }
         }
       ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "b7fc076fb58c1477bd1bc30ea78c65abeacc139f6f610a427bba5d82a873f582",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1emails~1{uuid}",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_emails_uuid_download",
@@ -360,9 +508,9 @@
       "tool": "darktrace_download_email",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "uuid",
@@ -376,9 +524,15 @@
       ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "2a6ec19aea63b792b39201d44ea855699a7d9c62fb03dcee0513e89beee05b8a",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1emails~1{uuid}~1download",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_resources_actions",
@@ -387,15 +541,21 @@
       "tool": "darktrace_email_reference_data",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "973faed131e9eb291e362ba7ba0e0d1774199899da97b5ef918343e521c53f1c",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1resources~1actions",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_resources_filters",
@@ -404,15 +564,21 @@
       "tool": "darktrace_email_reference_data",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "235a514f5718954637b3c8bfebd52a0524005b9f00dfd7b515f655c35f7e08ed",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1resources~1filters",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_resources_tags",
@@ -421,15 +587,21 @@
       "tool": "darktrace_email_reference_data",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "23882a42c6c3160d57ed8d2469e69941264e580c61725d7afef1b399a4bcaeaa",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1resources~1tags",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_system_audit_events",
@@ -438,15 +610,49 @@
       "tool": "darktrace_email_audit_events",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
-      "parameters": [],
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
+      "parameters": [
+        {
+          "name": "eventType",
+          "in": "query",
+          "required": false,
+          "description": "Filter by audit event type (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "description": "Pagination offset (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "55402a1007d5a1a461c4361069f6bb73fc740d1e95cf24c5ca343c2920ba64dd",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1system~1audit~1events",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_system_audit_eventTypes",
@@ -455,15 +661,21 @@
       "tool": "darktrace_email_reference_data",
       "tier": "read",
       "sensitivity": "low",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [],
       "bodies": [],
       "bodyRequired": false,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "1fbe9d3498e3a54317a833c24b2d16ba891ea0c5311bfa9a88387d79ac317763",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1system~1audit~1eventTypes",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_aianalyst_groups",
@@ -667,7 +879,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -705,7 +919,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -932,7 +1148,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1092,7 +1310,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1132,7 +1352,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1254,7 +1476,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1303,7 +1527,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1332,7 +1558,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1371,7 +1599,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1647,7 +1877,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1753,7 +1985,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1879,7 +2113,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1964,7 +2200,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -1994,7 +2232,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2068,7 +2308,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2097,7 +2339,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2173,7 +2417,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2242,7 +2488,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2415,7 +2663,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2444,7 +2694,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2483,7 +2735,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2701,7 +2955,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2929,7 +3185,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -2968,7 +3226,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3006,7 +3266,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3045,7 +3307,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3216,7 +3480,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3235,7 +3501,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3247,9 +3515,9 @@
       "tool": "darktrace_download_pcap",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Independent export approval, retention and aggregate disk quota pending",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [
         {
           "name": "filename",
@@ -3264,8 +3532,13 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
-      "requiredProfiles": []
+      "validatedOn": [
+        "7.1"
+      ],
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "get_similardevices",
@@ -3329,7 +3602,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3376,7 +3651,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3424,7 +3701,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3509,7 +3788,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3547,7 +3828,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3604,7 +3887,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3643,7 +3928,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3691,7 +3978,9 @@
       "bodies": [],
       "bodyRequired": false,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read"
       ]
@@ -3727,10 +4016,12 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "read",
-        "sensitiveRead"
+        "sensitive"
       ]
     },
     {
@@ -3740,9 +4031,9 @@
       "tool": "darktrace_email_search",
       "tier": "read",
       "sensitivity": "high",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "execution": "disabled",
+      "status": "implemented",
+      "reason": null,
+      "execution": "enabled-by-profile",
       "parameters": [],
       "bodies": [
         {
@@ -3754,9 +4045,15 @@
         }
       ],
       "bodyRequired": true,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "04d1d18fb20ee73899f10cdf96f11e82e2d4472fb921e18f8f5345285d25379d",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1emails~1search",
       "validatedOn": [],
-      "requiredProfiles": []
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ]
     },
     {
       "operationId": "post_agemail_api_ep_api_v1_0_emails_uuid_action",
@@ -3766,7 +4063,7 @@
       "tier": "critical",
       "sensitivity": "high",
       "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
+      "reason": "signing and schema unvalidated; 403 on lab",
       "execution": "disabled",
       "parameters": [
         {
@@ -3789,7 +4086,10 @@
         }
       ],
       "bodyRequired": true,
-      "documentedIn": "6.1",
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
+      "schemaSha256": "03766be7902e79c3adb17b8978936f04c1f5eec8e76ce1536646046ed6e0f1a0",
+      "schemaVersion": "darktrace-sdk 0.10.1",
+      "schemaProvenance": "openapi/darktrace-sdk.yaml#/paths/~1agemail~1api~1ep~1api~1v1.0~1emails~1{uuid}~1action",
       "validatedOn": [],
       "requiredProfiles": []
     },
@@ -3823,7 +4123,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -3863,7 +4165,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -3939,7 +4243,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -3974,7 +4280,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4009,7 +4317,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4023,7 +4333,7 @@
       "sensitivity": "high",
       "status": "implemented",
       "reason": null,
-      "execution": "preview-only",
+      "execution": "confirm-required",
       "parameters": [],
       "bodies": [
         {
@@ -4062,10 +4372,12 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
-        "writeCritical"
+        "critical"
       ]
     },
     {
@@ -4077,7 +4389,7 @@
       "sensitivity": "high",
       "status": "implemented",
       "reason": null,
-      "execution": "preview-only",
+      "execution": "confirm-required",
       "parameters": [],
       "bodies": [
         {
@@ -4143,10 +4455,12 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
-        "writeCritical"
+        "critical"
       ]
     },
     {
@@ -4238,7 +4552,7 @@
       "sensitivity": "medium",
       "status": "implemented",
       "reason": null,
-      "execution": "preview-only",
+      "execution": "confirm-required",
       "parameters": [],
       "bodies": [
         {
@@ -4332,10 +4646,12 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
-        "writeCritical"
+        "critical"
       ]
     },
     {
@@ -4398,7 +4714,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4443,7 +4761,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4508,7 +4828,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4587,7 +4909,7 @@
       "sensitivity": "medium",
       "status": "implemented",
       "reason": null,
-      "execution": "preview-only",
+      "execution": "confirm-required",
       "parameters": [],
       "bodies": [
         {
@@ -4697,10 +5019,12 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write",
-        "writeCritical"
+        "critical"
       ]
     },
     {
@@ -4753,7 +5077,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4799,7 +5125,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4867,7 +5195,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]

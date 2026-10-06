@@ -1,11 +1,24 @@
-name: Prepare private prerelease (no publication)
+name: Release (prepare, verify, publish npm, ghcr and the GitHub Release)
+# Runs on a reviewed `v<version>` tag. `prepare` builds and byte-verifies the candidate exactly as
+# before. `docker-gates` waits for the `ci.yml` run at the tagged SHA and requires both native
+# `docker` jobs (amd64 and arm64: vendor gates, image smoke, byte binding) to have passed. Only
+# after both succeed do `publish-npm` (npm trusted publishing with provenance) and `publish-ghcr`
+# (multi-arch image, pinned by digest) publish. `pack-mcpb` builds the .mcpb bundle from the same
+# checkout and proves its dist/src is byte-identical to the verified npm tarball. `github-release`
+# then attaches the tarball, the .mcpb, the evidence and SHA256SUMS to the GitHub Release and
+# records the npm integrity, image digests and CI gate run in the release notes.
+# MCP Registry publication (server.json) stays a documented owner step: see docs/releases.md.
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: private-release-preparation
+  group: release-${{ github.ref }}
   cancel-in-progress: false
+env:
+  IMAGE: ghcr.io/nuoframework/darktrace-mcp
 jobs:
   prepare:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -21,10 +34,10 @@ jobs:
       - name: Require tag to match package version exactly
         run: node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json')); if(process.env.GITHUB_REF!=='refs/tags/v'+p.version) throw Error('Release tag/version mismatch');"
       - run: npm run release:prepare -- "${{ runner.temp }}/darktrace-mcp-release"
-      - name: Retain reviewed candidate assets; owner publishes manually
+      - name: Retain the verified candidate (tgz, checksums, evidence)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: darktrace-mcp-private-release-candidate
+          name: darktrace-mcp-release-candidate
           path: |
             ${{ runner.temp }}/darktrace-mcp-release/*.tgz
             ${{ runner.temp }}/darktrace-mcp-release/SHA256SUMS
@@ -32,4 +45,370 @@ jobs:
             ${{ runner.temp }}/darktrace-mcp-release/*.log
             ${{ runner.temp }}/darktrace-mcp-release/release-notes.md
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
+
+  docker-gates:
+    # Nothing publishes unless ci.yml's docker jobs passed for both architectures at this exact SHA.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Wait for ci.yml at the tagged SHA and require both docker jobs to succeed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          deadline=$(( $(date +%s) + 110 * 60 ))
+          while :; do
+            runs="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$GITHUB_SHA&per_page=50" \
+              --jq '[.workflow_runs[] | {id, status, conclusion, html_url, head_sha}]')"
+            passed=""
+            for id in $(jq -r --arg sha "$GITHUB_SHA" '.[] | select(.head_sha == $sha and .status == "completed" and .conclusion == "success") | .id' <<<"$runs"); do
+              jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?per_page=100" \
+                --jq '[.jobs[] | select(.name | startswith("docker (")) | {name, conclusion, html_url, head_sha}]')"
+              if jq -e --arg sha "$GITHUB_SHA" '
+                  ([.[] | select(.name | startswith("docker (amd64")) | select(.conclusion == "success" and .head_sha == $sha)] | length) == 1 and
+                  ([.[] | select(.name | startswith("docker (arm64")) | select(.conclusion == "success" and .head_sha == $sha)] | length) == 1' <<<"$jobs" >/dev/null; then
+                passed="$id"
+                run="$(jq --argjson id "$id" '.[] | select(.id == $id)' <<<"$runs")"
+                jq -n --arg sha "$GITHUB_SHA" --argjson run "$run" --argjson jobs "$jobs" \
+                  '{sha: $sha, ciRun: $run, dockerJobs: $jobs}' > "$RUNNER_TEMP/docker-gates.json"
+                break
+              fi
+            done
+            if [ -n "$passed" ]; then break; fi
+            pending="$(jq '[.[] | select(.status != "completed")] | length' <<<"$runs")"
+            total="$(jq 'length' <<<"$runs")"
+            if [ "$total" -gt 0 ] && [ "$pending" -eq 0 ]; then
+              echo "::error::ci.yml completed at $GITHUB_SHA without both docker jobs passing; re-run it, then re-run this workflow" >&2
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error::timed out waiting for ci.yml at $GITHUB_SHA" >&2; exit 1; fi
+            echo "waiting for ci.yml at $GITHUB_SHA ($total runs, $pending in progress)"
+            sleep 60
+          done
+          {
+            echo "### Docker gates (ci.yml at $GITHUB_SHA)"
+            jq -r '"- CI run: \(.ciRun.html_url)", (.dockerJobs[] | "- \(.name): \(.conclusion) \(.html_url)")' "$RUNNER_TEMP/docker-gates.json"
+          } | tee "$RUNNER_TEMP/docker-gates.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: docker-gates
+          path: |
+            ${{ runner.temp }}/docker-gates.json
+            ${{ runner.temp }}/docker-gates.md
+          if-no-files-found: error
+          retention-days: 90
+
+  pack-mcpb:
+    needs: prepare
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate the bundle manifest (pinned validator)
+        run: npx -y @anthropic-ai/mcpb@2.1.2 validate manifest.json
+      - name: Build darktrace-mcp-<version>.mcpb from the verified checkout
+        run: |
+          set -euo pipefail
+          npm run pack:mcpb
+          version="${GITHUB_REF_NAME#v}"
+          test -f "release/darktrace-mcp-$version.mcpb"
+          echo "MCPB=$PWD/release/darktrace-mcp-$version.mcpb" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: darktrace-mcp-release-candidate
+          path: ${{ runner.temp }}/candidate
+      - name: Bind the bundle runtime to the verified npm tarball
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/candidate"
+          sha256sum -c SHA256SUMS
+          tgz="$(ls -- *.tgz)"
+          test "$(printf '%s\n' "$tgz" | wc -l)" -eq 1
+          mkdir -p "$RUNNER_TEMP/x/tgz" "$RUNNER_TEMP/x/mcpb"
+          tar -xzf "$tgz" -C "$RUNNER_TEMP/x/tgz"
+          unzip -q "$MCPB" -d "$RUNNER_TEMP/x/mcpb"
+          # Same compiled server bytes as the verified npm package: no changed, extra or missing runtime file.
+          diff -r "$RUNNER_TEMP/x/tgz/package/dist/src" "$RUNNER_TEMP/x/mcpb/dist/src"
+          node -e '
+            const fs=require("node:fs"),assert=require("node:assert/strict");
+            const bundled=JSON.parse(fs.readFileSync(process.argv[1],"utf8")),reviewed=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
+            assert.deepEqual(bundled,reviewed);
+            if("v"+bundled.version!==process.env.GITHUB_REF_NAME)throw Error("bundle version/tag mismatch");
+          ' "$RUNNER_TEMP/x/mcpb/manifest.json" "$GITHUB_WORKSPACE/manifest.json"
+          mkdir -p "$RUNNER_TEMP/mcpb"
+          cp "$MCPB" "$RUNNER_TEMP/mcpb/"
+          cd "$RUNNER_TEMP/mcpb"
+          sha256sum -- *.mcpb | tee mcpb.sha256
+          echo "mcpb: $(cat mcpb.sha256)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: darktrace-mcp-mcpb
+          path: |
+            ${{ runner.temp }}/mcpb/*.mcpb
+            ${{ runner.temp }}/mcpb/mcpb.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-npm:
+    needs: [prepare, docker-gates]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) and provenance; no long-lived npm token
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Require npm 11.5.1 or newer (trusted publishing)
+        run: |
+          set -euo pipefail
+          current="$(npm --version)"
+          if node -e 'const c=process.argv[1].split(".").map(Number),m=[11,5,1];for(let i=0;i<3;i++){if(c[i]>m[i])process.exit(0);if(c[i]<m[i])process.exit(1)}' "$current"; then
+            echo "npm $current"
+          else
+            echo "npm $current is too old; installing npm 11"
+            npm install -g npm@^11 --no-audit --no-fund
+            npm --version
+          fi
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: darktrace-mcp-release-candidate
+          path: ${{ runner.temp }}/candidate
+      - name: Verify the candidate checksums and package metadata against the tag
+        working-directory: ${{ runner.temp }}/candidate
+        run: |
+          set -euo pipefail
+          sha256sum -c SHA256SUMS
+          tgz="$(ls -- *.tgz)"
+          test "$(printf '%s\n' "$tgz" | wc -l)" -eq 1
+          tar -xzOf "$tgz" package/package.json > package.json.candidate
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const p=JSON.parse(fs.readFileSync('package.json.candidate'));
+            if(p.name!=='@nuoframework/darktrace-mcp')throw Error('unexpected package name '+p.name);
+            if('refs/tags/v'+p.version!==process.env.GITHUB_REF)throw Error('tag/version mismatch');
+            if(p.private!==undefined)throw Error('private flag present');
+            if(p.publishConfig?.access!=='public')throw Error('publishConfig.access must be public');
+            if(p.mcpName!=='io.github.nuoframework/darktrace-mcp')throw Error('mcpName missing');
+            for(const k of ['preinstall','install','postinstall','prepare','prepublish','prepublishOnly','postpublish'])if(p.scripts?.[k])throw Error('lifecycle script '+k);
+          "
+          echo "TGZ=$PWD/$tgz" >> "$GITHUB_ENV"
+      - name: Publish the verified tarball to npm (OIDC; NPM_TOKEN only as documented fallback)
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "::warning::Publishing with the NPM_TOKEN secret; configure a trusted publisher on npmjs.com and remove the secret."
+            umask 077
+            printf '//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" > "$RUNNER_TEMP/npmrc-publish"
+            export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/npmrc-publish"
+          fi
+          npm publish "$TGZ" --provenance --access public --registry https://registry.npmjs.org --ignore-scripts
+      - name: Record the published version
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          npm view "@nuoframework/darktrace-mcp@$version" name version dist.integrity dist.tarball --json | tee "$RUNNER_TEMP/npm-published.json"
+          {
+            echo "## npm"
+            echo '```'
+            echo "npx -y @nuoframework/darktrace-mcp@$version setup"
+            cat "$RUNNER_TEMP/npm-published.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  publish-ghcr:
+    needs: [prepare, docker-gates]
+    if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Fetch and authenticate immutable archived runtime inputs
+        run: node scripts/prepare-docker-runtime.mjs "$RUNNER_TEMP/runtime-inputs" "${{ matrix.arch }}" > "$RUNNER_TEMP/runtime-inputs-fetch.log" 2>&1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push the ${{ matrix.arch }} image by digest
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          test "$(node -p 'require("./package.json").version')" = "$version"
+          docker buildx build --platform "linux/${{ matrix.arch }}" \
+            --build-context "runtime-apks=$RUNNER_TEMP/runtime-inputs/${{ matrix.arch }}" \
+            --label "org.opencontainers.image.version=$version" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --output "type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true" \
+            --metadata-file "$RUNNER_TEMP/build-metadata.json" .
+          digest="$(node -p 'JSON.parse(require("node:fs").readFileSync(process.argv[1],"utf8"))["containerimage.digest"]' "$RUNNER_TEMP/build-metadata.json")"
+          case "$digest" in sha256:*) ;; *) echo "no digest in build metadata" >&2; exit 1 ;; esac
+          mkdir -p "$RUNNER_TEMP/digests"
+          printf '%s\n' "$digest" > "$RUNNER_TEMP/digests/${{ matrix.arch }}"
+          echo "linux/${{ matrix.arch }}: $IMAGE@$digest" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ghcr-digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/${{ matrix.arch }}
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-ghcr-manifest:
+    needs: publish-ghcr
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: ghcr-digest-*
+          path: ${{ runner.temp }}/digests
+          merge-multiple: true
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create the multi-arch tag <version> (never a moving latest) and record its digest
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          amd64="$(cat "$RUNNER_TEMP/digests/amd64")"; arm64="$(cat "$RUNNER_TEMP/digests/arm64")"
+          docker buildx imagetools create --tag "$IMAGE:$version" "$IMAGE@$amd64" "$IMAGE@$arm64"
+          docker buildx imagetools inspect "$IMAGE:$version" --raw > "$RUNNER_TEMP/manifest-list.json"
+          digest="$(docker buildx imagetools inspect "$IMAGE:$version" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+          case "$digest" in sha256:*) ;; *) echo "no manifest digest" >&2; exit 1 ;; esac
+          {
+            echo "## ghcr.io"
+            echo '```'
+            echo "$IMAGE:$version"
+            echo "$IMAGE@$digest"
+            echo "linux/amd64 $amd64"
+            echo "linux/arm64 $arm64"
+            echo '```'
+            echo "Pin clients to the digest: darktrace-mcp setup --runtime docker --image $IMAGE@$digest"
+          } | tee "$RUNNER_TEMP/ghcr-image-digest.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ghcr-image-digest
+          path: |
+            ${{ runner.temp }}/ghcr-image-digest.md
+            ${{ runner.temp }}/manifest-list.json
+          if-no-files-found: error
+          retention-days: 90
+
+  github-release:
+    # Last step: every channel published from the same verified SHA. Attaches the assets and records
+    # the npm integrity, the image digests and the CI docker-gate run in the release notes.
+    needs: [prepare, docker-gates, pack-mcpb, publish-npm, publish-ghcr-manifest]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the GitHub Release for this tag
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: darktrace-mcp-release-candidate
+          path: ${{ runner.temp }}/assets
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: darktrace-mcp-mcpb
+          path: ${{ runner.temp }}/mcpb
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ghcr-image-digest
+          path: ${{ runner.temp }}/ghcr
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: docker-gates
+          path: ${{ runner.temp }}/gates
+      - name: Add the .mcpb to SHA256SUMS and write the release notes
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          mcpb="darktrace-mcp-$version.mcpb"
+          (cd "$RUNNER_TEMP/mcpb" && sha256sum -c mcpb.sha256)
+          cd "$RUNNER_TEMP/assets"
+          sha256sum -c SHA256SUMS
+          cp "$RUNNER_TEMP/mcpb/$mcpb" .
+          sha256sum -- "$mcpb" >> SHA256SUMS
+          sha256sum -c SHA256SUMS
+          npm view "@nuoframework/darktrace-mcp@$version" version dist.integrity dist.tarball --json > "$RUNNER_TEMP/npm.json"
+          # release-notes.md stays byte-identical (it is listed in SHA256SUMS); the publication record goes in the release body.
+          {
+            cat release-notes.md
+            echo
+            echo "## Published artifacts ($GITHUB_SHA)"
+            echo
+            echo "### npm"
+            echo '```'
+            echo "npx -y @nuoframework/darktrace-mcp@$version setup"
+            cat "$RUNNER_TEMP/npm.json"
+            echo '```'
+            echo
+            sed 's/^## /### /' "$RUNNER_TEMP/ghcr/ghcr-image-digest.md"
+            echo
+            echo "### Claude Desktop bundle (.mcpb)"
+            echo '```'
+            grep -F "  $mcpb" SHA256SUMS
+            echo '```'
+            echo
+            cat "$RUNNER_TEMP/gates/docker-gates.md"
+            echo
+            echo "Verify downloads with \`sha256sum -c SHA256SUMS\`."
+          } > "$RUNNER_TEMP/release-body.md"
+          awk '{print $2}' SHA256SUMS > "$RUNNER_TEMP/asset-list"
+          cat "$RUNNER_TEMP/release-body.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Create the GitHub Release for the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/assets"
+          mapfile -t files < "$RUNNER_TEMP/asset-list"
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "darktrace-mcp ${GITHUB_REF_NAME#v}" --notes-file "$RUNNER_TEMP/release-body.md" \
+            "${files[@]}" SHA256SUMS

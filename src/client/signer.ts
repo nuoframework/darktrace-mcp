@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 
 export type HttpMethod = 'GET' | 'POST' | 'DELETE';
 export type OrderedPairs = ReadonlyArray<readonly [string, string]>;
@@ -39,6 +40,8 @@ export interface SignerOptions {
 }
 
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
+const MAX_PATH_DECODE_PASSES = 16;
+const MAX_S6_BASE64_CHARS = 21_848;
 
 function encodeRfc3986(value: string): string {
   return encodeURIComponent(value).replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
@@ -67,22 +70,61 @@ function formPairsToText(pairs: OrderedPairs): string {
   }).join('&');
 }
 
-function validatePath(path: string): void {
+function strictBase64(value: string): boolean {
+  if (value.length === 0 || value.length > MAX_S6_BASE64_CHARS || value.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(value)) return false;
+  const bytes = Buffer.from(value, 'base64');
+  return bytes.byteLength <= 16_384 && bytes.toString('base64') === value;
+}
+
+/** Returns the final S6 Base64 segment index, and rejects malformed or raw S6 paths. */
+function s6Base64SegmentIndex(path: string, method: HttpMethod): number | undefined {
+  const parts = path.split('/');
+  if (parts[1] !== 'advancedsearch' || parts[2] !== 'api' || !['search', 'analyze', 'graph'].includes(parts[3] ?? '')) return undefined;
+  // The reviewed POST search route carries its Base64 document in the JSON body, never in the path.
+  if (method === 'POST') {
+    if (path === '/advancedsearch/api/search') return undefined;
+    throw new TypeError('POST Advanced Search accepts only the exact /advancedsearch/api/search route');
+  }
+  if (method !== 'GET') throw new TypeError('Advanced Search paths are limited to GET and the POST search route');
+  const expectedLength = parts[3] === 'search' ? 5 : 7;
+  const index = expectedLength - 1;
+  if (parts.length !== expectedLength || !parts[index] || !strictBase64(decodeS6Segment(parts[index]!)) ||
+      encodeRfc3986(decodeS6Segment(parts[index]!)) !== parts[index]) {
+    throw new TypeError('S6 path must contain one RFC3986-encoded standard-Base64 segment');
+  }
+  return index;
+}
+
+function decodeS6Segment(segment: string): string {
+  try { return decodeURIComponent(segment); }
+  catch { throw new TypeError('S6 path contains invalid percent encoding'); }
+}
+
+function validatePath(path: string, method: HttpMethod): void {
   if (
-    !path.startsWith('/') || path.startsWith('//') || path.includes('?') || path.includes('#') ||
+    !path.startsWith('/') || path.includes('//') || path.includes('?') || path.includes('#') ||
     path.includes('\\') || CONTROL_CHARACTERS.test(path) || /\s/.test(path)
   ) {
     throw new TypeError('path must be a safe absolute-path reference');
   }
-  for (const rawSegment of path.split('/')) {
-    let segment: string;
-    try {
-      segment = decodeURIComponent(rawSegment);
-    } catch {
-      throw new TypeError('path contains invalid percent encoding');
+  const segments = path.split('/');
+  const s6Index = s6Base64SegmentIndex(path, method);
+  for (let index = 0; index < segments.length; index += 1) {
+    if (index === s6Index) continue;
+    let segment = segments[index]!;
+    for (let pass = 0; pass < MAX_PATH_DECODE_PASSES; pass += 1) {
+      if (segment === '.' || segment === '..' || segment.includes('/') || segment.includes('\\') || segment.includes('?') || segment.includes('#') || CONTROL_CHARACTERS.test(segment)) {
+        throw new TypeError('path contains an ambiguous separator or traversal segment');
+      }
+      let decoded: string;
+      try { decoded = decodeURIComponent(segment); }
+      catch { throw new TypeError('path contains invalid percent encoding'); }
+      if (decoded === segment) break;
+      segment = decoded;
+      if (pass === MAX_PATH_DECODE_PASSES - 1) throw new TypeError('path percent encoding is ambiguous');
     }
-    if (segment === '.' || segment === '..' || segment.includes('\\') || CONTROL_CHARACTERS.test(segment)) {
-      throw new TypeError('path contains a traversal segment');
+    if (segment === '.' || segment === '..' || segment.includes('/') || segment.includes('\\') || segment.includes('?') || segment.includes('#') || CONTROL_CHARACTERS.test(segment)) {
+      throw new TypeError('path contains an ambiguous separator or traversal segment');
     }
   }
 }
@@ -131,11 +173,15 @@ export function createSigner(publicToken: string, privateToken: string, opts: Si
   return Object.freeze({
     sign(input: SignInput): SignedRequest {
       if (!['GET', 'POST', 'DELETE'].includes(input.method)) throw new TypeError('unsupported HTTP method');
-      validatePath(input.path);
+      validatePath(input.path, input.method);
       validateDate(input.date);
       if (CONTROL_CHARACTERS.test(input.date)) throw new TypeError('date contains invalid control characters');
       if (input.body !== undefined && input.method !== 'POST') {
         throw new TypeError('request bodies are supported only for POST');
+      }
+      if (input.body?.kind === 'json' && (input.query?.length ?? 0) > 0) {
+        // S4 query+JSON is blocked: 7.1.0 accepts only path?{json}; query may ride on the wire unsigned.
+        throw new TypeError('query plus JSON body is not a supported appliance request shape');
       }
 
       const pairs = input.query ?? [];

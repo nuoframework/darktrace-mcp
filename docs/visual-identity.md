@@ -82,9 +82,9 @@ Local SVG files in [`docs/assets/badges/`](assets/badges/), in English (`*-en.sv
 | license: Apache-2.0 / licencia: Apache-2.0 | [`LICENSE`](../LICENSE) | Package manifest and image label agree |
 | docker: local build · pinned ID / docker: build local · ID fijado | [Docker guide](docker.md) | Local image only, run by inspected image ID with `--pull=never` |
 | security tests: offline · 2026-10-05 / pruebas seguridad: offline · 2026-10-05 | [Corrections acceptance](security/mcp-corrections-acceptance.md) | Synthetic offline suite on source `eadfe117…`: Linux Node 22 324/324, macOS Node 24 321 passed + 3 platform-blocked, 0 failed; standard suite 106/106 |
-| status: private alpha / estado: alfa privada | [Stable readiness](stable-readiness.md) | Version `0.1.0-alpha.0`; stable gates still open |
+| status: private alpha / estado: alfa privada | [Stable readiness](history/stable-readiness.md) | Version `0.1.0-alpha.0`; stable gates still open |
 
-**Not proposed, on purpose:** OpenSSF Scorecard or Best Practices, "OWASP certified", "0 CVE" or "scan passed", Docker Hardened Images, npm version, downloads or coverage percentages. None is true or measured for this project today. The Docker badge must not say "scanned" until the base-image remediation is accepted and its scan is recorded in the Docker guide.
+**Not proposed, on purpose:** OpenSSF Scorecard or Best Practices, "OWASP certified", "0 CVE" or "scan passed", Docker Hardened Images, npm version, downloads or coverage percentages. None is true or measured for this project today. The READMEs carry commented-out Scorecard and Best Practices placeholders; they stay commented out until the result exists, and enabling them is a deliberate exception to the local-only rule because they load from the OpenSSF badge services (see [supply-chain checks](security/supply-chain-checks.md#badges)). The Docker badge must not say "scanned" until the base-image remediation is accepted and its scan is recorded in the Docker guide.
 
 The security badge carries a date because the evidence is tied to one source snapshot. When the source changes, update the date and the linked evidence, or remove the badge.
 

@@ -1,7 +1,7 @@
 // Fetch immutable, signed Alpine runtime inputs; no production files are changed.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, renameSync, lstatSync, realpathSync, statSync, openSync, closeSync, writeSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, renameSync, lstatSync, realpathSync, openSync, closeSync, writeSync } from 'node:fs';
 import { resolve, join, dirname, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 const base='alpine@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6';

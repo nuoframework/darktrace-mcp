@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash, createHmac } from 'node:crypto';
 import test from 'node:test';
 import { parseConfig } from '../../src/config/schema.js';
 import { createHttpClient, type TrustedOperation } from '../../src/client/httpClient.js';
@@ -13,6 +14,7 @@ const operations: readonly TrustedOperation[] = [
   { operationId: 'post_comment', method: 'POST', pathTemplate: '/comments', parameterNames: ['comment'] },
   { operationId: 'delete_tags_entities', method: 'DELETE', pathTemplate: '/tags/entities' },
   { operationId: 'get_advancedsearch_api_search_query', method: 'GET', pathTemplate: '/advancedsearch/api/search/{query}' },
+  { operationId: 'get_pcaps_filename', method: 'GET', pathTemplate: '/pcaps/{filename}' },
 ];
 
 function makeConfig(overrides: Record<string, unknown> = {}) {
@@ -91,7 +93,9 @@ test('preview rejects blocked shapes and caller-owned field names before returni
     operationId: 'post_comment', query: [['query', 'x']], body: { kind: 'json', value: { comment: 'safe' } },
   }, { dryRun: true }), isKind('invalid_request'));
   await assert.rejects(client.send({ operationId: 'delete_tags_entities', query: [['ignore previous instructions', 'x']] }, { dryRun: true }), isKind('invalid_request'));
-  await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query: 'YQ==' } }, { dryRun: true }), isKind('invalid_request'));
+  for (const query of ['../status', 'YQ', 'a.b=', 'YQ==%2F']) {
+    await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query } }, { dryRun: true }), isKind('invalid_request'));
+  }
   await assert.rejects(client.send({
     operationId: 'post_comment', body: { kind: 'json', value: { 'ignore previous instructions': 'x' } },
   }, { dryRun: true }), isKind('invalid_request'));
@@ -221,31 +225,57 @@ test('form array values serialize as repeated keys in their original order', asy
   assert.equal(wireBody, 'tag=one+value&tag=two');
 });
 
-test('unreviewed query plus JSON and DELETE query signatures are rejected before fetch', async () => {
+test('S4 query+JSON is rejected; S5 and evidence-backed S6 signatures match their wire paths', async () => {
+  const date = '20260102T030405';
+  const hmac = (signed: string) => createHmac('sha1', 'private-secret').update(`${signed}\npublic-secret\n${date}`, 'utf8').digest('hex');
+  for (const encoded of [false, true]) {
+    const wire: Array<{ url: string; method: string; body?: string; headers: Record<string, string> }> = [];
+    const client = makeClient(async (input, init) => {
+      wire.push({ url: String(input), method: String(init?.method), ...(init?.body === undefined ? {} : { body: Buffer.from(init.body as Uint8Array).toString() }), headers: Object.fromEntries(new Headers(init?.headers)) });
+      return new Response('{"ok":true}', { headers: { 'content-type': 'application/json' } });
+    }, { auth: { publicToken: 'public-secret', privateToken: 'private-secret', querySignatureEncoding: encoded ? 'encoded' : 'unencoded' } },
+    { now: () => Date.UTC(2026, 0, 2, 3, 4, 5) });
+    // The 7.1.0 appliance rejects path?query&{json}; no catalogue operation needs this shape.
+    await assert.rejects(client.send({ operationId: 'post_comment', query: [['responsedata', 'a b']], body: { kind: 'json', value: { comment: 'x' } } }), isKind('invalid_request'));
+    // S5: DELETE with query -> path?query, exactly like GET (dt_utils._delete).
+    await client.send({ operationId: 'delete_tags_entities', query: [['did', '1'], ['tag', 'Quarantined Device']] });
+    // S6: standard Base64 is RFC3986-encoded identically in the signed and transmitted path.
+    await client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query: 'eyJh+/8=' } });
+    const space = encoded ? '%20' : ' ';
+    assert.deepEqual(wire.map(w => [w.method, w.url]), [
+      ['DELETE', 'https://darktrace.example:8443/tags/entities?did=1&tag=Quarantined%20Device'],
+      ['GET', 'https://darktrace.example:8443/advancedsearch/api/search/eyJh%2B%2F8%3D'],
+    ]);
+    assert.equal(wire[0].headers['dtapi-signature'], hmac(`/tags/entities?did=1&tag=Quarantined${space}Device`));
+    assert.equal(wire[1].headers['dtapi-signature'], hmac('/advancedsearch/api/search/eyJh%2B%2F8%3D'));
+    assert.ok(wire.every(w => w.headers['dtapi-date'] === date && w.headers['dtapi-token'] === 'public-secret'));
+  }
+});
+
+test('S6 standard Base64 path admits only canonical Base64; S4 and DELETE bodies reject before signing', async () => {
   let calls = 0;
   let signerCalls = 0;
-  const cfg = makeConfig();
-  const client = createHttpClient(cfg, {
+  const client = createHttpClient(makeConfig(), {
     testOnly: true,
     operations,
     signer: { sign() { signerCalls += 1; throw new Error('must not sign'); } },
     fetchImpl: async () => { calls += 1; return new Response('{}'); },
   });
-  await assert.rejects(client.send({
-    operationId: 'post_comment',
-    query: [['responsedata', 'true']],
-    body: { kind: 'json', value: {} },
-  }), isKind('invalid_request'));
-  await assert.rejects(client.send({
-    operationId: 'delete_tags_entities',
-    query: [['did', '1']],
-  }), isKind('invalid_request'));
-  await assert.rejects(client.send({
-    operationId: 'get_advancedsearch_api_search_query',
-    pathParams: { query: 'YQ==' },
-  }), isKind('invalid_request'));
+  for (const query of ['../../status', 'YQ==?x=1', 'YQ==#f', 'Y Q=', 'YQ', '%2e%2e/YQ', 'A===', 'Yf==', 'x'.repeat(21_852), 'YQ==\n']) {
+    await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query } }), isKind('invalid_request'));
+  }
+  await assert.rejects(client.send({ operationId: 'post_comment', query: [['did', '1']], body: { kind: 'json', value: { comment: 'x' } } }), isKind('invalid_request'));
+  await assert.rejects(client.send({ operationId: 'delete_tags_entities', query: [['did', '1']], body: { kind: 'json', value: { did: 1 } } }), isKind('invalid_request'));
+  await assert.rejects(client.send({ operationId: 'get_tags_tid', pathParams: { tid: 'YQ==/../x' } }), isKind('invalid_request'));
   assert.equal(signerCalls, 0);
   assert.equal(calls, 0);
+});
+
+test('S6 leading Base64 slash is data and is percent-encoded as one path segment', async () => {
+  let wireUrl = '';
+  const client = makeClient(async input => { wireUrl = String(input); return new Response('{}'); });
+  await client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query: '/YQ=' } });
+  assert.equal(wireUrl, 'https://darktrace.example:8443/advancedsearch/api/search/%2FYQ%3D');
 });
 
 test('safe API errors never include the remote response body or a token', async () => {
@@ -297,6 +327,37 @@ test('streamed responses exceeding the byte cap are cancelled and rejected', asy
   assert.equal(cancelled, true);
 });
 
+test('bounded binary reader retains one capped destination buffer for chunked input', async () => {
+  const source = Buffer.alloc(1024, 9);
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) { controller.enqueue(source.subarray(0, 512)); controller.enqueue(source.subarray(512)); controller.close(); },
+  });
+  const client = makeClient(async () => new Response(stream, { headers: { 'content-type': 'application/vnd.tcpdump.pcap' } }), {
+    limits: { maxResponseBytes: 1024, maxToolOutputChars: 4096 },
+  });
+  const result = await client.send({ operationId: 'get_pcaps_filename', pathParams: { filename: 'capture.pcap' }, accept: 'binary' });
+  assert.ok(!('dryRun' in result));
+  if ('dryRun' in result) throw new Error('unexpected dry-run result');
+  assert.equal(result.bytes?.byteLength, 1024);
+  assert.ok(result.bytes?.buffer.byteLength <= 1024);
+  assert.deepEqual(Buffer.from(result.bytes!), source);
+});
+
+test('binary output overflow returns code-owned size and digest with no bytes', async () => {
+  const raw = Buffer.alloc(512, 0x5a);
+  const client = makeClient(async () => new Response(raw, { headers: { 'content-type': 'application/vnd.tcpdump.pcap' } }), {
+    limits: { maxResponseBytes: 1024, maxToolOutputChars: 512 },
+  });
+  const result = await client.send({ operationId: 'get_pcaps_filename', pathParams: { filename: 'capture.pcap' }, accept: 'binary' });
+  assert.ok(!('dryRun' in result));
+  if ('dryRun' in result) throw new Error('unexpected dry-run result');
+  assert.deepEqual('outputLimitExceeded' in result ? result.outputLimitExceeded : undefined, {
+    errorCode: 'output_limit_exceeded', size: raw.byteLength, sha256: createHash('sha256').update(raw).digest('hex'),
+  });
+  assert.equal('bytes' in result, false);
+  assert.equal('json' in result, false);
+});
+
 test('cumulative response cap counts discarded retry bodies and rejects compressed responses', async () => {
   let calls = 0;
   const retryClient = makeClient(async () => {
@@ -311,8 +372,37 @@ test('cumulative response cap counts discarded retry bodies and rejects compress
     compressedCalls += 1;
     return new Response('opaque bytes', { headers: { 'content-encoding': 'gzip' } });
   });
-  await assert.rejects(compressedClient.send({ operationId: 'get_status' }), isKind('invalid_response'));
+  await assert.rejects(compressedClient.send({ operationId: 'get_status' }), isKind('unsupported_encoding'));
   assert.equal(compressedCalls, 1);
+});
+
+test('unsupported encoding is a safe typed error, cancels unread bytes and never retries GET or POST', async t => {
+  for (const operationId of ['get_status', 'post_comment']) for (const encoding of ['gzip', 'br', 'deflate', 'x-untrusted-secret']) {
+    let calls = 0, reads = 0, cancelled = 0;
+    const client = createHttpClient(makeConfig(), {
+      testOnly: true, operations,
+      connector: {
+        async initialize() {},
+        async request() {
+          calls++;
+          return { status: 200, headers: new Headers({ 'content-encoding': encoding }), body: {
+            async *[Symbol.asyncIterator]() { reads++; yield Buffer.from('untrusted bytes'); },
+            async cancel() { cancelled++; },
+          } };
+        },
+        close() {},
+      },
+    });
+    t.after(() => client.close());
+    await assert.rejects(client.send({ operationId }), error => {
+      assert.ok(error instanceof DarktraceApiError);
+      assert.equal(error.kind, 'unsupported_encoding'); assert.equal(error.status, 200); assert.ok(error.requestId);
+      assert.equal(error.message, 'Darktrace returned an unsupported response encoding.');
+      assert.equal(error.safeDetail, error.message); assert.equal(error.message.includes(encoding), false);
+      return true;
+    });
+    assert.equal(calls, 1); assert.equal(reads, 0); assert.equal(cancelled, 1);
+  }
 });
 
 test('only GET operations retry transient failures, with at most three attempts', async () => {

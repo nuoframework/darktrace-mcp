@@ -86,6 +86,6 @@ test('ST-02.ARGV tokens are never echoed/accepted',()=>{
 });
 test('ST-11.CONFIG every ceiling rejects increase; ST-08/16 strict critical/transport',()=>{
   const base={instance:{baseUrl:'https://appliance.test'},auth:{publicToken:PUBLIC,privateToken:PRIVATE}};
-  for(const [key,max] of Object.entries(DEFAULT_LIMITS))assert.throws(()=>parseConfig({...base,...(key==='timeoutMs'?{instance:{...base.instance,timeoutMs:max+1}}:{limits:{[key]:max+1}})}));
+  for(const [key,value] of Object.entries(DEFAULT_LIMITS)){const max=value; /* CR-13/ST-22: maxWritesPerMinute default 10 is also its ceiling (lower-only) */assert.throws(()=>parseConfig({...base,...(key==='timeoutMs'?{instance:{...base.instance,timeoutMs:max+1}}:{limits:{[key]:max+1}})}));if(key==='maxWritesPerMinute')assert.doesNotThrow(()=>parseConfig({...base,limits:{[key]:max}}));}
   for(const extra of [{profiles:{writeCritical:true}},{profiles:{email:false}},{profiles:{export:false}},{transport:{kind:'http'}},{transport:{kind:'stdio',http:{}}},{bearerTokens:[]},{compat:{assumeVersion:'7.1'}},{instance:{baseUrl:'https://appliance.test',testOnlyLoopback:true}}])assert.throws(()=>parseConfig({...base,...extra}));
 });

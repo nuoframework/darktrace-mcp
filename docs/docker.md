@@ -1,10 +1,35 @@
 # Docker use
 
-The image runs the MCP server over stdio. It exposes no TCP port and is built for a local, private deployment. No image has been published to a registry.
+[README](../README.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
 
-The release candidate enforces **19 validated GET selectors across 15 MCP tools**, identical in `read` and `read` + `sensitiveRead` ([mapping](../README.md#tools-in-this-release)). Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access.
+The image runs the MCP server over stdio and opens no network port. From v1.1.0 the release workflow publishes it as `ghcr.io/nuoframework/darktrace-mcp:<version>` for linux/amd64 and linux/arm64, once the v1.1.0 release is published; always pin the digest. Verification status: [below](#110-image-verification-status).
 
-## Current candidate at a glance
+The image exposes the same tools as a native install. Profiles work the same way: set `DARKTRACE_PROFILES` with `-e` (default `read`). See [profiles](configuration.md#profiles).
+
+> **Release archives.** The v1.0.0 image archives contain the earlier read-only build (15 tools). For the full API surface, build the image from the current checkout ([Build](#build)) or use the 1.1.0 image once it is published.
+
+## Quick steps
+
+1. Pull, load or build the image ([Install options](#install-options)).
+2. Run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)).
+3. Add the client snippet from [Clients: Docker](clients.md#docker), with the image ID.
+
+## 1.1.0 image verification status
+
+| Item | Status (2026-10-06) |
+|---|---|
+| linux/arm64 | Local build `sha256:7e5a2a410cce692efb1dc0848ad040424fccf66d1c7d482003ca5fbeaadd6aad` passed every local CI Docker check: configuration inventory, help/version, vendor Node.js and shared OpenSSL, runtime inventory, `--check-config`, `tools/list` for all eight pinned contracts, doctor per profile and approval channel, and startup refusals. Its runtime bytes match the Linux arm64 security receipt ([release pins](security/release-pins-1.1.0.md#docker-evidence)) |
+| linux/amd64 | Not run locally. Verified only by the CI `docker` job on the release commit |
+| Published ghcr image | `release.yml` rebuilds the image for publication; it is not the image the CI Docker job tested. The manifest digest is recorded in the release notes |
+| Live MCP session | Only on a build from before the final write controls ([lab campaign](security/final-lab-campaign-1.1.0.md#docker-hardened-run-macos-docker-desktop)) |
+| Vulnerability scan | None yet for the 1.1.0 runtime. The v1.0.0 scan and its review are below; they are not a statement about 1.1.0 |
+| Attestation | No image attestation. SBOMs are inventories, not clearances |
+
+This is not a zero-CVE claim, and it is not release approval.
+
+## v1.0.0 image at a glance (previous release)
+
+This table records the reviewed v1.0.0 image (read-only build). It is history for 1.1.0.
 
 | Item | Status (2026-10-06) |
 |---|---|
@@ -21,7 +46,16 @@ This is not a zero-CVE claim, and it is not stable-release approval.
 
 ## Install options
 
-1. **Private GitHub Release image archive (easiest; v1.0.0).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`. No public registry image exists.
+1. **Public image on GitHub Container Registry (easiest; v1.1.0 and later).** Built by `.github/workflows/release.yml` on the reviewed tag, natively on amd64 and arm64 runners, and combined into one tag. The manifest digest is recorded in the workflow summary and in the release notes.
+
+```sh
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+```
+
+   Compare the digest with the release notes before using it. The wizard writes the hardened `docker run` entry with `--pull=never` and the `name@sha256:…` reference, so clients only ever start the inspected bytes; a tag is mutable, a digest is not. For a manual snippet use the local image ID (`docker image inspect --format '{{.Id}}'`) as shown under [MCP client configuration](#mcp-client-configuration).
+2. **GitHub Release image archive (v1.0.0, previous release).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`.
 
 ```sh
 gh release download v1.0.0 --repo nuoframework/darktrace-mcp \
@@ -31,8 +65,8 @@ docker load --input darktrace-mcp-1.0.0-linux-arm64.tar.gz
 docker image inspect --format '{{.Id}}' darktrace-mcp:1.0.0-arm64
 ```
 
-   On x86-64 hosts, use the `amd64` archive and the `darktrace-mcp:1.0.0-amd64` tag. Check that the loaded image ID matches the release notes, then use that `sha256:…` ID with `--pull=never`. Release asset availability is shown on the private v1.0.0 release page.
-2. **Build from the reviewed checkout** (below).
+   On x86-64 hosts, use the `amd64` archive and the `darktrace-mcp:1.0.0-amd64` tag. Check that the loaded image ID matches the release notes, then use that `sha256:…` ID with `--pull=never`.
+3. **Build from the reviewed checkout** (below).
 
 ## Build
 
@@ -66,7 +100,7 @@ The Node.js binary is Alpine's musl build, maintained by the Alpine distribution
 
 ## MCP client configuration
 
-Mount separate public and private token files read-only. Each must be a regular, non-symlink file, at most 4 KiB, owned by the container's effective non-root UID, and mode `0600` or stricter (`0400` is also accepted). Each file may have one final LF; do not use CRLF or put tokens in environment files. On Docker Desktop, ownership mapping can differ from the host; check it with the image's `--check-config` diagnostic before adding the server to an MCP host. Do not weaken the server's ownership or mode checks to compensate.
+Mount separate public and private token files read-only. Each must be a regular, non-symlink file, at most 4 KiB, owned by the container's effective non-root UID, and mode `0600` or stricter (`0400` is also accepted). Each file may have one final LF; do not use CRLF or put tokens in environment files. On Docker Desktop for macOS and Windows, bind-mounted files appear inside the container as owned by root (uid 0) with the host mode, whatever `--user` you pass, so the default owner check fails. For that case only, add `--env DARKTRACE_TOKEN_FILE_OWNER=root-or-current` to the `docker run` arguments: the server then also accepts root-owned token files, still requires a regular non-symlink file of at most 4 KiB with an owner-only mode, and writes `{"event":"token_file_owner_relaxed"}` to stderr at startup. `darktrace-mcp setup --runtime docker` adds it on macOS and Windows only. Keep the default on Linux, where bind mounts keep the host owner. Check the result with the image's `--check-config` diagnostic before adding the server to an MCP host. Never loosen the file mode to compensate.
 
 Example client configuration (replace the executable and private paths, and set the real approved HTTPS origin locally):
 
@@ -130,7 +164,7 @@ These controls apply to the current recipe and the documented client configurati
 | Identity/filesystem | Default UID/GID `1000:1000`; application and runtime files are root-owned. Run with `--read-only`. |
 | Privileges/resources | `--cap-drop=ALL`, `--security-opt=no-new-privileges`, `--pids-limit=64`, `--memory=256m`; Docker's default seccomp stays enabled. AppArmor/SELinux and rootless Docker were not tested. |
 | Network/ports | No exposed or published port. Diagnostics run with `--network=none`; production egress needs deployment policy limited to the approved appliance. |
-| Secrets | Token files only, mounted read-only, owned by the runtime UID, mode `0600` or stricter. No token values in environment, arguments or image layers. |
+| Secrets | Token files only, mounted read-only, owned by the runtime UID (or root on Docker Desktop with `DARKTRACE_TOKEN_FILE_OWNER=root-or-current`), mode `0600` or stricter. No token values in environment, arguments or image layers. |
 | Host boundary | No Docker socket is mounted. Docker Desktop/daemon, host integration and other MCP servers remain trusted host components and were not audited. |
 
 ## Predecessor base-image review (history)
@@ -141,7 +175,7 @@ The public upstream [Distroless project](https://github.com/GoogleContainerTools
 
 ## Predecessor image and lab checkpoint — 2026-10-06 (history)
 
-> Predecessor image `sha256:eb3a7681…` with bundled OpenSSL 3.5.8. Its OpenSSL hold applied to that image; the current candidate is summarized [above](#current-candidate-at-a-glance).
+> Predecessor image `sha256:eb3a7681…` with bundled OpenSSL 3.5.8. Its OpenSSL hold applied to that image; the v1.0.0 image is summarized [above](#v100-image-at-a-glance-previous-release).
 
 That candidate enforced **19 GET selectors in 15 MCP tools** in both read profiles. `sensitiveRead` cannot expand the ceiling. All excluded operations, including 20 formerly eligible reads and all writes, are denied before preview, audit or network access. Write and critical settings still fail closed at startup.
 

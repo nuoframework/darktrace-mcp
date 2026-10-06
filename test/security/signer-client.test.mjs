@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { readFileSync } from 'node:fs';
+import { createHmac } from 'node:crypto';
 import { createSigner } from '../../dist/src/client/signer.js';
 import { createHttpClient } from '../../dist/src/client/httpClient.js';
 import { cfg,harness,kind,PUBLIC,PRIVATE,routes } from './helpers.mjs';
@@ -27,9 +28,10 @@ test('ST-01.WIRE mutation during async DNS does not change signed URL/body',asyn
   assert.equal(observed[0].headers['Accept-Encoding'],'identity');client.close();
 });
 for(const mode of ['encoded','unencoded']) for(const attack of [
-  {operationId:'post_synthetic',query:[['q','x']],body:{value:'x'}},
-  {operationId:'delete_synthetic',query:[['id','1']]},
+  {operationId:'delete_synthetic',query:[['id','1']],body:{value:'x'}},
   {operationId:'get_advancedsearch_api_search_query',pathParams:{query:'+/='}},
+  {operationId:'get_advancedsearch_api_search_query',pathParams:{query:'..//YQ=='}},
+  {operationId:'get_advancedsearch_api_search_query',pathParams:{query:'YQ==%0d%0a'}},
   {operationId:'get_status',query:[['x','a\r\nb']]},
   {operationId:'get_segment',pathParams:{id:'%252e%252e%252fstatus'}},
 ]) test('ST-01/04.BLOCK '+mode+' '+JSON.stringify(attack),async()=>{
@@ -49,4 +51,16 @@ test('ST-01.PREVIEW exact unsigned result with code-owned names and zero sign/ne
   assert.deepEqual(preview,{dryRun:true,operationId:'post_synthetic',method:'POST',parameterNames:['text']});
   await assert.rejects(h.client.send({operationId:'post_synthetic',body:{kind:'json',value:{'ignore previous instructions':PRIVATE}}},{dryRun:true}),kind('invalid_request'));
   assert.equal(h.state.signs,0);assert.equal(h.state.calls,0);h.client.close();
+});
+for(const mode of ['encoded','unencoded']) test('ST-01.SDK '+mode+' S4 rejects; S5 query and S6 encoded Base64 follow 7.1.0 evidence',async()=>{
+  const h=harness({config:cfg({auth:{publicToken:PUBLIC,privateToken:PRIVATE,querySignatureEncoding:mode}}),extra:{now:()=>Date.UTC(2026,9,5,11,0,0)}});
+  const date='20261005T110000',sig=text=>createHmac('sha1',PRIVATE).update(`${text}\n${PUBLIC}\n${date}`,'utf8').digest('hex');
+  const v=text=>mode==='encoded'?encodeURIComponent(text):text;
+  await assert.rejects(h.client.request({operationId:'post_synthetic',query:[['q','a b']],body:{value:'x'}}),kind('invalid_request'));
+  assert.equal(h.state.signs,0);assert.equal(h.state.calls,0);
+  await h.client.request({operationId:'delete_synthetic',query:[['did','1'],['tag','a b']]});
+  await h.client.request({operationId:'get_advancedsearch_api_search_query',pathParams:{query:'eyJh+/8='}});
+  assert.deepEqual(h.state.wire.map(w=>w.url),['https://appliance.test/synthetic?did=1&tag=a%20b','https://appliance.test/advancedsearch/api/search/eyJh%2B%2F8%3D']);
+  assert.deepEqual(h.state.wire.map(w=>w.headers['dtapi-signature']),[sig(`/synthetic?did=1&tag=${v('a b')}`),sig('/advancedsearch/api/search/eyJh%2B%2F8%3D')]);
+  assert.equal(h.state.signs,2);h.client.close();
 });

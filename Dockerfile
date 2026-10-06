@@ -7,7 +7,7 @@ RUN npm ci --ignore-scripts
 COPY tsconfig.json tsconfig.generate.json ./
 COPY scripts/build.mjs scripts/generate-catalogue.ts ./scripts/
 COPY src/ ./src/
-COPY openapi/darktrace-threat-visualizer.yaml ./openapi/
+COPY openapi/darktrace-threat-visualizer.yaml openapi/darktrace-sdk.yaml ./openapi/
 COPY docs/operation-inventory.json ./docs/
 RUN npm run build
 RUN printf '{"type":"module"}\n' > /build/runtime-package.json
@@ -146,7 +146,8 @@ COPY --from=build /build/dist/src ./dist/src
 COPY --from=build /build/runtime-package.json ./package.json
 COPY LICENSE ./LICENSE
 LABEL org.opencontainers.image.title="Darktrace MCP" \
-      org.opencontainers.image.description="Private stdio MCP server for Darktrace Threat Visualizer" \
+      org.opencontainers.image.description="Stdio MCP server for the Darktrace Threat Visualizer API (unofficial)" \
+      org.opencontainers.image.source="https://github.com/nuoframework/darktrace-mcp" \
       org.opencontainers.image.licenses="Apache-2.0"
 USER 1000:1000
 ENTRYPOINT ["/nodejs/bin/node", "/app/dist/src/index.js"]

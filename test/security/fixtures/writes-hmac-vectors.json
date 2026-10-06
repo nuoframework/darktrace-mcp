@@ -1,0 +1,146 @@
+{
+  "provenance": {
+    "sdk": "LegendEvent/darktrace-sdk v0.10.1",
+    "source": "https://github.com/LegendEvent/darktrace-sdk/tree/v0.10.1/darktrace",
+    "algorithm": "auth.py get_headers/generate_signature; dt_utils.py _delete; dt_advanced_search.py search",
+    "generator": "test/security/writes-vectors.py (Python stdlib, independent of production)",
+    "review": "new adversarial fixture; independent reviewer acceptance remains required"
+  },
+  "vectors": [
+    {
+      "shape": "S4",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "space é \"quote\""
+        ],
+        [
+          "q",
+          "second+/%"
+        ]
+      ],
+      "jsonText": "{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}",
+      "encoded": false,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/synthetic?empty=&q=space é \"quote\"&q=second+/%&{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}",
+      "hmacInput": "/synthetic?empty=&q=space é \"quote\"&q=second+/%&{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "a0a2f89470f6efbfe144ee6d8630f855fb7addd2",
+      "wirePath": "/synthetic?empty=&q=space%20%C3%A9%20%22quote%22&q=second%2B%2F%25",
+      "httpBody": "{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}"
+    },
+    {
+      "shape": "S4",
+      "method": "POST",
+      "path": "/synthetic",
+      "query": [
+        [
+          "empty",
+          ""
+        ],
+        [
+          "q",
+          "space é \"quote\""
+        ],
+        [
+          "q",
+          "second+/%"
+        ]
+      ],
+      "jsonText": "{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}",
+      "encoded": true,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/synthetic?empty=&q=space%20%C3%A9%20%22quote%22&q=second%2B%2F%25&{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}",
+      "hmacInput": "/synthetic?empty=&q=space%20%C3%A9%20%22quote%22&q=second%2B%2F%25&{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "652e3b62af938deb42e0f818544e21c9d6e3d9e2",
+      "wirePath": "/synthetic?empty=&q=space%20%C3%A9%20%22quote%22&q=second%2B%2F%25",
+      "httpBody": "{\"message\":\"\\u00e9 \\\"quote\\\"\",\"empty\":\"\"}"
+    },
+    {
+      "shape": "S5",
+      "method": "DELETE",
+      "path": "/tags/entities",
+      "query": [
+        [
+          "did",
+          "7"
+        ],
+        [
+          "tag",
+          "space é/+%"
+        ]
+      ],
+      "jsonText": null,
+      "encoded": false,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/tags/entities?did=7&tag=space é/+%",
+      "hmacInput": "/tags/entities?did=7&tag=space é/+%\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "01835b2b72725e32df72d56a18b74b09befac392",
+      "wirePath": "/tags/entities?did=7&tag=space%20%C3%A9%2F%2B%25",
+      "httpBody": null
+    },
+    {
+      "shape": "S5",
+      "method": "DELETE",
+      "path": "/tags/entities",
+      "query": [
+        [
+          "did",
+          "7"
+        ],
+        [
+          "tag",
+          "space é/+%"
+        ]
+      ],
+      "jsonText": null,
+      "encoded": true,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/tags/entities?did=7&tag=space%20%C3%A9%2F%2B%25",
+      "hmacInput": "/tags/entities?did=7&tag=space%20%C3%A9%2F%2B%25\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "0f8c8ef803c18faccf4d4a164ca31586b65217e7",
+      "wirePath": "/tags/entities?did=7&tag=space%20%C3%A9%2F%2B%25",
+      "httpBody": null
+    },
+    {
+      "shape": "S6",
+      "method": "GET",
+      "path": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "query": [],
+      "jsonText": null,
+      "encoded": false,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "hmacInput": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "1ecafc0d707c7f46eae5ea74281f7e0e248d98ba",
+      "wirePath": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "httpBody": null
+    },
+    {
+      "shape": "S6",
+      "method": "GET",
+      "path": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "query": [],
+      "jsonText": null,
+      "encoded": true,
+      "date": "2026-10-06 12:00:00",
+      "firstComponent": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "hmacInput": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=\nSYNTH_PUBLIC_CANARY_6ef9\n2026-10-06 12:00:00",
+      "signature": "1ecafc0d707c7f46eae5ea74281f7e0e248d98ba",
+      "wirePath": "/advancedsearch/api/search/eyJzZWFyY2giOiI/Pz8+Pz8/IiwiZmllbGRzIjpbInRpbWVzdGFtcCJdLCJ0aW1lZnJhbWUiOiIzNjAwIn0=",
+      "httpBody": null
+    }
+  ],
+  "searchDocument": {
+    "search": "???>???",
+    "fields": [
+      "timestamp"
+    ],
+    "timeframe": "3600"
+  }
+}

@@ -1,3 +1,4 @@
+import { EMAIL_VIEWS } from './email-views.js';
 /** Code-owned output projection: no dynamic property maps or caller-selected allowlists. */
 export type ResponseView={kind:'string'|'number'|'boolean'|'null'|'summary'}|{kind:'object';fields:Record<string,ResponseView>}|{kind:'array';items:ResponseView}|{kind:'union';variants:ResponseView[]};
 /** Exact documented hourly aggregate variant; never selected from upstream keys. */
@@ -5,7 +6,31 @@ export const SUMMARY_LOGINPUT_VIEW:ResponseView={kind:'object',fields:{events:{k
 export function operationResponseVariants(operationId:string) {
   return operationId==='get_summarystatistics'?[{query:{eventtype:'loginput'},schema:'SummarystatisticsEventtypeLoginput',fields:SUMMARY_LOGINPUT_VIEW}]:[];
 }
+/** Code-owned views for operations whose spec response is untyped and that may not pass data through. */
+export const CODE_OWNED_VIEWS:Readonly<Record<string,ResponseView>>=Object.freeze({
+  // Email action acknowledgement: only a status-like field is returned; message content never is.
+  post_agemail_api_ep_api_v1_0_emails_uuid_action:{kind:'object',fields:{response:{kind:'string'},status:{kind:'string'},success:{kind:'boolean'}}},
+  ...EMAIL_VIEWS,
+});
+/**
+ * Aggregate endpoints whose spec leaves the nested sections untyped, while each section is the record type of
+ * another reviewed endpoint. The section is projected through that endpoint's reviewed view (same allowlist,
+ * so e.g. device credentials stay excluded) instead of collapsing to a summary.
+ */
+export const COMPOSED_VIEWS:Readonly<Record<string,Readonly<Record<string,string>>>>=Object.freeze({
+  get_devicesummary:Object.freeze({devices:'get_devices',similardevices:'get_similardevices',modelbreaches:'get_modelbreaches',deviceinfo:'get_deviceinfo',details:'get_details'}),
+});
+export function composedView(operationId:string,views:Readonly<Record<string,ResponseView>>):ResponseView|undefined {
+  if(!Object.hasOwn(COMPOSED_VIEWS,operationId))return undefined;
+  const fields:Record<string,ResponseView>={};
+  for(const [section,source] of Object.entries(COMPOSED_VIEWS[operationId])) {
+    const view=views[source];
+    if(view)fields[section]=view;
+  }
+  return {kind:'object',fields:{data:{kind:'object',fields}}};
+}
 export function selectResponseView(operationId:string,query:Record<string,unknown>|undefined,base:ResponseView|undefined):ResponseView|undefined {
+  if (Object.hasOwn(CODE_OWNED_VIEWS,operationId)) return CODE_OWNED_VIEWS[operationId];
   return operationId==='get_summarystatistics'&&query?.eventtype==='loginput'?SUMMARY_LOGINPUT_VIEW:base;
 }
 type ResponseViewOverride=Readonly<{operationId:string;path:readonly string[];compiledKind:ResponseView['kind'];schema:string;property:string;quote:string;view?:ResponseView;nullable?:true}>;
@@ -52,13 +77,34 @@ export function compileResponseView(raw:Record<string,any>|undefined,schemas:Rec
   if(raw.type==='boolean')return {kind:'boolean'};
   return {kind:'summary'};
 }
-export function projectResponse(view:ResponseView|undefined,value:unknown):{value:unknown;omitted:boolean;unmodeled:boolean;truncated:boolean} {
+/** untypedFallback: keep bounded data for objects matching no documented key (Advanced Search aggregations). */
+export function projectResponse(view:ResponseView|undefined,value:unknown,options:{untypedFallback?:boolean;untypedObjects?:boolean}={}):{value:unknown;omitted:boolean;unmodeled:boolean;truncated:boolean} {
   let omitted=false,unmodeled=false,truncated=false;
   const summary=()=>{unmodeled=true;return {summary:'Response received; fields omitted because no reviewed output view matches.'};};
+  /** Untyped schema nodes: keep bounded data, dropping credential-like keys (secrets are redacted again downstream). */
+  function untyped(input:unknown,depth:number):unknown {
+    if(input===null||typeof input==='boolean')return input;
+    if(typeof input==='number')return Number.isFinite(input)?input:null;
+    if(typeof input==='string'){if(input.length>16384){truncated=true;return input.slice(0,16384);}return input;}
+    if(depth>8){omitted=true;return summary();}
+    if(Array.isArray(input)){if(input.length>1000)truncated=true;return input.slice(0,1000).map(item=>untyped(item,depth+1));}
+    if(typeof input==='object'){
+      // Untyped objects (free-form maps) pass only where the caller allows it; scalars and scalar lists always do.
+      if(!options.untypedObjects&&!options.untypedFallback){omitted=true;return summary();}
+      const out:Record<string,unknown>=Object.create(null);
+      for(const [key,entry] of Object.entries(input as Record<string,unknown>)){if(unsafe.test(key)){omitted=true;continue;}out[key]=untyped(entry,depth+1);}
+      return out;
+    }
+    omitted=true;return summary();
+  }
   function visit(v:ResponseView|undefined,input:unknown,depth:number):unknown {
+    if(v?.kind==='summary'&&depth>0)return untyped(input,depth);
     if(!v||v.kind==='summary'||depth>8){omitted=true;return summary();}
     if(v.kind==='union') {
-      const variant=v.variants.find(item=>item.kind==='array'?Array.isArray(input):item.kind==='object'?input!==null&&typeof input==='object'&&!Array.isArray(input):item.kind==='null'?input===null:(['string','number','boolean'].includes(item.kind)&&item.kind===typeof input));
+      const fits=v.variants.filter(item=>item.kind==='array'?Array.isArray(input):item.kind==='object'?input!==null&&typeof input==='object'&&!Array.isArray(input):item.kind==='null'?input===null:(['string','number','boolean'].includes(item.kind)&&item.kind===typeof input));
+      // Several object variants: prefer the one sharing the most keys with the received object.
+      const overlap=(item:ResponseView)=>item.kind==='object'&&input&&typeof input==='object'?Object.keys(input).filter(key=>Object.hasOwn(item.fields,key)).length:0;
+      const variant=fits.length>1?[...fits].sort((a,b)=>overlap(b)-overlap(a))[0]:fits[0];
       return visit(variant,input,depth+1);
     }
     if(v.kind==='array') {
@@ -71,7 +117,8 @@ export function projectResponse(view:ResponseView|undefined,value:unknown):{valu
       const out:Record<string,unknown>=Object.create(null),data=input as Record<string,unknown>;
       if(Object.keys(data).some(key=>!Object.hasOwn(v.fields,key)))omitted=true;
       for(const [key,child] of Object.entries(v.fields))if(Object.hasOwn(data,key))out[key]=visit(child,data[key],depth+1);
-      if(!Object.keys(out).length&&Object.keys(data).length){omitted=true;return summary();}
+      // No documented key matched (e.g. undocumented aggregation shapes): keep the bounded data rather than nothing.
+      if(!Object.keys(out).length&&Object.keys(data).length)return depth>0&&options.untypedFallback?untyped(input,depth):(()=>{omitted=true;return summary();})();
       return out;
     }
     if(v.kind==='null'){if(input===null)return null;omitted=true;return summary();}
