@@ -12,7 +12,7 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const canonical=value=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value&&typeof value==='object'?'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}':JSON.stringify(value);
 // Full-API oracle: complete tools/list contracts for every supported operator profile combination.
 const fixturePath='test/security/fixtures/mcp-tool-contracts-full-api.json';
-const fixtureSha256='c95104ced1955b7a1bdc72a6e19bc79c3d1a3e0ee39114e7eabf7fa71545fd3b'; // Generated for the full-API release; requires independent review before shared application.
+const fixtureSha256='df8ca493e50a9f8eef2dd883c8e7a4f3b36b2effa0cba72cf36ed07ab488ded5'; // Generated for the full-API release; requires independent review before shared application.
 // Historical oracles stay byte-pinned provenance; they no longer describe the shipped surface.
 const firstStableFixturePath='test/security/fixtures/mcp-tool-contracts-first-stable.json';
 const firstStableFixtureSha256='6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c';
@@ -21,17 +21,20 @@ const alphaFixtureSha256='37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518
 const capabilityPath='src/policy/release-capability.ts';
 const capabilityValue=Object.freeze({read:true,sensitiveRead:true,write:true,writeCritical:true});
 const fixtureCapability=Object.freeze({...capabilityValue,grantedBy:'operator profiles only; model arguments cannot grant or escalate'});
-const profileHashes=Object.freeze({read:'afeb056eb4e1830462256436948ceaa706601d14ade6ebc7f36ab00cda011964',"read+sensitive":'ca4ebd6b4d640aae3571ad3d68e18bd489ae39f02b980188a554dfb989462d6a',"read+write":'9d55533f6fff2982f3aa0414687a259c1d042cc7aa267a0106126a4ea7d4e39b',"read+write+critical":'f22cee1aefb944c8be6b683f251951a965d9d94dd0b9ff872a5c06cc69bd062b',all:'b377eac60a2eed8233d8481b0b69074e79eac6a537b8e1b4ec1e47a5b2abf859'});
-// Independent oracle from the owner request: tools/operations per profile and the six critical operations.
-const profileShape=Object.freeze({read:[27,38],'read+sensitive':[36,56],'read+write':[36,54],'read+write+critical':[42,60],all:[51,78]});
-const criticalOperations=Object.freeze(['delete_tags_tid','post_agemail_api_ep_api_v1_0_emails_uuid_action','post_antigena','post_antigena_manual','post_intelfeed','post_subnets']);
+const profileHashes=Object.freeze({"read":"734a9e33dd8632df6efa4ec7b81c3f313d85dfbb478af3128bd3aec4f0b6833a","read+sensitive":"d885ce0e247f9dc7d55c7f27ed67be4396ffd8b35b2c7a6faf18d3f6a051b046","read+write":"1820b2b88e685e8058a79d26d97acf9f19f3d47a90cfd9e0862f4b37ce294f22","read+write+critical":"c5372a1b21079709f4f2766df8c298bd8e91151aa5c417fc2703c734d12c0aae","all":"90c0a24a18ed849bec6bb8f6c9a6a7a2a2672121c0ed5d1fcbe8fad206e5f53d","read+sensitive+write":"3ccf0ef5ace7817dfb69fdb83893dab1baa36911bf3cbb906062dae26ca5b64b","read+write+critical/critical-host":"f1b5457452b52acb25a9fe37df152d1a88f542580d3b8eadd73bae183a7ae646","read+write/write-elicitation":"cbd4ac4d9f9f904591ad905f8c3be9244614c982a8d511b9f1102457a968e5bd"});
+// Independent oracle from the owner request: tools/operations per profile and the five implemented critical operations.
+const profileShape=Object.freeze({"read":[27,38],"read+sensitive":[36,56],"read+write":[36,54],"read+write+critical":[41,59],"all":[50,77],"read+sensitive+write":[45,72],"read+write+critical/critical-host":[41,59],"read+write/write-elicitation":[36,54]});
+const criticalOperations=Object.freeze(['delete_tags_tid','post_antigena','post_antigena_manual','post_intelfeed','post_subnets']);
+// The 600-character base budget excludes the fixed AD-W-18 sensitive/write notice.
+const sensitiveWriteNotice=' Sensitive reads are also enabled: results may contain untrusted content, and free-text fields of this write can carry copied data out of the appliance. Write only text the user asked for.';
 function selectors(schema){const values=[];const walk=node=>{if(!node||typeof node!=='object')return;const op=node.properties?.operation;if(op?.const)values.push(op.const);if(op?.enum)values.push(...op.enum);for(const key of ['anyOf','oneOf','allOf'])for(const child of node[key]??[])walk(child);};walk(schema);return values;}
 function assertProfileTools(name,tools){
  const [toolCount,operationCount]=profileShape[name];assert.equal(tools.length,toolCount,'tool count '+name);
  const all=[];
  for(const tool of tools){const ids=selectors(tool.inputSchema).sort();all.push(...ids);
   assert.deepEqual([...new Set(tool.description.match(/\b(?:get|post|delete)_[a-zA-Z0-9_]+\b/g)??[])].sort(),ids,'description lists exactly its operations: '+tool.name);
-  assert(tool.description.length<=600,'concise description: '+tool.name);
+  const description=['all','read+sensitive+write'].includes(name)&&tool.description.endsWith(sensitiveWriteNotice)?tool.description.slice(0,-sensitiveWriteNotice.length):tool.description;
+  assert(description.length<=600,'concise description: '+tool.name);
   const critical=ids.some(id=>criticalOperations.includes(id)),reads=ids.every(id=>id.startsWith('get_')||id==='post_advancedsearch_api_search'||id==='post_agemail_api_ep_api_v1_0_emails_search');
   assert.equal(Boolean(tool.inputSchema.properties?.confirm),critical,'confirm only on critical: '+tool.name);
   if(critical) assert.match(tool.description,/confirm:true/);
@@ -39,7 +42,7 @@ function assertProfileTools(name,tools){
   assert.equal(tool.annotations.idempotentHint,ids.every(id=>id.startsWith('get_')),'idempotentHint: '+tool.name);
  }
  assert.equal(all.length,operationCount,'operation count '+name);assert.equal(new Set(all).size,operationCount);assert(!all.includes('get_aianalyst_incidents'));
- assert.equal(all.some(id=>criticalOperations.includes(id)),['read+write+critical','all'].includes(name),'critical scope '+name);
+ assert.equal(all.some(id=>criticalOperations.includes(id)),['read+write+critical','all'].includes(name.split('/')[0]),'critical scope '+name);
 }
 const forbiddenProfiles=Object.freeze({
  'critical-without-write':{profiles:{writeCritical:true},errorClass:'ConfigValidationError',beforeSdk:true,beforeNetwork:true},
@@ -104,11 +107,11 @@ export function verifyValidatedPredecessorArchives(base){
 export async function captureReviewedContracts(base){
  const {bytes,fixture}=reviewedFixture(base),helper=await import(pathToFileURL(join(base,'test/security/mcp-contracts.mjs')));
  const capability=await import(pathToFileURL(join(base,'dist/src/policy/release-capability.js')));assert.deepEqual(capability.RELEASE_CAPABILITY,capabilityValue);assert(Object.isFrozen(capability.RELEASE_CAPABILITY));
- const {productionOperationDescriptors}=await import(pathToFileURL(join(base,'dist/src/server/stdio.js')));assert(Object.isFrozen(productionOperationDescriptors));assert.equal(productionOperationDescriptors.length,78);
- assert(productionOperationDescriptors.every(o=>Object.isFrozen(o)&&['GET','POST','DELETE'].includes(o.method)));assert(!productionOperationDescriptors.some(o=>o.operationId==='get_aianalyst_incidents'));
+ const {productionOperationDescriptors}=await import(pathToFileURL(join(base,'dist/src/server/stdio.js')));assert(Object.isFrozen(productionOperationDescriptors));assert.equal(productionOperationDescriptors.length,77);
+ assert(productionOperationDescriptors.every(o=>Object.isFrozen(o)&&['GET','POST','DELETE'].includes(o.method)));assert(!productionOperationDescriptors.some(o=>['get_aianalyst_incidents','post_agemail_api_ep_api_v1_0_emails_uuid_action'].includes(o.operationId)));
  for(const id of criticalOperations)assert(productionOperationDescriptors.some(o=>o.operationId===id),'critical route registered: '+id);
- assert.deepEqual(Object.keys(helper.releaseProfiles).sort(),Object.keys(profileHashes).sort());assert.deepEqual(helper.forbiddenReleaseProfiles,forbiddenProfiles);
- const contracts={};for(const [name,profile] of Object.entries(helper.releaseProfiles)){const tools=await helper.toolContract(profile);contracts[name]={sha256:helper.digest(tools),tools};}
+ assert.deepEqual(Object.keys({...helper.releaseProfiles,...helper.approvalVariants}).sort(),Object.keys(profileHashes).sort());assert.deepEqual(helper.forbiddenReleaseProfiles,forbiddenProfiles);
+ const contracts={};for(const [name,profile] of Object.entries({...helper.releaseProfiles,...helper.approvalVariants})){const tools=await helper.toolContract(profile);contracts[name]={sha256:helper.digest(tools),tools};}
  assert.equal(canonical(contracts),canonical(fixture.contracts),'generated complete tools/list contract differs from reviewed full-API MR-04 oracle');
  const rejected=await helper.verifyRejectedReleaseProfiles();assert.deepEqual(rejected.rejectedProfiles,fixture.rejectedProfiles);assert.deepEqual(rejected.startupChecks,expectedStartupChecks());
  verifyHistoricalArchive(base);verifyValidatedPredecessorArchives(base);
@@ -196,9 +199,15 @@ assert.equal(run(process.execPath,[entry,'--version'],work,cliEnv).trim(),pkg.ve
 const help=run(process.execPath,[entry,'--help'],work,cliEnv);assert.match(help,/Usage:/);assert.match(help,/DARKTRACE_PROFILES/);assert.match(help,/confirm:true/);
 for(const [name,value] of [['public-token','offline-public-canary'],['private-token','offline-private-canary']]){writeFileSync(join(work,name),value,{mode:0o600});chmodSync(join(work,name),0o600);}
 const doctorEnv={...cliEnv,DARKTRACE_URL:'https://darktrace.example.internal',DARKTRACE_PUBLIC_TOKEN_FILE:join(work,'public-token'),DARKTRACE_PRIVATE_TOKEN_FILE:join(work,'private-token'),DARKTRACE_PROFILES:'read'};
-// Write profiles start; only critical without write (or an unknown profile) is a startup error.
-for(const [profiles,expected,tools] of [['read',{read:true,sensitive:false,write:false,critical:false},profileShape.read[0]],['read,write',{read:true,sensitive:false,write:true,critical:false},profileShape['read+write'][0]],['all',{read:true,sensitive:true,write:true,critical:true},profileShape.all[0]]])for(const flag of ['doctor','--check-config']){const result=JSON.parse(run(process.execPath,[entry,flag],work,{...doctorEnv,DARKTRACE_PROFILES:profiles}));assert.deepEqual(Object.keys(result).sort(),['approval','labValidated','networkProbe','ok','profiles','registeredTools','transport']);assert.equal(result.ok,true);assert.equal(result.transport,'stdio');assert.equal(result.registeredTools,tools,'registered tools '+profiles);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);assert.deepEqual(result.profiles,expected);assert.deepEqual(Object.keys(result.approval).sort(),['critical','write']);}
-for(const variables of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'superuser'}])for(const flag of [[],['doctor'],['--check-config']]){const got=spawnSync(process.execPath,[entry,...flag],{cwd:work,env:{...doctorEnv,...variables},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});assert.equal(got.status,1);assert.equal(got.stdout,'');assert(!got.stderr.includes('offline-public-canary')&&!got.stderr.includes('offline-private-canary'));const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);}
+// Every pinned profile and approval-description variant starts with explicit operator acknowledgements.
+for(const name of Object.keys(profileShape))for(const flag of ['doctor','--check-config']){
+ const base=name.split('/')[0],profiles=base==='all'?'all':base.replaceAll('+',',');
+ const expected={read:true,sensitive:base==='all'||base.includes('sensitive'),write:base==='all'||base.includes('write'),critical:base==='all'||base.includes('critical')};
+ const approval={critical:name.endsWith('/critical-host')?'host':'elicitation',write:name.endsWith('/write-elicitation')?'elicitation':'host'};
+ const result=JSON.parse(run(process.execPath,[entry,flag],work,{...doctorEnv,DARKTRACE_PROFILES:profiles,DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE:'true',DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL:'true',DARKTRACE_CRITICAL_APPROVAL:approval.critical,DARKTRACE_WRITE_APPROVAL:approval.write}));
+ assert.deepEqual(Object.keys(result).sort(),['approval','labValidated','networkProbe','ok','profiles','registeredTools','transport']);assert.equal(result.ok,true);assert.equal(result.transport,'stdio');assert.equal(result.registeredTools,profileShape[name][0],'registered tools '+name);assert.equal(result.networkProbe,false);assert.equal(result.labValidated,false);assert.deepEqual(result.profiles,expected);assert.deepEqual(result.approval,approval);
+}
+for(const variables of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'superuser'}])for(const flag of [[],['doctor'],['--check-config']]){const got=spawnSync(process.execPath,[entry,...flag],{cwd:work,env:{...doctorEnv,...variables},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});assert.equal(got.status,1);assert.equal(got.stdout,'');assert(!got.stderr.includes('offline-public-canary')&&!got.stderr.includes('offline-private-canary'));const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','reason','ts']:['event','reason','ts','variable']);}
 const rootComponent={type:'application','bom-ref':pkg.name,name:pkg.name,version:pkg.version,licenses:[{license:{id:pkg.license}}],hashes:[{alg:'SHA-256',content:hash(readFileSync(archive))}]};
 const sbom={bomFormat:'CycloneDX',specVersion:'1.5',version:1,metadata:{component:rootComponent},components,dependencies:[{ref:pkg.name,dependsOn:['@modelcontextprotocol/server','zod']},{ref:'@modelcontextprotocol/server',dependsOn:['@modelcontextprotocol/core','zod']},{ref:'@modelcontextprotocol/core',dependsOn:['zod']},{ref:'zod',dependsOn:[]}]};
 writeFileSync(join(out,'runtime-sbom.cdx.json'),JSON.stringify(sbom,null,2)+'\n');
