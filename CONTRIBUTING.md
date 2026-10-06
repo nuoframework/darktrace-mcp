@@ -17,3 +17,11 @@ When dependency updates are explicitly authorized, review upstream changes and e
 For a change request, describe the concrete trigger and resulting behavior, policy boundaries, tests run and unresolved compatibility risks. Request authorized lab scope before any live request; write tests require operation-specific approval. Use synthetic secrets in temporary directories outside the repository.
 
 Report vulnerabilities via [SECURITY.md](SECURITY.md). The full [Apache-2.0 license](LICENSE) applies to contributions; submit only work you are authorized to contribute.
+
+## How changes are accepted
+
+- Open a **pull request** against `main` from a branch or fork; direct pushes to `main` are blocked by branch protection.
+- Every pull request must pass the required checks (`lint`, `offline (22)`, `offline (24)`, `docker (amd64)`, `docker (arm64)`) and CodeQL, and all review conversations must be resolved before it can be merged.
+- Acceptable contributions follow the existing style: TypeScript in strict mode, `npm run lint` (ESLint with security rules) and `npm run typecheck` clean, tests added with the change (`npm test`, and `npm run test:security` for anything touching policy, signing, limits or output handling), no new runtime dependencies without discussion, and documentation claims limited to recorded evidence.
+- Security-relevant changes (profiles, approval flow, signing, limits, redaction) also need an updated threat-model or test-plan entry under `docs/security/`.
+- Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md), not in public issues.
