@@ -54,8 +54,14 @@ Los perfiles deciden qué herramientas ve y puede usar el modelo. Se configuran 
 | `read` | Lecturas normales: dispositivos, model breaches, AI Analyst, lista de Antigena, etiquetas, modelos, métricas, estado | — |
 | `sensitive` | Lecturas que pueden devolver contenido en bruto: Advanced Search, contenido y búsqueda de correos, descarga de PCAP, eventos de auditoría de correo | — |
 | `write` | Cambios de nivel medio y alto: reconocer, comentar, fijar, etiquetas, etiquetas de dispositivo, solicitar PCAP, investigaciones de AI Analyst | Añade `dryRun:true` a una llamada para ver una vista previa sin cambiar nada |
-| `critical` | Acciones de Antigena/RESPOND, intel feed, subredes, acciones sobre correo, borrar una etiqueta | Solo se ejecuta si la llamada repite una vista previa con `confirm:true` y su `previewId`, y (por defecto) aceptas el diálogo de confirmación del servidor. Si no, devuelve una vista previa. Consulta [aprobación humana](#aprobación-humana) |
-| `all` | Todo lo anterior | Las mismas reglas por operación |
+| `critical` | Acciones de Antigena/RESPOND, intel feed, subredes, borrar una etiqueta | Solo se ejecuta tras una vista previa con `dryRun:true`, repitiendo la llamada con `confirm:true` y su `previewId` (válido 5 minutos, una vez) y (por defecto) tras aceptar el diálogo de confirmación del servidor. Consulta [aprobación humana](#aprobación-humana). La acción sobre correo aparece en el catálogo pero no está disponible en esta versión |
+| `all` | Todo lo anterior | Las mismas reglas por operación. Necesita `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (ver abajo) |
+
+Activar `sensitive` y `write` a la vez (también con `all`) permite que datos leídos del appliance acaben en
+campos de texto libre de las escrituras (comentarios, descripciones de etiquetas, entradas de intel). El
+arranque rechaza esta combinación salvo que también pongas `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (JSON
+`profiles.acknowledgeSensitiveWrite`). El servidor registra entonces el aviso `sensitive_write_acknowledged` y
+las descripciones de las herramientas afectadas avisan al modelo.
 
 Ejemplos:
 
@@ -71,8 +77,27 @@ Buenas prácticas:
 - Empieza con `read`. Añade más solo cuando lo necesites.
 - Da `critical` solo a quien podría hacer la misma acción en la interfaz de Darktrace.
 - `confirm:true` debe venir de ti, después de leer la vista previa. No le digas al modelo que confirme siempre.
-- Cada escritura y acción crítica genera una línea de auditoría (JSON con `"audit":true`) en el log stderr del servidor.
+- Cada vista previa, rechazo y escritura genera una línea de auditoría (JSON con `"audit":true`, con el resumen de argumentos `argsHash` y el `approvalMode`) en el log stderr del servidor.
 - Si una escritura agota el tiempo, su resultado es desconocido. Revisa el appliance antes de repetir. Las escrituras nunca se reintentan solas.
+- Tras tres escrituras seguidas fallidas o de resultado desconocido, el servidor detiene todas las escrituras hasta que se reinicie. Las lecturas siguen funcionando.
+
+### Objetivos protegidos
+
+| Variable | Campo JSON | Por defecto |
+|---|---|---|
+| `DARKTRACE_PROTECTED_TARGETS` | `policy.protectedTargets` (array) | ninguno |
+
+Lista separada por comas de identificadores que el servidor nunca debe cambiar: ids de dispositivo (`did`),
+ids o redes de subred, ids o nombres de etiqueta, valores de entidad. La coincidencia es exacta. Las
+escrituras de impacto alto y críticas que nombran un identificador protegido se rechazan antes de cualquier
+vista previa (`target_denied`). Cada escritura tiene además un máximo fijo de objetivos por llamada (por
+ejemplo 5 en acciones de Antigena, 20 entradas de intel feed, 1 subred o dispositivo); las llamadas mayores se
+rechazan (`blast_radius_exceeded`). La tabla completa está en
+[CHANGES-core](../CHANGES-core.md#86-target-policy-and-blast-radius) (inglés).
+
+```sh
+export DARKTRACE_PROTECTED_TARGETS=1,42,10.0.0.0/24,Domain Controllers
+```
 
 ### Aprobación humana
 
@@ -82,16 +107,17 @@ Quién confirma una escritura antes de que llegue al appliance:
 |---|---|---|---|
 | `DARKTRACE_CRITICAL_APPROVAL` | `profiles.criticalApproval` | `elicitation`, `host` | `elicitation` |
 | `DARKTRACE_WRITE_APPROVAL` | `profiles.writeApproval` | `elicitation`, `host` | `host` |
+| `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `profiles.acknowledgeHostApproval` | `true`, `false` | `false` |
 
-- `elicitation`: el propio servidor te pregunta en un diálogo de confirmación (elicitación MCP). El diálogo muestra la operación y los valores exactos. No se envía nada si no aceptas. Rechazar, cancelar, cerrar el diálogo o no responder en 2 minutos equivalen a no.
-- `host`: el servidor confía en el aviso de permisos de herramientas de tu cliente. Las acciones críticas siguen necesitando `confirm:true` con un `previewId` válido. Este modo es más débil: una regla de "permitir siempre" para la herramienta aprueba todas las llamadas siguientes sin enseñarte los valores.
+- `elicitation`: el propio servidor te pregunta en un diálogo de confirmación (elicitación MCP). El diálogo muestra la operación, un resumen (digest) de los argumentos y todos los valores (escapados). Debes marcar `approved`; si no, no se envía nada. Rechazar, cancelar, cerrar el diálogo o no responder en 30 segundos (o antes de que caduque la vista previa) equivalen a no. Si los valores no caben en el diálogo, la llamada se rechaza en lugar de mostrar un resumen recortado. Solo puede haber un diálogo abierto por sesión (cuatro por proceso del servidor).
+- `host`: el servidor confía en el aviso de permisos de herramientas de tu cliente. Las acciones críticas siguen necesitando `confirm:true` con un `previewId` válido. Este modo es más débil: una regla de "permitir siempre" para la herramienta aprueba todas las llamadas siguientes sin enseñarte los valores. Para acciones críticas necesita `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` al arrancar, y las líneas de auditoría registran `"approvalMode":"host"`.
 
 El servidor solo considera que un cliente puede mostrar el diálogo si el cliente lo declara a nivel de protocolo. Los argumentos de herramienta que escribe el modelo nunca cuentan. Hay dos formas de declararlo:
 
 - **Clientes del protocolo 2025**: declaran la capacidad `elicitation` en `initialize`. El servidor envía una petición `elicitation/create`.
-- **Clientes del protocolo 2026-07-28** (por ejemplo, Claude Code): no hay `initialize`. Declaran `elicitation` en el sobre `_meta` de cada petición. Esa revisión no tiene peticiones del servidor al cliente, así que el servidor responde a la llamada con un resultado `input_required` que lleva el diálogo. El cliente te pregunta y repite la llamada idéntica con tu respuesta. El servidor acepta esa respuesta una sola vez, para esa llamada exacta, durante 2 minutos, y solo junto con el estado firmado que emitió.
+- **Clientes del protocolo 2026-07-28** (por ejemplo, Claude Code): no hay `initialize`. Declaran `elicitation` en el sobre `_meta` de cada petición. Esa revisión no tiene peticiones del servidor al cliente, así que el servidor responde a la llamada con un resultado `input_required` que lleva el diálogo. El cliente te pregunta y repite la llamada idéntica con tu respuesta. El servidor acepta esa respuesta una sola vez, para esa llamada exacta, durante 2 minutos, y solo junto con el estado firmado que emitió; la vista previa debe seguir siendo válida.
 
-Si el cliente no declara un diálogo de formulario (por ejemplo, sin `elicitation` o solo con URL), las acciones críticas se rechazan con `"approval":"unsupported"`. La pista dice que el host no puede mostrar el diálogo y menciona `DARKTRACE_CRITICAL_APPROVAL=host`. Consejos por cliente: [configuración de clientes](clients.md#claude-code).
+Si el cliente no declara un diálogo de formulario (por ejemplo, sin `elicitation` o solo con URL), las acciones críticas se rechazan con `"errorCode":"approval_unavailable"`. La pista dice que el host no puede mostrar el diálogo y menciona `DARKTRACE_CRITICAL_APPROVAL=host`. Consejos por cliente: [configuración de clientes](clients.md#claude-code).
 
 ### Variables antiguas
 
@@ -123,6 +149,7 @@ Solo se pueden bajar. Un valor por encima del máximo detiene el arranque.
 | `DARKTRACE_RATE_LIMIT_PER_MINUTE` | `limits.rateLimitPerMinute` | 120 |
 | `DARKTRACE_MAX_GET_RETRIES` | `limits.maxGetRetries` | 2 (solo GET) |
 | `DARKTRACE_MAX_RETRY_AFTER_MS` | `limits.maxRetryAfterMs` | 2.000 ms |
+| `DARKTRACE_MAX_WRITES_PER_MINUTE` | `limits.maxWritesPerMinute` | 10 escrituras por minuto móvil (críticas: 3) |
 
 Cola, reintentos y espera entre reintentos aceptan `0`. El resto empieza en 1.
 

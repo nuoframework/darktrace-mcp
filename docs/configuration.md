@@ -54,8 +54,13 @@ Profiles decide which tools the model sees and can call. Set them with a comma-s
 | `read` | Normal reads: devices, model breaches, AI Analyst, Antigena list, tags, models, metrics, status | — |
 | `sensitive` | Reads that can return raw content: Advanced Search, email content and search, PCAP download, email audit events | — |
 | `write` | Medium and high changes: acknowledge, comment, pin, tags, device labels, PCAP requests, AI Analyst investigations | Add `dryRun:true` to a call to preview it without changing anything |
-| `critical` | Antigena/RESPOND actions, intel feed, subnets, email actions, deleting a tag | Runs only when the call repeats a preview with `confirm:true` and its `previewId`, and (by default) you accept the server's confirmation dialog. Otherwise it returns a preview. See [human approval](#human-approval) |
-| `all` | All of the above | Same rules per operation |
+| `critical` | Antigena/RESPOND actions, intel feed, subnets, deleting a tag | Runs only after a `dryRun:true` preview, repeated with `confirm:true` and its `previewId` (valid 5 minutes, once), and (by default) after you accept the server's confirmation dialog. See [human approval](#human-approval). The email action is listed but not available in this release |
+| `all` | All of the above | Same rules per operation. Needs `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (see below) |
+
+Turning on `sensitive` and `write` together (including `all`) lets data read from the appliance flow into
+free-text fields of writes (comments, tag descriptions, intel entries). Startup refuses this combination
+unless you also set `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` (JSON `profiles.acknowledgeSensitiveWrite`).
+The server then logs a `sensitive_write_acknowledged` notice and the affected tool descriptions warn the model.
 
 Examples:
 
@@ -71,8 +76,26 @@ Good practice:
 - Start with `read`. Add more only when you need it.
 - Only give `critical` to people who could take the same action in the Darktrace UI.
 - `confirm:true` should come from you, the user, after reading the preview. Do not tell the model to always confirm.
-- Every write and critical call writes an audit line (JSON with `"audit":true`) to the server's stderr log.
+- Every preview, refusal and write writes an audit line (JSON with `"audit":true`, including the arguments digest `argsHash` and the `approvalMode`) to the server's stderr log.
 - If a write times out, its result is unknown. Check the appliance before you try again. Writes are never retried automatically.
+- After three failed or unknown writes in a row the server stops all writes until it is restarted. Reads keep working.
+
+### Protected targets
+
+| Variable | JSON field | Default |
+|---|---|---|
+| `DARKTRACE_PROTECTED_TARGETS` | `policy.protectedTargets` (array) | none |
+
+A comma-separated list of identifiers the server must never change: device ids (`did`), subnet ids or
+networks, tag ids or names, entity values. Matching is exact. High-impact and critical writes that name a
+protected identifier are refused before any preview (`target_denied`). Each write also has a fixed maximum
+number of targets per call (for example 5 for Antigena actions, 20 intel feed entries, 1 subnet or device);
+larger calls are refused (`blast_radius_exceeded`). The full table is in
+[CHANGES-core](CHANGES-core.md#86-target-policy-and-blast-radius).
+
+```sh
+export DARKTRACE_PROTECTED_TARGETS=1,42,10.0.0.0/24,Domain Controllers
+```
 
 ### Human approval
 
@@ -82,16 +105,17 @@ Who confirms a write before it reaches the appliance:
 |---|---|---|---|
 | `DARKTRACE_CRITICAL_APPROVAL` | `profiles.criticalApproval` | `elicitation`, `host` | `elicitation` |
 | `DARKTRACE_WRITE_APPROVAL` | `profiles.writeApproval` | `elicitation`, `host` | `host` |
+| `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `profiles.acknowledgeHostApproval` | `true`, `false` | `false` |
 
-- `elicitation`: the server itself asks you in a confirmation dialog (MCP elicitation). The dialog shows the exact operation and values. Nothing is sent unless you accept. Decline, cancel, a closed dialog or no answer within 2 minutes all mean no.
-- `host`: the server relies on your client's own tool-permission prompt. Critical actions still need `confirm:true` with a valid `previewId`. This mode is weaker: an "always allow" rule for the tool approves every later call without showing you the values.
+- `elicitation`: the server itself asks you in a confirmation dialog (MCP elicitation). The dialog shows the operation, a digest of the arguments and every value (escaped). You must tick `approved`; nothing is sent otherwise. Decline, cancel, a closed dialog or no answer within 30 seconds (or before the preview expires) all mean no. If the values do not fit the dialog, the call is refused instead of showing a shortened summary. Only one dialog per session (four per server process) can be open at a time.
+- `host`: the server relies on your client's own tool-permission prompt. Critical actions still need `confirm:true` with a valid `previewId`. This mode is weaker: an "always allow" rule for the tool approves every later call without showing you the values. For critical actions it needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` at startup, and audit lines record `"approvalMode":"host"`.
 
 The server only treats a client as able to show the dialog when the client says so at the protocol level. Tool arguments written by the model never count. There are two ways to say it:
 
 - **Protocol 2025 clients** declare the `elicitation` capability in `initialize`. The server sends an `elicitation/create` request.
-- **Protocol 2026-07-28 clients** (Claude Code, for example) have no `initialize`. They declare `elicitation` in the `_meta` envelope of each request. That revision has no server-to-client requests, so the server answers the call with an `input_required` result that carries the dialog. The client asks you and repeats the identical call with your answer. The server accepts that answer once, for that exact call, within 2 minutes, and only together with the signed state it issued.
+- **Protocol 2026-07-28 clients** (Claude Code, for example) have no `initialize`. They declare `elicitation` in the `_meta` envelope of each request. That revision has no server-to-client requests, so the server answers the call with an `input_required` result that carries the dialog. The client asks you and repeats the identical call with your answer. The server accepts that answer once, for that exact call, within 2 minutes, and only together with the signed state it issued; the preview must still be valid.
 
-If the client declares no form dialog (for example no `elicitation`, or URL-only), critical actions are refused with `"approval":"unsupported"`. The hint says that the host cannot show the dialog and names `DARKTRACE_CRITICAL_APPROVAL=host`. Per-client advice: [client setup](clients.md#claude-code).
+If the client declares no form dialog (for example no `elicitation`, or URL-only), critical actions are refused with `"errorCode":"approval_unavailable"`. The hint says that the host cannot show the dialog and names `DARKTRACE_CRITICAL_APPROVAL=host`. Per-client advice: [client setup](clients.md#claude-code).
 
 ### Older variables
 
@@ -123,6 +147,7 @@ You can only lower these. Values above the maximum stop startup.
 | `DARKTRACE_RATE_LIMIT_PER_MINUTE` | `limits.rateLimitPerMinute` | 120 |
 | `DARKTRACE_MAX_GET_RETRIES` | `limits.maxGetRetries` | 2 (GET only) |
 | `DARKTRACE_MAX_RETRY_AFTER_MS` | `limits.maxRetryAfterMs` | 2,000 ms |
+| `DARKTRACE_MAX_WRITES_PER_MINUTE` | `limits.maxWritesPerMinute` | 10 writes per rolling minute (critical writes: 3) |
 
 Queue, retries and retry delay accept `0`. All other limits start at 1.
 
