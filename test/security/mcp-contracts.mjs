@@ -49,7 +49,7 @@ export async function verifyRejectedReleaseProfiles(){
   for(const args of [[],['doctor'],['--check-config']]){
    const got=spawnSync(process.execPath,['--import',fileURLToPath(new URL('./diagnostic-guard.mjs',import.meta.url)),fileURLToPath(new URL('../../dist/src/index.js',import.meta.url)),...args],{env:env(variables),input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});
    assert.equal(got.error,undefined);assert.equal(got.status,1);assert.equal(got.stdout,'');noCanaries(got.stderr);assert(!got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'));
-   const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);
+   const error=JSON.parse(got.stderr);assert.equal(error.event,'startup_error');assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','reason','ts']:['event','reason','ts','variable']);assert.match(error.reason,/requires profiles\.write/);
   }
   startupChecks[name]={objectRejected:true,contractRejectedBeforeSdk:true,productionModes:['stdio','doctor','--check-config'],exitStatus:1,stdoutEmpty:true,networkSigningGuardTriggered:false};
  }

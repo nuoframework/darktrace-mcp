@@ -15,6 +15,7 @@ El servidor lee la configuración de **variables de entorno** y, opcionalmente, 
 | `DARKTRACE_URL` | `instance.baseUrl` | — (obligatoria) | Solo origen HTTPS, por ejemplo `https://darktrace.example.internal`. Sin ruta, query ni usuario |
 | `DARKTRACE_PUBLIC_TOKEN_FILE` | `auth.publicTokenFile` | — (obligatoria) | Ruta absoluta al archivo con el token público |
 | `DARKTRACE_PRIVATE_TOKEN_FILE` | `auth.privateTokenFile` | — (obligatoria) | Ruta absoluta al archivo con el token privado |
+| `DARKTRACE_TOKEN_FILE_OWNER` | `auth.tokenFileOwner` | `current` | Quién puede ser dueño de los archivos de token. `root-or-current` acepta también root (uid 0); solo para Docker Desktop, ver abajo |
 | `DARKTRACE_CONFIG_FILE` | — | ninguno | Ruta absoluta al archivo JSON |
 | `DARKTRACE_DATE_FORMAT` | `auth.dateFormat` | `compact` | Formato de fecha de la firma. Alternativa: `spaced` |
 | `DARKTRACE_QUERY_SIGNATURE_ENCODING` | `auth.querySignatureEncoding` | `unencoded` | Alternativa: `encoded`. Sin cambio automático |
@@ -31,6 +32,8 @@ Cada archivo de token debe:
 - pertenecer al usuario que ejecuta el servidor;
 - tener permisos `0600` o `0400`;
 - contener solo el token, opcionalmente seguido de un salto de línea.
+
+**Docker Desktop (macOS y Windows).** Los archivos montados con bind mount aparecen dentro del contenedor como propiedad de root (uid 0), sea cual sea su dueño en el host, y la comprobación por defecto los rechaza. Define `DARKTRACE_TOKEN_FILE_OWNER=root-or-current` (o `"auth": {"tokenFileOwner": "root-or-current"}`) para aceptar también archivos de token de root. El resto de comprobaciones se mantiene: archivo normal, sin enlace simbólico, máximo 4 KiB y permisos solo para el dueño. Mientras esté activo, el servidor escribe `{"event":"token_file_owner_relaxed"}` en stderr al arrancar. Es un ajuste del operador; el modelo no puede cambiarlo. En Linux déjalo en `current`, porque los bind mounts conservan el dueño del host. `darktrace-mcp setup` lo añade solo con el runtime Docker en macOS y Windows.
 
 ```sh
 chmod 600 ~/.config/darktrace-mcp/public-token ~/.config/darktrace-mcp/private-token

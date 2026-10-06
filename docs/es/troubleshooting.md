@@ -33,7 +33,7 @@ darktrace-mcp test
 2. Usa rutas absolutas. Las aplicaciones de escritorio no ven el `PATH` de tu shell, así que `node` a secas puede fallar. Obtén la ruta completa con `node -p 'process.execPath'`.
 3. Asegúrate de haber compilado: `dist/src/index.js` debe existir (`npm run build`).
 4. Revisa la sintaxis JSON o TOML. En Windows, las barras invertidas en JSON se escriben dobles.
-5. Mira el log MCP del cliente. Los mensajes del servidor van a stderr.
+5. Mira el log MCP del cliente. Los mensajes del servidor van a stderr. Un problema de configuración escribe una línea como `{"event":"startup_error","reason":"could not read private token file"}`; `reason` nombra el ajuste, nunca su valor. Otros fallos de arranque solo muestran el evento.
 
 Que el servidor parezca "parado" es normal: espera al cliente.
 
@@ -91,7 +91,7 @@ chmod 600 /absolute/private/darktrace/public-token /absolute/private/darktrace/p
 
 **Windows.** En Windows nativo los permisos no se pueden comprobar igual, así que el servidor puede rechazar los archivos. Ejecuta el servidor dentro de WSL con rutas de Linux.
 
-**Docker Desktop.** Los archivos montados pueden mostrar otro dueño dentro del contenedor. Ejecuta `--check-config` en el contenedor (consulta la [guía de Docker](../docker.md), en inglés). Corrige el dueño con `--user`, nunca relajando los permisos.
+**Docker Desktop.** En macOS y Windows los archivos montados aparecen como propiedad de root dentro del contenedor, así que verás `could not read ... token file` aunque los permisos en el host sean correctos. Añade `-e DARKTRACE_TOKEN_FILE_OWNER=root-or-current` a los argumentos de `docker run` (consulta la [guía de Docker](../docker.md), en inglés) y ejecuta `--check-config` en el contenedor. Nunca relajes los permisos.
 
 ## Se rechazan las variables de proxy
 

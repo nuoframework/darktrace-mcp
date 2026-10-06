@@ -78,7 +78,7 @@ The Node.js binary is Alpine's musl build, maintained by the Alpine distribution
 
 ## MCP client configuration
 
-Mount separate public and private token files read-only. Each must be a regular, non-symlink file, at most 4 KiB, owned by the container's effective non-root UID, and mode `0600` or stricter (`0400` is also accepted). Each file may have one final LF; do not use CRLF or put tokens in environment files. On Docker Desktop, ownership mapping can differ from the host; check it with the image's `--check-config` diagnostic before adding the server to an MCP host. Do not weaken the server's ownership or mode checks to compensate.
+Mount separate public and private token files read-only. Each must be a regular, non-symlink file, at most 4 KiB, owned by the container's effective non-root UID, and mode `0600` or stricter (`0400` is also accepted). Each file may have one final LF; do not use CRLF or put tokens in environment files. On Docker Desktop for macOS and Windows, bind-mounted files appear inside the container as owned by root (uid 0) with the host mode, whatever `--user` you pass, so the default owner check fails. For that case only, add `--env DARKTRACE_TOKEN_FILE_OWNER=root-or-current` to the `docker run` arguments: the server then also accepts root-owned token files, still requires a regular non-symlink file of at most 4 KiB with an owner-only mode, and writes `{"event":"token_file_owner_relaxed"}` to stderr at startup. `darktrace-mcp setup --runtime docker` adds it on macOS and Windows only. Keep the default on Linux, where bind mounts keep the host owner. Check the result with the image's `--check-config` diagnostic before adding the server to an MCP host. Never loosen the file mode to compensate.
 
 Example client configuration (replace the executable and private paths, and set the real approved HTTPS origin locally):
 
@@ -142,7 +142,7 @@ These controls apply to the current recipe and the documented client configurati
 | Identity/filesystem | Default UID/GID `1000:1000`; application and runtime files are root-owned. Run with `--read-only`. |
 | Privileges/resources | `--cap-drop=ALL`, `--security-opt=no-new-privileges`, `--pids-limit=64`, `--memory=256m`; Docker's default seccomp stays enabled. AppArmor/SELinux and rootless Docker were not tested. |
 | Network/ports | No exposed or published port. Diagnostics run with `--network=none`; production egress needs deployment policy limited to the approved appliance. |
-| Secrets | Token files only, mounted read-only, owned by the runtime UID, mode `0600` or stricter. No token values in environment, arguments or image layers. |
+| Secrets | Token files only, mounted read-only, owned by the runtime UID (or root on Docker Desktop with `DARKTRACE_TOKEN_FILE_OWNER=root-or-current`), mode `0600` or stricter. No token values in environment, arguments or image layers. |
 | Host boundary | No Docker socket is mounted. Docker Desktop/daemon, host integration and other MCP servers remain trusted host components and were not audited. |
 
 ## Predecessor base-image review (history)

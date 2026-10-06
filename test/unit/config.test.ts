@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import '../security/test-runtime-argv.js';
 import test from 'node:test';
-import { loadConfig } from '../../src/config/load.js';
+import { assertPrivateFile, loadConfig } from '../../src/config/load.js';
 import { assertSafeNetworkEnvironment, ConfigValidationError, parseConfig } from '../../src/config/schema.js';
 import { canonicalIpAddress, isForbiddenDestination } from '../../src/config/address.js';
 
@@ -165,6 +165,64 @@ test('token files reject symlinks, broad permissions, CRLF, and oversized data w
       assert.equal(created.status, 0);
       assert.throws(() => loadConfig({ ...base, DARKTRACE_PRIVATE_TOKEN_FILE: fifo }), /could not read private token file/);
     }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('token file owner rule: default rejects foreign owners; root-or-current accepts only uid 0 and keeps mode checks', { skip: process.platform === 'win32' }, () => {
+  const uid = process.getuid!();
+  const foreign = uid === 4242 ? 4243 : 4242;
+  for (const owner of [undefined, 'current'] as const) {
+    assert.doesNotThrow(() => assertPrivateFile(0o100600, uid, 'private token file', owner));
+    assert.throws(() => assertPrivateFile(0o100600, foreign, 'private token file', owner), /must be owned by the current user$/);
+    if (uid !== 0) assert.throws(() => assertPrivateFile(0o100600, 0, 'private token file', owner), /must be owned by the current user$/);
+  }
+  assert.doesNotThrow(() => assertPrivateFile(0o100600, 0, 'private token file', 'root-or-current'));
+  assert.doesNotThrow(() => assertPrivateFile(0o100400, 0, 'private token file', 'root-or-current'));
+  assert.doesNotThrow(() => assertPrivateFile(0o100600, uid, 'private token file', 'root-or-current'));
+  assert.throws(() => assertPrivateFile(0o100600, foreign, 'private token file', 'root-or-current'), /must be owned by the current user or root/);
+  for (const mode of [0o100644, 0o100640, 0o100700, 0o104600, 0o102600, 0o101600, 0o100200]) {
+    assert.throws(() => assertPrivateFile(mode, 0, 'private token file', 'root-or-current'), /owner-only/);
+  }
+
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'darktrace-owner-'));
+  try {
+    const token = path.join(dir, 'token');
+    writeFileSync(token, 'synthetic-owner-token\n', { mode: 0o600 });
+    const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'public-token', DARKTRACE_PRIVATE_TOKEN_FILE: token };
+    for (const value of ['current', 'root-or-current']) {
+      assert.equal(loadConfig({ ...base, DARKTRACE_TOKEN_FILE_OWNER: value }).auth.privateToken, 'synthetic-owner-token');
+    }
+    for (const value of ['root', 'any', '', 'ROOT-OR-CURRENT', 'root-or-current ']) {
+      assert.throws(() => loadConfig({ ...base, DARKTRACE_TOKEN_FILE_OWNER: value }), (error: unknown) =>
+        error instanceof ConfigValidationError && error.message === 'DARKTRACE_TOKEN_FILE_OWNER must be current or root-or-current');
+    }
+    const file = path.join(dir, 'config.json');
+    writeFileSync(file, JSON.stringify({ auth: { tokenFileOwner: 'root-or-current' } }), { mode: 0o600 });
+    assert.equal(loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file }).auth.privateToken, 'synthetic-owner-token');
+    assert.throws(() => loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file, DARKTRACE_TOKEN_FILE_OWNER: 'current' }), /conflicts with auth\.tokenFileOwner/);
+    writeFileSync(file, JSON.stringify({ auth: { tokenFileOwner: 'nobody' } }), { mode: 0o600 });
+    assert.throws(() => loadConfig({ ...base, DARKTRACE_CONFIG_FILE: file }), /auth\.tokenFileOwner must be current or root-or-current/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('DARKTRACE_TOKEN_FILE_OWNER=root-or-current logs one fixed secret-free startup warning', { skip: process.platform === 'win32' }, () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'darktrace-owner-log-'));
+  try {
+    const token = path.join(dir, 'token');
+    writeFileSync(token, 'synthetic-warning-token\n', { mode: 0o600 });
+    const script = `import { loadConfig } from ${JSON.stringify(path.resolve('dist/src/config/load.js'))}; loadConfig(process.env);`;
+    const base = { DARKTRACE_URL: 'https://darktrace.example', DARKTRACE_PUBLIC_TOKEN: 'synthetic-public', DARKTRACE_PRIVATE_TOKEN_FILE: token };
+    const relaxed = spawnSync(process.execPath, ['--input-type=module', '-e', script], { env: { ...base, DARKTRACE_TOKEN_FILE_OWNER: 'root-or-current' }, encoding: 'utf8' });
+    assert.equal(relaxed.status, 0, relaxed.stderr);
+    const lines = relaxed.stderr.trim().split('\n');
+    assert.equal(lines.length, 1);
+    const warning = JSON.parse(lines[0]);
+    assert.deepEqual(Object.keys(warning).sort(), ['event', 'ts']);
+    assert.equal(warning.event, 'token_file_owner_relaxed');
+    for (const secret of ['synthetic-warning-token', 'synthetic-public', token]) assert.equal(relaxed.stderr.includes(secret), false);
+    const strict = spawnSync(process.execPath, ['--input-type=module', '-e', script], { env: base, encoding: 'utf8' });
+    assert.equal(strict.status, 0, strict.stderr);
+    assert.equal(strict.stderr, '');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

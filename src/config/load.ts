@@ -1,5 +1,6 @@
 import { constants, fstatSync, openSync, readSync, closeSync } from 'node:fs';
 import path from 'node:path';
+import { logEvent } from '../observability/log.js';
 import { assertSafeNetworkEnvironment, ConfigValidationError, assertReleaseProfiles, parseConfig, type Config, type ConfigSource } from './schema.js';
 
 type RawConfig = Record<string, unknown>;
@@ -19,18 +20,32 @@ const KNOWN_DARKTRACE_ENV = new Set([
   'DARKTRACE_MAX_TOOL_INPUT_DEPTH', 'DARKTRACE_MAX_TOOL_INPUT_ELEMENTS', 'DARKTRACE_MAX_TOOL_OUTPUT_CHARS',
   'DARKTRACE_MAX_CONCURRENT_REQUESTS', 'DARKTRACE_MAX_QUEUED_REQUESTS', 'DARKTRACE_MAX_PAGES',
   'DARKTRACE_RATE_LIMIT_PER_MINUTE', 'DARKTRACE_MAX_GET_RETRIES', 'DARKTRACE_MAX_RETRY_AFTER_MS', 'DARKTRACE_MAX_WRITES_PER_MINUTE',
+  'DARKTRACE_TOKEN_FILE_OWNER',
   ...FORBIDDEN_ENV,
 ]);
 
-function assertPrivateFile(mode: number, uid: number, label: string): void {
+/**
+ * Who may own a token file. `current` (default) requires the process uid. `root-or-current` also accepts uid 0,
+ * for Docker Desktop (macOS/Windows) bind mounts, which surface as root-owned inside the container. It is an
+ * operator-only setting (environment or config file) and never relaxes the mode, file-type, symlink or size checks.
+ */
+export type TokenFileOwner = 'current' | 'root-or-current';
+
+function parseTokenFileOwner(value: unknown, label: string): TokenFileOwner | undefined {
+  if (value === undefined) return undefined;
+  if (value === 'current' || value === 'root-or-current') return value;
+  throw new ConfigValidationError(`${label} must be current or root-or-current`);
+}
+
+export function assertPrivateFile(mode: number, uid: number, label: string, owner: TokenFileOwner = 'current'): void {
   if (process.platform === 'win32') throw new ConfigValidationError(`${label} secure ownership checks are unsupported on this platform`);
   const permissions = mode & 0o7777;
   if ((permissions & (0o077 | 0o111 | 0o7000)) !== 0 || (permissions & 0o400) === 0) {
     throw new ConfigValidationError(`${label} permissions must be owner-only with no execute or special bits`);
   }
-  if (typeof process.getuid !== 'function' || uid !== process.getuid()) {
-    throw new ConfigValidationError(`${label} must be owned by the current user`);
-  }
+  if (typeof process.getuid !== 'function') throw new ConfigValidationError(`${label} must be owned by the current user`);
+  if (uid === process.getuid() || (owner === 'root-or-current' && uid === 0)) return;
+  throw new ConfigValidationError(owner === 'current' ? `${label} must be owned by the current user` : `${label} must be owned by the current user or root`);
 }
 
 function secureOpenFlags(): number {
@@ -83,7 +98,7 @@ function parseConfigFile(configPath: string): RawConfig {
   }
 }
 
-function readTokenFile(filePath: string | undefined, label: string): string | undefined {
+function readTokenFile(filePath: string | undefined, label: string, owner: TokenFileOwner): string | undefined {
   if (filePath === undefined) return undefined;
   if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) throw new ConfigValidationError(`${label} must be an absolute path`);
   let fd: number | undefined;
@@ -91,7 +106,7 @@ function readTokenFile(filePath: string | undefined, label: string): string | un
     fd = openSync(filePath, secureOpenFlags());
     const stat = fstatSync(fd);
     if (!stat.isFile() || stat.size > TOKEN_FILE_MAX_BYTES) throw new Error('invalid token file');
-    assertPrivateFile(stat.mode, stat.uid, label);
+    assertPrivateFile(stat.mode, stat.uid, label, owner);
     const bytes = readCapped(fd, TOKEN_FILE_MAX_BYTES);
     if (fstatSync(fd).size > TOKEN_FILE_MAX_BYTES) throw new Error('token file grew while reading');
     let text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
@@ -179,7 +194,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   const auth = asObject(raw.auth);
   const profiles = asObject(raw.profiles);
   const limits = asObject(raw.limits);
-  const { publicTokenFile: publicFileInConfig, privateTokenFile: privateFileInConfig, ...runtimeAuth } = auth;
+  const { publicTokenFile: publicFileInConfig, privateTokenFile: privateFileInConfig, tokenFileOwner: ownerInConfig, ...runtimeAuth } = auth;
+  const ownerFromEnvironment = parseTokenFileOwner(env.DARKTRACE_TOKEN_FILE_OWNER, 'DARKTRACE_TOKEN_FILE_OWNER');
+  const ownerFromFile = parseTokenFileOwner(ownerInConfig, 'auth.tokenFileOwner');
+  if (ownerFromEnvironment !== undefined && ownerFromFile !== undefined && ownerFromEnvironment !== ownerFromFile) {
+    throw new ConfigValidationError('DARKTRACE_TOKEN_FILE_OWNER conflicts with auth.tokenFileOwner');
+  }
+  const tokenFileOwner: TokenFileOwner = ownerFromEnvironment ?? ownerFromFile ?? 'current';
 
   const publicFile = env.DARKTRACE_PUBLIC_TOKEN_FILE ?? publicFileInConfig as string | undefined;
   const privateFile = env.DARKTRACE_PRIVATE_TOKEN_FILE ?? privateFileInConfig as string | undefined;
@@ -195,8 +216,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   if ((env.DARKTRACE_PRIVATE_TOKEN !== undefined || auth.privateToken !== undefined) && privateFile !== undefined) {
     throw new ConfigValidationError('set either DARKTRACE_PRIVATE_TOKEN or its token file, not both');
   }
-  const publicTokenFromFile = readTokenFile(publicFile as string | undefined, 'public token file');
-  const privateTokenFromFile = readTokenFile(privateFile as string | undefined, 'private token file');
+  // Fixed, secret-free warning so the relaxed owner rule is always visible in the operator's logs.
+  if (tokenFileOwner === 'root-or-current') logEvent('token_file_owner_relaxed');
+  const publicTokenFromFile = readTokenFile(publicFile as string | undefined, 'public token file', tokenFileOwner);
+  const privateTokenFromFile = readTokenFile(privateFile as string | undefined, 'private token file', tokenFileOwner);
   if (env.DARKTRACE_EXPORT_DIR !== undefined) throw new ConfigValidationError('export configuration is unsupported');
 
   const merged: RawConfig = {
