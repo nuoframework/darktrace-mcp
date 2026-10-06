@@ -45,10 +45,10 @@ C is a **synthetic illustration**, not a terminal recording or a claim that a re
 
 ## Rebuild and review
 
-Run from the repository root with Python 3 and `rsvg-convert` installed:
+Run from the repository root with Python 3, `rsvg-convert`, and `ffmpeg` installed:
 
 ```sh
 python3 docs/assets/banner-variants/generate.py
 ```
 
-[generate.py](generate.py) recreates all twelve SVGs and six PNGs from the checked-in, unmodified official logo. It checks XML parsing, literal logo inclusion, and the SVG size limit. Inspect both languages at an 896 px desktop width and a 343 px mobile width, including the monospace code and independence captions. No README hero swap is part of this change.
+[generate.py](generate.py) recreates all twelve SVGs and six PNGs from the checked-in, unmodified official logo. It checks XML parsing, literal logo inclusion, and the size limit. PNG previews use an indexed palette to keep them below 150,000 bytes too; the SVGs retain the original vector colors. Inspect both languages at an 896 px desktop width and a 343 px mobile width, including the monospace code and independence captions. No README hero swap is part of this change.

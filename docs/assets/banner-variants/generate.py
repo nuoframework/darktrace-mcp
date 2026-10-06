@@ -4,6 +4,7 @@ from html import escape
 from pathlib import Path
 import re
 import subprocess
+import tempfile
 import xml.etree.ElementTree as ET
 
 HERE = Path(__file__).resolve().parent
@@ -194,7 +195,14 @@ def main():
                 assert len(svg.encode()) <= 150_000
                 path.write_text(svg)
                 if not mobile:
-                    subprocess.run(['rsvg-convert','-o',str(HERE/'preview'/f'{variant}-{lang}.png'),str(path)],check=True)
+                    with tempfile.TemporaryDirectory(prefix='banner-preview-') as tmp:
+                        raw = str(Path(tmp)/'raw.png')
+                        png = HERE/'preview'/f'{variant}-{lang}.png'
+                        subprocess.run(['rsvg-convert','-o',raw,str(path)],check=True)
+                        subprocess.run(['ffmpeg','-y','-v','error','-i',raw,
+                            '-filter_complex','split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer',
+                            '-frames:v','1',str(png)],check=True)
+                        assert png.stat().st_size <= 150_000
     print('Generated 12 SVGs and 6 desktop PNG previews.')
 
 
