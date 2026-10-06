@@ -1,6 +1,6 @@
 # Writes and sensitive-read design review (DR-W)
 
-**Status:** independent design review (security architecture) of the full-API change. Date: 2026-10-06. Reviewer: Claude Opus 5.5, a different model from the authors of the code and of the writes supplement.
+**Status:** independent design review (security architecture) of the full-API change. Date: 2026-10-06. Reviewer: an independent reviewer (a different model from the authors of the code and of the writes supplement.
 **Verdict:** **CONDITIONAL GO** for reversible writes. **CONDITIONAL GO** for tags, subnets and intel feed, after DR-W-01/02/04 are fixed. **NO-GO** for Antigena/RESPOND and email actions. **CONDITIONAL GO** for sensitive reads in a profile **without** `write`. **NO-GO** for releasing `all` or any other sensitive+write union until DR-W-03 is fixed (§6).
 **What this is not:** this is not a test result, not a lab result and not an acceptance of risk. I ran no test suite and contacted no appliance. One finding (DR-W-01) was reproduced with a standalone copy of the code path, described in §3. Every ST-17–29 row stays NOT RUN. I did not change `src/` or `test/`.
 
