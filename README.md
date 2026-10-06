@@ -24,32 +24,44 @@ Investigate your Darktrace appliance from your MCP client. Start read-only; choo
 
 ## Install
 
-One command for every client. You need **Node.js 22+**, your appliance URL (`https://…`) and a public/private API token pair (Darktrace: **System Config → Settings → API Token**).
+1. **Requirements.** Node.js 22+, your appliance URL (`https://…`) and a public/private API token pair (Darktrace: **System Config → Settings → API Token**).
+2. **Run the wizard.** One command for every client. It asks for the URL, the tokens (hidden input, stored in owner-only files), the permissions (`read` by default) and the clients it detects, checks the connection with a signed request, and only then writes the entries (existing files are backed up).
 
-```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
-```
+    ```sh
+    npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+    ```
 
-Five numbered steps: appliance, runtime, tokens (hidden input, stored in owner-only files), permissions (`read` by default), clients. The wizard verifies TLS and the tokens with a signed request, backs up each client file before writing it, and ends with what to ask first. Then restart your client.
+    One click instead: the Cursor button only adds the entry; then run `npx -y @nuoframework/darktrace-mcp@1.1.1 setup --client cursor` to complete it. The VS Code buttons prompt for the URL and tokens themselves.
 
-One-click (Cursor adds the server and tells you to run `setup`; VS Code prompts for the URL and tokens itself):
+    [![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMSJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D)
+    [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
+    [![Install in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
 
-[![Install in Cursor](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMSJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D)
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
-[![Install in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
+3. **Restart the client and ask it:** "list my Darktrace devices".
 
-**[Install page: pick your client →](docs/install.md)** covers 21 clients ([matrix](docs/install-matrix.md)), Docker, the `.mcpb` for Claude Desktop, Windows, manual snippets, `test` and `uninstall`.
+<details>
+<summary>Per client (21 clients), plugin, Docker, Claude Desktop extension, uninstall</summary>
 
-### Claude Code and Codex plugin
+`setup --client <id>` configures one client; `config <id>` prints its snippet with your real paths and no secrets. Details and file locations: [install page](docs/install.md).
 
-Claude Code: two commands, then answer the prompts (URL, tokens, profile). Nothing else to run.
+| Client | Shortest path |
+|---|---|
+| Claude Desktop | `setup --client claude-desktop`, or open the `.mcpb` from the [release](https://github.com/nuoframework/darktrace-mcp/releases) (tokens go to the OS keychain) |
+| Claude Code | `setup --client claude-code`, or the plugin: `claude plugin marketplace add nuoframework/darktrace-mcp` then `claude plugin install darktrace-mcp@darktrace-mcp` ([guide](docs/plugin-distribution.md)) |
+| Codex CLI / app | `setup --client codex`, or `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp`, then `setup` once |
+| Cursor | Cursor button above, then `setup --client cursor` |
+| VS Code / Insiders | VS Code button above (prompts for URL and tokens), or `setup --client vscode` |
+| Windsurf, OpenCode, Gemini CLI | `setup --client windsurf` / `opencode` / `gemini` |
+| Zed, Cline, Roo Code, Continue | `setup --client zed` / `cline` / `roo` / `continue` |
+| Kiro, Amp, Copilot CLI, Warp | `setup --client kiro` / `amp` / `copilot-cli` / `warp` |
+| Goose, LM Studio, Antigravity | `setup --client goose` / `lmstudio` / `antigravity` |
+| JetBrains Junie / AI Assistant | `setup --client junie`; AI Assistant: `config jetbrains` and paste into Settings \| Tools \| AI Assistant \| MCP |
+| Docker | `setup --runtime docker` pulls `ghcr.io/nuoframework/darktrace-mcp:1.1.1` and pins the image ID ([Docker guide](docs/docker.md)) |
+| Uninstall | `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall` removes every entry (backups kept), the tokens and the fixed copies |
 
-```sh
-claude plugin marketplace add nuoframework/darktrace-mcp
-claude plugin install darktrace-mcp@darktrace-mcp
-```
+Windows, manual snippets, `test`, when to pin the version and what the buttons do: [install page](docs/install.md) · [install matrix](docs/install-matrix.md).
 
-Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp`, then the wizard above once for the connection. The plugin in `claude-plugin/` starts the npm package pinned to one version; tokens go to the OS credential store. [Plugin guide](docs/plugin-distribution.md) · [Claude Code](docs/clients.md#claude-code) · [Codex](docs/clients.md#codex).
+</details>
 
 ## See it work
 

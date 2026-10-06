@@ -47,17 +47,17 @@ Several clients at once: `setup` lists the ones it detects and preselects them; 
 
 ## What the badge does
 
-A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. On the first start the server has no appliance to talk to, so it exposes exactly one tool, `darktrace_setup_status`, which says what is missing and the one command to run:
+A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. The button only adds the entry; complete it with the wizard:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --client cursor
 ```
 
-`setup` then rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. Every other client entry must never run `npx`: each launch would depend on the registry and could silently pick up new code, which is why the wizard registers absolute paths.
+`setup` rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. Until then the entry has no appliance to talk to: with the published 1.1.1 the server exits with `startup_error`; from the first version that ships setup mode (this branch, planned for 1.1.3) it starts anyway and exposes exactly one tool, `darktrace_setup_status`, whose description and result repeat the command above. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. Every other client entry must never run `npx`: each launch would depend on the registry and could silently pick up new code, which is why the wizard registers absolute paths.
 
 ## Pinning the version
 
-`npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; it was checked against the registry on 2026-10-06 and resolves to 1.1.1. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client.
+`npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; it was checked against the registry on 2026-10-06 and resolves to 1.1.1. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client. The version pinned in the badges comes from `package.json`: `node scripts/install-badges.mjs --write` rewrites the badge rows of every README after a version bump, and a test fails when they drift.
 
 ## Other paths
 

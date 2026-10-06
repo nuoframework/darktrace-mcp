@@ -52,3 +52,16 @@ test('both README languages carry the badge rows generated for the current packa
     assert.ok(carrier, `no README carries the ${lang} badge rows for ${version} (run: node scripts/install-badges.mjs and paste them)`);
   }
 });
+
+test('install-badges --write replaces stale badge rows in place and keeps indentation', async () => {
+  const { rewriteBadges } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { rewriteBadges(file: string, text: string): { changed: boolean; text: string } };
+  const stale = installBadgesMarkdown('0.0.1', { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n').map((l) => '    ' + l).join('\n');
+  const before = `## Install\n\n2. Run it.\n\n${stale}\n\n3. Restart.\n`;
+  const { changed, text } = rewriteBadges('README.md', before);
+  assert.equal(changed, true);
+  assert.equal(text.includes('0.0.1'), false);
+  for (const line of installBadgesMarkdown(version, { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n')) assert.ok(text.includes('    ' + line));
+  assert.equal(rewriteBadges('README.md', text).changed, false);
+  assert.throws(() => rewriteBadges('README.md', '## Install\n'), /expected 3 badge rows/);
+});
+
