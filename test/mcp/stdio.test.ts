@@ -27,11 +27,11 @@ test('real stdio spawn lists read tools without contacting appliance and denies 
   assert.equal(denied.isError,true);assert.equal(stderr.includes('SECRET'),false);
  } finally {await client.close();}
 });
-test('real stdio write grants reject before SDK, DNS, network or signing and never expose values',{timeout:15000},()=>{
- for(const extra of [{DARKTRACE_PROFILES:'read,write'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'read,write',DARKTRACE_WRITE_CRITICAL:'true'}])for(const mode of [[],['doctor'],['--check-config']]){
+test('real stdio invalid profile grants reject before SDK, DNS, network or signing and never expose values',{timeout:15000},()=>{
+ for(const extra of [{DARKTRACE_PROFILES:'read,critical'},{DARKTRACE_WRITE_CRITICAL:'true'},{DARKTRACE_PROFILES:'read,superuser'},{DARKTRACE_PROFILES:'all,write'}] as Record<string,string>[])for(const mode of [[],['doctor'],['--check-config']]){
   const run=spawnSync(process.execPath,['--import','./test/security/diagnostic-guard.mjs',cli,...mode],{env:{...env,...extra},input:'',encoding:'utf8',timeout:4000,maxBuffer:4096});
   assert.equal(run.error,undefined);assert.equal(run.status,1);assert.equal(run.stdout,'');assert.equal(run.stderr.includes('SECRET'),false);assert.equal(run.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'),false);
-  const error=JSON.parse(run.stderr);assert.equal(error.event,'startup_error');assert.equal(error.variable,extra.DARKTRACE_PROFILES?'DARKTRACE_PROFILES':undefined);assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);
+  const error=JSON.parse(run.stderr);assert.equal(error.event,'startup_error');assert.equal(error.variable,/superuser|all,write/.test(extra.DARKTRACE_PROFILES??'')?'DARKTRACE_PROFILES':undefined);assert.deepEqual(Object.keys(error).sort(),error.variable===undefined?['event','ts']:['event','ts','variable']);
  }
 });
 test('stdio buffer is finite and process exits on EOF',{timeout:10000},async()=>{

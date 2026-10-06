@@ -1,6 +1,7 @@
 import { RELEASE_CAPABILITY, releaseAllowsOperation } from '../policy/release-capability.js';
 import { z } from 'zod';
 import { operations } from '../api/operations.js';
+import { requiredProfiles } from '../policy/profiles.js';
 import catalogue from '../api/catalogue.generated.json' with {type:'json'};
 import responseViews from '../api/response-views.generated.json' with {type:'json'};
 import { schemaFromOpenApi, inputUnit, blockedInputReason, SearchSchema, validationRules, SEARCH_HASH_RULE, summaryAnchorParameter, SUMMARY_HOURLY_RULE } from '../api/validation.js';
@@ -59,7 +60,8 @@ export function generateCoverage() {
     return {operationId:op.operationId,method:op.method,pathTemplate:op.pathTemplate,tool:op.tool,tier:op.tier,
       status:op.status,reason:op.reason,discovery:releaseAllowsOperation(op)?'profile dependent':'unavailable',
       releaseEligible:releaseAllowsOperation(op),releaseCapability:RELEASE_CAPABILITY,
-      execution:op.status!=='implemented'?'blocked':!releaseAllowsOperation(op)?'release capability denied':mandatoryBlocked?'blocked input form':op.tier==='critical'?'preview-only':'operator profile dependent',
+      execution:op.status!=='implemented'?'blocked':!releaseAllowsOperation(op)?'release capability denied':mandatoryBlocked?'blocked input form':op.tier==='critical'?'confirm-required (write+critical profiles, confirm:true)':'operator profile dependent',
+      requiredProfiles:op.status==='implemented'?requiredProfiles(op):[],
       documentedIn:op.documentedIn,validatedOn:op.validatedOn,
       outputView:{source:'local 6.1 response schema and code-owned response-fields.json',
         fields:(responseViews.views as Record<string,unknown>)[op.operationId],...(operationResponseVariants(op.operationId).length?{requestVariants:operationResponseVariants(op.operationId)}:{}),unknownFields:'omitted',unmodeledStructures:'fixed safe summary',labValidated:false},parameters};

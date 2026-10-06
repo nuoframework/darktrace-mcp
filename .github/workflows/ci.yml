@@ -67,9 +67,10 @@ jobs:
               npm test > /results/functional.log 2>&1
               npm run test:security > /results/security.log 2>&1
             '
+          # Totals for the full-API release; recompute after merging branches that add tests.
           node --input-type=commonjs <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');
-          for(const [name,count] of [['functional',130],['security',325]]){
+          for(const [name,count] of [['functional',149],['security',330]]){
             const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
             const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
             for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])
@@ -124,7 +125,7 @@ jobs:
             --env DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token \
             --env DARKTRACE_PROFILES=read --env DARKTRACE_SENSITIVE_READ=false \
             "$DARKTRACE_IMAGE_ID" --check-config > "$RUNNER_TEMP/darktrace-check-config.json"
-          node -e 'const assert=require("node:assert/strict");const fs=require("node:fs");const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));assert.equal(x.ok,true);assert.equal(x.transport,"stdio");assert.equal(x.criticalExecution,false);assert.equal(x.email,false);assert.equal(x.pcapExport,false);assert.equal(x.labValidated,false)' "$RUNNER_TEMP/darktrace-check-config.json"
+          node -e 'const assert=require("node:assert/strict");const fs=require("node:fs");const x=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));assert.deepEqual(Object.keys(x).sort(),["approval","labValidated","networkProbe","ok","profiles","registeredTools","transport"]);assert.equal(x.ok,true);assert.equal(x.transport,"stdio");assert.equal(x.registeredTools,27);assert.deepEqual(x.profiles,{read:true,sensitive:false,write:false,critical:false});assert.deepEqual(x.approval,{critical:"elicitation",write:"host"});assert.equal(x.networkProbe,false);assert.equal(x.labValidated,false)' "$RUNNER_TEMP/darktrace-check-config.json"
           rm -f "$RUNNER_TEMP/darktrace-check-config.json"
       - name: Verify SDK initialize and tool listing without network
         shell: bash
@@ -140,12 +141,14 @@ jobs:
           test "$uid" -ne 0
           mkdir -p "$smoke_dir"
           cp package.json package-lock.json npm-shrinkwrap.json "$smoke_dir/"
-          cp test/security/fixtures/mcp-tool-contracts-first-stable.json "$smoke_dir/contract.json"
+          # Active oracle: the full-API contract (five operator profiles). The first-stable
+          # fixture stays pinned only as historical provenance in scripts/verify-release.mjs.
+          cp test/security/fixtures/mcp-tool-contracts-full-api.json "$smoke_dir/contract.json"
           (
             cd "$smoke_dir"
             npm ci --ignore-scripts --no-audit --no-fund
-          for sensitive in false true; do
-          export DARKTRACE_SMOKE_SENSITIVE="$sensitive"
+          for smoke_profile in read read,sensitive read,write read,write,critical all; do
+          export DARKTRACE_SMOKE_PROFILES="$smoke_profile"
           node --input-type=module <<'NODE'
             import assert from 'node:assert/strict';
             import { randomUUID, createHash } from 'node:crypto';
@@ -171,7 +174,7 @@ jobs:
               '--env', 'DARKTRACE_URL=https://darktrace.example.invalid',
               '--env', 'DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token',
               '--env', 'DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token',
-              '--env', 'DARKTRACE_PROFILES=read', '--env', `DARKTRACE_SENSITIVE_READ=${process.env.DARKTRACE_SMOKE_SENSITIVE}`,
+              '--env', `DARKTRACE_PROFILES=${process.env.DARKTRACE_SMOKE_PROFILES}`,
               process.env.DARKTRACE_IMAGE_ID,
             ];
             const client = new Client({ name: 'darktrace-docker-smoke', version: '1.0.0' });
@@ -204,31 +207,54 @@ jobs:
               const listing = client.connect(transport).then(() => client.listTools());
               const { tools } = await Promise.race([listing, timeout]);
               assert.ok(Array.isArray(tools), 'SDK listTools must return an array');
-              assert.equal(tools.length, 15);
               const fixtureBytes=readFileSync('contract.json');
-              assert.equal(createHash('sha256').update(fixtureBytes).digest('hex'),'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
+              assert.equal(createHash('sha256').update(fixtureBytes).digest('hex'),'c95104ced1955b7a1bdc72a6e19bc79c3d1a3e0ee39114e7eabf7fa71545fd3b');
               const fixture=JSON.parse(fixtureBytes);
-              const profile=process.env.DARKTRACE_SMOKE_SENSITIVE==='true'?'read+sensitive':'read';
+              const shapes={
+                read:{profile:'read',tools:27,hash:'afeb056eb4e1830462256436948ceaa706601d14ade6ebc7f36ab00cda011964',flags:{read:true,sensitive:false,write:false,critical:false}},
+                'read,sensitive':{profile:'read+sensitive',tools:36,hash:'ca4ebd6b4d640aae3571ad3d68e18bd489ae39f02b980188a554dfb989462d6a',flags:{read:true,sensitive:true,write:false,critical:false}},
+                'read,write':{profile:'read+write',tools:36,hash:'9d55533f6fff2982f3aa0414687a259c1d042cc7aa267a0106126a4ea7d4e39b',flags:{read:true,sensitive:false,write:true,critical:false}},
+                'read,write,critical':{profile:'read+write+critical',tools:42,hash:'f22cee1aefb944c8be6b683f251951a965d9d94dd0b9ff872a5c06cc69bd062b',flags:{read:true,sensitive:false,write:true,critical:true}},
+                all:{profile:'all',tools:51,hash:'b377eac60a2eed8233d8481b0b69074e79eac6a537b8e1b4ec1e47a5b2abf859',flags:{read:true,sensitive:true,write:true,critical:true}},
+              };
+              const shape=shapes[process.env.DARKTRACE_SMOKE_PROFILES];
+              assert.ok(shape,'unknown smoke profile');
+              const profile=shape.profile;
+              assert.equal(tools.length,shape.tools);
               const captured=tools.map(({name,description,inputSchema,annotations})=>({name,description,inputSchema,annotations}));
               assert.deepEqual(captured,fixture.contracts[profile].tools);
               function canonical(v){if(Array.isArray(v))return v.map(canonical);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])]));return v;}
               const hash=createHash('sha256').update(JSON.stringify(canonical(captured))).digest('hex');
-              assert.equal(hash,'cd4ee42249a9110182046794c39fc00f5995700b7d751bccc6628e86afbddfe3');
+              assert.equal(hash,shape.hash);assert.equal(hash,fixture.contracts[profile].sha256);
+              const offlineRun=(extra,mode)=>{
+                const args=dockerArgs.slice(0,-1);
+                args.splice(args.indexOf('--name'),2);
+                args.push(...extra.flatMap(x=>['--env',x]),process.env.DARKTRACE_IMAGE_ID,...mode);
+                const r=spawnSync('docker',args,{encoding:'utf8',timeout:30000});
+                assert.equal(r.error,undefined);
+                assert.ok(!/synthetic-public-token|synthetic-private-token/.test(r.stdout+r.stderr));
+                return r;
+              };
+              // Every supported profile, write and critical included, must start and report itself offline.
+              for(const mode of [['doctor'],['--check-config']]){
+                const r=offlineRun([],mode);
+                assert.equal(r.status,0,r.stderr);
+                const x=JSON.parse(r.stdout);
+                assert.equal(x.ok,true);assert.equal(x.transport,'stdio');assert.equal(x.registeredTools,shape.tools);
+                assert.deepEqual(x.profiles,shape.flags);assert.equal(x.networkProbe,false);assert.equal(x.labValidated,false);
+              }
               if(profile==='read'){
+                // Only critical without write is a startup error, in every production mode.
                 const denials=[];
-                for(const extra of [['DARKTRACE_PROFILES=read,write'],['DARKTRACE_PROFILES=read,write','DARKTRACE_WRITE_CRITICAL=true'],['DARKTRACE_WRITE_CRITICAL=true']])for(const mode of [[],['doctor'],['--check-config']]){
-                  const args=dockerArgs.slice(0,-1);
-                  args.splice(args.indexOf('--name'),2);
-                  args.push(...extra.flatMap(x=>['--env',x]),process.env.DARKTRACE_IMAGE_ID,...mode);
-                  const r=spawnSync('docker',args,{encoding:'utf8',timeout:30000});
-                  assert.equal(r.error,undefined);assert.equal(r.status,1);assert.equal(r.stdout,'');
+                for(const extra of [['DARKTRACE_WRITE_CRITICAL=true'],['DARKTRACE_PROFILES=read,critical'],['DARKTRACE_PROFILES=read,sensitive,critical']])for(const mode of [[],['doctor'],['--check-config']]){
+                  const r=offlineRun(extra,mode);
+                  assert.equal(r.status,1);assert.equal(r.stdout,'');
                   assert.equal(JSON.parse(r.stderr).event,'startup_error');
-                  assert.ok(!/synthetic-public-token|synthetic-private-token/.test(r.stderr));
                   denials.push({extra,mode,exit:r.status});
                 }
-                writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/write-refusals.json`,JSON.stringify(denials,null,2));
+                writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/critical-without-write-refusals.json`,JSON.stringify(denials,null,2));
               }
-              writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/sdk-${profile}.json`,JSON.stringify({image:process.env.DARKTRACE_IMAGE_ID,profile,tools:15,contractHash:hash,exactFixture:true,noApiCalls:true}));
+              writeFileSync(`${process.env.RUNNER_TEMP}/vendor-results/sdk-${profile}.json`,JSON.stringify({image:process.env.DARKTRACE_IMAGE_ID,profile,tools:shape.tools,contractHash:hash,exactFixture:true,noApiCalls:true}));
             } finally {
               clearTimeout(deadline);
               try { await client.close(); } catch {}
@@ -252,17 +278,24 @@ jobs:
           set -euo pipefail
           docker run --pull=never --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --entrypoint node "$DARKTRACE_IMAGE_ID" \
             -e 'const f=require("node:fs"),c=require("node:crypto");function hashes(d,p=""){const out={};for(const e of f.readdirSync(d,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const n=p+e.name;if(e.isDirectory())Object.assign(out,hashes(d+"/"+e.name,n+"/"));else if(e.isFile())out[n]=c.createHash("sha256").update(f.readFileSync(d+"/"+e.name)).digest("hex")}return out}console.log(JSON.stringify(hashes("/app/dist/src")))' > "$RUNNER_TEMP/vendor-results/final-runtime-hashes.json"
+          # These pins bind src/ (sourceTreeSha256), the security subcase count and the built
+          # dist/src runtime. Recompute them after merging other branches (for example changes to
+          # src/index.ts or new src/cli/* files): run `npm run test:security`, then from its receipt
+          # take sourceTreeSha256, subcases.length, Object.keys(runtimeHashes).length and
+          # sha256(JSON.stringify(runtimeHashes)).
           node --input-type=commonjs <<'NODE'
           const a=require('node:assert/strict'),f=require('node:fs'),c=require('node:crypto'),p=`${process.env.RUNNER_TEMP}/vendor-results`;
           const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
-          a.equal(r.sourceTreeSha256,'582a12121e7e9bb3844d527556ad62dfc5c0ed8f8c6ba57f64aad0ccee07f72c');
-          a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,325);
+          a.equal(r.sourceTreeSha256,'099c3244a455353ac2b9b467e0380d3578cbefa5366a157c8eaae82bb44f9125');
+          a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,330);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
-          a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,49);
-          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'054a25fa1ff349a8ad7a84dd03e2f891ddf6f762b4472bdcec0f36f22d52d16f');
-          f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:49,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
+          a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,53);
+          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'99e8fdcdf437e583f6697a7810115114ba1505d27d5f129deabe26be36a454f9');
+          a.equal(r.fixtureHashes['mcp-tool-contracts-full-api.json'],'c95104ced1955b7a1bdc72a6e19bc79c3d1a3e0ee39114e7eabf7fa71545fd3b');
+          a.equal(r.fixtureHashes['mcp-tool-contracts-first-stable.json'],'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
+          f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:53,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-full-api.json'],historicalFirstStableFixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
           NODE
       - name: Archive signed inputs and complete native gate receipts
         if: always()

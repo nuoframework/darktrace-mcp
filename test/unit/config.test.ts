@@ -33,6 +33,7 @@ test('config defaults are conservative and every public limit has a hard ceiling
     rateLimitPerMinute: 120,
     maxGetRetries: 2,
     maxRetryAfterMs: 2_000,
+    maxWritesPerMinute: 10,
   });
 });
 
@@ -73,7 +74,8 @@ test('strict config rejects unknown keys, unsupported profiles, HTTP, export, an
   assert.throws(() => config({ instance: { baseUrl: 'https://darktrace.example', proxy: 'http://proxy' } }), /unsupported field/);
   assert.throws(() => config({ profiles: { sensitiveRead: true, export: false } }), /email and export/);
   assert.throws(() => config({ profiles: { email: false } }), /email and export/);
-  assert.throws(() => config({ profiles: { writeCritical: true } }), /read-only release/);
+  assert.throws(() => config({ profiles: { writeCritical: true } }), /requires profiles.write/);
+  assert.doesNotThrow(() => config({ profiles: { sensitiveRead: true, write: true, writeCritical: true } }));
   assert.throws(() => config({ transport: { kind: 'http' } }), /only stdio/);
   assert.throws(() => config({ transport: { kind: 'stdio', http: { port: 8080 } } }), /HTTP transport/);
   assert.throws(() => config({ compat: { assumeVersion: '7.1' } }), /compatibility overrides/);
@@ -247,7 +249,7 @@ test('network environment rejects TLS, proxy, and known NODE_OPTIONS bypasses wi
   assert.throws(() => assertSafeNetworkEnvironment({ NODE_OPTIONS: '--tls-min-v1.0' }, []), /--tls-min-v1.0/);
   assert.throws(() => assertSafeNetworkEnvironment({ NODE_OPTIONS: '"--use-env-proxy"' }, []), /--use-env-proxy/);
   assert.throws(() => loadConfig({ DARKTRACE_HTTP_PORT: '8080' }), /DARKTRACE_HTTP_PORT/);
-  assert.throws(() => loadConfig({ DARKTRACE_PROFILES: 'read,email' }), /email\/export/);
+  assert.throws(() => loadConfig({ DARKTRACE_PROFILES: 'read,email' }), /DARKTRACE_PROFILES must be/);
   assert.doesNotThrow(() => assertSafeNetworkEnvironment({ NODE_EXTRA_CA_CERTS: '/trusted/ca.pem' }, []));
 });
 

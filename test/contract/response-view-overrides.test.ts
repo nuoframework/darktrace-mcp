@@ -70,7 +70,7 @@ test('documented did arrays and automatic null triggerer project without fallbac
 });
 
 test('unknown keys stay dropped and the array cap is unchanged',()=>{
-  const a=projectResponse(views.get_antigena,[{codeid:1,triggerer:null,model:CANARY,score:0.3},{codeid:2,triggerer:{username:'u',[CANARY]:1}}]);
+  const a=projectResponse(views.get_antigena,[{codeid:1,triggerer:null,[KEY_CANARY]:CANARY,score:0.3},{codeid:2,triggerer:{username:'u',[CANARY]:1}}]);
   assert.equal(a.omitted,true);assert.equal(a.unmodeled,false);
   assert.equal(JSON.stringify(a.value).includes(CANARY),false);
   const big=projectResponse(views.get_antigena_summary,{activeActionDevices:Array.from({length:1001},(_,i)=>i)});

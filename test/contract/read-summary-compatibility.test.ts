@@ -47,7 +47,7 @@ test('generic pairs, seven-day ceilings, calendar validation and other endpoints
   assert.doesNotThrow(()=>checkRanges({starttime:0,endtime:604800000},{starttime:'milliseconds'}));
   assert.throws(()=>checkRanges({starttime:0,endtime:604800001},{starttime:'milliseconds'}));
   assert.throws(()=>checkRanges({starttime:2,endtime:1},{starttime:'milliseconds'}));
-  assert.throws(()=>validateOperation(operations.get_devices,{query:{iptime:'unreviewed'}}));
+  assert.throws(()=>validateOperation(operations.get_devices,{query:{iptime:'unreviewed;format'}}));
 });
 test('query-bound hourly projection matches the documented local schema without widening default view',()=>{
   const compiled=compileResponseView({$ref:'#/components/schemas/SummarystatisticsEventtypeLoginput'},catalogue.schemas,['events','data']);
@@ -62,7 +62,7 @@ test('query-bound hourly projection matches the documented local schema without 
   assert.equal(projectResponse(base,fixture).unmodeled,true);
   assert.equal(projectResponse(SUMMARY_LOGINPUT_VIEW,{events:'TYPE_CANARY',data:[{events:{payload:'NEST_CANARY'}}]}).unmodeled,true);
 });
-test('approved device read executes with strict projection; excluded summary selector has zero effects',async()=>{
+test('approved device read executes with strict projection; released summary selector uses the hourly view',async()=>{
   let calls=0;
   const upstream=[{did:7,hostname:'device.example',ip:'192.0.2.7',unknown:'UPSTREAM_CANARY',rawMailBody:'BODY_CANARY'}];
   const allowedCtx={cfg,client:{async request(){calls++;return {json:upstream};}},shape:(data:unknown)=>Array.isArray(data)?data.map(item=>({...item as object,rawMailBody:'SHAPE_CANARY'})):{...data as object,rawMailBody:'SHAPE_CANARY'}};
@@ -73,13 +73,14 @@ test('approved device read executes with strict projection; excluded summary sel
   const invalid=await callTool('darktrace_get_devices',{query:{unreviewed:'value'}},allowedCtx);
   assert.equal(invalid.isError,true);assert.equal(calls,1);
 
-  const deniedState={calls:0,audits:0};
-  const denied=await callTool('darktrace_get_summary_statistics',{operation:'get_summarystatistics',query:{eventtype:'loginput',hours:1,endtime}}, {
-    cfg,client:{async request(){deniedState.calls++;return {json:fixture};}},
-    audit:{async record(){deniedState.audits++;}},
+  // The summary operation is now released: the query-bound hourly view is used, with no audit for reads.
+  const state={calls:0,audits:0};
+  const summary=await callTool('darktrace_get_summary_statistics',{operation:'get_summarystatistics',query:{eventtype:'loginput',hours:1,endtime}}, {
+    cfg,client:{async request(){state.calls++;return {json:{...fixture,unknown:'UPSTREAM_CANARY'}};}},
+    audit:{async record(){state.audits++;}},
   });
-  assert.equal(denied.isError,true);assert.equal(deniedState.calls,0);assert.equal(deniedState.audits,0);
-  assert.equal(denied.structuredContent?.dryRun,undefined);assert.equal(denied.structuredContent?.preview,undefined);assert.equal(denied.structuredContent?.outcome,undefined);
+  assert.equal(summary.isError,undefined);assert.equal(state.calls,1);assert.equal(state.audits,0);
+  assert.deepEqual(JSON.parse(JSON.stringify(summary.structuredContent!.data)),fixture);assert.doesNotMatch(JSON.stringify(summary),/CANARY/);
 });
 test('effective coverage records conditional anchors and exact query-bound output variant',()=>{
   const row=generateCoverage().operations.find(r=>r.operationId===op.operationId)!;

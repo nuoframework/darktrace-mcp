@@ -15,10 +15,10 @@ const KNOWN_DARKTRACE_ENV = new Set([
   'DARKTRACE_PUBLIC_TOKEN_FILE', 'DARKTRACE_PRIVATE_TOKEN', 'DARKTRACE_PRIVATE_TOKEN_FILE',
   'DARKTRACE_TIMEOUT_MS', 'DARKTRACE_DESTINATION_ALLOWLIST', 'DARKTRACE_DATE_FORMAT',
   'DARKTRACE_QUERY_SIGNATURE_ENCODING', 'DARKTRACE_PROFILES', 'DARKTRACE_WRITE_CRITICAL',
-  'DARKTRACE_SENSITIVE_READ', 'DARKTRACE_MAX_RESPONSE_BYTES', 'DARKTRACE_MAX_TOOL_INPUT_BYTES',
+  'DARKTRACE_SENSITIVE_READ', 'DARKTRACE_CRITICAL_APPROVAL', 'DARKTRACE_WRITE_APPROVAL', 'DARKTRACE_MAX_RESPONSE_BYTES', 'DARKTRACE_MAX_TOOL_INPUT_BYTES',
   'DARKTRACE_MAX_TOOL_INPUT_DEPTH', 'DARKTRACE_MAX_TOOL_INPUT_ELEMENTS', 'DARKTRACE_MAX_TOOL_OUTPUT_CHARS',
   'DARKTRACE_MAX_CONCURRENT_REQUESTS', 'DARKTRACE_MAX_QUEUED_REQUESTS', 'DARKTRACE_MAX_PAGES',
-  'DARKTRACE_RATE_LIMIT_PER_MINUTE', 'DARKTRACE_MAX_GET_RETRIES', 'DARKTRACE_MAX_RETRY_AFTER_MS',
+  'DARKTRACE_RATE_LIMIT_PER_MINUTE', 'DARKTRACE_MAX_GET_RETRIES', 'DARKTRACE_MAX_RETRY_AFTER_MS', 'DARKTRACE_MAX_WRITES_PER_MINUTE',
   ...FORBIDDEN_ENV,
 ]);
 
@@ -131,16 +131,24 @@ function setNested(base: RawConfig, key: string, value: unknown): void {
   base[section] = sectionValue;
 }
 
+/**
+ * DARKTRACE_PROFILES: comma list of read, sensitive, write, critical, or the shortcut all
+ * (= read,sensitive,write,critical). When set it replaces the file's profile flags; read is always on.
+ */
+export function parseProfilesVariable(value: string): { read: true; sensitiveRead: boolean; write: boolean; writeCritical: boolean } {
+  const requested = value.split(',').map((name) => name.trim()).filter(Boolean);
+  const allowed = new Set(['read', 'sensitive', 'write', 'critical', 'all']);
+  if (requested.length === 0 || requested.some((name) => !allowed.has(name)) || new Set(requested).size !== requested.length ||
+    (requested.includes('all') && requested.length !== 1)) {
+    throw new ConfigValidationError('DARKTRACE_PROFILES must be a comma list of read, sensitive, write, critical (each once) or all');
+  }
+  const has = (name: string) => requested.includes('all') || requested.includes(name);
+  return { read: true, sensitiveRead: has('sensitive'), write: has('write'), writeCritical: has('critical') };
+}
+
 function applyProfiles(raw: RawConfig, value: string | undefined): void {
   if (value === undefined) return;
-  const requested = value.split(',').map((name) => name.trim()).filter(Boolean);
-  const allowed = new Set(['read', 'write']);
-  if (requested.some((name) => !allowed.has(name)) || new Set(requested).size !== requested.length) {
-    throw new ConfigValidationError('DARKTRACE_PROFILES may contain read and write once each; email/export are unsupported');
-  }
-  if(requested.includes('write')) throw new ConfigValidationError('DARKTRACE_PROFILES write is unavailable in this read-only release');
-  const existing = asObject(raw.profiles);
-  raw.profiles = { ...existing, read: true, write: requested.includes('write') };
+  raw.profiles = { ...asObject(raw.profiles), ...parseProfilesVariable(value) };
 }
 
 function parseDestinationAllowlist(value: string | undefined): readonly string[] | undefined {
@@ -215,6 +223,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   if (sensitiveRead !== undefined) merged.profiles = { ...asObject(merged.profiles), sensitiveRead };
   const critical = envBoolean(env.DARKTRACE_WRITE_CRITICAL, 'DARKTRACE_WRITE_CRITICAL');
   if (critical !== undefined) merged.profiles = { ...asObject(merged.profiles), writeCritical: critical };
+  for (const [variable, key] of [['DARKTRACE_CRITICAL_APPROVAL', 'criticalApproval'], ['DARKTRACE_WRITE_APPROVAL', 'writeApproval']] as const) {
+    const value = env[variable];
+    if (value === undefined) continue;
+    if (value !== 'elicitation' && value !== 'host') throw new ConfigValidationError(`${variable} must be elicitation or host`);
+    merged.profiles = { ...asObject(merged.profiles), [key]: value };
+  }
 
   const environmentLimits: ReadonlyArray<readonly [string, string]> = [
     ['DARKTRACE_MAX_RESPONSE_BYTES', 'limits.maxResponseBytes'],
@@ -228,6 +242,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
     ['DARKTRACE_RATE_LIMIT_PER_MINUTE', 'limits.rateLimitPerMinute'],
     ['DARKTRACE_MAX_GET_RETRIES', 'limits.maxGetRetries'],
     ['DARKTRACE_MAX_RETRY_AFTER_MS', 'limits.maxRetryAfterMs'],
+    ['DARKTRACE_MAX_WRITES_PER_MINUTE', 'limits.maxWritesPerMinute'],
   ];
   for (const [variable, key] of environmentLimits) {
     const parsed = envInteger(env[variable], variable);

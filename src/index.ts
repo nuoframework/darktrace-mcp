@@ -10,9 +10,13 @@ Usage: darktrace-mcp [--help | --version | --check-config | doctor]
 Default: MCP over stdio. Configuration and credentials come from operator environment or private files.
 --check-config / doctor validate local configuration without network access.
 Private CA: NODE_EXTRA_CA_CERTS. TLS verification is mandatory. HTTP transport is unavailable.
-This release permits consultation only. Write/writeCritical profiles and write previews are unavailable.
-Advanced Search is sensitive read-only and requires DARKTRACE_SENSITIVE_READ; lab compatibility is not established.
-Critical execution, email and PCAP export are blocked.
+Profiles (operator-only; the model cannot change them): DARKTRACE_PROFILES=read|sensitive|write|critical (comma list) or all.
+Default: read (non-sensitive consultation). sensitive: Advanced Search, Darktrace/EMAIL, PCAP download, audit events.
+write: state-changing actions run directly (dryRun:true previews). critical (needs write): RESPOND/Antigena, intel feed,
+subnets, tag deletion and email actions need confirm:true AND a human accept in an MCP elicitation dialog; otherwise
+only a preview is returned. DARKTRACE_CRITICAL_APPROVAL=elicitation (default; refused if the host cannot elicit) or host
+(rely on the host's own tool-approval prompt). DARKTRACE_WRITE_APPROVAL=host (default) or elicitation for other writes.
+Legacy: DARKTRACE_SENSITIVE_READ=true|false, DARKTRACE_WRITE_CRITICAL=true|false. Writes are audited on stderr.
 Appliance results enter the MCP host/model context; assess provider processing, retention and organizational eligibility before enabling sensitive reads.
 `;
 const cliArgs=process.argv.slice(2);
@@ -28,7 +32,8 @@ if (isCliCommand(cliArgs)) {
   else {
     const cfg=loadConfig(process.env);
     if (args.length) process.stdout.write(JSON.stringify({ok:true,transport:'stdio',registeredTools:eligibleTools(cfg).length,
-      criticalExecution:false,email:false,pcapExport:false,networkProbe:false,labValidated:false})+'\n');
+      profiles:{read:cfg.profiles.read,sensitive:cfg.profiles.sensitiveRead,write:cfg.profiles.write,critical:cfg.profiles.write&&cfg.profiles.writeCritical},approval:cfg.approval,
+      networkProbe:false,labValidated:false})+'\n');
     else runStdio(cfg);
   }
 } catch(error) {logStartupError(error);process.exitCode=1;}

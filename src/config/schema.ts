@@ -1,8 +1,8 @@
-import { RELEASE_CAPABILITY } from '../policy/release-capability.js';
 import { canonicalIpAddress } from './address.js';
 
 export type DateFormat = 'compact' | 'spaced';
 export type QuerySignatureEncoding = 'encoded' | 'unencoded';
+export type ApprovalMode = 'elicitation' | 'host';
 
 export interface Config {
   readonly instance: {
@@ -22,6 +22,15 @@ export interface Config {
     readonly sensitiveRead: boolean;
     readonly writeCritical: boolean;
   };
+  /**
+   * Human approval channel. 'elicitation': the server asks the user through MCP elicitation and executes
+   * only on an explicit accept (fails closed when the client cannot elicit). 'host': the operator relies
+   * on the MCP host's own per-tool approval prompt. Never settable from model arguments.
+   */
+  readonly approval: {
+    readonly critical: ApprovalMode;
+    readonly write: ApprovalMode;
+  };
   readonly limits: {
     /** Applied independently to cumulative response wire and decoded bytes. */
     readonly maxResponseBytes: number;
@@ -35,6 +44,8 @@ export interface Config {
     readonly rateLimitPerMinute: number;
     readonly maxGetRetries: number;
     readonly maxRetryAfterMs: number;
+    /** Non-GET operations per rolling minute (critical writes are additionally capped at 3/min). */
+    readonly maxWritesPerMinute: number;
   };
 }
 
@@ -55,6 +66,8 @@ export interface ConfigSource {
     readonly write?: unknown;
     readonly sensitiveRead?: unknown;
     readonly writeCritical?: unknown;
+    readonly criticalApproval?: unknown;
+    readonly writeApproval?: unknown;
     readonly export?: unknown;
     readonly email?: unknown;
   };
@@ -70,6 +83,7 @@ export interface ConfigSource {
     readonly rateLimitPerMinute?: unknown;
     readonly maxGetRetries?: unknown;
     readonly maxRetryAfterMs?: unknown;
+    readonly maxWritesPerMinute?: unknown;
   };
   readonly transport?: { readonly kind?: unknown; readonly http?: unknown };
   readonly compat?: { readonly assumeVersion?: unknown };
@@ -89,6 +103,7 @@ export const DEFAULT_LIMITS = Object.freeze({
   rateLimitPerMinute: 120,
   maxGetRetries: 2,
   maxRetryAfterMs: 2_000,
+  maxWritesPerMinute: 10,
 });
 
 const CEILINGS = Object.freeze({
@@ -104,6 +119,7 @@ const CEILINGS = Object.freeze({
   rateLimitPerMinute: 120,
   maxGetRetries: 2,
   maxRetryAfterMs: 2_000,
+  maxWritesPerMinute: 60,
 });
 
 export class ConfigValidationError extends Error {
@@ -170,11 +186,10 @@ function boolean(value: unknown, fallback: boolean, label: string): boolean {
   return value;
 }
 
-/** Also used before file/environment overlays, so unsupported file grants cannot be hidden. */
+/** Also used before file/environment overlays, so malformed file grants cannot be hidden by an override. */
 export function assertReleaseProfiles(value:unknown):void {
   const profiles=record(value,'profiles');
-  if(boolean(profiles.write,false,'profiles.write')&&!RELEASE_CAPABILITY.write) throw new ConfigValidationError('profiles.write is unavailable in this read-only release');
-  if(boolean(profiles.writeCritical,false,'profiles.writeCritical')&&!RELEASE_CAPABILITY.writeCritical) throw new ConfigValidationError('profiles.writeCritical is unavailable in this read-only release');
+  for (const key of ['read','write','sensitiveRead','writeCritical'] as const) boolean(profiles[key],false,`profiles.${key}`);
 }
 
 function requiredToken(value: unknown, label: string): string {
@@ -263,7 +278,7 @@ export function parseConfig(source: unknown): Config {
   assertKeys(root, ['instance', 'auth', 'profiles', 'limits', 'transport', 'compat'], 'config');
   assertKeys(instance, ['baseUrl', 'timeoutMs', 'destinationAllowlist', 'tlsRejectUnauthorized', 'tlsInsecure', 'caFile'], 'instance');
   assertKeys(auth, ['publicToken', 'privateToken', 'dateFormat', 'querySignatureEncoding'], 'auth');
-  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'export', 'email'], 'profiles');
+  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'criticalApproval', 'writeApproval', 'export', 'email'], 'profiles');
   assertKeys(limits, Object.keys(CEILINGS).filter((key) => key !== 'timeoutMs'), 'limits');
   assertKeys(transport, ['kind', 'http'], 'transport');
   assertKeys(compat, ['assumeVersion'], 'compat');
@@ -293,9 +308,15 @@ export function parseConfig(source: unknown): Config {
   if (!read) throw new ConfigValidationError('profiles.read must remain enabled');
   const write = boolean(profiles.write, false, 'profiles.write');
   const sensitiveRead = boolean(profiles.sensitiveRead, false, 'profiles.sensitiveRead');
-  if (sensitiveRead && write) throw new ConfigValidationError('profiles.sensitiveRead and profiles.write cannot be enabled together');
   const writeCritical = boolean(profiles.writeCritical, false, 'profiles.writeCritical');
   if (writeCritical && !write) throw new ConfigValidationError('profiles.writeCritical requires profiles.write');
+  const approvalMode = (value: unknown, fallback: ApprovalMode, label: string): ApprovalMode => {
+    if (value === undefined) return fallback;
+    if (value !== 'elicitation' && value !== 'host') throw new ConfigValidationError(`${label} must be elicitation or host`);
+    return value;
+  };
+  const criticalApproval = approvalMode(profiles.criticalApproval, 'elicitation', 'profiles.criticalApproval');
+  const writeApproval = approvalMode(profiles.writeApproval, 'host', 'profiles.writeApproval');
 
   return Object.freeze({
     instance: Object.freeze({
@@ -305,6 +326,7 @@ export function parseConfig(source: unknown): Config {
     }),
     auth: Object.freeze({ publicToken, privateToken, dateFormat, querySignatureEncoding }),
     profiles: Object.freeze({ read: true as const, write, sensitiveRead, writeCritical }),
+    approval: Object.freeze({ critical: criticalApproval, write: writeApproval }),
     limits: Object.freeze({
       maxResponseBytes: boundedInteger(limits.maxResponseBytes, DEFAULT_LIMITS.maxResponseBytes, 'maxResponseBytes'),
       maxToolInputBytes: boundedInteger(limits.maxToolInputBytes, DEFAULT_LIMITS.maxToolInputBytes, 'maxToolInputBytes'),
@@ -317,6 +339,7 @@ export function parseConfig(source: unknown): Config {
       rateLimitPerMinute: boundedInteger(limits.rateLimitPerMinute, DEFAULT_LIMITS.rateLimitPerMinute, 'rateLimitPerMinute'),
       maxGetRetries: boundedInteger(limits.maxGetRetries, DEFAULT_LIMITS.maxGetRetries, 'maxGetRetries', 0),
       maxRetryAfterMs: boundedInteger(limits.maxRetryAfterMs, DEFAULT_LIMITS.maxRetryAfterMs, 'maxRetryAfterMs', 0),
+      maxWritesPerMinute: boundedInteger(limits.maxWritesPerMinute, DEFAULT_LIMITS.maxWritesPerMinute, 'maxWritesPerMinute'),
     }),
   });
 }

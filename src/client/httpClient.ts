@@ -45,12 +45,16 @@ export interface OperationRequest {
   readonly body?: unknown;
   readonly contentType?: 'application/json' | 'application/x-www-form-urlencoded';
   readonly signal?: AbortSignal;
+  /** Code-owned by src/api/operations BINARY_OPERATIONS; selects bounded byte output. */
+  readonly accept?: 'binary';
 }
 
 export interface ApiResponse<T = unknown> {
   readonly status: number;
   readonly json?: T;
   readonly bytes?: Uint8Array;
+  /** Sanitized media type (type/subtype only) for binary responses. */
+  readonly contentType?: string;
   readonly truncated: boolean;
   readonly elapsedMs: number;
   readonly requestId: string;
@@ -90,6 +94,8 @@ interface RuntimeOperation {
   readonly pathTemplate: string;
   readonly pathParamNames: readonly string[];
   readonly parameterNames: readonly string[];
+  /** S6: standard-Base64 path parameters sent and signed verbatim (darktrace-sdk behaviour). */
+  readonly rawBase64Params: readonly string[];
 }
 
 interface EncodedBody {
@@ -106,11 +112,13 @@ const DARKTRACE_USER_AGENT = 'darktrace-mcp';
 const TRANSIENT_PRE_RESPONSE_CODES = new Set([
   'ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE', 'ECONNABORTED', 'ENETUNREACH', 'EHOSTUNREACH',
 ]);
-const UNSUPPORTED_S6 = new Set([
-  'get_advancedsearch_api_search_query',
-  'get_advancedsearch_api_analyze_field_analysis_query',
-  'get_advancedsearch_api_graph_graphmode_interval_query',
-]);
+/** S6: Advanced Search GET routes carry a standard-Base64 query in their final path segment(s). */
+const RAW_BASE64_ROUTES: Readonly<Record<string, string>> = Object.freeze({
+  '/advancedsearch/api/search/{query}': 'query',
+  '/advancedsearch/api/analyze/{field}/{analysis}/{query}': 'query',
+  '/advancedsearch/api/graph/{graphmode}/{interval}/{query}': 'query',
+});
+const MAX_BASE64_PATH_CHARS = 21_848; // 16 KiB decoded search document
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 const MAX_RESPONSE_HARD_CAP = 2_097_152;
 const RATE_WINDOW_MS = 60_000;
@@ -131,8 +139,8 @@ function operationRegistry(entries: readonly TrustedOperation[]): ReadonlyMap<st
       !entry.pathTemplate.startsWith('/') || entry.pathTemplate.startsWith('//') || entry.pathTemplate.includes('?') ||
       entry.pathTemplate.includes('#') || entry.pathTemplate.includes('\\') || CONTROL_CHARS.test(entry.pathTemplate)
     ) throw new TypeError('trusted operation registry contains an invalid path template');
-    if (entry.pathTemplate.startsWith('/agemail/') || entry.operationId.startsWith('post_agemail_') ||
-      entry.operationId === 'get_aianalyst_incidents' || UNSUPPORTED_S6.has(entry.operationId)) continue;
+    // Deprecated endpoint stays unreachable even if a caller lists it.
+    if (entry.operationId === 'get_aianalyst_incidents') continue;
     const names: string[] = [];
     const checkedPath = entry.pathTemplate.replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (_match, name: string) => {
       if (names.includes(name)) throw new TypeError('trusted operation registry contains a duplicate path parameter');
@@ -153,6 +161,7 @@ function operationRegistry(entries: readonly TrustedOperation[]): ReadonlyMap<st
       pathTemplate: entry.pathTemplate,
       pathParamNames: Object.freeze(names),
       parameterNames: Object.freeze([...names, ...parameterNames]),
+      rawBase64Params: Object.freeze(entry.method === 'GET' && Object.hasOwn(RAW_BASE64_ROUTES, entry.pathTemplate) ? [RAW_BASE64_ROUTES[entry.pathTemplate]] : []),
     }));
   }
   if (result.size === 0) throw new TypeError('trusted operation registry must not be empty');
@@ -185,6 +194,13 @@ function expandPath(operation: RuntimeOperation, supplied: ClientRequest['pathPa
     }
     const text = String(value);
     if (text.length === 0 || CONTROL_CHARS.test(text) || hasPathTraversal(text)) throw new TypeError('path parameter has an invalid value');
+    if (operation.rawBase64Params.includes(name)) {
+      // S6: the darktrace-sdk signs and sends standard Base64 unencoded ('/', '+', '=' literal).
+      // Only the Base64 alphabet is admitted, so no '.', '%', '\\', '?', '#' or control can appear.
+      if (typeof value !== 'string' || text.length > MAX_BASE64_PATH_CHARS || text.length % 4 !== 0 ||
+        !/^[A-Za-z0-9+/]+={0,2}$/.test(text) || text.startsWith('/')) throw new TypeError('path parameter has an invalid value');
+      return text;
+    }
     return rfc3986(text);
   });
 }
@@ -496,7 +512,7 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
   const client: HttpClient = {
     async request(request: OperationRequest): Promise<ApiResponse> {
       const requestRecord = request as unknown as Record<string, unknown>;
-      if (Object.keys(requestRecord).some((key) => !['operationId', 'pathParams', 'query', 'body', 'contentType', 'signal'].includes(key))) {
+      if (Object.keys(requestRecord).some((key) => !['operationId', 'pathParams', 'query', 'body', 'contentType', 'signal', 'accept'].includes(key))) {
         throw new DarktraceApiError('invalid_request', randomUUID());
       }
       let body: ClientRequest['body'];
@@ -505,11 +521,13 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
         else if (request.contentType === 'application/x-www-form-urlencoded') body = { kind: 'form', value: request.body as Readonly<Record<string, FormValue>> };
         else throw new DarktraceApiError('invalid_request', randomUUID());
       } else if (request.contentType !== undefined) throw new DarktraceApiError('invalid_request', randomUUID());
+      if (request.accept !== undefined && request.accept !== 'binary') throw new DarktraceApiError('invalid_request', randomUUID());
       const response = await client.send({
         operationId: request.operationId,
         ...(request.pathParams === undefined ? {} : { pathParams: request.pathParams }),
         ...(request.query === undefined ? {} : { query: request.query }),
         ...(body === undefined ? {} : { body }),
+        ...(request.accept === undefined ? {} : { accept: request.accept }),
       }, { ...(request.signal === undefined ? {} : { signal: request.signal }) });
       if ('dryRun' in response) throw new DarktraceApiError('invalid_request', randomUUID());
       return response;
@@ -535,11 +553,8 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
         query = encodeQuery(req.query);
         body = encodeBody(req.body);
       } catch { throw new DarktraceApiError('invalid_request', requestId); }
-      if ((body?.kind === 'json' && query.length > 0) || (operation.method === 'DELETE' && query.length > 0) ||
-        (operation.method === 'GET' && path.startsWith('/advancedsearch/api/search/'))) {
-        // S4 query+JSON, S5 DELETE+query, and S6 base64 GET path remain blocked before signing.
-        throw new DarktraceApiError('invalid_request', requestId);
-      }
+      // S4 query+JSON (path?query&{json}), S5 DELETE+query (path?query, like GET) and S6 raw Base64 GET
+      // paths are signed exactly as LegendEvent/darktrace-sdk v0.10.1 does; see docs/CHANGES-core.md.
       const shaped = [req.pathParams, req.query, req.body?.value].filter((value) => value !== undefined);
       if (!checkShapes(shaped, cfg.limits.maxToolInputDepth, cfg.limits.maxToolInputElements)) {
         throw new DarktraceApiError('invalid_request', requestId);
@@ -609,7 +624,7 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
             const headers: Record<string, string> = {
               ...signed.headers,
               'User-Agent': DARKTRACE_USER_AGENT,
-              Accept: accept === 'json' ? 'application/json' : 'application/octet-stream, application/vnd.tcpdump.pcap',
+              Accept: accept === 'json' ? 'application/json' : 'application/octet-stream, application/vnd.tcpdump.pcap, message/rfc822, application/json;q=0.5',
               'Accept-Encoding': 'identity',
               ...(signed.bodyBytes === undefined ? {} : { 'Content-Length': String(signed.bodyBytes.byteLength) }),
             };
@@ -644,7 +659,15 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
               throw new DarktraceApiError(responseKind(status), requestId, status);
             }
             if (accept === 'binary') {
-              return Object.freeze({ status: response.status, bytes, truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
+              const mediaType = /^\s*([A-Za-z0-9!#$&^_.+-]{1,64}\/[A-Za-z0-9!#$&^_.+-]{1,64})\s*(?:;|$)/.exec(response.headers.get('content-type') ?? '')?.[1]?.toLowerCase();
+              // A file endpoint may answer with a JSON status document (e.g. PCAP not ready yet).
+              if (mediaType === 'application/json' && bytes.byteLength > 0) {
+                let json: unknown;
+                try { json = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); }
+                catch { throw new DarktraceApiError('invalid_response', requestId, response.status); }
+                return Object.freeze({ status: response.status, json: json as T, truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
+              }
+              return Object.freeze({ status: response.status, bytes, ...(mediaType === undefined ? {} : { contentType: mediaType }), truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
             }
             if (bytes.byteLength === 0) {
               return Object.freeze({ status: response.status, json: undefined, truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });

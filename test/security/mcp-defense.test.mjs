@@ -83,7 +83,9 @@ for (const mode of modes) test('MR-02/06.STARTUP ' + (mode[0] ?? 'stdio') + ' gu
   for (const [extra, injected, expected] of [
     [{ SSL_CERT_FILE: CANARY }, {}, 'SSL_CERT_FILE'], [{ SSL_CERT_DIR: CANARY }, {}, 'SSL_CERT_DIR'], [{ OPENSSL_CONF: CANARY }, {}, 'OPENSSL_CONF'],
     ...flags.map(flag => [{}, { NODE_OPTIONS: '"' + flag + '=' + CANARY + '"' }, 'NODE_OPTIONS']),
-    [{ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,email' }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,' + CANARY }, {}, 'DARKTRACE_PROFILES'],
+    [{ DARKTRACE_PROFILES: 'read,critical' }, {}, undefined],
   ]) {
     // Inject Node flags only AFTER native startup, so this tests our app guard rather than Node's option parser.
     const script = 'process.argv=' + JSON.stringify([process.execPath, resolve('dist/src/index.js'), ...mode]) + ';Object.assign(process.env,' + JSON.stringify(injected) + ');await import(' + JSON.stringify(resolve('dist/src/index.js')) + ');';
@@ -93,19 +95,22 @@ for (const mode of modes) test('MR-02/06.STARTUP ' + (mode[0] ?? 'stdio') + ' gu
     assert.equal(got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false);
   }
 });
-test('MR-06.PROFILES toxic sensitive+write combinations rejected in object/env/file+env overlays; independent profiles accepted', () => {
-  for (const writeCritical of [false, true]) assert.throws(() => cfg({ profiles: { sensitiveRead: true, write: true, writeCritical } }), /read-only release/);
-  for (const profile of Object.values(profiles)) {if(profile.write)assert.throws(()=>cfg({profiles:profile}),/read-only release/);else assert.doesNotThrow(()=>cfg({profiles:profile}));}
-  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' })), /read-only release/);
+test('MR-06.PROFILES sensitive+write combinations accepted in object/env/file+env overlays; critical without write rejected everywhere', () => {
+  for (const writeCritical of [false, true]) assert.doesNotThrow(() => cfg({ profiles: { sensitiveRead: true, write: true, writeCritical } }));
+  for (const profile of Object.values(profiles)) assert.doesNotThrow(() => cfg({ profiles: profile }));
+  assert.deepEqual({ ...loadConfig(env({ DARKTRACE_PROFILES: 'read,write', DARKTRACE_SENSITIVE_READ: 'true' })).profiles }, { read: true, write: true, sensitiveRead: true, writeCritical: false });
+  assert.throws(() => cfg({ profiles: { writeCritical: true } }), /requires profiles\.write/);
+  assert.throws(() => loadConfig(env({ DARKTRACE_PROFILES: 'sensitive,critical' })), /requires profiles\.write/);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr06-')), file = join(directory, 'config.json');
-  for (const [profile, extra] of [[{ write: true }, { DARKTRACE_SENSITIVE_READ: 'true' }], [{ sensitiveRead: true }, { DARKTRACE_PROFILES: 'read,write' }]]) {
+  for (const [profile, extra, ok] of [[{ write: true }, { DARKTRACE_SENSITIVE_READ: 'true' }, true], [{ sensitiveRead: true }, { DARKTRACE_PROFILES: 'read,write' }, true],
+    [{ writeCritical: true }, { DARKTRACE_SENSITIVE_READ: 'true' }, false], [{ write: true, writeCritical: true }, { DARKTRACE_PROFILES: 'read,critical' }, false]]) {
     writeFileSync(file, JSON.stringify({ profiles: profile }), { mode: 0o600 });
-    assert.throws(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra })), /read-only release/);
+    if (ok) assert.doesNotThrow(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra })));
+    else assert.throws(() => loadConfig(env({ DARKTRACE_CONFIG_FILE: file, ...extra })), /requires profiles\.write/);
   }
 });
-const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-first-stable.json', import.meta.url), 'utf8')).contracts;
+const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json', import.meta.url), 'utf8')).contracts;
 for (const [name, profile] of Object.entries(profiles)) test('MR-04.CONTRACT reviewed tools/list exact description/schema/annotations snapshot ' + name, async () => {
-  if(profile.write){assert.throws(()=>cfg({profiles:profile}),/read-only release/);await assert.rejects(()=>toolContract(profile),/read-only release/);return;}
   const tools = await toolContract(profile); assert.equal(digest(tools), contracts[name].sha256); assert.deepEqual(tools, contracts[name].tools); clean(tools);
   for (const tool of tools) { assert.equal(tool.description.includes('<IMPORTANT>'), false); assert.equal(tool.description.includes(PUBLIC), false); assert.equal(tool.description.includes(PRIVATE), false); }
 });
@@ -271,7 +276,7 @@ for (const mode of modes) for (const value of ['', '0', '1', CANARY]) test('IR-0
 });
 
 test('MR-04.STABLE forbidden release profile matrix rejects objects, SDK capture and production startup with zero sinks',async()=>{
- const expected=JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-first-stable.json',import.meta.url),'utf8'));
+ const expected=JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json',import.meta.url),'utf8'));
  const checked=await verifyRejectedReleaseProfiles();assert.deepEqual(checked.rejectedProfiles,expected.rejectedProfiles);assert.deepEqual(Object.keys(checked.startupChecks).sort(),Object.keys(expected.rejectedProfiles).sort());
  for(const row of Object.values(checked.startupChecks)){assert.equal(row.objectRejected,true);assert.equal(row.contractRejectedBeforeSdk,true);assert.equal(row.stdoutEmpty,true);assert.equal(row.networkSigningGuardTriggered,false);assert.deepEqual(row.productionModes,['stdio','doctor','--check-config']);}
 });

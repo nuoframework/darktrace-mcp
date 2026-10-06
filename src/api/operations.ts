@@ -8,11 +8,15 @@ export interface OperationDescriptor {
   execution:string; parameters:any[]; bodies:any[]; bodyRequired:boolean; documentedIn:string; validatedOn:string[];
 }
 export interface Operation extends OperationDescriptor { input:z.ZodObject<any>; }
-export interface OperationArgs { operation?:string; path?:Record<string,unknown>; query?:Record<string,unknown>; body?:unknown; contentType?:string; dryRun?:boolean; confirm?:boolean; }
+export interface OperationArgs { operation?:string; path?:Record<string,unknown>; query?:Record<string,unknown>; body?:unknown; contentType?:string; dryRun?:boolean; confirm?:boolean; previewId?:string; }
 export interface ApiRequest {
   operationId:string; pathParams?:Record<string,string|number>; query?:ReadonlyArray<readonly [string,string]>;
   body?:unknown; contentType?:'application/json'|'application/x-www-form-urlencoded'; signal?:AbortSignal;
+  /** Code-owned per operation (see BINARY_OPERATIONS); never taken from model arguments. */
+  accept?:'binary';
 }
+/** Operations whose success body is a file (PCAP, raw MIME email), read as bounded bytes. */
+export const BINARY_OPERATIONS:ReadonlySet<string>=Object.freeze(new Set(['get_pcaps_filename','get_agemail_api_ep_api_v1_0_emails_uuid_download']));
 export interface OperationClient { request(request:ApiRequest):Promise<unknown>; }
 function parameterObject(params:any[], location:string) {
   const fields:Record<string,z.ZodType<any>> = {};
@@ -35,10 +39,16 @@ export const operations:Readonly<Record<string,Operation>> = Object.freeze(Objec
     fields.body = row.bodyRequired ? body : body.optional();
     fields.contentType = z.enum(row.bodies.map(b=>b.contentType) as [string,...string[]]).optional();
   }
-  if (row.tier!=='read') {fields.dryRun=z.boolean().default(true);}
+  // Writes execute by default when the operator profile allows; dryRun:true returns a value-free preview.
+  if (row.tier!=='read') {
+    fields.dryRun=z.boolean().default(false).describe('true = preview only; nothing is sent.');
+    fields.previewId=z.string().regex(/^[a-f0-9]{32}$/).optional().describe(row.tier==='critical'?'Required with confirm:true: the previewId returned by the preview of these exact arguments.':'Optional: binds execution to an earlier preview of these exact arguments.');
+  }
+  // Critical writes additionally need explicit user approval expressed as confirm:true.
+  if (row.tier==='critical') fields.confirm=z.boolean().default(false).describe('Must be true, after explicit user approval, to execute this critical action.');
   return [row.operationId,Object.freeze({...row,input:z.strictObject(fields)})];
 })));
-export const operationDescriptors = Object.values(operations).filter(op=>op.status==='implemented'&&op.tier!=='critical').map(({operationId,method,pathTemplate})=>({operationId,method,pathTemplate}));
+export const operationDescriptors = Object.values(operations).filter(op=>op.status==='implemented').map(({operationId,method,pathTemplate})=>({operationId,method,pathTemplate}));
 export function validateOperation(op:Operation, raw:unknown, limits:number|Partial<InputLimits>=5000): OperationArgs {
   checkInput(raw,limits);
   const args=op.input.parse(raw) as OperationArgs;
@@ -79,7 +89,8 @@ export function buildRequest(op:Operation,args:OperationArgs,signal?:AbortSignal
     } else query.push([p.name,String(value)]);
   }
   const contentType = args.contentType??op.bodies[0]?.contentType;
-  if (query.length && args.body!==undefined && contentType==='application/json') throw new Error('Query plus JSON signing is not reviewed');
+  // Query plus JSON body (S4) is signed as path?query&{json}, matching darktrace-sdk v0.10.1 auth.py.
   return {operationId:op.operationId,pathParams:args.path as Record<string,string|number>|undefined,query,
-    ...(args.body===undefined?{}:{body:args.body,contentType}),...(signal?{signal}:{})};
+    ...(args.body===undefined?{}:{body:args.body,contentType}),...(signal?{signal}:{}),
+    ...(BINARY_OPERATIONS.has(op.operationId)?{accept:'binary' as const}:{})};
 }

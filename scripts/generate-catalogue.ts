@@ -1,9 +1,55 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parse } from 'yaml';
 import { applyResponseViewOverrides, compileResponseView, type ResponseView } from '../src/api/response-view.js';
+import { requiredProfiles } from '../src/policy/profiles.js';
 
 // Build-time only: shipped runtime never parses mutable YAML or documentation.
 const spec = parse(readFileSync('openapi/darktrace-threat-visualizer.yaml', 'utf8'));
+// The portal 6.1 spec lists Darktrace/EMAIL routes without parameters. Parameter names/types come from the
+// static LegendEvent/darktrace-sdk v0.10.1 inventory; descriptions and bounds below are code-owned.
+const sdk = parse(readFileSync('openapi/darktrace-sdk.yaml', 'utf8'));
+const EMAIL_PARAMETER_DESCRIPTIONS: Record<string,string> = {
+  link:'Encoded link to decode (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1, not in portal 6.1 docs).',
+  days:'Number of days to include (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).',
+  limit:'Maximum number of results (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).',
+  offset:'Pagination offset (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).',
+  include_headers:'Include email headers in the response (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).',
+  eventType:'Filter by audit event type (Darktrace/EMAIL; parameter from darktrace-sdk v0.10.1).',
+  uuid:'Email UUID',
+};
+function emailParameters(pathTemplate: string, method: string, documented: any[]): any[] {
+  const op = sdk.paths?.[pathTemplate]?.[method];
+  if (!op) throw new Error(`Missing SDK email inventory: ${method} ${pathTemplate}`);
+  const names = new Set(documented.map((p: any) => `${p.in}:${p.name}`));
+  const extra = [...(sdk.paths[pathTemplate].parameters ?? []), ...(op.parameters ?? [])]
+    .filter((p: any) => !names.has(`${p.in}:${p.name}`))
+    .map((p: any) => {
+      if (!Object.hasOwn(EMAIL_PARAMETER_DESCRIPTIONS, p.name)) throw new Error(`Unreviewed email parameter: ${p.name}`);
+      const type = p.schema?.type;
+      if (!['string', 'integer', 'boolean'].includes(type)) throw new Error('Unsupported email parameter type');
+      return { name: p.name, in: p.in, required: Boolean(p.required), description: EMAIL_PARAMETER_DESCRIPTIONS[p.name], schema: { type } };
+    });
+  return [...documented, ...extra];
+}
+// Lab evidence on Darktrace 7.1: the 19 bounded consultation recipes
+// (docs/security/validated-consultations-lab-checkpoint.md) plus the 2026-10-06 full-API live run through the
+// production MCP stdio path (docs/CHANGES-core.md "Live lab validation"). Only clean 2xx results with a verified
+// effect count; operations that failed, were forbidden for the lab token, answered non-2xx after applying the
+// change, or were not executed stay "not lab-validated".
+const LAB_VALIDATED_71 = new Set(['get_status','get_devices','get_subnets','get_aianalyst_stats','get_intelfeed',
+  'get_modelbreaches','get_devicesearch','get_similardevices','get_aianalyst_groups','get_aianalyst_incidentevents',
+  'get_aianalyst_investigations','get_mbcomments','get_details','get_tags_entities','get_tags_tid','get_tags_tid_entities',
+  'get_endpointdetails','get_antigena','get_antigena_summary',
+  // 2026-10-06 live run
+  'get_modelbreaches_pbid','get_modelbreaches_pbid_comments','get_metrics','get_metrics_mlid','get_models','get_models_pid',
+  'get_components','get_components_cid','get_deviceinfo','get_devicesummary','get_network','get_metricdata','get_enums',
+  'get_summarystatistics','get_aianalyst_incident_comments','get_tags','get_pcaps','get_pcaps_filename',
+  'post_advancedsearch_api_search','get_advancedsearch_api_search_query','get_advancedsearch_api_analyze_field_analysis_query',
+  'get_advancedsearch_api_graph_graphmode_interval_query',
+  'post_tags','post_tags_entities','post_tags_tid_entities','post_aianalyst_acknowledge','post_aianalyst_unacknowledge',
+  'post_aianalyst_pin','post_aianalyst_unpin','post_modelbreaches_pbid_acknowledge','post_modelbreaches_pbid_unacknowledge',
+  'post_modelbreaches_pbid_comments','post_aianalyst_incident_comments',
+  'post_antigena_manual','post_antigena','post_intelfeed','post_subnets']);
 const inventory = JSON.parse(readFileSync('docs/operation-inventory.json', 'utf8'));
 const mapping = JSON.parse(readFileSync('src/api/tool-groups.json', 'utf8')) as Record<string,string|null>;
 const assignments = new Map(Object.entries(mapping));
@@ -18,9 +64,7 @@ for (const [pathTemplate, item] of Object.entries(spec.paths) as [string, any][]
     if (!risk || risk.path !== pathTemplate || risk.method !== method.toUpperCase()) throw new Error('Inventory mismatch');
     const email = pathTemplate.startsWith('/agemail/');
     const excluded = Boolean(op.deprecated || risk.deprecated);
-    const exportBlocked = op.operationId === 'get_pcaps_filename';
-    const signingBlocked = ['get_advancedsearch_api_search_query','get_advancedsearch_api_analyze_field_analysis_query','get_advancedsearch_api_graph_graphmode_interval_query','delete_tags_entities'].includes(op.operationId);
-    const status = excluded ? 'excluded' : email || exportBlocked || signingBlocked ? 'blocked' : 'implemented';
+    const status = excluded ? 'excluded' : 'implemented';
     const tool = assignments.get(op.operationId);
     if (!excluded && !tool) throw new Error(`Missing curated mapping: ${op.operationId}`);
     if (!Object.hasOwn(outputFields,op.operationId)) throw new Error('Missing reviewed output field policy');
@@ -28,10 +72,11 @@ for (const [pathTemplate, item] of Object.entries(spec.paths) as [string, any][]
     const bodies = Object.entries(op.requestBody?.content ?? {}).map(([contentType, entry]: [string, any]) => ({contentType,schema:entry.schema}));
     rows.push({operationId:op.operationId, method:method.toUpperCase(), pathTemplate, tool:tool ?? null,
       tier:risk.risk_tier, sensitivity:risk.data_sensitivity, status,
-      reason:excluded?'Deprecated endpoint':email?'Instance email schema and authentication contract required':exportBlocked?'Independent export approval, retention and aggregate disk quota pending':signingBlocked?'Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence':null,
-      execution:status!=='implemented'?'disabled':risk.risk_tier==='critical'?'preview-only':'enabled-by-profile',
-      parameters:[...(item.parameters??[]),...(op.parameters??[])], bodies, bodyRequired:op.requestBody?.required??false,
-      documentedIn:'6.1', validatedOn:[], requiredProfiles:status!=='implemented'?[]:[risk.risk_tier==='read'?'read':'write',...(risk.risk_tier==='critical'?['writeCritical']:[]),...(pathTemplate.startsWith('/advancedsearch/')?['sensitiveRead']:[])]});
+      reason:excluded?'Deprecated endpoint':null,
+      execution:status!=='implemented'?'disabled':risk.risk_tier==='critical'?'confirm-required':'enabled-by-profile',
+      parameters:email?emailParameters(pathTemplate,method,[...(item.parameters??[]),...(op.parameters??[])]):[...(item.parameters??[]),...(op.parameters??[])], bodies, bodyRequired:op.requestBody?.required??false,
+      documentedIn:email?'6.1 (routes) + darktrace-sdk v0.10.1 (parameters)':'6.1', validatedOn:LAB_VALIDATED_71.has(op.operationId)?['7.1']:[],
+      requiredProfiles:status!=='implemented'?[]:requiredProfiles({method:method.toUpperCase(),pathTemplate,tier:risk.risk_tier,sensitivity:risk.data_sensitivity})});
   }
 }
 applyResponseViewOverrides(responseViews,spec.components?.schemas??{});

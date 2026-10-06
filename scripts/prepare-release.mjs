@@ -28,7 +28,7 @@ for(const name of ['docs/clients.md','docs/configuration.md','docs/docker.md','d
 const productionSourceHashes=hashes(join(snapshot,'src'));
 const historicalAlphaTests=verifyHistoricalArchive(snapshot);
 const historicalValidatedPredecessors=verifyValidatedPredecessorArchives(snapshot);
-const releaseCapability={value:{write:false,writeCritical:false},sourcePath:'src/policy/release-capability.ts',sourceSha256:sourceHashes['src/policy/release-capability.ts']};
+const releaseCapability={value:{read:true,sensitiveRead:true,write:true,writeCritical:true},sourcePath:'src/policy/release-capability.ts',sourceSha256:sourceHashes['src/policy/release-capability.ts']};
 writeFileSync(join(out,'source-files.sha256.json'),JSON.stringify(sourceHashes,null,2)+'\n');
 const commands=[];
 const childEnv={PATH:process.env.PATH,HOME:join(snapshot,'operator-free-home'),TMPDIR:tmpdir(),npm_config_cache:process.env.npm_config_cache??join(tmpdir(),'darktrace-release-npm-cache')};mkdirSync(childEnv.HOME);
@@ -55,7 +55,7 @@ const secondContracts=await captureReviewedContracts(snapshot);assert.deepEqual(
 run(process.execPath,['scripts/verify-release.mjs',join(out,second.filename),out],'verify');
 run(process.execPath,['scripts/validate-examples.mjs'],'examples');
 cpSync(join(snapshot,'CHANGELOG.md'),join(out,'release-notes.md'));
-writeFileSync(join(out,'build-evidence.json'),JSON.stringify({schemaVersion:3,releaseCapability,historicalAlphaTests,historicalValidatedPredecessors,node:process.version,platform:process.platform,arch:process.arch,snapshot,sourceTreeSha256:digest(JSON.stringify(sourceHashes)),sourceProductionTreeSha256:digest(JSON.stringify(productionSourceHashes)),archive:second.filename,archiveSha256:firstHash,reproducibleTwoBuilds:true,mcpToolContracts:contracts.metadata,contractGeneration:{helper:'test/security/mcp-contracts.mjs',execution:'module import; toolContract(profile) for two supported profiles plus three startup-refusal profiles; no appliance requests',repeatedAfterSecondBuild:true},sourceOnlyDistributionInputs:['Dockerfile','.dockerignore',...Object.keys(sourceHashes).filter(p=>p.startsWith('docs/assets/'))],commands},null,2)+'\n');
+writeFileSync(join(out,'build-evidence.json'),JSON.stringify({schemaVersion:3,releaseCapability,historicalAlphaTests,historicalValidatedPredecessors,node:process.version,platform:process.platform,arch:process.arch,snapshot,sourceTreeSha256:digest(JSON.stringify(sourceHashes)),sourceProductionTreeSha256:digest(JSON.stringify(productionSourceHashes)),archive:second.filename,archiveSha256:firstHash,reproducibleTwoBuilds:true,mcpToolContracts:contracts.metadata,contractGeneration:{helper:'test/security/mcp-contracts.mjs',execution:'module import; toolContract(profile) for five supported profiles plus two startup-refusal profiles; no appliance requests',repeatedAfterSecondBuild:true},sourceOnlyDistributionInputs:['Dockerfile','.dockerignore',...Object.keys(sourceHashes).filter(p=>p.startsWith('docs/assets/'))],commands},null,2)+'\n');
 const assets=releaseAssets(second.filename);
 writeFileSync(join(out,'SHA256SUMS'),assets.map(n=>`${digest(readFileSync(join(out,n)))}  ${n}`).join('\n')+'\n');
 verifyReleaseEvidence(join(out,second.filename),out,snapshot);
