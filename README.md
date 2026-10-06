@@ -48,19 +48,17 @@ Darktrace MCP conecta tu cliente de IA con la API de Darktrace Threat Visualizer
 | Docker (cualquier cliente) | `npx -y @nuoframework/darktrace-mcp@1.1.2 setup --runtime docker` |
 
 [![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-desktop) [![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-code) [![Codex](https://img.shields.io/badge/Codex-412991?style=flat-square)](docs/clients.md#codex) [![Cursor](https://img.shields.io/badge/Cursor-111111?style=flat-square&logo=cursor&logoColor=white)](docs/clients.md#cursor) [![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square)](docs/clients.md#vs-code) [![Windsurf](https://img.shields.io/badge/Windsurf-087F8C?style=flat-square&logo=windsurf&logoColor=white)](docs/clients.md#windsurf) [![OpenCode](https://img.shields.io/badge/OpenCode-222222?style=flat-square&logo=opencode&logoColor=white)](docs/clients.md#opencode) [![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](docs/clients.md#gemini-cli) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](docs/clients.md#docker)
-[![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMiJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D)
-[![Instalar en VS Code](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
-[![Instalar en VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
+<p align="left"><a href="cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&amp;config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMiJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D"><img src="https://img.shields.io/badge/Instalar%20en%20Cursor-161B22?style=for-the-badge" height="36" alt="Instalar en Cursor"></a>
+<a href="vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D"><img src="https://img.shields.io/badge/Instalar%20en%20VS%20Code-161B22?style=for-the-badge" height="36" alt="Instalar en VS Code"></a>
+<a href="vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D"><img src="https://img.shields.io/badge/Instalar%20en%20VS%20Code%20Insiders-161B22?style=for-the-badge" height="36" alt="Instalar en VS Code Insiders"></a></p>
 
-**Cursor:** el botón solo añade la entrada. Ejecuta después `npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor` para completarla con tu appliance y tus tokens. VS Code pide esos datos en su propio diálogo.
+**Cursor:** añade la entrada ([completar](docs/install.md#qué-hace-el-botón)). **VS Code / Insiders:** piden los datos.
 
 </details>
 
 Para desinstalar: `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`. Muestra el plan y pide confirmación; `--dry-run` solo lo muestra y `--docker` incluye la imagen fijada.
 
 ## Cómo funciona
-
-### Una conexión local, permisos explícitos
 
 ```mermaid
 flowchart LR
@@ -135,25 +133,27 @@ Grabaciones con un mock HTTPS y datos sintéticos; muestran el flujo, no validan
 
 **50 herramientas · 77 operaciones ejecutables**. Por perfil mínimo: `read` 38, `sensitive` 18, `write` 16, `critical` 5. La [referencia generada](docs/tools.md) detalla cada operación, sus límites y la evidencia.
 
-| Área | Herramientas / ops | Ejemplos | Perfiles | Completa / parcial / sin validar |
-|---|---:|---|---|---:|
-| [Sistema y referencias](docs/tools.md#sistema-y-referencias) | 5 / 6 | Estado, estadísticas de red, enumeraciones | `read` | 3 / 1 / 2 |
-| [Dispositivos](docs/tools.md#dispositivos) | 9 / 9 | Búsquedas, conexiones, métricas, etiquetas | `read`, `write` | 9 / 0 / 0 |
-| [Model breaches](docs/tools.md#model-breaches) | 4 / 7 | Consultar, reconocer, comentar | `read`, `write` | 7 / 0 / 0 |
-| [Modelos y métricas](docs/tools.md#modelos-y-métricas) | 3 / 6 | Definiciones de modelos, componentes y métricas | `read` | 4 / 2 / 0 |
-| [AI Analyst](docs/tools.md#ai-analyst) | 8 / 11 | Incidentes, fijación, investigaciones | `read`, `write` | 11 / 0 / 0 |
-| [Respuesta autónoma (Antigena)](docs/tools.md#respuesta-autónoma-antigena) | 3 / 4 | Listar, activar, ampliar, anular | `read`, `critical` | 3 / 1 / 0 |
-| [Etiquetas](docs/tools.md#etiquetas) | 3 / 10 | Listar, crear, asignar, quitar, borrar | `read`, `write`, `critical` | 7 / 0 / 3 |
-| [Intel feed y subredes](docs/tools.md#intel-feed-y-subredes) | 4 / 4 | Watched Domains, ajustes de subred | `read`, `critical` | 2 / 2 / 0 |
-| [Capturas de paquetes](docs/tools.md#capturas-de-paquetes) | 3 / 3 | Listar, solicitar, descargar | `read`, `sensitive`, `write` | 3 / 0 / 0 |
-| [Advanced Search](docs/tools.md#advanced-search) | 1 / 4 | Consultas, análisis de campos, gráficos | `sensitive` | 4 / 0 / 0 |
-| [Darktrace/Email](docs/tools.md#darktraceemail) | 7 / 13 | Paneles, metadatos, búsquedas, auditoría | `sensitive` | 0 / 0 / 13 |
+| Área | Herramientas | Operaciones | Ejemplos | Perfiles | ✓ / ◐ / — |
+|---|---:|---:|---|---|---:|
+| [Sistema y referencias](docs/tools.md#sistema-y-referencias) | 5 | 6 | Estado, estadísticas de red, enumeraciones | `read` | 3 / 1 / 2 |
+| [Dispositivos](docs/tools.md#dispositivos) | 9 | 9 | Búsquedas, conexiones, métricas, etiquetas | `read`, `write` | 9 / 0 / 0 |
+| [Model breaches](docs/tools.md#model-breaches) | 4 | 7 | Consultar, reconocer, comentar | `read`, `write` | 7 / 0 / 0 |
+| [Modelos y métricas](docs/tools.md#modelos-y-métricas) | 3 | 6 | Definiciones de modelos, componentes y métricas | `read` | 4 / 2 / 0 |
+| [AI Analyst](docs/tools.md#ai-analyst) | 8 | 11 | Incidentes, fijación, investigaciones | `read`, `write` | 11 / 0 / 0 |
+| [Respuesta autónoma (Antigena)](docs/tools.md#respuesta-autónoma-antigena) | 3 | 4 | Listar, activar, ampliar, anular | `read`, `critical` | 3 / 1 / 0 |
+| [Etiquetas](docs/tools.md#etiquetas) | 3 | 10 | Listar, crear, asignar, quitar, borrar | `read`, `write`, `critical` | 7 / 0 / 3 |
+| [Intel feed y subredes](docs/tools.md#intel-feed-y-subredes) | 4 | 4 | Watched Domains, ajustes de subred | `read`, `critical` | 2 / 2 / 0 |
+| [Capturas de paquetes](docs/tools.md#capturas-de-paquetes) | 3 | 3 | Listar, solicitar, descargar | `read`, `sensitive`, `write` | 3 / 0 / 0 |
+| [Advanced Search](docs/tools.md#advanced-search) | 1 | 4 | Consultas, análisis de campos, gráficos | `sensitive` | 4 / 0 / 0 |
+| [Darktrace/Email](docs/tools.md#darktraceemail) | 7 | 13 | Paneles, metadatos, búsquedas, auditoría | `sensitive` | 0 / 0 / 13 |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar; las cifras cuentan operaciones. Cada herramienta agrupa variantes de la misma API (por ejemplo, lista y detalle por ID), de ahí que haya menos herramientas que operaciones.
 
 Prueba: «Busca un dispositivo y sus conexiones recientes» (`read`), «Previsualiza una etiqueta de triaje para el dispositivo 42» (`write`) o «Previsualiza la anulación de Antigena 123 y espera mi aprobación» (`write,critical`).
 
 ## Estado de validación por área
 
-La última columna de la tabla es **completa / parcial / sin validar**, por operación: **53 / 6 / 18**. Son **59 con evidencia**, no 59 totalmente validadas. Las campañas se hicieron con Darktrace **7.1.0**; no garantizan todas las combinaciones de argumentos ni otras versiones.
+**53 operaciones tienen evidencia completa, 6 parcial y 18 están sin validar**. Son **59 con evidencia**, no 59 totalmente validadas. Las campañas se hicieron con Darktrace **7.1.0**; no garantizan todas las combinaciones de argumentos ni otras versiones.
 
 - **Dispositivos, model breaches, AI Analyst, PCAP y Advanced Search:** evidencia para las operaciones listadas. PCAP devuelve Base64 completo solo dentro del límite (unos 45 KB); por encima devuelve tamaño y SHA-256.
 - **Sistema, modelos y métricas:** `models`, `components` y `enums` solo con `responsedata`; CVEs devolvió 500 en el laboratorio no OT y `filtertypes`, una redirección 302 rechazada.

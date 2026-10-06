@@ -261,16 +261,18 @@ const MESSAGES = {
     nav: '[README](../../README.en.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)',
     generated: '> Built by `npm run docs:tools` from the API catalogue, tool groups and `src/tools/descriptions.ts`. Do not edit by hand. MCP summaries below reproduce the English text seen by the client; dynamic policy notes are added at runtime. Operation descriptions are localized for readers.',
     inventory: ({tools, available, total, spec, excluded, deprecated}) => `**${tools} tools** cover **${available} executable operations** out of ${total} in the API inventory (Darktrace Threat Visualizer API ${spec}). The other ${excluded} are [not available](#not-available): ${excluded - deprecated} excluded (the email action) and ${deprecated} deprecated (\`GET /aianalyst/incidents\`).`,
-    evidence: ({validated, partial, email}, scope) => `**Lab evidence.** ${validated} operations have evidence from ${scope.appliances} distinct Darktrace ${scope.version} appliances (${scope.date}): lab A for ${scope.first}, lab B for the ${scope.gap} gap campaign. ${partial} operations have partial evidence; the **Lab** column states its scope. The rest are *not lab-validated*: they follow API documentation but did not pass against a live appliance, including all ${email} Email reads (HTTP 403; a later service outage returned 503, see the [Email record](../security/lab-email-validation.md)). Some write evidence predates the final approval, rate-limit, breaker and audit controls, which have offline coverage. The [gap campaign](../security/lab-gap-campaign-${scope.gap}.md) re-ran critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and device, investigation, PCAP and tag writes under those controls.`,
+    evidence: ({validated, partial, email}, scope) => `**Lab evidence.** ${validated} operations have evidence from ${scope.appliances} distinct Darktrace ${scope.version} appliances (${scope.date}): lab A for ${scope.first}, lab B for the ${scope.gap} gap campaign. ${partial} operations have partial evidence; the **Lab evidence** column states its scope. The rest are *not lab-validated*: they follow API documentation but did not pass against a live appliance, including all ${email} Email reads (HTTP 403; a later service outage returned 503, see the [Email record](../security/lab-email-validation.md)). Some write evidence predates the final approval, rate-limit, breaker and audit controls, which have offline coverage. The [gap campaign](../security/lab-gap-campaign-${scope.gap}.md) re-ran critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and device, investigation, PCAP and tag writes under those controls.`,
     profiles: 'Which profile do I need?', profileTable: '| Profile | What it unlocks | Operations |',
     default: 'default', read: 'Normal reads', sensitive: 'Reads that can return raw traffic, email content or audit data',
     write: 'Reversible or configuration changes. `dryRun:true` returns a preview',
     critical: 'Actions that can block traffic or change detection. Call with `dryRun:true` for a preview, then repeat with `confirm:true` and its `previewId`; by default you also accept a server dialog. Without `confirm:true` the call is refused (`confirmation_required`)',
     selection: 'Set profiles with `DARKTRACE_PROFILES`. `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. See [Configuration](configuration.md#profiles).',
-    columns: 'Columns: **Tier** is the risk class from the API inventory. **Lab** states whether, and how far, the operation passed a real-appliance test.',
+    columns: 'Columns: **Tier** is the risk class from the API inventory. **Lab evidence** states whether, and how far, the operation passed a real-appliance test.',
     contents: 'Contents', unavailable: 'Not available', summaryLabel: 'Literal MCP summaries (English):',
-    table: '| Tool | Method and path | Tier | Profile | Lab | What it does |', reasonsTable: '| Method and path | Reason |',
-    yes: 'yes', unvalidated: 'not lab-validated',
+    table: '| Tool | Method and path | Tier | Profile | Lab evidence | What it does |', reasonsTable: '| Method and path | Reason |',
+    yes: '✓', unvalidated: 'not lab-validated',
+    legend: '**✓** full evidence · **◐** partial evidence · **—** not lab-validated. Read each note for the exact scope.',
+    grouping: 'Each tool groups variants of the same API, such as a list and detail by ID; therefore there are fewer tools than operations.',
     areas: Object.fromEntries([...AREAS.map(([name]) => [name, name]), ['Other', 'Other']]),
     partial: LAB_PARTIAL, notes: LAB_NOT_VALIDATED_NOTE, reasons: NOT_AVAILABLE_REASON, descriptions: DESCRIPTIONS,
   },
@@ -279,16 +281,18 @@ const MESSAGES = {
     nav: '[README](../README.md) · [Configuración](configuration.md) · [Primeros pasos](getting-started.md)',
     generated: '> Se genera con `npm run docs:tools` a partir del catálogo API, los grupos y `src/tools/descriptions.ts`. No edites esta página a mano. Los resúmenes MCP reproducen el texto inglés que ve el cliente; las notas dinámicas de política se añaden en ejecución. Las descripciones de operaciones se traducen para quien lee esta guía.',
     inventory: ({tools, available, total, spec, excluded, deprecated}) => `**${tools} herramientas** cubren **${available} operaciones ejecutables** de las ${total} del inventario API (Darktrace Threat Visualizer API ${spec}). Las otras ${excluded} [no están disponibles](#no-disponibles): ${excluded - deprecated} excluida (la acción de correo) y ${deprecated} obsoleta (\`GET /aianalyst/incidents\`).`,
-    evidence: ({validated, partial, email}, scope) => `**Evidencia de laboratorio.** ${validated} operaciones tienen evidencia de ${scope.appliances} appliances distintos Darktrace ${scope.version} (${scope.date}): lab A para ${scope.first} y lab B para la campaña de huecos ${scope.gap}. En ${partial} operaciones es parcial; la columna **Laboratorio** indica su alcance. El resto figura *sin validar en laboratorio*: sigue la documentación API, pero no superó la prueba con un appliance real, incluidas las ${email} lecturas Email (HTTP 403; una caída posterior del servicio devolvió 503, según el [registro Email](security/lab-email-validation.md)). Parte de la evidencia de escritura es anterior a los controles finales de aprobación, límites, bloqueo y auditoría, cubiertos por pruebas offline. La [campaña de huecos](security/lab-gap-campaign-${scope.gap}.md) repitió flujos críticos (Antigena, Antigena manual, intel feed, subredes y borrado de etiquetas) y escrituras de dispositivos, investigaciones, PCAP y etiquetas con esos controles.`,
+    evidence: ({validated, partial, email}, scope) => `**Evidencia de laboratorio.** ${validated} operaciones tienen evidencia de ${scope.appliances} appliances distintos Darktrace ${scope.version} (${scope.date}): lab A para ${scope.first} y lab B para la campaña de huecos ${scope.gap}. En ${partial} operaciones es parcial; la columna **Evidencia de laboratorio** indica su alcance. El resto figura *sin validar en laboratorio*: sigue la documentación API, pero no superó la prueba con un appliance real, incluidas las ${email} lecturas Email (HTTP 403; una caída posterior del servicio devolvió 503, según el [registro Email](security/lab-email-validation.md)). Parte de la evidencia de escritura es anterior a los controles finales de aprobación, límites, bloqueo y auditoría, cubiertos por pruebas offline. La [campaña de huecos](security/lab-gap-campaign-${scope.gap}.md) repitió flujos críticos (Antigena, Antigena manual, intel feed, subredes y borrado de etiquetas) y escrituras de dispositivos, investigaciones, PCAP y etiquetas con esos controles.`,
     profiles: 'Qué perfil necesitas', profileTable: '| Perfil | Qué permite | Operaciones |',
     default: 'predeterminado', read: 'Lecturas habituales', sensitive: 'Lecturas que pueden devolver tráfico sin procesar, contenido de correo o auditoría',
     write: 'Cambios reversibles o de configuración. `dryRun:true` devuelve una vista previa',
     critical: 'Acciones que pueden bloquear tráfico o cambiar la detección. Usa `dryRun:true` para obtener una vista previa; repite con `confirm:true` y su `previewId`. Por defecto, también debes aceptar un diálogo del servidor. Sin `confirm:true`, se rechaza la llamada (`confirmation_required`)',
     selection: 'Selecciona los perfiles con `DARKTRACE_PROFILES`. `all`, o una lista con `sensitive` y `write`, solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. Consulta [Configuración](configuration.md#perfiles).',
-    columns: 'Columnas: **Riesgo** es la categoría del inventario API. **Laboratorio** indica si la operación pasó una prueba con un appliance real y hasta dónde llegó la validación.',
+    columns: 'Columnas: **Riesgo** es la categoría del inventario API. **Evidencia de laboratorio** indica si la operación pasó una prueba con un appliance real y hasta dónde llegó la validación.',
     contents: 'Índice', unavailable: 'No disponibles', summaryLabel: 'Resúmenes literales MCP (inglés):',
-    table: '| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |', reasonsTable: '| Método y ruta | Motivo |',
-    yes: 'sí', unvalidated: 'sin validar en laboratorio',
+    table: '| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |', reasonsTable: '| Método y ruta | Motivo |',
+    yes: '✓', unvalidated: 'sin validar en laboratorio',
+    legend: '**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.',
+    grouping: 'Cada herramienta agrupa variantes de la misma API, como una lista y su detalle por ID; por eso hay menos herramientas que operaciones.',
     areas: { 'System and reference data': 'Sistema y referencias', Devices: 'Dispositivos', 'Model breaches': 'Model breaches', 'Models and metrics': 'Modelos y métricas', 'AI Analyst': 'AI Analyst', 'Autonomous Response (Antigena)': 'Respuesta autónoma (Antigena)', Tags: 'Etiquetas', 'Intel feed and subnets': 'Intel feed y subredes', 'Packet captures': 'Capturas de paquetes', 'Advanced Search': 'Advanced Search', 'Darktrace/Email': 'Darktrace/Email', Other: 'Otros' },
     partial: {
       post_antigena_manual: 'parcial: solo se ejecutaron bloqueos manuales `connection`; `pol`, `gpol` y `quarantineOutgoing` devolvieron HTTP 400 en un dispositivo sensor cliente; no se ejecutaron `quarantine` ni `quarantineIncoming`',
@@ -326,8 +330,8 @@ function required(object, key) {
 const slug = label => label.toLowerCase().replace(/[^\p{L}\p{N} -]/gu, '').replaceAll(' ', '-');
 const validated = op => (op.validatedOn ?? []).length > 0;
 function labCell(op, messages) {
-  if (!validated(op)) return messages.unvalidated + (Object.hasOwn(LAB_NOT_VALIDATED_NOTE, op.operationId) ? `: ${required(messages.notes, op.operationId)}` : '');
-  return Object.hasOwn(LAB_PARTIAL, op.operationId) ? required(messages.partial, op.operationId) : messages.yes;
+  if (!validated(op)) return '— ' + messages.unvalidated + (Object.hasOwn(LAB_NOT_VALIDATED_NOTE, op.operationId) ? `: ${required(messages.notes, op.operationId)}` : '');
+  return Object.hasOwn(LAB_PARTIAL, op.operationId) ? `◐ ${required(messages.partial, op.operationId)}` : messages.yes;
 }
 
 export function render(lang = 'es') {
@@ -345,6 +349,7 @@ export function render(lang = 'es') {
   const deprecated = excluded.filter(op => op.status === 'excluded').length;
   const out = [`# ${m.title}`, '', lang === 'es' ? '**Español** · [English](en/tools.md)' : '[Español](../tools.md) · **English**', '', m.nav, '', m.lead, '', m.generated, ''];
   out.push(m.inventory({ tools: byTool.size, available: available.length, total: ops.length, spec: catalogue.specVersion ?? '6.1', excluded: excluded.length, deprecated }), '');
+  out.push(m.grouping, '');
   out.push(m.evidence({ validated: nValidated, partial: nPartial, email: nEmail }, LAB_SCOPE), '');
   out.push(`## ${m.profiles}`, '', m.profileTable, '|---|---|---:|');
   for (const profile of Object.keys(counts)) out.push(`| \`${profile}\`${profile === 'read' ? ` (${m.default})` : ''} | ${required(m, profile)} | ${counts[profile]} |`);
@@ -370,7 +375,7 @@ export function render(lang = 'es') {
       const list = byTool.get(tool).sort((a, b) => a.pathTemplate.localeCompare(b.pathTemplate) || a.method.localeCompare(b.method));
       for (const op of list) out.push(`| \`${tool}\` | \`${op.method} ${op.pathTemplate}\` | ${op.tier} | \`${profileOf(op)}\` | ${labCell(op, m)} | ${required(m.descriptions, op.operationId)} |`);
     }
-    out.push('');
+    out.push('', m.legend, '');
   }
   out.push(`## ${m.unavailable}`, '', m.reasonsTable, '|---|---|');
   for (const op of excluded) out.push(`| \`${op.method} ${op.pathTemplate}\` | ${required(m.reasons, op.operationId)} |`);

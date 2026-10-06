@@ -65,6 +65,14 @@ Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `2
 
 El empaquetado, la vinculación al origen, los ejemplos y la validación de demos usan el nuevo par de README. El verificador mantiene las comprobaciones de tipo de archivo, permisos, tamaño e igualdad de bytes del espejo; sus campos son `readmeEnSha256` y `readmeEnSourceBinding`.
 
-Con autorización expresa del propietario se actualizaron únicamente las referencias a README en los ejecutores aislados, el comprobador y fixture de distribución, los avisos en inglés y las pruebas de botones. No se debilitaron ni eliminaron aserciones. Las dos versiones siguen comprobándose.
+Con autorización expresa del propietario se actualizaron las referencias a README y su comprobación de presentación en los ejecutores aislados, el comprobador y fixture de distribución, los avisos en inglés y las pruebas de botones. No se debilitaron ni eliminaron aserciones. Las dos versiones siguen comprobándose.
 
 Los 27 hallazgos tienen respuesta individual en la PR. El punto 15 se resolvió por separado en #21 por decisión del propietario; los demás se incorporan aquí. Los registros de 1.1.0/1.1.1 conservan sus fechas y hashes; las funciones de `main` previstas para 1.1.3 no se atribuyen al paquete 1.1.2. La fusión queda a cargo del propietario, sin fusión automática.
+
+## Claridad de la tabla de capacidades
+
+Por indicación final del propietario, ambos README separan Herramientas y Operaciones en columnas, con una nota sobre las variantes agrupadas por herramienta. La evidencia usa `✓ / ◐ / —` y una leyenda inmediatamente debajo; la referencia generada utiliza los mismos símbolos y explica su alcance. Las cifras y la clasificación de operaciones no cambian.
+
+## Presentación de los botones
+
+Los tres botones usan badges oscuros homogéneos de 36 px en una sola fila HTML, con textos localizados y explicación debajo. `scripts/install-badges.mjs` modifica solo su presentación; las funciones de URI siguen siendo las de #18. Se comprobó la igualdad exacta de los tres deeplinks, incluido el JSON codificado, antes y después en ambos README. La comprobación de contenido del README se adapta a las filas HTML; las pruebas del JSON y de seguridad permanecen intactas. La vista renderizada se enlaza en la PR.

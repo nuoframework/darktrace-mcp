@@ -10,7 +10,9 @@ Referencia de operaciones, perfiles y alcance exacto de la evidencia de laborato
 
 **50 herramientas** cubren **77 operaciones ejecutables** de las 79 del inventario API (Darktrace Threat Visualizer API 6.1). Las otras 2 [no están disponibles](#no-disponibles): 1 excluida (la acción de correo) y 1 obsoleta (`GET /aianalyst/incidents`).
 
-**Evidencia de laboratorio.** 59 operaciones tienen evidencia de 2 appliances distintos Darktrace 7.1.0 (2026-10-06): lab A para 1.1.0 y lab B para la campaña de huecos 1.1.1. En 6 operaciones es parcial; la columna **Laboratorio** indica su alcance. El resto figura *sin validar en laboratorio*: sigue la documentación API, pero no superó la prueba con un appliance real, incluidas las 13 lecturas Email (HTTP 403; una caída posterior del servicio devolvió 503, según el [registro Email](security/lab-email-validation.md)). Parte de la evidencia de escritura es anterior a los controles finales de aprobación, límites, bloqueo y auditoría, cubiertos por pruebas offline. La [campaña de huecos](security/lab-gap-campaign-1.1.1.md) repitió flujos críticos (Antigena, Antigena manual, intel feed, subredes y borrado de etiquetas) y escrituras de dispositivos, investigaciones, PCAP y etiquetas con esos controles.
+Cada herramienta agrupa variantes de la misma API, como una lista y su detalle por ID; por eso hay menos herramientas que operaciones.
+
+**Evidencia de laboratorio.** 59 operaciones tienen evidencia de 2 appliances distintos Darktrace 7.1.0 (2026-10-06): lab A para 1.1.0 y lab B para la campaña de huecos 1.1.1. En 6 operaciones es parcial; la columna **Evidencia de laboratorio** indica su alcance. El resto figura *sin validar en laboratorio*: sigue la documentación API, pero no superó la prueba con un appliance real, incluidas las 13 lecturas Email (HTTP 403; una caída posterior del servicio devolvió 503, según el [registro Email](security/lab-email-validation.md)). Parte de la evidencia de escritura es anterior a los controles finales de aprobación, límites, bloqueo y auditoría, cubiertos por pruebas offline. La [campaña de huecos](security/lab-gap-campaign-1.1.1.md) repitió flujos críticos (Antigena, Antigena manual, intel feed, subredes y borrado de etiquetas) y escrituras de dispositivos, investigaciones, PCAP y etiquetas con esos controles.
 
 ## Qué perfil necesitas
 
@@ -23,7 +25,7 @@ Referencia de operaciones, perfiles y alcance exacto de la evidencia de laborato
 
 Selecciona los perfiles con `DARKTRACE_PROFILES`. `all`, o una lista con `sensitive` y `write`, solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. Consulta [Configuración](configuration.md#perfiles).
 
-Columnas: **Riesgo** es la categoría del inventario API. **Laboratorio** indica si la operación pasó una prueba con un appliance real y hasta dónde llegó la validación.
+Columnas: **Riesgo** es la categoría del inventario API. **Evidencia de laboratorio** indica si la operación pasó una prueba con un appliance real y hasta dónde llegó la validación.
 
 ## Índice
 
@@ -50,14 +52,16 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_get_status`**: Darktrace appliance health: version, probes, traffic and licensing status.
 - **`darktrace_get_summary_statistics`**: High-level summary statistics (bandwidth, device counts, patterns).
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_get_cves` | `GET /cves` | read | `read` | sin validar en laboratorio: el appliance devuelve HTTP 500 (solo Darktrace/OT) | CVE de dispositivos OT (solo Darktrace/OT). |
-| `darktrace_get_network_stats` | `GET /network` | read | `read` | sí | Conectividad entre dispositivos o subredes. |
-| `darktrace_get_reference_data` | `GET /enums` | read | `read` | parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Valores de texto para códigos numéricos de las respuestas API. |
-| `darktrace_get_reference_data` | `GET /filtertypes` | read | `read` | sin validar en laboratorio: el appliance redirige (HTTP 302); nunca se siguen redirecciones | Filtros disponibles en el editor de modelos. |
-| `darktrace_get_status` | `GET /status` | read | `read` | sí | Estado del sistema y versión del appliance. |
-| `darktrace_get_summary_statistics` | `GET /summarystatistics` | read | `read` | sí | Número de dispositivos, ancho de banda y acciones de respuesta activas. |
+| `darktrace_get_cves` | `GET /cves` | read | `read` | — sin validar en laboratorio: el appliance devuelve HTTP 500 (solo Darktrace/OT) | CVE de dispositivos OT (solo Darktrace/OT). |
+| `darktrace_get_network_stats` | `GET /network` | read | `read` | ✓ | Conectividad entre dispositivos o subredes. |
+| `darktrace_get_reference_data` | `GET /enums` | read | `read` | ◐ parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Valores de texto para códigos numéricos de las respuestas API. |
+| `darktrace_get_reference_data` | `GET /filtertypes` | read | `read` | — sin validar en laboratorio: el appliance redirige (HTTP 302); nunca se siguen redirecciones | Filtros disponibles en el editor de modelos. |
+| `darktrace_get_status` | `GET /status` | read | `read` | ✓ | Estado del sistema y versión del appliance. |
+| `darktrace_get_summary_statistics` | `GET /summarystatistics` | read | `read` | ✓ | Número de dispositivos, ancho de banda y acciones de respuesta activas. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Dispositivos
 
@@ -73,17 +77,19 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_search_devices`**: Free-text device search (hostname, IP, MAC, vendor, tag...) with paging.
 - **`darktrace_update_device`**: Update device properties (label, priority, type).
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_get_connection_details` | `GET /details` | read | `read` | sí | Conexiones y eventos de un dispositivo o entidad, ordenados por tiempo. |
-| `darktrace_get_device_info` | `GET /deviceinfo` | read | `read` | sí | Datos de conexión de un dispositivo. |
-| `darktrace_get_device_summary` | `GET /devicesummary` | read | `read` | sí | Contexto de un dispositivo obtenido de varias fuentes. |
-| `darktrace_get_devices` | `GET /devices` | read | `read` | sí | Lista dispositivos o consulta uno por `did`. |
-| `darktrace_get_endpoint_details` | `GET /endpointdetails` | read | `read` | sí | Ubicación y conexiones de una IP o nombre de host externo. |
-| `darktrace_get_metric_data` | `GET /metricdata` | read | `read` | sí | Serie temporal de métricas de un dispositivo. |
-| `darktrace_get_similar_devices` | `GET /similardevices` | read | `read` | sí | Dispositivos con comportamiento similar al indicado. |
-| `darktrace_search_devices` | `GET /devicesearch` | read | `read` | sí | Busca dispositivos con filtros. |
-| `darktrace_update_device` | `POST /devices` | high | `write` | sí | Cambia la etiqueta, prioridad o tipo de un dispositivo. |
+| `darktrace_get_connection_details` | `GET /details` | read | `read` | ✓ | Conexiones y eventos de un dispositivo o entidad, ordenados por tiempo. |
+| `darktrace_get_device_info` | `GET /deviceinfo` | read | `read` | ✓ | Datos de conexión de un dispositivo. |
+| `darktrace_get_device_summary` | `GET /devicesummary` | read | `read` | ✓ | Contexto de un dispositivo obtenido de varias fuentes. |
+| `darktrace_get_devices` | `GET /devices` | read | `read` | ✓ | Lista dispositivos o consulta uno por `did`. |
+| `darktrace_get_endpoint_details` | `GET /endpointdetails` | read | `read` | ✓ | Ubicación y conexiones de una IP o nombre de host externo. |
+| `darktrace_get_metric_data` | `GET /metricdata` | read | `read` | ✓ | Serie temporal de métricas de un dispositivo. |
+| `darktrace_get_similar_devices` | `GET /similardevices` | read | `read` | ✓ | Dispositivos con comportamiento similar al indicado. |
+| `darktrace_search_devices` | `GET /devicesearch` | read | `read` | ✓ | Busca dispositivos con filtros. |
+| `darktrace_update_device` | `POST /devices` | high | `write` | ✓ | Cambia la etiqueta, prioridad o tipo de un dispositivo. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Model breaches
 
@@ -94,15 +100,17 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_get_model_breach_comments`**: Read comments on model breaches.
 - **`darktrace_list_model_breaches`**: List model breaches (alerts), or fetch one by pbid.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_acknowledge_model_breach` | `POST /modelbreaches/{pbid}/acknowledge` | medium | `write` | sí | Reconoce una alerta. |
-| `darktrace_acknowledge_model_breach` | `POST /modelbreaches/{pbid}/unacknowledge` | medium | `write` | sí | Retira el reconocimiento de una alerta. |
-| `darktrace_comment_model_breach` | `POST /modelbreaches/{pbid}/comments` | medium | `write` | sí | Añade un comentario a una alerta. |
-| `darktrace_get_model_breach_comments` | `GET /mbcomments` | read | `read` | sí | Comentarios de las alertas. |
-| `darktrace_get_model_breach_comments` | `GET /modelbreaches/{pbid}/comments` | read | `read` | sí | Comentarios de una alerta. |
-| `darktrace_list_model_breaches` | `GET /modelbreaches` | read | `read` | sí | Lista model breaches (alertas). |
-| `darktrace_list_model_breaches` | `GET /modelbreaches/{pbid}` | read | `read` | sí | Consulta una alerta por `pbid`. |
+| `darktrace_acknowledge_model_breach` | `POST /modelbreaches/{pbid}/acknowledge` | medium | `write` | ✓ | Reconoce una alerta. |
+| `darktrace_acknowledge_model_breach` | `POST /modelbreaches/{pbid}/unacknowledge` | medium | `write` | ✓ | Retira el reconocimiento de una alerta. |
+| `darktrace_comment_model_breach` | `POST /modelbreaches/{pbid}/comments` | medium | `write` | ✓ | Añade un comentario a una alerta. |
+| `darktrace_get_model_breach_comments` | `GET /mbcomments` | read | `read` | ✓ | Comentarios de las alertas. |
+| `darktrace_get_model_breach_comments` | `GET /modelbreaches/{pbid}/comments` | read | `read` | ✓ | Comentarios de una alerta. |
+| `darktrace_list_model_breaches` | `GET /modelbreaches` | read | `read` | ✓ | Lista model breaches (alertas). |
+| `darktrace_list_model_breaches` | `GET /modelbreaches/{pbid}` | read | `read` | ✓ | Consulta una alerta por `pbid`. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Modelos y métricas
 
@@ -112,14 +120,16 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_list_metrics`**: List available metrics, or one metric by mlid.
 - **`darktrace_list_models`**: List detection models, or fetch one by pid.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_list_components` | `GET /components` | read | `read` | parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Lista componentes de modelos. |
-| `darktrace_list_components` | `GET /components/{cid}` | read | `read` | sí | Consulta un componente por `cid`. |
-| `darktrace_list_metrics` | `GET /metrics` | read | `read` | sí | Lista las métricas disponibles. |
-| `darktrace_list_metrics` | `GET /metrics/{mlid}` | read | `read` | sí | Consulta una métrica por `mlid`. |
-| `darktrace_list_models` | `GET /models` | read | `read` | parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Lista modelos. |
-| `darktrace_list_models` | `GET /models/{pid}` | read | `read` | sí | Consulta un modelo por `pid`. |
+| `darktrace_list_components` | `GET /components` | read | `read` | ◐ parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Lista componentes de modelos. |
+| `darktrace_list_components` | `GET /components/{cid}` | read | `read` | ✓ | Consulta un componente por `cid`. |
+| `darktrace_list_metrics` | `GET /metrics` | read | `read` | ✓ | Lista las métricas disponibles. |
+| `darktrace_list_metrics` | `GET /metrics/{mlid}` | read | `read` | ✓ | Consulta una métrica por `mlid`. |
+| `darktrace_list_models` | `GET /models` | read | `read` | ◐ parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded` | Lista modelos. |
+| `darktrace_list_models` | `GET /models/{pid}` | read | `read` | ✓ | Consulta un modelo por `pid`. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## AI Analyst
 
@@ -134,19 +144,21 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_list_ai_analyst_investigations`**: List Cyber AI Analyst investigations.
 - **`darktrace_pin_ai_analyst_incident`**: Pin or unpin Cyber AI Analyst incident events.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/acknowledge` | medium | `write` | sí | Reconoce eventos de incidentes AI Analyst. |
-| `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/unacknowledge` | medium | `write` | sí | Retira el reconocimiento de eventos de incidentes AI Analyst. |
-| `darktrace_comment_ai_analyst_incident` | `POST /aianalyst/incident/comments` | medium | `write` | sí | Añade un comentario a un evento de incidente AI Analyst. |
-| `darktrace_create_ai_analyst_investigation` | `POST /aianalyst/investigations` | medium | `write` | sí | Inicia una investigación manual de AI Analyst. |
-| `darktrace_get_ai_analyst_incident_comments` | `GET /aianalyst/incident/comments` | read | `read` | sí | Comentarios de un evento de incidente AI Analyst. |
-| `darktrace_get_ai_analyst_stats` | `GET /aianalyst/stats` | read | `read` | sí | Estadísticas de AI Analyst. |
-| `darktrace_list_ai_analyst_incidents` | `GET /aianalyst/groups` | read | `read` | sí | Lista incidentes (grupos) de AI Analyst. |
-| `darktrace_list_ai_analyst_incidents` | `GET /aianalyst/incidentevents` | read | `read` | sí | Lista eventos de incidentes de AI Analyst. |
-| `darktrace_list_ai_analyst_investigations` | `GET /aianalyst/investigations` | read | `read` | sí | Lista investigaciones manuales de AI Analyst. |
-| `darktrace_pin_ai_analyst_incident` | `POST /aianalyst/pin` | medium | `write` | sí | Fija eventos de incidentes AI Analyst. |
-| `darktrace_pin_ai_analyst_incident` | `POST /aianalyst/unpin` | medium | `write` | sí | Desfija eventos de incidentes AI Analyst. |
+| `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/acknowledge` | medium | `write` | ✓ | Reconoce eventos de incidentes AI Analyst. |
+| `darktrace_acknowledge_ai_analyst_incident` | `POST /aianalyst/unacknowledge` | medium | `write` | ✓ | Retira el reconocimiento de eventos de incidentes AI Analyst. |
+| `darktrace_comment_ai_analyst_incident` | `POST /aianalyst/incident/comments` | medium | `write` | ✓ | Añade un comentario a un evento de incidente AI Analyst. |
+| `darktrace_create_ai_analyst_investigation` | `POST /aianalyst/investigations` | medium | `write` | ✓ | Inicia una investigación manual de AI Analyst. |
+| `darktrace_get_ai_analyst_incident_comments` | `GET /aianalyst/incident/comments` | read | `read` | ✓ | Comentarios de un evento de incidente AI Analyst. |
+| `darktrace_get_ai_analyst_stats` | `GET /aianalyst/stats` | read | `read` | ✓ | Estadísticas de AI Analyst. |
+| `darktrace_list_ai_analyst_incidents` | `GET /aianalyst/groups` | read | `read` | ✓ | Lista incidentes (grupos) de AI Analyst. |
+| `darktrace_list_ai_analyst_incidents` | `GET /aianalyst/incidentevents` | read | `read` | ✓ | Lista eventos de incidentes de AI Analyst. |
+| `darktrace_list_ai_analyst_investigations` | `GET /aianalyst/investigations` | read | `read` | ✓ | Lista investigaciones manuales de AI Analyst. |
+| `darktrace_pin_ai_analyst_incident` | `POST /aianalyst/pin` | medium | `write` | ✓ | Fija eventos de incidentes AI Analyst. |
+| `darktrace_pin_ai_analyst_incident` | `POST /aianalyst/unpin` | medium | `write` | ✓ | Desfija eventos de incidentes AI Analyst. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Respuesta autónoma (Antigena)
 
@@ -156,12 +168,14 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_antigena_manual_action`**: Create a manual RESPOND action (e.g. quarantine or block a device).
 - **`darktrace_list_antigena_actions`**: Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_antigena_action` | `POST /antigena` | critical | `critical` | sí | Activa, amplía, anula o reactiva una acción de respuesta. |
-| `darktrace_antigena_manual_action` | `POST /antigena/manual` | critical | `critical` | parcial: solo se ejecutaron bloqueos manuales `connection`; `pol`, `gpol` y `quarantineOutgoing` devolvieron HTTP 400 en un dispositivo sensor cliente; no se ejecutaron `quarantine` ni `quarantineIncoming` | Crea una acción de respuesta manual, por ejemplo bloquear una conexión. |
-| `darktrace_list_antigena_actions` | `GET /antigena` | read | `read` | sí | Lista acciones de respuesta autónoma (Antigena). |
-| `darktrace_list_antigena_actions` | `GET /antigena/summary` | read | `read` | sí | Resumen de acciones de respuesta activas y pendientes. |
+| `darktrace_antigena_action` | `POST /antigena` | critical | `critical` | ✓ | Activa, amplía, anula o reactiva una acción de respuesta. |
+| `darktrace_antigena_manual_action` | `POST /antigena/manual` | critical | `critical` | ◐ parcial: solo se ejecutaron bloqueos manuales `connection`; `pol`, `gpol` y `quarantineOutgoing` devolvieron HTTP 400 en un dispositivo sensor cliente; no se ejecutaron `quarantine` ni `quarantineIncoming` | Crea una acción de respuesta manual, por ejemplo bloquear una conexión. |
+| `darktrace_list_antigena_actions` | `GET /antigena` | read | `read` | ✓ | Lista acciones de respuesta autónoma (Antigena). |
+| `darktrace_list_antigena_actions` | `GET /antigena/summary` | read | `read` | ✓ | Resumen de acciones de respuesta activas y pendientes. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Etiquetas
 
@@ -171,18 +185,20 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_list_tags`**: Tags and tagged entities: list tags, one tag, or which devices carry which tags.
 - **`darktrace_manage_tags`**: Create tags and add/remove tags on devices or entities.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_delete_tag` | `DELETE /tags/{tid}` | critical | `critical` | sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Borra una etiqueta. |
-| `darktrace_list_tags` | `GET /tags` | read | `read` | sí | Lista etiquetas. |
-| `darktrace_list_tags` | `GET /tags/{tid}` | read | `read` | sí | Consulta una etiqueta por `tid`. |
-| `darktrace_list_tags` | `GET /tags/{tid}/entities` | read | `read` | sí | Dispositivos con una etiqueta concreta. |
-| `darktrace_list_tags` | `GET /tags/entities` | read | `read` | sí | Etiquetas de un dispositivo o dispositivos con una etiqueta. |
-| `darktrace_manage_tags` | `POST /tags` | high | `write` | sí | Crea una etiqueta. |
-| `darktrace_manage_tags` | `POST /tags/{tid}/entities` | high | `write` | sí | Asigna una etiqueta a un dispositivo mediante el ID de etiqueta. |
-| `darktrace_manage_tags` | `DELETE /tags/{tid}/entities/{teid}` | high | `write` | sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Retira una asignación de etiqueta. |
-| `darktrace_manage_tags` | `DELETE /tags/entities` | high | `write` | sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Retira una etiqueta de un dispositivo. |
-| `darktrace_manage_tags` | `POST /tags/entities` | high | `write` | sí | Asigna una etiqueta a un dispositivo. |
+| `darktrace_delete_tag` | `DELETE /tags/{tid}` | critical | `critical` | — sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Borra una etiqueta. |
+| `darktrace_list_tags` | `GET /tags` | read | `read` | ✓ | Lista etiquetas. |
+| `darktrace_list_tags` | `GET /tags/{tid}` | read | `read` | ✓ | Consulta una etiqueta por `tid`. |
+| `darktrace_list_tags` | `GET /tags/{tid}/entities` | read | `read` | ✓ | Dispositivos con una etiqueta concreta. |
+| `darktrace_list_tags` | `GET /tags/entities` | read | `read` | ✓ | Etiquetas de un dispositivo o dispositivos con una etiqueta. |
+| `darktrace_manage_tags` | `POST /tags` | high | `write` | ✓ | Crea una etiqueta. |
+| `darktrace_manage_tags` | `POST /tags/{tid}/entities` | high | `write` | ✓ | Asigna una etiqueta a un dispositivo mediante el ID de etiqueta. |
+| `darktrace_manage_tags` | `DELETE /tags/{tid}/entities/{teid}` | high | `write` | — sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Retira una asignación de etiqueta. |
+| `darktrace_manage_tags` | `DELETE /tags/entities` | high | `write` | — sin validar en laboratorio: se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown` | Retira una etiqueta de un dispositivo. |
+| `darktrace_manage_tags` | `POST /tags/entities` | high | `write` | ✓ | Asigna una etiqueta a un dispositivo. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Intel feed y subredes
 
@@ -193,12 +209,14 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_update_intel_feed`**: Add or remove watched domains in the intel feed (removeall wipes the list).
 - **`darktrace_update_subnet`**: Update subnet settings (label, DHCP, exclusion from monitoring).
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_get_intel_feed` | `GET /intelfeed` | read | `read` | sí | Consulta Watched Domains (intel feed). |
-| `darktrace_list_subnets` | `GET /subnets` | read | `read` | sí | Lista subredes. |
-| `darktrace_update_intel_feed` | `POST /intelfeed` | critical | `critical` | parcial: se ejecutaron `addentry`, `addlist`, `expiry` (caducó a tiempo) y `removeentry`; se aceptó `hostname:true` sin lectura posterior; no se ejecutaron `iagn` ni `removeall` | Añade o retira entradas de Watched Domains. |
-| `darktrace_update_subnet` | `POST /subnets` | critical | `critical` | parcial: solo se ejecutaron cambios de `label` y `uniqueHostnames` | Cambia ajustes de una subred. |
+| `darktrace_get_intel_feed` | `GET /intelfeed` | read | `read` | ✓ | Consulta Watched Domains (intel feed). |
+| `darktrace_list_subnets` | `GET /subnets` | read | `read` | ✓ | Lista subredes. |
+| `darktrace_update_intel_feed` | `POST /intelfeed` | critical | `critical` | ◐ parcial: se ejecutaron `addentry`, `addlist`, `expiry` (caducó a tiempo) y `removeentry`; se aceptó `hostname:true` sin lectura posterior; no se ejecutaron `iagn` ni `removeall` | Añade o retira entradas de Watched Domains. |
+| `darktrace_update_subnet` | `POST /subnets` | critical | `critical` | ◐ parcial: solo se ejecutaron cambios de `label` y `uniqueHostnames` | Cambia ajustes de una subred. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Capturas de paquetes
 
@@ -208,11 +226,13 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_list_pcaps`**: List packet captures and their status.
 - **`darktrace_request_pcap`**: Request a new packet capture for a connection.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_download_pcap` | `GET /pcaps/{filename}` | read | `sensitive` | sí | Descarga una captura en Base64, completa o sin contenido: por encima de unos 45 KB se rechaza con `output_limit_exceeded` (solo tamaño y SHA-256). |
-| `darktrace_list_pcaps` | `GET /pcaps` | read | `read` | sí | Lista capturas de paquetes. |
-| `darktrace_request_pcap` | `POST /pcaps` | high | `write` | sí | Solicita una captura de paquetes nueva. |
+| `darktrace_download_pcap` | `GET /pcaps/{filename}` | read | `sensitive` | ✓ | Descarga una captura en Base64, completa o sin contenido: por encima de unos 45 KB se rechaza con `output_limit_exceeded` (solo tamaño y SHA-256). |
+| `darktrace_list_pcaps` | `GET /pcaps` | read | `read` | ✓ | Lista capturas de paquetes. |
+| `darktrace_request_pcap` | `POST /pcaps` | high | `write` | ✓ | Solicita una captura de paquetes nueva. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Advanced Search
 
@@ -220,12 +240,14 @@ Resúmenes literales MCP (inglés):
 
 - **`darktrace_advanced_search`**: Advanced Search (log/event search) plus analyze/graph. query/hash = base64 of JSON {"search":"<query>","fields":[],"timeframe":"3600"} (seconds, max 604800).
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_advanced_search` | `GET /advancedsearch/api/analyze/{field}/{analysis}/{query}` | read | `sensitive` | sí | Análisis de campos de Advanced Search. |
-| `darktrace_advanced_search` | `GET /advancedsearch/api/graph/{graphmode}/{interval}/{query}` | read | `sensitive` | sí | Datos de gráficos de Advanced Search. |
-| `darktrace_advanced_search` | `POST /advancedsearch/api/search` | read | `sensitive` | sí | Consulta Advanced Search mediante POST. |
-| `darktrace_advanced_search` | `GET /advancedsearch/api/search/{query}` | read | `sensitive` | sí | Consulta Advanced Search mediante GET. |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/analyze/{field}/{analysis}/{query}` | read | `sensitive` | ✓ | Análisis de campos de Advanced Search. |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/graph/{graphmode}/{interval}/{query}` | read | `sensitive` | ✓ | Datos de gráficos de Advanced Search. |
+| `darktrace_advanced_search` | `POST /advancedsearch/api/search` | read | `sensitive` | ✓ | Consulta Advanced Search mediante POST. |
+| `darktrace_advanced_search` | `GET /advancedsearch/api/search/{query}` | read | `sensitive` | ✓ | Consulta Advanced Search mediante GET. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## Darktrace/Email
 
@@ -239,21 +261,23 @@ Resúmenes literales MCP (inglés):
 - **`darktrace_email_reference_data`**: Darktrace/EMAIL reference data: tags, actions, filters, audit event types.
 - **`darktrace_email_search`**: Darktrace/EMAIL: search emails with a JSON criteria body.
 
-| Herramienta | Método y ruta | Riesgo | Perfil | Laboratorio | Qué hace |
+| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |
 |---|---|---|---|---|---|
-| `darktrace_download_email` | `GET /agemail/api/ep/api/v1.0/emails/{uuid}/download` | read | `sensitive` | sin validar en laboratorio | Tamaño y SHA-256 de un correo sin procesar; no devuelve contenido. |
-| `darktrace_email_audit_events` | `GET /agemail/api/ep/api/v1.0/system/audit/events` | read | `sensitive` | sin validar en laboratorio | Eventos de auditoría Email. |
-| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/action_summary` | read | `sensitive` | sin validar en laboratorio | Panel Email: resumen de acciones. |
-| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/dash_stats` | read | `sensitive` | sin validar en laboratorio | Panel Email: estadísticas. |
-| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/data_loss` | read | `sensitive` | sin validar en laboratorio | Panel Email: pérdida de datos. |
-| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/user_anomaly` | read | `sensitive` | sin validar en laboratorio | Panel Email: anomalías de usuario. |
-| `darktrace_email_decode_link` | `GET /agemail/api/ep/api/v1.0/admin/decode_link` | read | `sensitive` | sin validar en laboratorio | Decodifica un enlace de correo reescrito. |
-| `darktrace_email_get` | `GET /agemail/api/ep/api/v1.0/emails/{uuid}` | read | `sensitive` | sin validar en laboratorio | Consulta un correo, incluidos sus metadatos de contenido. |
-| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/actions` | read | `sensitive` | sin validar en laboratorio | Datos de referencia Email: acciones. |
-| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/filters` | read | `sensitive` | sin validar en laboratorio | Datos de referencia Email: filtros. |
-| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/tags` | read | `sensitive` | sin validar en laboratorio | Datos de referencia Email: etiquetas. |
-| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/system/audit/eventTypes` | read | `sensitive` | sin validar en laboratorio | Datos de referencia Email: tipos de evento de auditoría. |
-| `darktrace_email_search` | `POST /agemail/api/ep/api/v1.0/emails/search` | read | `sensitive` | sin validar en laboratorio | Busca correos. |
+| `darktrace_download_email` | `GET /agemail/api/ep/api/v1.0/emails/{uuid}/download` | read | `sensitive` | — sin validar en laboratorio | Tamaño y SHA-256 de un correo sin procesar; no devuelve contenido. |
+| `darktrace_email_audit_events` | `GET /agemail/api/ep/api/v1.0/system/audit/events` | read | `sensitive` | — sin validar en laboratorio | Eventos de auditoría Email. |
+| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/action_summary` | read | `sensitive` | — sin validar en laboratorio | Panel Email: resumen de acciones. |
+| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/dash_stats` | read | `sensitive` | — sin validar en laboratorio | Panel Email: estadísticas. |
+| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/data_loss` | read | `sensitive` | — sin validar en laboratorio | Panel Email: pérdida de datos. |
+| `darktrace_email_dashboard` | `GET /agemail/api/ep/api/v1.0/dash/user_anomaly` | read | `sensitive` | — sin validar en laboratorio | Panel Email: anomalías de usuario. |
+| `darktrace_email_decode_link` | `GET /agemail/api/ep/api/v1.0/admin/decode_link` | read | `sensitive` | — sin validar en laboratorio | Decodifica un enlace de correo reescrito. |
+| `darktrace_email_get` | `GET /agemail/api/ep/api/v1.0/emails/{uuid}` | read | `sensitive` | — sin validar en laboratorio | Consulta un correo, incluidos sus metadatos de contenido. |
+| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/actions` | read | `sensitive` | — sin validar en laboratorio | Datos de referencia Email: acciones. |
+| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/filters` | read | `sensitive` | — sin validar en laboratorio | Datos de referencia Email: filtros. |
+| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/resources/tags` | read | `sensitive` | — sin validar en laboratorio | Datos de referencia Email: etiquetas. |
+| `darktrace_email_reference_data` | `GET /agemail/api/ep/api/v1.0/system/audit/eventTypes` | read | `sensitive` | — sin validar en laboratorio | Datos de referencia Email: tipos de evento de auditoría. |
+| `darktrace_email_search` | `POST /agemail/api/ep/api/v1.0/emails/search` | read | `sensitive` | — sin validar en laboratorio | Busca correos. |
+
+**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.
 
 ## No disponibles
 

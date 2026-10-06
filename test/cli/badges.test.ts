@@ -43,11 +43,11 @@ test('VS Code badges prompt for URL and both tokens through inputs; tokens are p
 });
 
 test('both README languages carry the badge rows generated for the current package version', async () => {
-  const { BADGE_LABELS } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { BADGE_LABELS: Record<'en' | 'es', { cursor: string; vscode: string; insiders: string }> };
+  const { BADGE_LABELS, readmeBadgesHtml } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { BADGE_LABELS: Record<'en' | 'es', { cursor: string; vscode: string; insiders: string }>; readmeBadgesHtml: (version: string, labels: { cursor: string; vscode: string; insiders: string }) => string };
   // README.md is Spanish and README.en.md is English; both must carry their language rows.
   const candidates = ['README.md', 'README.en.md'].filter((f) => existsSync(join(root, f))).map((f) => [f, readFileSync(join(root, f), 'utf8')] as const);
   for (const [lang, labels] of Object.entries(BADGE_LABELS)) {
-    const rows = installBadgesMarkdown(version, labels).split('\n');
+    const rows = readmeBadgesHtml(version, labels).split('\n');
     const carrier = candidates.find(([, text]) => rows.every((line) => text.includes(line)));
     assert.ok(carrier, `no README carries the ${lang} badge rows for ${version} (run: node scripts/install-badges.mjs and paste them)`);
   }
