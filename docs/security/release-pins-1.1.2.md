@@ -43,3 +43,23 @@ The three security skips are the existing macOS setgid-mode cases; Linux CI stil
 - `src/cli/clients.ts`, `src/cli/docker.ts` (new), `src/cli/help.ts`, `src/cli/main.ts`, `src/cli/online.ts`, `src/cli/setup.ts`, `src/cli/state.ts`, `src/cli/uninstall.ts` (new)
 - `test/cli/date-format.test.ts`, `test/cli/docker-setup.test.ts` (new), `test/cli/helpers.ts`, `test/cli/sensitive-write.test.ts`, `test/cli/setup.test.ts`, `test/cli/uninstall.test.ts` (new)
 - `test/security/evidence/2026-10-06T20-07-36-725Z.json`
+
+## Supply-chain branch: signed releases and property-based tests
+
+Branch `chore/scorecard` adds no production source: `src/` is unchanged, so the source tree SHA-256, the runtime file count and the runtime aggregate SHA-256 above still apply. It adds `fast-check` 4.10.2 as an exact development dependency (both lockfiles updated and byte-identical) and 22 property-based tests in `test/unit/validation-properties.test.ts` (9), `test/unit/signer-properties.test.ts` (7) and `test/unit/canonical-properties.test.ts` (6). Workflow changes (release signing, the pinned npm fallback, `sign-release.yml`, the Scorecard token) do not affect any pin.
+
+Ran `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:security` and `node scripts/validate-examples.mjs` from `7ccfa798ccef9c385f3f292c6728a754cf388ead` (main after PR #13) with the branch changes uncommitted.
+
+Receipt: [2026-10-06T20-31-32-550Z.json](../../test/security/evidence/2026-10-06T20-31-32-550Z.json), SHA-256 `ed9b12452199d725015eafb84f8c141846d618755f76dccb720cbaf06580d681`. It records `receiptComplete:true`, successful build/test status, 1150 subcases, 95 runtime hashes and source tree `98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad`, identical to the receipt above.
+
+| Pin | Old → new | Locations |
+|---|---|---|
+| Functional tests / Linux passes | 245 → 267 | `.github/workflows/ci.yml` |
+| Security tests / Linux passes / receipt subcases | 1150 → 1150 (unchanged) | `.github/workflows/ci.yml` |
+| Production source tree SHA-256 | `98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad` (unchanged) | `.github/workflows/ci.yml` |
+| Runtime files / runtime aggregate SHA-256 | 95 / `3eb5f9740d4c995849d736160bbdfed98c90433bdfda42f47cc6877e511e38ad` (unchanged) | `.github/workflows/ci.yml` |
+
+| Environment | Functional total / pass / fail / skip | Security total / pass / fail / skip |
+|---|---|---|
+| macOS arm64 (Node 24.14.1) | 267 / 267 / 0 / 0 | 1150 / 1147 / 0 / 3 (the existing macOS setgid-mode skips) |
+
