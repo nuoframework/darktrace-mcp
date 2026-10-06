@@ -11,11 +11,15 @@ Default: MCP over stdio. Configuration and credentials come from operator enviro
 --check-config / doctor validate local configuration without network access.
 Private CA: NODE_EXTRA_CA_CERTS. TLS verification is mandatory. HTTP transport is unavailable.
 Profiles (operator-only; the model cannot change them): DARKTRACE_PROFILES=read|sensitive|write|critical (comma list) or all.
-Default: read (non-sensitive consultation). sensitive: Advanced Search, Darktrace/EMAIL, PCAP download, audit events.
-write: state-changing actions run directly (dryRun:true previews). critical (needs write): RESPOND/Antigena, intel feed,
-subnets, tag deletion and email actions need confirm:true AND a human accept in an MCP elicitation dialog; otherwise
-only a preview is returned. DARKTRACE_CRITICAL_APPROVAL=elicitation (default; refused if the host cannot elicit) or host
-(rely on the host's own tool-approval prompt). DARKTRACE_WRITE_APPROVAL=host (default) or elicitation for other writes.
+Default: read (non-sensitive consultation). sensitive: Advanced Search, Darktrace/EMAIL content, PCAP download, audit events.
+write: acknowledge, comment, tags, labels, PCAP requests, AI Analyst investigations; dryRun:true previews.
+critical (needs write): RESPOND/Antigena actions, intel feed, subnets, tag deletion. Each runs only after a dryRun:true
+preview repeated with confirm:true and its previewId; without them the call is refused (confirmation_required).
+The email action is not available in this release. DARKTRACE_CRITICAL_APPROVAL=elicitation (default: a human accepts
+an MCP elicitation dialog; refused if the host cannot elicit) or host (needs DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true).
+DARKTRACE_WRITE_APPROVAL=host (default) or elicitation for other writes.
+all = read,sensitive,write,critical. Any set with sensitive and write (all included) refuses to start unless
+DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true: untrusted appliance content could be copied into write free-text fields.
 Legacy: DARKTRACE_SENSITIVE_READ=true|false, DARKTRACE_WRITE_CRITICAL=true|false. Writes are audited on stderr.
 Appliance results enter the MCP host/model context; assess provider processing, retention and organizational eligibility before enabling sensitive reads.
 `;

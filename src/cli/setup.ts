@@ -3,7 +3,7 @@ import {
   CLIENT_IDS, clientLabel, detectClients, installClient, isClientId, type CliContext, type ClientId, type ClientResult,
 } from './clients.js';
 import {
-  PROFILE_PRESETS, SetupInputError, buildServerEntry, normalizeProfiles, normalizeUrl, validateImage, validateToken,
+  PROFILE_PRESETS, SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, validateImage, validateToken,
   type InstallSettings, type Runtime, type TokenMode,
 } from './entry.js';
 import { findOnPath } from './fsutil.js';
@@ -22,6 +22,8 @@ export interface SetupArgs {
   readonly tokensFromStdin: boolean;
   /** Windows only: explicit consent to place token values in client configuration. */
   readonly inlineTokens: boolean;
+  /** Explicit consent to the sensitive-read + write risk notice; required for such profiles without an interactive yes. */
+  readonly acknowledgeSensitiveWrite?: boolean;
 }
 
 export interface SetupIo {
@@ -166,9 +168,34 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       }, io);
     } else profiles = saved?.profiles ?? 'read';
 
+    // 5b. Sensitive reads + writes: show the exact risk notice and require an explicit yes (or flag).
+    let acknowledgeSensitiveWrite = false;
+    if (needsSensitiveWriteAck(profiles)) {
+      write(io, `\n${SENSITIVE_WRITE_NOTICE}\n`);
+      if (args.acknowledgeSensitiveWrite === true) {
+        acknowledgeSensitiveWrite = true;
+        write(io, 'Acknowledged with --acknowledge-sensitive-write: client entries will set DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true.\n');
+      } else if (interactive && prompter) {
+        if (await askYesNo(prompter, `Enable "${profiles}" and acknowledge this risk?`, false)) {
+          acknowledgeSensitiveWrite = true;
+          write(io, 'Acknowledged: client entries will set DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true.\n');
+        } else {
+          write(io, 'Not acknowledged. Choose one side instead:\n  1) read + write (no sensitive reads)\n  2) read + sensitive (no writes)\n');
+          profiles = await askUntilValid(prompter, 'Choice [1]: ', '1', (v) => {
+            if (v === '1' || v === 'read-write' || v === 'read,write') return 'read,write';
+            if (v === '2' || v === 'read-sensitive' || v === 'read,sensitive') return 'read,sensitive';
+            throw new SetupInputError('choose 1 or 2');
+          }, io);
+        }
+      } else {
+        throw new SetupInputError(`profiles "${profiles}" combine sensitive reads with writes; after reading the notice above, rerun with ` +
+          '--acknowledge-sensitive-write, or choose --profiles read-write or --profiles read-sensitive');
+      }
+    }
+
     const files = tokenPaths(ctx);
     const settings: InstallSettings = {
-      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath,
+      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath, acknowledgeSensitiveWrite,
       ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid, hostPlatform: ctx.platform } : {}),
     };
     if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
@@ -180,7 +207,8 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       write(io, `\nWould store ${tokens ? 'new tokens' : 'no new tokens'}${tokenMode === 'file' ? ` in ${files.publicTokenFile} and ${files.privateTokenFile} (0600, directory 0700)` : ''}.\n`);
     } else {
       if (tokens && tokenMode === 'file') writeTokenFiles(ctx, tokens.publicToken, tokens.privateToken);
-      writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}) });
+      writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}),
+        ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}) });
       write(io, `\nSaved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`);
     }
 

@@ -69,6 +69,22 @@ test('MCPB manifest declares node server, ${__dirname} entry and sensitive requi
   assert.equal(manifest.server.mcp_config.env.DARKTRACE_PUBLIC_TOKEN, '${user_config.public_token}');
   assert.equal(manifest.user_config.private_token.sensitive, true);
   assert.equal(manifest.user_config.profiles.default, 'read');
+  assert.equal(manifest.server.mcp_config.env.DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE, '${user_config.acknowledge_sensitive_write}');
+  assert.deepEqual([manifest.user_config.acknowledge_sensitive_write.type, manifest.user_config.acknowledge_sensitive_write.default], ['boolean', false]);
+  assert.match(manifest.user_config.acknowledge_sensitive_write.description, /exfiltration risk/);
+  const optIn = structuredClone(manifest);
+  optIn.user_config.acknowledge_sensitive_write.default = true;
+  optIn.user_config.profiles.default = 'all';
+  const optInProblems = mod.checkManifest(optIn, pkg).join('\n');
+  assert.match(optInProblems, /must be opt-in/);
+  assert.match(optInProblems, /profiles must default to read/);
+  const registry = JSON.parse(readFileSync(join(root, 'server.json'), 'utf8'));
+  for (const pack of registry.packages) {
+    const ack = pack.environmentVariables.find((v: { name: string }) => v.name === 'DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE');
+    assert.equal(ack?.format, 'boolean');
+    assert.equal(ack?.default, 'false');
+    assert.match(ack?.description ?? '', /exfiltration risk/);
+  }
   const broken = structuredClone(manifest);
   broken.user_config.private_token.sensitive = false;
   broken.server.mcp_config.env.DARKTRACE_TLS_INSECURE = 'true';

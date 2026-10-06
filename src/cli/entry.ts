@@ -4,10 +4,27 @@ import { parseConfig } from '../config/schema.js';
 
 export const SERVER_NAME = 'darktrace';
 export const PROFILE_PRESETS = Object.freeze([
-  { id: 'read', label: 'read-only (recommended)', profiles: 'read' },
-  { id: 'read-write', label: 'read + write', profiles: 'read,write' },
-  { id: 'all', label: 'everything (all: read, write, critical, sensitive)', profiles: 'all' },
+  { id: 'read', label: 'read: consultation only, no raw content (recommended)', profiles: 'read' },
+  { id: 'read-write', label: 'read + write: also acknowledge, comment, tag, label, PCAP requests', profiles: 'read,write' },
+  { id: 'read-sensitive', label: 'read + sensitive: also Advanced Search, email content, PCAP download, audit events', profiles: 'read,sensitive' },
+  { id: 'all', label: 'all: read, sensitive, write and critical (requires the risk acknowledgement below)', profiles: 'all' },
 ] as const);
+
+/** Exact notice shown before the sensitive-read + write union is enabled (DR-W-03, MR-06). */
+export const SENSITIVE_WRITE_NOTICE = [
+  'RISK NOTICE: these profiles combine sensitive reads with write actions.',
+  '  - Sensitive data: Advanced Search, email content, PCAP downloads and audit events enter the AI client.',
+  '  - Untrusted content: that data is attacker-influenced (email bodies, hostnames, URLs) and can carry instructions.',
+  '  - Write channels: comments, tag descriptions, intel feed entries and other free-text fields leave the session.',
+  '  Together this is an exfiltration risk: injected content can make the model copy sensitive data into a write.',
+  '  The server refuses to start this combination unless DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is set.',
+].join('\n');
+
+/** True when the profile list enables both sensitive reads and writes, which the server only starts with an acknowledgement. */
+export function needsSensitiveWriteAck(profiles: string): boolean {
+  const list = new Set(profiles.split(',').map((v) => v.trim()));
+  return list.has('all') || (list.has('sensitive') && list.has('write'));
+}
 const PROFILE_NAMES = new Set(['read', 'write', 'critical', 'sensitive', 'all']);
 export const IMAGE_PATTERN = /^(?:sha256:[a-f0-9]{64}|[A-Za-z0-9._/:=-]+@sha256:[a-f0-9]{64})$/;
 
@@ -30,6 +47,8 @@ export interface InstallSettings {
   readonly gid?: number;
   /** Host OS running Docker. darwin/win32 mean Docker Desktop, whose bind mounts surface as root-owned. */
   readonly hostPlatform?: NodeJS.Platform;
+  /** Explicit operator acknowledgement of the sensitive-read + write risk; required when `needsSensitiveWriteAck(profiles)`. */
+  readonly acknowledgeSensitiveWrite?: boolean;
 }
 
 export interface ServerEntry {
@@ -88,6 +107,11 @@ const CONTAINER_PRIVATE = '/run/secrets/private-token';
 
 /** Build the launcher for this checkout (node) or a reviewed image (docker). Never contains token values in file mode. */
 export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToken: string; privateToken: string }): ServerEntry {
+  const ackEnv: Record<string, string> = {};
+  if (needsSensitiveWriteAck(s.profiles)) {
+    if (s.acknowledgeSensitiveWrite !== true) throw new SetupInputError('profiles combining sensitive and write need the explicit risk acknowledgement (--acknowledge-sensitive-write)');
+    ackEnv.DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE = 'true';
+  }
   if (s.runtime === 'docker') {
     if (!s.dockerPath || !s.image || s.uid === undefined || s.gid === undefined) throw new SetupInputError('docker runtime requires docker path, image and uid/gid');
     if (s.uid === 0 || s.gid === 0) throw new SetupInputError('docker runtime refuses to run the container as root; run setup as a regular user');
@@ -101,6 +125,7 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
         '--network=bridge', '--mount', bind(s.publicTokenFile, CONTAINER_PUBLIC), '--mount', bind(s.privateTokenFile, CONTAINER_PRIVATE),
         '-e', `DARKTRACE_URL=${s.url}`, '-e', `DARKTRACE_PUBLIC_TOKEN_FILE=${CONTAINER_PUBLIC}`,
         '-e', `DARKTRACE_PRIVATE_TOKEN_FILE=${CONTAINER_PRIVATE}`, '-e', `DARKTRACE_PROFILES=${s.profiles}`,
+        ...Object.entries(ackEnv).flatMap(([k, v]) => ['-e', `${k}=${v}`]),
         ...(dockerDesktop ? ['-e', 'DARKTRACE_TOKEN_FILE_OWNER=root-or-current'] : []), s.image],
       env: {},
     };
@@ -113,7 +138,7 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
   return {
     command: s.nodePath,
     args: [s.entryPath],
-    env: { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles },
+    env: { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles, ...ackEnv },
   };
 }
 

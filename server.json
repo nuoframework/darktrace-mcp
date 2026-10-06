@@ -42,11 +42,19 @@
         },
         {
           "name": "DARKTRACE_PROFILES",
-          "description": "Capability profiles: read (default), sensitive, write, critical or all, comma separated",
+          "description": "Capability profiles: read (default), sensitive, write, critical or all, comma separated. all, or sensitive with write, also needs DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true",
           "isRequired": false,
           "isSecret": false,
           "format": "string",
           "default": "read"
+        },
+        {
+          "name": "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE",
+          "description": "Set to true only to run all, or a profile list with both sensitive and write; the server refuses to start that combination without it. Sensitive results are untrusted content and write free-text fields can carry them out: an exfiltration risk",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean",
+          "default": "false"
         }
       ]
     },
@@ -94,11 +102,19 @@
         },
         {
           "name": "DARKTRACE_PROFILES",
-          "description": "Capability profiles: read (default), sensitive, write, critical or all",
+          "description": "Capability profiles: read (default), sensitive, write, critical or all. all, or sensitive with write, also needs DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true",
           "isRequired": false,
           "isSecret": false,
           "format": "string",
           "default": "read"
+        },
+        {
+          "name": "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE",
+          "description": "Set to true only to run all, or a profile list with both sensitive and write; the server refuses to start that combination without it. Sensitive results are untrusted content and write free-text fields can carry them out: an exfiltration risk",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean",
+          "default": "false"
         }
       ]
     }

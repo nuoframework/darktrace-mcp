@@ -4,7 +4,7 @@
   "display_name": "Darktrace Threat Visualizer",
   "version": "1.1.0",
   "description": "Consult a Darktrace Threat Visualizer appliance (status, devices, model breaches, AI Analyst) over a hardened local MCP server.",
-  "long_description": "Runs the @nuoframework/darktrace-mcp stdio server locally. Requests are HMAC-signed with your Darktrace API token pair over verified TLS to one fixed HTTPS origin. Tokens are stored by the host as sensitive values (OS keychain) and passed to the server as environment variables; they are never written to a client configuration file. Profiles default to read-only.",
+  "long_description": "Runs the @nuoframework/darktrace-mcp stdio server locally. Requests are HMAC-signed with your Darktrace API token pair over verified TLS to one fixed HTTPS origin. Tokens are stored by the host as sensitive values (OS keychain) and passed to the server as environment variables; they are never written to a client configuration file. Profiles default to read-only. Profiles that combine sensitive reads with writes (all, or a list with both sensitive and write) start only after you tick the risk acknowledgement.",
   "author": {
     "name": "nuoframework",
     "url": "https://github.com/nuoframework"
@@ -27,7 +27,8 @@
         "DARKTRACE_URL": "${user_config.darktrace_url}",
         "DARKTRACE_PUBLIC_TOKEN": "${user_config.public_token}",
         "DARKTRACE_PRIVATE_TOKEN": "${user_config.private_token}",
-        "DARKTRACE_PROFILES": "${user_config.profiles}"
+        "DARKTRACE_PROFILES": "${user_config.profiles}",
+        "DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE": "${user_config.acknowledge_sensitive_write}"
       }
     }
   },
@@ -55,8 +56,15 @@
     "profiles": {
       "type": "string",
       "title": "Capability profiles",
-      "description": "read (recommended), read,write, or all (read, write, critical, sensitive).",
+      "description": "read (default, recommended): consultation without raw content. read,write: adds state-changing actions. read,sensitive: adds Advanced Search, email content, PCAP download and audit events. all = read,sensitive,write,critical (the email action is not available); all, or any list with both sensitive and write, also needs the acknowledgement below or the server will not start.",
       "default": "read",
+      "required": false
+    },
+    "acknowledge_sensitive_write": {
+      "type": "boolean",
+      "title": "Acknowledge sensitive + write risk",
+      "description": "Required only for all, or a profile list with both sensitive and write. Sensitive data (Advanced Search, email content, PCAP, audit events) is untrusted, attacker-influenced content; combined with write channels (comments, tag descriptions, intel feed entries) the model can be led to copy it out of the appliance: an exfiltration risk. Tick only if you accept that risk. Sets DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE.",
+      "default": false,
       "required": false
     }
   },

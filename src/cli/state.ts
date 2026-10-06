@@ -1,7 +1,7 @@
 import { lstatSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 import { atomicWrite, ensurePrivateDir, lstatOrUndefined, readTextIfExists } from './fsutil.js';
-import { normalizeProfiles, normalizeUrl, IMAGE_PATTERN, type Runtime, type TokenMode } from './entry.js';
+import { needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, IMAGE_PATTERN, type Runtime, type TokenMode } from './entry.js';
 import type { CliContext } from './clients.js';
 
 /** Installer state: non-secret choices remembered between `setup`, `config`, `remove` and `test`. */
@@ -12,6 +12,8 @@ export interface SavedSetup {
   readonly runtime: Runtime;
   readonly tokenMode: TokenMode;
   readonly image?: string;
+  /** Recorded only after the operator explicitly accepted the sensitive-read + write risk notice. */
+  readonly acknowledgeSensitiveWrite?: true;
 }
 
 export function setupDir(ctx: Pick<CliContext, 'home' | 'env'>): string {
@@ -33,7 +35,9 @@ export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetu
     const runtime: Runtime = raw.runtime === 'docker' ? 'docker' : 'node';
     const tokenMode: TokenMode = raw.tokenMode === 'inline' ? 'inline' : 'file';
     const image = typeof raw.image === 'string' && IMAGE_PATTERN.test(raw.image) ? raw.image : undefined;
-    return { version: 1, url: normalizeUrl(raw.url), profiles: normalizeProfiles(raw.profiles), runtime, tokenMode, ...(image ? { image } : {}) };
+    const profiles = normalizeProfiles(raw.profiles);
+    const acknowledged = raw.acknowledgeSensitiveWrite === true && needsSensitiveWriteAck(profiles);
+    return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}) };
   } catch {
     return undefined;
   }
