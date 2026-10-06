@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { Client } from '@modelcontextprotocol/client';
 import { InMemoryTransport } from '@modelcontextprotocol/server';
@@ -13,9 +14,10 @@ export const profiles = {
   'read+write': { write: true },
   'read+write+critical': { write: true, writeCritical: true },
   all: { sensitiveRead: true, write: true, writeCritical: true },
+  'read+sensitive+write': { sensitiveRead: true, write: true },
 };
 // DR-W-08: approval-channel variants whose tool descriptions differ from the default channel (critical elicitation,
-// write host). Pinned in the same fixture next to the five release profiles.
+// write host). Pinned in the same fixture next to the six release profiles.
 export const approvalVariants = {
   'read+write+critical/critical-host': { write: true, writeCritical: true, criticalApproval: 'host' },
   'read+write/write-elicitation': { write: true, writeApproval: 'elicitation' },
@@ -38,7 +40,7 @@ export async function toolContract(profile) {
   } finally { await client.close(); await server.close(); }
 }
 
-// The alpha and first-stable fixtures remain historical provenance; the full-API oracle covers all five profiles.
+// The alpha and first-stable fixtures remain historical provenance; the full-API oracle covers all six profiles.
 export const releaseProfiles=Object.freeze(Object.fromEntries(Object.entries(profiles).map(([name,value])=>[name,Object.freeze({...value})])));
 // The only unsupported grant shape left: critical without write (startup error in every overlay and mode).
 export const forbiddenReleaseProfiles=Object.freeze({
@@ -60,4 +62,28 @@ export async function verifyRejectedReleaseProfiles(){
   startupChecks[name]={objectRejected:true,contractRejectedBeforeSdk:true,productionModes:['stdio','doctor','--check-config'],exitStatus:1,stdoutEmpty:true,networkSigningGuardTriggered:false};
  }
  return {rejectedProfiles:forbiddenReleaseProfiles,startupChecks};
+}
+
+// Explicit deterministic capture uses the same SDK tools/list generator as MR-04.
+// Regeneration does not constitute independent fixture review (CHANGES-core §8.11 E11).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  assert.deepEqual(process.argv.slice(2), ['--capture'], 'Usage: node test/security/mcp-contracts.mjs --capture');
+  const capture = async () => {
+    const contracts = {};
+    for (const [name, profile] of Object.entries({ ...releaseProfiles, ...approvalVariants })) {
+      const tools = await toolContract(profile);
+      contracts[name] = { sha256: digest(tools), tools };
+    }
+    return JSON.stringify({
+      alphaFixtureSha256: createHash('sha256').update(readFileSync(new URL('./fixtures/mcp-tool-contracts.json', import.meta.url))).digest('hex'),
+      canonicalization: 'Recursive sorted object keys; preserve array order; SHA-256 UTF-8 JSON',
+      contracts,
+      rejectedProfiles: forbiddenReleaseProfiles,
+      releaseCapability: { read: true, sensitiveRead: true, write: true, writeCritical: true, grantedBy: 'operator profiles only; model arguments cannot grant or escalate' },
+    }, null, 2) + '\n';
+  };
+  const bytes = await capture();
+  assert.equal(await capture(), bytes, 'Repeated tools/list capture must be byte-identical');
+  writeFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json', import.meta.url), bytes);
+  console.log(createHash('sha256').update(bytes).digest('hex'));
 }

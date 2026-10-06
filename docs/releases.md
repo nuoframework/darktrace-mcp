@@ -15,6 +15,8 @@
 
 The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
 
+The 1.1.0 candidate gates pin six operator profile contracts (including `read+sensitive+write`, AD-W-18) and two approval-description variants. The [release pin evidence](security/release-pins-1.1.0.md) records the final counts and byte bindings. Deterministic regeneration of the full-API fixture still requires independent review under [E11](CHANGES-core.md#811-exceptions-and-open-conflicts) before release approval.
+
 ### Publishing a version (owner)
 
 1. Set the same `version` in `package.json`, `package-lock.json`, `npm-shrinkwrap.json`, `manifest.json` and `server.json`, update `CHANGELOG.md`, commit, then create and push the tag `v<version>` on the reviewed commit. `release.yml` refuses a tag that does not match the package version.

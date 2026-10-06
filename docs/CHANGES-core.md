@@ -42,10 +42,12 @@ Tier and the profile(s) each one needs:
 | get_pcaps_filename | read (file) | read + sensitive |
 | post_aianalyst_acknowledge/unacknowledge/pin/unpin, post_aianalyst_incident_comments, post_aianalyst_investigations, post_modelbreaches_pbid_acknowledge/unacknowledge, post_modelbreaches_pbid_comments | medium | write |
 | post_devices, post_pcaps, post_tags, post_tags_entities, post_tags_tid_entities, delete_tags_entities, delete_tags_tid_entities_teid | high | write |
-| post_antigena, post_antigena_manual, post_intelfeed, post_subnets, delete_tags_tid, post_agemail_api_ep_api_v1_0_emails_uuid_action | critical | write + critical |
+| post_antigena, post_antigena_manual, post_intelfeed, post_subnets, delete_tags_tid | critical | write + critical |
+| post_agemail_api_ep_api_v1_0_emails_uuid_action | blocked (§8.11 E1) | never published or executed |
 
 Per profile, tools/operations listed: read 27/38, read+sensitive 36/56, read+write 36/54,
-read+write+critical 42/60, all 51/78.
+read+write+critical 41/59, all 50/77, read+sensitive+write 45/72. Approval-description
+variants preserve their base profile's tools/operations counts.
 
 ## 2. Profiles and configuration (operator-only)
 
@@ -425,7 +427,9 @@ UX key `appliedDefaults` was added to MR2's envelope allowlist.
   holds no server slot; its HMAC state lives 120 s and the preview expiry still bounds execution.
 - **E11 Contract fixture.** `mcp-tool-contracts-full-api.json` was regenerated (critical descriptions now
   say `dryRun:true`, the union notice, ordinary writes no longer take `previewId`) and needs independent
-  review; the pins in `scripts/verify-release.mjs` must be recomputed at release time.
+  review. The 1.1.0 candidate pins in `scripts/verify-release.mjs` and CI have been recomputed;
+  [release pin evidence](security/release-pins-1.1.0.md) records their byte bindings. Pin consistency
+  and deterministic capture do not constitute independent review or release approval.
 
 ### 8.12 Design-review follow-ups (DR-W-08, DR-W-09, DR-W-16; 2026-10-06)
 
@@ -457,7 +461,7 @@ UX key `appliedDefaults` was added to MR2's envelope allowlist.
   `read+write+critical` `c5372a1b...`, `all` `90c0a24a...`, `read+sensitive+write` `3ccf0ef5...`; `read` and
   `read+sensitive` unchanged. New: `read+write+critical/critical-host` `f1b54574...`,
   `read+write/write-elicitation` `cbd4ac4d...`. Release pins in `scripts/verify-release.mjs` still need
-  recomputation at release time (E11).
+  independent fixture review (E11); their 1.1.0 candidate recomputation is recorded in the release pin evidence.
 - **DR-W-12 not changed.** `validatedOn` is a version-string array with no per-action/response scope, so
   operations whose live result was partial (e.g. DELETE answered non-2xx, `clear`/`label`/`responsedata`
   qualifications in §6) cannot be distinguished without a catalogue data-model change. Left as-is.
