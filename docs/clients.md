@@ -40,7 +40,7 @@ Shortest path per client, in one table: [Install](install.md). Vendor documentat
 
 `<VS Code user dir>` is `~/Library/Application Support/Code/User` on macOS, `~/.config/Code/User` on Linux and `%APPDATA%\Code\User` on Windows.
 
-**First run without configuration.** An entry that lacks the URL and token variables (for example one added by a README badge) does not fail: the server starts in setup mode with a single tool, `darktrace_setup_status`, that names the command to run (`npx -y @nuoframework/darktrace-mcp@1.1.1 setup`). Run it once and restart the client.
+**First run without configuration.** An entry that lacks the URL and token variables (for example one added by a README badge) does not fail: the server starts in setup mode with a single tool, `darktrace_setup_status`, that names the command to run (`npx -y @nuoframework/darktrace-mcp@1.1.2 setup`). Run it once and restart the client.
 
 ## Rules for every manual snippet
 

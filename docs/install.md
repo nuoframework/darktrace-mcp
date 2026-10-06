@@ -7,7 +7,7 @@
 One command works everywhere. It asks five questions, checks the appliance with a signed request, stores the tokens in owner-only files and writes the entry into the clients it finds:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 Then restart the client and ask it: **"list my Darktrace devices"**.
@@ -16,7 +16,7 @@ You need Node.js 22+, the appliance address (`https://…`) and an API token pai
 
 ## Pick your client
 
-Each line is the shortest path. `darktrace-mcp` means `npx -y @nuoframework/darktrace-mcp@1.1.1` unless you installed the package globally. `config <client>` prints the exact snippet with your real paths and no secrets.
+Each line is the shortest path. `darktrace-mcp` means `npx -y @nuoframework/darktrace-mcp@1.1.2` unless you installed the package globally. `config <client>` prints the exact snippet with your real paths and no secrets.
 
 | Client | Shortest path | Where the entry lives |
 |---|---|---|
@@ -50,19 +50,19 @@ Several clients at once: `setup` lists the ones it detects and preselects them; 
 A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. The button only adds the entry; complete it with the wizard:
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --client cursor
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 ```
 
-`setup` rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. Until then the entry has no appliance to talk to: with the published 1.1.1 the server exits with `startup_error`; from the first version that ships setup mode (this branch, planned for 1.1.3) it starts anyway and exposes exactly one tool, `darktrace_setup_status`, whose description and result repeat the command above. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. Every other client entry must never run `npx`: each launch would depend on the registry and could silently pick up new code, which is why the wizard registers absolute paths.
+`setup` rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. Until then the entry has no appliance to talk to: with the published 1.1.1 and 1.1.2 the server exits with `startup_error`; from the first version that ships setup mode (this branch, planned for 1.1.3) it starts anyway and exposes exactly one tool, `darktrace_setup_status`, whose description and result repeat the command above. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. Every other client entry must never run `npx`: each launch would depend on the registry and could silently pick up new code, which is why the wizard registers absolute paths.
 
 ## Pinning the version
 
-`npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; it was checked against the registry on 2026-10-06 and resolves to 1.1.1. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client. The version pinned in the badges comes from `package.json`: `node scripts/install-badges.mjs --write` rewrites the badge rows of every README after a version bump, and a test fails when they drift.
+`npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; it was checked against the registry on 2026-10-06, when it resolved to 1.1.1; after the 1.1.2 publication it resolves to 1.1.2. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client. The version pinned in the badges comes from `package.json`: `node scripts/install-badges.mjs --write` rewrites the badge rows of every README after a version bump, and a test fails when they drift.
 
 ## Other paths
 
-- **Docker.** `setup --runtime docker` checks that the daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.1`, pulls it on request and writes a hardened entry that starts the immutable image ID with `--pull=never`. [Docker guide](docker.md#install).
-- **Claude Desktop extension.** `darktrace-mcp-1.1.1.mcpb` from the GitHub release, or `npm run pack:mcpb` from a checkout. [Details](clients.md#claude-desktop).
+- **Docker.** `setup --runtime docker` checks that the daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.2`, pulls it on request and writes a hardened entry that starts the immutable image ID with `--pull=never`. [Docker guide](docker.md#install).
+- **Claude Desktop extension.** `darktrace-mcp-1.1.2.mcpb` from the GitHub release, or `npm run pack:mcpb` from a checkout. [Details](clients.md#claude-desktop).
 - **Claude Code plugin.** `claude plugin marketplace add nuoframework/darktrace-mcp`, then `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code asks for the URL, tokens and profile and keeps the tokens in the OS credential store. Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp`, then `setup` once for the connection. [Plugin guide](plugin-distribution.md).
 - **Manual.** `darktrace-mcp config <client>` prints the snippet with real paths; every client's file and shape is listed in [Clients](clients.md).
 - **Build from source.** [Fallback](getting-started.md#fallback-build-from-source).
@@ -74,8 +74,8 @@ Native Windows cannot prove that a token file is owner-only (Node has no file-AC
 ## Check and remove
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 test
-npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall
+npx -y @nuoframework/darktrace-mcp@1.1.2 test
+npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
 `test` performs one signed `GET /status` and says exactly what to fix. `uninstall` shows a plan, asks once, removes the `darktrace` entry from every client (backups kept), the stored tokens and the fixed copies. [Troubleshooting](troubleshooting.md).

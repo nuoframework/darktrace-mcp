@@ -10,7 +10,7 @@ Owner rule applied throughout: installation must be easy on every client, IDE an
 
 | Path | What it is | Steps for the user |
 |---|---|---|
-| **Wizard** | `npx -y @nuoframework/darktrace-mcp@1.1.1 setup` | 1 command, 5 numbered questions, restart the client |
+| **Wizard** | `npx -y @nuoframework/darktrace-mcp@1.1.2 setup` | 1 command, 5 numbered questions, restart the client |
 | **One-click badge** | README badge opens the client, which adds a `darktrace` entry running the pinned package through `npx`; the server starts in setup mode and its only tool says to run `setup` | badge → confirm in client → run `setup` once → restart |
 | **Plugin / marketplace** | Claude plugin bundle and Codex marketplace, built by another track in `claude-plugin/`, `.claude-plugin/`, `.agents/` | out of scope here |
 | **`.mcpb`** | Claude Desktop extension bundle from the GitHub release; tokens go to the OS keychain | download, double-click, fill the form |
@@ -60,7 +60,7 @@ Every **W** entry: backup of the existing file (`<file>.bak-<timestamp>`), atomi
 
 | Friction | Before | After |
 |---|---|---|
-| A client entry exists but has no URL or tokens (badge, manual copy, forgotten `setup`) | the server exited with `startup_error`; the client showed a dead server | the server starts in **setup mode** with one read-only tool, `darktrace_setup_status`, whose description and result name the exact command: `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`; stderr gets one `setup_required` line |
+| A client entry exists but has no URL or tokens (badge, manual copy, forgotten `setup`) | the server exited with `startup_error`; the client showed a dead server | the server starts in **setup mode** with one read-only tool, `darktrace_setup_status`, whose description and result name the exact command: `npx -y @nuoframework/darktrace-mcp@1.1.2 setup`; stderr gets one `setup_required` line |
 | Client not in the wizard | 13 of the 21 clients above needed hand-written JSON | every client has an id; two are paste-only because the vendor documents no file |
 | Which client file, which key | per-client prose in `docs/clients.md` | `docs/install.md` starts with "pick your client" and gives 1 to 3 lines each; the wizard summary prints file, status and mode |
 | Wizard output on a 80-column terminal | unstructured text | banner, `Step n of 5`, markers, aligned summary; plain ASCII without a TTY or with `NO_COLOR` |
