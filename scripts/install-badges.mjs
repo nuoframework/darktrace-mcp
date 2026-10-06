@@ -1,7 +1,7 @@
 // Prints the README one-click badge rows for the package version in package.json (run after `npm run build`).
 // With --write it replaces the existing badge rows in every README in place (README.md, README.en.md, README.es.md;
 // the language is detected from the "## Instalación" heading); test/cli/badges.test.ts checks they match.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { installBadgesMarkdown } from '../dist/src/cli/entry.js';
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -25,8 +25,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   if (process.argv.includes('--write')) {
     for (const name of ['README.md', 'README.en.md', 'README.es.md']) {
       const file = new URL('../' + name, import.meta.url);
-      if (!existsSync(file)) continue;
-      const { changed, text } = rewriteBadges(name, readFileSync(file, 'utf8'));
+      // Read directly and treat a missing README language as absent (no exists-then-read window).
+      let current;
+      try { current = readFileSync(file, 'utf8'); } catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+      const { changed, text } = rewriteBadges(name, current);
       if (changed) writeFileSync(file, text);
       console.log(`${name}: ${changed ? 'updated' : 'already current'} (${version})`);
     }
