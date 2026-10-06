@@ -17,6 +17,12 @@ Use the Darktrace Threat Visualizer API from Claude, Codex, Cursor, VS Code and 
   <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-en.svg" alt="license: Apache-2.0"></a>
   <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: local build or ghcr.io image, pinned image ID"></a>
   <a href="docs/security.md"><img src="docs/assets/badges/security-tests-en.svg" alt="security tests: offline"></a>
+  <!-- OpenSSF badges: placeholders, kept commented out until the project has a published Scorecard
+       result and a bestpractices.dev entry. Replace <BESTPRACTICES_ID> with the numeric project id.
+       See docs/security/supply-chain-checks.md before enabling (they load from external badge services).
+  <a href="https://scorecard.dev/viewer/?uri=github.com/nuoframework/darktrace-mcp"><img src="https://api.scorecard.dev/projects/github.com/nuoframework/darktrace-mcp/badge" alt="OpenSSF Scorecard"></a>
+  <a href="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>"><img src="https://www.bestpractices.dev/projects/<BESTPRACTICES_ID>/badge" alt="OpenSSF Best Practices"></a>
+  -->
 </p>
 
 [Getting started](docs/getting-started.md) · [Clients](docs/clients.md) · [Tools](docs/tools.md) · [Configuration](docs/configuration.md) · [Troubleshooting](docs/troubleshooting.md)
