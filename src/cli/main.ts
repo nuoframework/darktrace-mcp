@@ -5,8 +5,8 @@ import {
   CLIENT_IDS, clientLabel, clientSnippet, isClientId, removeClient, type CliContext, type ClientId, type ClientResult,
 } from './clients.js';
 import {
-  SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, cursorInstallLink, needsSensitiveWriteAck, defaultEntryPath, normalizeProfiles, normalizeUrl, validateImage,
-  vscodeInstallLink, vscodeInstallPayload, type InstallSettings, type Runtime,
+  SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, cursorInstallLink, kiroInstallLink, lmstudioInstallLink, needsSensitiveWriteAck, defaultEntryPath,
+  normalizeProfiles, normalizeUrl, validateImage, vscodeInstallLink, vscodeInstallPayload, type InstallSettings, type Runtime,
 } from './entry.js';
 import { findOnPath, InstallerFileError } from './fsutil.js';
 import { existingFixedCopyEntry, isTransientInstall } from './install.js';
@@ -15,6 +15,7 @@ import { printResults, runSetup } from './setup.js';
 import { purgeSetup, readSavedSetup, tokenPaths } from './state.js';
 import { isDateFormat, runOnlineTest } from './online.js';
 import { runUninstall } from './uninstall.js';
+import { createUi, detectUi, type Ui } from './ui.js';
 import type { DateFormat } from '../config/schema.js';
 
 export class UsageError extends Error {
@@ -100,6 +101,8 @@ export interface CliIo {
   readonly entryPath: string;
   readonly uid?: number;
   readonly gid?: number;
+  /** Terminal presentation (colours, spinners); plain text when absent. */
+  readonly ui?: Ui;
 }
 
 export function defaultCliIo(): CliIo {
@@ -121,6 +124,7 @@ export function defaultCliIo(): CliIo {
     },
     stdin: process.stdin, stdout: process.stdout, stderr: process.stderr, execPath: process.execPath,
     entryPath: defaultEntryPath(import.meta.url),
+    ui: createUi(detectUi(process.env, process.stdout, process.platform)),
     ...(typeof process.getuid === 'function' && typeof process.getgid === 'function' ? { uid: process.getuid(), gid: process.getgid() } : {}),
   };
 }
@@ -186,6 +190,17 @@ function configCommand(p: Parsed, io: CliIo): number {
     out.write('\n# One-click install link (uses the token-file paths above):\n');
     out.write(cursorInstallLink(entry) + '\n');
   }
+  if (client === 'lmstudio') {
+    out.write('\n# One-click install link (uses the token-file paths above):\n');
+    out.write(lmstudioInstallLink(entry) + '\n');
+  }
+  if (client === 'kiro') {
+    out.write('\n# One-click install link (opens kiro.dev, which hands the entry to Kiro; it asks before writing):\n');
+    out.write(kiroInstallLink(entry) + '\n');
+  }
+  if (client === 'jetbrains' && saved !== undefined) {
+    out.write('\n# Shortcut: with Claude Desktop already configured by setup, use "Import from Claude" in the same settings page.\n');
+  }
   return 0;
 }
 
@@ -198,7 +213,7 @@ function removeCommand(p: Parsed, io: CliIo): number {
     try { results.push(removeClient(id, io.ctx, { dryRun })); }
     catch (error) { results.push({ client: id, status: 'failed', detail: error instanceof Error ? error.message : 'failed' }); }
   }
-  printResults(io, results.filter((r) => r.status !== 'absent' || clientsFlag(p) !== undefined));
+  printResults(io, results.filter((r) => r.status !== 'absent' || clientsFlag(p) !== undefined), io.ui);
   if (results.every((r) => r.status === 'absent')) io.stdout.write('No darktrace entries found.\n');
   if (bool(p, '--purge')) {
     if (dryRun) io.stdout.write('Would delete stored token files and setup state.\n');
@@ -235,16 +250,20 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
       case 'test':
       case 'doctor':
         if (p.positional.length > 0) throw new UsageError(`${p.command} takes no positional arguments`);
-        return await runOnlineTest(io.ctx, io.stdout, { uid: io.uid, gid: io.gid });
+        return await runOnlineTest(io.ctx, io.stdout, { uid: io.uid, gid: io.gid, ui: io.ui });
       default: throw new UsageError('unknown command');
     }
   } catch (error) {
-    if (error instanceof UsageError) { io.stderr.write(`Usage error: ${error.message}. Run --help.\n`); return 2; }
-    if (error instanceof SetupInputError || error instanceof InstallerFileError || error instanceof PromptAbortedError) {
-      io.stderr.write(`Setup error: ${error.message}\n`); return 1;
+    // Every failure ends with the next action, and never with a value the operator typed.
+    const ui = io.ui ?? createUi();
+    const command = argv[0] ?? 'setup';
+    if (error instanceof UsageError) { io.stderr.write(ui.fail(`Usage error: ${error.message}. Run --help.\n`) + `Next: darktrace-mcp --help lists every option of "${command}".\n`); return 2; }
+    if (error instanceof PromptAbortedError) { io.stderr.write(ui.fail(`Setup error: ${error.message}\n`) + 'Next: rerun `darktrace-mcp setup` in an interactive terminal, or pass --yes with --url and --tokens-from-stdin.\n'); return 1; }
+    if (error instanceof SetupInputError || error instanceof InstallerFileError) {
+      io.stderr.write(ui.fail(`Setup error: ${error.message}\n`) + `Next: fix the item above and rerun \`darktrace-mcp ${command}\` (add --dry-run to preview without writing).\n`); return 1;
     }
     const code = typeof (error as NodeJS.ErrnoException)?.code === 'string' ? ` (${(error as NodeJS.ErrnoException).code})` : '';
-    io.stderr.write(`Unexpected installer error${code}; no secret was printed. Rerun with --dry-run to inspect planned changes.\n`);
+    io.stderr.write(ui.fail(`Unexpected installer error${code}; no secret was printed.\n`) + `Next: rerun \`darktrace-mcp ${command} --dry-run\` to inspect the planned changes, then report the error code.\n`);
     return 1;
   }
 }

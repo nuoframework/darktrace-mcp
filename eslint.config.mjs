@@ -83,9 +83,16 @@ export default tseslint.config(
   // Reviewed false positives, scoped to the file that triggers them so the
   // rule stays active everywhere else.
   {
-    // Bounded quantifiers or a single character class: linear-time.
-    files: ['src/cli/install.ts', 'src/config/address.ts', 'src/shape/output.ts', 'scripts/lab-read-smoke.mjs', 'scripts/validate-examples.mjs'],
+    // Bounded quantifiers or a single character class: linear-time. entry.ts repeats install.ts's exact
+    // package-version pattern for the README badge builder.
+    files: ['src/cli/install.ts', 'src/cli/entry.ts', 'src/config/address.ts', 'src/shape/output.ts', 'scripts/lab-read-smoke.mjs', 'scripts/validate-examples.mjs'],
     rules: { 'security/detect-unsafe-regex': 'off' },
+  },
+  {
+    // The RegExp constructor interpolates a code-owned top-level key name ('mcpServers' / 'extensions') only;
+    // the pattern is anchored and has no nested quantifiers.
+    files: ['src/cli/yamlBlock.ts'],
+    rules: { 'security/detect-non-literal-regexp': 'off' },
   },
   {
     // TOML header regex: quadratic worst case on a single local config line

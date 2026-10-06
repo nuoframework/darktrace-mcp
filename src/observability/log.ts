@@ -37,6 +37,13 @@ export function logStartupError(error:unknown):void {
   // Any other error stays opaque: its text may come from the platform or upstream and is not reviewed for secrets.
   writeSync(2,JSON.stringify({event:'startup_error',ts:new Date().toISOString(),...(variable?{variable}:{}),...(reason?{reason}:{})})+'\n');
 }
+/**
+ * Unconfigured start (no connection variable at all): one fixed, value-free line naming the setup command.
+ * The server keeps running in setup mode and exposes only the setup-status tool.
+ */
+export function logSetupRequired(command:string):void {
+  writeSync(2,JSON.stringify({event:'setup_required',ts:new Date().toISOString(),reason:`not configured yet; run: ${command}`})+'\n');
+}
 // Logs take fixed event codes only, never arbitrary exceptions, arguments, config or upstream text.
 export function logEvent(event:'startup_error'|'protocol_error'|'shutdown'|'token_file_owner_relaxed'|'sensitive_write_acknowledged'|'host_approval_acknowledged'):void {
   writeSync(2,JSON.stringify({event,ts:new Date().toISOString()})+'\n');

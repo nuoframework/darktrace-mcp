@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { loadConfig } from './config/load.js';
-import { runStdio } from './server/stdio.js';
+import { assertEnvironmentPolicy, isUnconfigured, loadConfig } from './config/load.js';
+import { runSetupStdio, runStdio } from './server/stdio.js';
 import { VERSION } from './server/createServer.js';
+import { SETUP_COMMAND } from './server/setupServer.js';
 import { eligibleTools } from './tools/index.js';
-import { logStartupError } from './observability/log.js';
+import { logSetupRequired, logStartupError } from './observability/log.js';
 import { CLI_HELP, isCliCommand } from './cli/help.js';
 const HELP=`darktrace-mcp ${VERSION}
 Usage: darktrace-mcp [--help | --version | --check-config | doctor]
@@ -33,11 +34,20 @@ if (isCliCommand(cliArgs)) {
     process.stderr.write('Unsupported arguments. Run --help; credentials are never accepted as flags.\n');process.exitCode=2;
   } else if (args[0]==='--help') process.stdout.write(HELP+CLI_HELP);
   else if (args[0]==='--version') process.stdout.write(VERSION+'\n');
-  else {
+  else if (args.length) {
+    // --check-config / doctor keep their exit semantics: an unconfigured process is a configuration error here.
     const cfg=loadConfig(process.env);
-    if (args.length) process.stdout.write(JSON.stringify({ok:true,transport:'stdio',registeredTools:eligibleTools(cfg).length,
+    process.stdout.write(JSON.stringify({ok:true,transport:'stdio',registeredTools:eligibleTools(cfg).length,
       profiles:{read:cfg.profiles.read,sensitive:cfg.profiles.sensitiveRead,write:cfg.profiles.write,critical:cfg.profiles.write&&cfg.profiles.writeCritical},approval:cfg.approval,
       networkProbe:false,labValidated:false})+'\n');
-    else runStdio(cfg);
+  } else if (isUnconfigured(process.env)) {
+    // First run (one-click install, no setup yet): same environment policy, then an MCP server whose only tool
+    // explains what is missing and the one command to run. Every Darktrace tool stays hidden until configured.
+    assertEnvironmentPolicy(process.env);
+    logSetupRequired(SETUP_COMMAND);
+    runSetupStdio();
+  } else {
+    const cfg=loadConfig(process.env);
+    runStdio(cfg);
   }
 } catch(error) {logStartupError(error);process.exitCode=1;}

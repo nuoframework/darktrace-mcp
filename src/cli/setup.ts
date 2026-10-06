@@ -6,7 +6,7 @@ import {
   PROFILE_PRESETS, SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, validateToken,
   type InstallSettings, type Runtime, type TokenMode,
 } from './entry.js';
-import { findOnPath } from './fsutil.js';
+import { findOnPath, lstatOrUndefined } from './fsutil.js';
 import {
   checkDockerDaemon, defaultImageReference, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ImageReference, type ResolvedImage,
 } from './docker.js';
@@ -14,6 +14,8 @@ import { installFixedCopy, isTransientInstall } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
 import { describeProbeFailure, probeDateFormat, probeStatus, type DateFormatProbe } from './online.js';
+import { createUi, modeText, type Ui } from './ui.js';
+import { VERSION } from '../server/createServer.js';
 import type { DateFormat } from '../config/schema.js';
 
 export interface SetupArgs {
@@ -48,8 +50,11 @@ export interface SetupIo {
   readonly gid?: number;
   /** Test hook; production chooses a TTY or line prompter. */
   readonly prompter?: Prompter;
+  /** Terminal presentation; defaults to plain text (what tests and piped output get). */
+  readonly ui?: Ui;
 }
 
+const STEPS = 5;
 const write = (io: SetupIo, text: string): void => { io.stdout.write(text); };
 
 async function askUntilValid<T>(prompter: Prompter, question: string, fallback: string | undefined, parse: (v: string) => T, io: SetupIo): Promise<T> {
@@ -132,8 +137,12 @@ export function describeFailedProbe(probe: DateFormatProbe): string {
     'or pass --date-format compact|spaced (or --offline) to skip the check';
 }
 
+/** The prompt a user types into a client once the entry exists; the same sentence closes every successful setup. */
+export const FIRST_QUESTION = 'list my Darktrace devices';
+
 export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
   const { ctx } = io;
+  const ui = io.ui ?? createUi();
   const saved = readSavedSetup(ctx);
   const stdinLines = args.tokensFromStdin ? await readStdinLines(io.stdin) : undefined;
   let prompter = io.prompter;
@@ -144,20 +153,24 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
   }
   const interactive = prompter !== undefined && !args.yes;
   try {
-    write(io, `darktrace-mcp setup${args.dryRun ? ' (dry run: nothing will be written)' : ''}\n\n`);
+    write(io, ui.banner(`darktrace-mcp setup${args.dryRun ? ' (dry run: nothing will be written)' : ''} · v${VERSION}`,
+      'Connects your AI clients to one Darktrace appliance. Tokens go to owner-only files; nothing is written before the appliance check passes.'));
 
     // 1. Appliance URL
+    write(io, ui.step(1, STEPS, 'Appliance'));
     let url: string;
     if (args.url !== undefined) url = normalizeUrl(args.url);
     // Never prefill or print a saved appliance address: the operator types it every time.
     else if (interactive && prompter) url = await askUntilValid(prompter, 'Darktrace appliance URL (https://...): ', undefined, normalizeUrl, io);
     else if (saved) url = saved.url;
     else throw new SetupInputError('--url is required for non-interactive setup');
+    write(io, ui.ok(`Appliance URL accepted (HTTPS origin${args.url !== undefined ? ', from --url' : saved && !(interactive && prompter) ? ', from the saved setup' : ''}).\n`));
 
     // 2. Runtime
+    write(io, ui.step(2, STEPS, 'Runtime'));
     let runtime: Runtime = args.runtime ?? saved?.runtime ?? 'node';
     if (args.runtime === undefined && interactive && prompter) {
-      write(io, '\nHow should clients start the server?\n  1) node (this checkout)  [default]\n  2) docker (setup pulls and pins the image)\n');
+      write(io, 'How should clients start the server?\n  1) node (this checkout)  [default]\n  2) docker (setup pulls and pins the image)\n');
       runtime = await askUntilValid(prompter, `Choice [${runtime === 'docker' ? 2 : 1}]: `, runtime === 'docker' ? '2' : '1',
         (v) => { if (v === '1' || v === 'node') return 'node' as const; if (v === '2' || v === 'docker') return 'docker' as const; throw new SetupInputError('choose 1 or 2'); }, io);
     }
@@ -170,7 +183,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       dockerPath = findOnPath('docker', ctx.env, ctx.platform);
       if (dockerPath === undefined) throw new SetupInputError(dockerInstallHelp(ctx.platform));
       const server = checkDockerDaemon(ctx, dockerPath);
-      write(io, `\nDocker: ${dockerPath} (daemon answers, ${server}).\n`);
+      write(io, ui.ok(`Docker: ${dockerPath} (daemon answers, ${server}).\n`));
       const suggested = defaultImageReference(io.entryPath) ?? saved?.imageReference ?? saved?.image;
       let ref: ImageReference;
       if (args.image !== undefined) ref = parseImageReference(args.image);
@@ -200,7 +213,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       // Client entries start the immutable local image ID with --pull=never; the digest is recorded for verification.
       image = resolved?.id ?? 'sha256:<image ID after docker pull>';
       if (resolved !== undefined) write(io, describeImage(resolved));
-    }
+    } else write(io, ui.ok(`Runtime: node (${io.execPath}).\n`));
 
     // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path.
     let entryPath = io.entryPath;
@@ -208,14 +221,15 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       const copy = installFixedCopy(io.entryPath, ctx, args.dryRun);
       const verb = copy.status === 'copied' ? 'Installed a fixed copy of the package in'
         : copy.status === 'reused' ? 'Reusing the fixed copy in' : 'Would install a fixed copy of the package in';
-      write(io, `\nRunning from the npx cache. ${verb} ${copy.dir}.\nClients will start the server from that absolute path, never through npx.\n`);
+      write(io, ui.ok(`Running from the npx cache. ${verb} ${copy.dir}.\n`) + ui.note('  Clients will start the server from that absolute path, never through npx.\n'));
       entryPath = copy.entryPath;
     }
 
     // 3. Token storage mode
+    write(io, ui.step(3, STEPS, 'API tokens'));
     let tokenMode: TokenMode = 'file';
     if (ctx.platform === 'win32' && runtime === 'node') {
-      write(io, '\nWARNING: Windows cannot enforce owner-only token files, so the server rejects token files there.\n' +
+      write(io, ui.warn('WARNING: Windows cannot enforce owner-only token files, so the server rejects token files there.\n') +
         'Setup can instead write the token VALUES into each client configuration file. Anyone who can read those\n' +
         'files can use your API tokens. Prefer the docker runtime or WSL when possible.\n');
       const consent = args.inlineTokens || (interactive && prompter ? await askYesNo(prompter, 'Write token values into client configs?', false) : false);
@@ -226,14 +240,16 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     // 4. Tokens
     let tokens: { publicToken: string; privateToken: string } | undefined;
     const reuse = tokenMode === 'file' && stdinLines === undefined && tokenFilesUsable(ctx) &&
-      (args.yes || prompter === undefined || await askYesNo(prompter, `\nExisting tokens found in ${setupDir(ctx)}. Keep them?`, true));
-    if (!reuse) { write(io, '\n'); tokens = await readTokens(io, prompter, stdinLines); }
+      (args.yes || prompter === undefined || await askYesNo(prompter, `Existing tokens found in ${setupDir(ctx)}. Keep them?`, true));
+    if (!reuse) tokens = await readTokens(io, prompter, stdinLines);
+    write(io, ui.ok(reuse ? `Keeping the tokens already stored in ${setupDir(ctx)}.\n` : 'Both tokens received (never echoed, never written to client files).\n'));
 
     // 5. Profiles
+    write(io, ui.step(4, STEPS, 'Permissions'));
     let profiles: string;
     if (args.profiles !== undefined) profiles = normalizeProfiles(args.profiles);
     else if (interactive && prompter) {
-      write(io, '\nWhich capabilities should the AI client get?\n');
+      write(io, 'Which capabilities should the AI client get?\n');
       PROFILE_PRESETS.forEach((p, i) => write(io, `  ${i + 1}) ${p.label}\n`));
       const current = PROFILE_PRESETS.findIndex((p) => p.profiles === (saved?.profiles ?? 'read'));
       profiles = await askUntilValid(prompter, `Choice [${current >= 0 ? current + 1 : 1}]: `, String(current >= 0 ? current + 1 : 1), (v) => {
@@ -267,6 +283,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
           '--acknowledge-sensitive-write, or choose --profiles read-write or --profiles read-sensitive');
       }
     }
+    write(io, ui.ok(`Profiles: ${profiles}${acknowledgeSensitiveWrite ? ' (risk acknowledged)' : ''}.\n`));
 
     if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
 
@@ -275,18 +292,20 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     let dateFormat: DateFormat;
     if (args.dateFormat !== undefined) {
       dateFormat = args.dateFormat;
-      write(io, `\nDate format: ${dateFormat} (from --date-format; the appliance was not probed).\n`);
+      write(io, `Date format: ${dateFormat} (from --date-format; the appliance was not probed).\n`);
     } else if (args.dryRun || args.offline === true) {
       dateFormat = saved?.dateFormat ?? 'compact';
-      write(io, `\nDate format: ${dateFormat} (not probed ${args.dryRun ? 'in a dry run' : 'with --offline'}; ` +
+      write(io, `Date format: ${dateFormat} (not probed ${args.dryRun ? 'in a dry run' : 'with --offline'}; ` +
         'if `darktrace-mcp test` reports bad_request, rerun setup with --date-format spaced).\n');
     } else {
-      write(io, '\nChecking the appliance with a signed GET /status...\n');
-      const probe = await probeDateFormat(probeEnv(ctx, url, tokenMode, tokens), ctx.probeStatus ?? probeStatus, 'compact');
+      write(io, 'Checking the appliance with a signed GET /status...\n');
+      const spinner = ui.spinner(io.stdout, 'Contacting the appliance (signed GET /status)');
+      let probe: DateFormatProbe;
+      try { probe = await probeDateFormat(probeEnv(ctx, url, tokenMode, tokens), ctx.probeStatus ?? probeStatus, 'compact'); } finally { spinner.stop(); }
       if (probe.chosen === undefined) throw new SetupInputError(describeFailedProbe(probe));
       dateFormat = probe.chosen;
       if (probe.outcomes.length > 1) write(io, `The appliance rejected date format ${dateFormat === 'spaced' ? 'compact' : 'spaced'} (HTTP 400) and accepted ${dateFormat}.\n`);
-      write(io, `OK: URL, TLS and tokens work with date format ${dateFormat}. Client entries will set DARKTRACE_DATE_FORMAT=${dateFormat}.\n`);
+      write(io, ui.ok(`OK: URL, TLS and tokens work with date format ${dateFormat}. Client entries will set DARKTRACE_DATE_FORMAT=${dateFormat}.\n`));
     }
 
     const files = tokenPaths(ctx);
@@ -298,34 +317,36 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     const displayEntry = buildServerEntry(settings);
 
     // 6. Persist tokens and choices
+    const stored: ClientResult[] = [];
     if (args.dryRun) {
-      write(io, `\nWould store ${tokens ? 'new tokens' : 'no new tokens'}${tokenMode === 'file' ? ` in ${files.publicTokenFile} and ${files.privateTokenFile} (0600, directory 0700)` : ''}.\n`);
+      write(io, `Would store ${tokens ? 'new tokens' : 'no new tokens'}${tokenMode === 'file' ? ` in ${files.publicTokenFile} and ${files.privateTokenFile} (0600, directory 0700)` : ''}.\n`);
     } else {
       if (tokens && tokenMode === 'file') writeTokenFiles(ctx, tokens.publicToken, tokens.privateToken);
       writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}),
         ...(resolved ? { imageReference: resolved.reference, ...(resolved.digest ? { imageDigest: resolved.digest } : {}) } : {}),
         ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}), dateFormat });
-      write(io, `\nSaved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`);
+      write(io, ui.ok(`Saved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`));
     }
 
     // 7. Clients
+    write(io, ui.step(5, STEPS, 'Clients'));
     const detected = detectClients(ctx);
     let selected: ClientId[];
     if (args.clients !== undefined) selected = [...args.clients];
     else if (interactive && prompter) {
-      write(io, '\nInstall into which clients? (numbers separated by commas, "all" or "none")\n');
-      CLIENT_IDS.forEach((id, i) => write(io, `  ${i + 1}) ${clientLabel(id)}${detected.includes(id) ? '  [detected]' : ''}\n`));
+      write(io, 'Install into which clients? (numbers separated by commas, "all" or "none")\n');
+      CLIENT_IDS.forEach((id, i) => write(io, `  ${String(i + 1).padStart(2)}) ${clientLabel(id)}${detected.includes(id) ? ui.paint('green', '  [detected]') : ''}\n`));
       const fallback = detected.map((id) => String(CLIENT_IDS.indexOf(id) + 1)).join(',');
       selected = await askUntilValid(prompter, `Choice [${fallback || 'none'}]: `, fallback || 'none', (v) => parseSelection(v, CLIENT_IDS, detected), io);
     } else selected = detected;
-    if (selected.length === 0) write(io, '\nNo clients selected. Print a snippet any time with: darktrace-mcp config <client>\n');
+    if (selected.length === 0) write(io, ui.warn('No clients selected. Print a snippet any time with: darktrace-mcp config <client>\n'));
 
     const results: ClientResult[] = [];
     for (const id of selected) {
       try { results.push(installClient(id, entry, ctx, { dryRun: args.dryRun, inlineTokens: tokenMode === 'inline', displayEntry })); }
       catch (error) { results.push({ client: id, status: 'failed', detail: error instanceof Error ? error.message : 'failed' }); }
     }
-    printResults(io, results);
+    printSummary(io, ui, [...stored, ...results], args.dryRun ? undefined : { tokenMode, tokens: tokens !== undefined || reuse, files, dir: setupDir(ctx) });
     if (runtime === 'docker') {
       write(io, '\nDocker: the container runs as your UID:GID so it can read the 0600 token files.' +
         (ctx.platform === 'darwin' || ctx.platform === 'win32'
@@ -333,8 +354,12 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
           : '\n'));
       if (resolved !== undefined) write(io, describeImage(resolved));
     }
-    write(io, `\nNext: run \`darktrace-mcp test\` to check URL, TLS and tokens, then restart your AI clients.\n`);
-    return results.some((r) => r.status === 'failed') ? 1 : 0;
+    const failed = results.some((r) => r.status === 'failed');
+    const configured = results.filter((r) => r.status === 'written' || r.status === 'command' || r.status === 'unchanged').map((r) => clientLabel(r.client));
+    write(io, '\n' + ui.paint('bold', 'Next:') + ` run \`darktrace-mcp test\` to check URL, TLS and tokens, then restart your AI clients.\n`);
+    if (configured.length > 0 && !args.dryRun) write(io, `      open ${configured[0]} and ask: ${ui.paint('cyan', `"${FIRST_QUESTION}"`)}\n`);
+    if (failed) write(io, ui.fail('Some clients failed (see above). Fix the problem and rerun `darktrace-mcp setup --client <name>`.\n'));
+    return failed ? 1 : 0;
   } finally {
     if (owned) prompter?.close();
   }
@@ -348,16 +373,36 @@ function describeImage(image: ResolvedImage): string {
       : '  digest:   none (locally built image; no registry digest to compare)\n');
 }
 
-export function printResults(io: Pick<SetupIo, 'stdout'>, results: readonly ClientResult[]): void {
-  if (results.length === 0) return;
-  io.stdout.write('\nResults:\n');
-  for (const r of results) {
-    io.stdout.write(`  ${clientLabel(r.client).padEnd(15)} ${r.status.padEnd(9)} ${r.detail}\n`);
-    if (r.backup) io.stdout.write(`  ${''.padEnd(15)} backup    ${r.backup}\n`);
+interface StoredFiles { tokenMode: TokenMode; tokens: boolean; files: { publicTokenFile: string; privateTokenFile: string }; dir: string }
+const markerFor = (status: ClientResult['status']): 'ok' | 'fail' | 'warn' | 'info' =>
+  status === 'written' || status === 'command' || status === 'unchanged' ? 'ok' : status === 'failed' ? 'fail' : status === 'manual' ? 'warn' : 'info';
+
+/**
+ * Aligned summary: what was written, where and with which permissions. Rows keep the `<label> <status> <detail>`
+ * order so the text stays greppable; markers and modes are decoration around it.
+ */
+function printSummary(io: Pick<SetupIo, 'stdout'>, ui: Ui, results: readonly ClientResult[], stored?: StoredFiles): void {
+  const rows: string[][] = [];
+  if (stored && stored.tokenMode === 'file') {
+    const dirMode = modeText(lstatOrUndefined(stored.dir)?.mode);
+    rows.push([ui.marker('ok'), 'Public token', 'written', stored.files.publicTokenFile, modeText(lstatOrUndefined(stored.files.publicTokenFile)?.mode)]);
+    rows.push([ui.marker('ok'), 'Private token', 'written', stored.files.privateTokenFile, modeText(lstatOrUndefined(stored.files.privateTokenFile)?.mode)]);
+    rows.push([ui.marker('ok'), 'Settings', 'written', `${stored.dir}/setup.json`, `${modeText(lstatOrUndefined(`${stored.dir}/setup.json`)?.mode)} (dir ${dirMode})`]);
   }
+  for (const r of results) {
+    rows.push([ui.marker(markerFor(r.status)), clientLabel(r.client), r.status, r.detail, r.file && (r.status === 'written' || r.status === 'unchanged') ? modeText(lstatOrUndefined(r.file)?.mode) : '']);
+    if (r.backup) rows.push(['', '', 'backup', r.backup, modeText(lstatOrUndefined(r.backup)?.mode)]);
+  }
+  if (rows.length === 0) return;
+  io.stdout.write('\n' + ui.paint('bold', 'Summary') + ui.note('  (what · status · where · mode)') + '\n' + ui.table(rows));
   for (const r of results) {
     if (r.snippet && (r.status === 'manual' || r.status === 'failed' || r.status === 'dry-run')) {
       io.stdout.write(`\n--- ${clientLabel(r.client)} ---\n${r.snippet}${r.snippet.endsWith('\n') ? '' : '\n'}`);
     }
   }
+}
+
+/** Results table used by `remove` (no stored files). */
+export function printResults(io: Pick<SetupIo, 'stdout'>, results: readonly ClientResult[], ui: Ui = createUi()): void {
+  printSummary(io, ui, results);
 }

@@ -173,8 +173,25 @@ function parseDestinationAllowlist(value: string | undefined): readonly string[]
   return value.split(',').map((item) => item.trim());
 }
 
-/** Load a strict operator configuration. Secret values never appear in errors. */
-export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: string): Config {
+/**
+ * Variables that connect the server to an appliance. When none of them is set the process is unconfigured
+ * (a first run after a one-click install): the server then starts in setup mode instead of failing.
+ */
+export const CONNECTION_VARIABLES = Object.freeze([
+  'DARKTRACE_CONFIG_FILE', 'DARKTRACE_URL', 'DARKTRACE_BASE_URL',
+  'DARKTRACE_PUBLIC_TOKEN', 'DARKTRACE_PUBLIC_TOKEN_FILE', 'DARKTRACE_PRIVATE_TOKEN', 'DARKTRACE_PRIVATE_TOKEN_FILE',
+] as const);
+
+/** True when no connection variable is present at all. A partial or invalid configuration is not "unconfigured". */
+export function isUnconfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return CONNECTION_VARIABLES.every((name) => env[name] === undefined);
+}
+
+/**
+ * Process-environment policy that applies before any configuration is read: no proxy or TLS bypass, no unknown
+ * or forbidden DARKTRACE_* variables. Shared by the full loader and the unconfigured setup mode.
+ */
+export function assertEnvironmentPolicy(env: NodeJS.ProcessEnv = process.env): void {
   assertSafeNetworkEnvironment(env);
   const unknownDarktraceEnvironment = Object.keys(env).find((name) => name.startsWith('DARKTRACE_') && !KNOWN_DARKTRACE_ENV.has(name));
   if (unknownDarktraceEnvironment !== undefined) throw new ConfigValidationError(`${unknownDarktraceEnvironment} is not a supported configuration field`);
@@ -183,6 +200,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
   if (forbiddenEnvironment !== undefined) {
     throw new ConfigValidationError(`${forbiddenEnvironment} is unsupported HTTP, email, export, version override, private CA, or TLS configuration`);
   }
+}
+
+/** Load a strict operator configuration. Secret values never appear in errors. */
+export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: string): Config {
+  assertEnvironmentPolicy(env);
 
   if (env.DARKTRACE_URL !== undefined && env.DARKTRACE_BASE_URL !== undefined && env.DARKTRACE_URL !== env.DARKTRACE_BASE_URL) {
     throw new ConfigValidationError('DARKTRACE_URL and DARKTRACE_BASE_URL conflict');
