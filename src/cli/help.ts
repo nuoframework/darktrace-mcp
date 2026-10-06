@@ -13,6 +13,8 @@ Installer commands:
         [--runtime node|docker] [--image <sha256:id>] [--tokens-from-stdin] [--inline-tokens-windows]
       Interactive wizard: stores tokens in ~/.config/darktrace-mcp (0700/0600) and registers the server
       in detected AI clients. Tokens are read with hidden input or as two stdin lines, never as flags.
+      Started through npx (npx -y @nuoframework/darktrace-mcp@<version> setup), it first copies the package
+      to ~/.local/share/darktrace-mcp/<version>/ and registers that absolute path, never npx.
   config <client> [--url <origin>] [--profiles <p>] [--runtime node|docker] [--image <id>]
       Print a ready-to-paste snippet (no secrets). VS Code and Cursor also get one-click install links.
   remove [--client <name>]... [--dry-run] [--purge]

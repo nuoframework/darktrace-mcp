@@ -7,6 +7,7 @@ import {
   type InstallSettings, type Runtime, type TokenMode,
 } from './entry.js';
 import { findOnPath } from './fsutil.js';
+import { installFixedCopy, isTransientInstall } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
 
@@ -124,6 +125,16 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       if (io.uid === undefined || io.gid === undefined || io.uid === 0) throw new SetupInputError('docker runtime needs a regular (non-root) POSIX user');
     }
 
+    // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path.
+    let entryPath = io.entryPath;
+    if (runtime === 'node' && isTransientInstall(io.entryPath, ctx)) {
+      const copy = installFixedCopy(io.entryPath, ctx, args.dryRun);
+      const verb = copy.status === 'copied' ? 'Installed a fixed copy of the package in'
+        : copy.status === 'reused' ? 'Reusing the fixed copy in' : 'Would install a fixed copy of the package in';
+      write(io, `\nRunning from the npx cache. ${verb} ${copy.dir}.\nClients will start the server from that absolute path, never through npx.\n`);
+      entryPath = copy.entryPath;
+    }
+
     // 3. Token storage mode
     let tokenMode: TokenMode = 'file';
     if (ctx.platform === 'win32' && runtime === 'node') {
@@ -157,7 +168,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
 
     const files = tokenPaths(ctx);
     const settings: InstallSettings = {
-      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath: io.entryPath,
+      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath,
       ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid } : {}),
     };
     if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');

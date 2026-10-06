@@ -9,6 +9,7 @@ import {
   vscodeInstallLink, vscodeInstallPayload, type InstallSettings, type Runtime,
 } from './entry.js';
 import { findOnPath, InstallerFileError } from './fsutil.js';
+import { existingFixedCopyEntry, isTransientInstall } from './install.js';
 import { PromptAbortedError } from './prompt.js';
 import { printResults, runSetup } from './setup.js';
 import { purgeSetup, readSavedSetup, tokenPaths } from './state.js';
@@ -113,6 +114,9 @@ function configCommand(p: Parsed, io: CliIo): number {
   const saved = readSavedSetup(io.ctx);
   const runtime = runtimeFlag(p) ?? saved?.runtime ?? 'node';
   const imageFlag = one(p, '--image');
+  // Through npx the running path is transient: prefer the fixed copy that `setup` installs.
+  const transient = runtime === 'node' && isTransientInstall(io.entryPath, io.ctx);
+  const fixedEntry = transient ? existingFixedCopyEntry(io.entryPath, io.ctx) : undefined;
   const settings: InstallSettings = {
     url: one(p, '--url') !== undefined ? normalizeUrl(one(p, '--url') as string) : saved?.url ?? 'https://darktrace.example.internal',
     profiles: one(p, '--profiles') !== undefined ? normalizeProfiles(one(p, '--profiles') as string) : saved?.profiles ?? 'read',
@@ -120,7 +124,7 @@ function configCommand(p: Parsed, io: CliIo): number {
     tokenMode: io.ctx.platform === 'win32' && runtime === 'node' ? 'inline' : 'file',
     ...tokenPaths(io.ctx),
     nodePath: io.execPath,
-    entryPath: io.entryPath,
+    entryPath: fixedEntry ?? io.entryPath,
     ...(runtime === 'docker' ? {
       dockerPath: findOnPath('docker', io.ctx.env, io.ctx.platform) ?? '/absolute/path/to/docker',
       image: imageFlag !== undefined ? validateImage(imageFlag) : saved?.image ?? 'REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT',
@@ -131,6 +135,7 @@ function configCommand(p: Parsed, io: CliIo): number {
   const out = io.stdout;
   out.write(`# ${clientLabel(client)} — darktrace MCP server (no secrets below)\n`);
   if (saved === undefined && one(p, '--url') === undefined) out.write('# No saved setup: replace the placeholder URL, and create the token files (see `darktrace-mcp setup`).\n');
+  if (transient && fixedEntry === undefined) out.write('# Running from the npx cache: the path below is temporary. Run `darktrace-mcp setup` once to install a fixed copy.\n');
   if (settings.tokenMode === 'inline') out.write('# Windows: replace <public token>/<private token>; anyone able to read this config can use the tokens.\n');
   out.write(clientSnippet(client, entry, io.ctx));
   if (client === 'vscode' && runtime === 'node') {
