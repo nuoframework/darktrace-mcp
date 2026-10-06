@@ -52,3 +52,24 @@ presents bind-mounted files as uid 0. The image is rebuilt and re-checked at the
 
 Residuals: email routes answer 403 for this token (not validated); `get_cves` 500 and
 `get_filtertypes` 302 are appliance-side; DELETE routes answer 502 after applying the change.
+
+## Second lab (lab B, 2026-10-06, final tree `ea99f1e` + 1.1.0-rc image)
+
+The first lab expired during the day; the owner provisioned a second Darktrace 7.1.0 appliance.
+
+- **Signing difference:** lab B rejects the compact `DTAPI-Date` (`YYYYMMDDTHHMMSS`, HTTP 400 on
+  `GET /status`) and accepts the spaced form; lab A accepted both. `DARKTRACE_DATE_FORMAT=spaced`
+  was set for every run below. The installer now probes both formats at setup time and records the
+  working one (no runtime fallback).
+- **Node, profile `all` (acknowledged):** 50 tools; status, device search, breaches, AI Analyst
+  groups, Antigena summary, tags, subnets, intel feed, POST Advanced Search (sensitive), PCAP
+  listing: all PASS; `post_tags` preview PASS; `post_antigena` without `confirm` →
+  `confirmation_required`.
+- **Critical flow with revert (node):** intel feed `addentry` → preview → `confirm:true` +
+  `previewId` → dialog (`argsHash`, every field, `approved` boolean) → accept → `SUCCESS`; entry
+  visible; replay → `preview_used`; `removeentry` through the same flow → `SUCCESS`; entry gone.
+  The `mcp-test` intel *source* name remains listed by the appliance with no entries (the API has
+  no source-delete call).
+- **Docker 1.1.0-rc (`sha256:7e5a2a41…6aad`, hardened run, Docker Desktop with
+  `DARKTRACE_TOKEN_FILE_OWNER=root-or-current`):** the same campaign, all reads and the write
+  preview PASS; critical without `confirm` refused.
