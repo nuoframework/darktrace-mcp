@@ -70,7 +70,7 @@ jobs:
           # Totals for the full-API release; recompute after merging branches that add tests.
           node --input-type=commonjs <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');
-          for(const [name,count] of [['functional',149],['security',330]]){
+          for(const [name,count] of [['functional',149],['security',1127]]){
             const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
             const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
             for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])
@@ -289,7 +289,7 @@ jobs:
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
           a.equal(r.sourceTreeSha256,'099c3244a455353ac2b9b467e0380d3578cbefa5366a157c8eaae82bb44f9125');
-          a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,330);
+          a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,1127);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
           a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,53);
           a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'99e8fdcdf437e583f6697a7810115114ba1505d27d5f129deabe26be36a454f9');
