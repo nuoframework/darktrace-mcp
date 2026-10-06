@@ -125,7 +125,7 @@ Tú decides qué puede hacer el modelo con `DARKTRACE_PROFILES` (el asistente te
 
 Combina perfiles con comas, por ejemplo `DARKTRACE_PROFILES=read,write`. Cada escritura y acción crítica queda auditada. Los permisos de tu token de Darktrace siguen aplicando: el servidor no puede hacer más de lo que el token permite.
 
-> **Los datos salen de tu red.** Los resultados llegan a tu cliente MCP y a su proveedor del modelo. Comprueba la idoneidad del proveedor, la retención y la residencia de datos (provider eligibility, retention, residency) en tu organización antes de conectar un appliance de producción.
+> **Los datos salen de tu red.** Los resultados llegan a tu cliente MCP y a su proveedor del modelo. Comprueba la idoneidad del proveedor, la retención y la residencia de datos (provider eligibility, retention, residency) en tu organización antes de conectar un appliance de producción. Las descargas de PCAP se devuelven en línea como Base64 y llegan al host y a su proveedor del modelo como cualquier otro resultado.
 
 Más: [resumen de seguridad](docs/security.md) (inglés) · [política de seguridad](SECURITY.md).
 

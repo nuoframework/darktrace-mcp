@@ -9,12 +9,15 @@ test('all 79 spec/inventory operations map exactly once to truthful statuses',()
  const ids=Object.values(spec.paths).flatMap((path:any)=>['get','post','delete'].flatMap(method=>path[method]?[path[method].operationId]:[])).sort();
  assert.equal(ids.length,79);assert.deepEqual(Object.keys(operations).sort(),ids);
  assert.equal(report.operations.length,79);assert.equal(new Set(report.operations.map(r=>r.operationId)).size,79);
- assert.deepEqual(report.counts,{implemented:78,blocked:0,excluded:1});
+ assert.deepEqual(report.counts,{implemented:77,blocked:1,excluded:1});
  const email=report.operations.filter(r=>r.pathTemplate.startsWith('/agemail/'));
- assert.equal(email.length,14);assert.ok(email.every(r=>r.status==='implemented'));
+ assert.equal(email.length,14);assert.ok(email.filter(r=>r.tier==='read').length===13&&email.filter(r=>r.tier==='read').every(r=>r.status==='implemented'));
  assert.deepEqual(email.filter(r=>r.tier==='read').map(r=>(r as any).requiredProfiles.join('+')).filter((v,i,a)=>a.indexOf(v)===i),['read+sensitive']);
- assert.deepEqual((email.find(r=>r.tier==='critical') as any).requiredProfiles,['write','critical']);
- assert.equal(operationDescriptors.length,78);assert.ok(operationDescriptors.every(op=>operations[op.operationId].status==='implemented'));
+ // The email ACTION is blocked (never published or executable): unvalidated signing/schema, 403 on the lab.
+ const action=email.find(r=>r.tier==='critical') as any;
+ assert.deepEqual([action.operationId,action.status,action.reason,action.requiredProfiles],['post_agemail_api_ep_api_v1_0_emails_uuid_action','blocked','signing and schema unvalidated; 403 on lab',[]]);
+ assert.equal(operations.post_agemail_api_ep_api_v1_0_emails_uuid_action.status,'blocked');
+ assert.equal(operationDescriptors.length,77);assert.ok(!operationDescriptors.some(op=>op.operationId==='post_agemail_api_ep_api_v1_0_emails_uuid_action'));assert.ok(operationDescriptors.every(op=>operations[op.operationId].status==='implemented'));
  assert.equal(report.labValidated,false);
  // Lab evidence (Darktrace 7.1): 19 bounded consultation recipes plus the 2026-10-06 live run; critical writes
  // were executed only with human approval and reverted. Email (403 for the lab token) and DELETE routes are not validated.

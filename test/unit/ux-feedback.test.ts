@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseConfig } from '../../src/config/schema.js';
-import { callTool, eligibleTools } from '../../src/tools/index.js';
+import { callTool, eligibleTools, SENSITIVE_WRITE_NOTICE } from '../../src/tools/index.js';
 import { operations, validateOperation, type ApiRequest } from '../../src/api/operations.js';
 import { DarktraceApiError } from '../../src/client/errors.js';
 const CANARY='SUBMITTED_VALUE_CANARY';
@@ -50,25 +50,33 @@ test('code-owned validation errors map to invalid_arguments with guidance',async
 test('policy denials, missing operation and unknown tools carry a code and next step',async()=>{
   const {requests,ctx}=context();
   const denied=await callTool('darktrace_advanced_search',{body:{hash:'e30='}},ctx);
-  assert.equal(sc(denied).errorCode,'policy_denied');assert.match(sc(denied).hint,/sensitive/);
+  assert.equal(sc(denied).errorCode,'operation_denied');assert.deepEqual(sc(denied).error,{code:'operation_denied',message:'Operation is not permitted by the active profile.'});assert.match(sc(denied).hint,/sensitive/);
+  assert.equal(denied.content[0].text,JSON.stringify(denied.structuredContent));
   const write=await callTool('darktrace_manage_tags',{operation:'post_tags',body:{name:'x',data:{}}},ctx);
-  assert.equal(sc(write).errorCode,'policy_denied');assert.match(sc(write).hint,/write/);
+  assert.equal(sc(write).errorCode,'operation_denied');assert.match(sc(write).hint,/write/);
   const ambiguous=await callTool('darktrace_get_reference_data',{},ctx);
-  assert.equal(sc(ambiguous).errorCode,'invalid_operation');assert.deepEqual(sc(ambiguous).operations,['get_enums','get_filtertypes']);
+  assert.equal(sc(ambiguous).errorCode,'invalid_arguments');assert.equal(sc(ambiguous).error.code,'invalid_arguments');assert.deepEqual(sc(ambiguous).operations,['get_enums','get_filtertypes']);assert.match(sc(ambiguous).hint,/"operation"/);
   const wrong=await callTool('darktrace_list_tags',{operation:'get_status'},ctx);
-  assert.equal(sc(wrong).errorCode,'invalid_operation');
-  assert.equal(sc(await callTool('darktrace_nope',{},ctx)).errorCode,'unknown_tool');
+  assert.equal(sc(wrong).errorCode,'operation_denied');assert.ok(Array.isArray(sc(wrong).operations));
+  const nope=sc(await callTool('darktrace_nope',{},ctx));
+  assert.deepEqual([nope.errorCode,nope.error.code],['operation_denied','operation_denied']);assert.match(nope.hint,/tools\/list/);
   assert.equal(requests.length,0);
 });
 
 test('api errors keep opaque code-owned text and add an operation-aware hint for too_large',async()=>{
   const {ctx}=context({},()=>{const e=new DarktraceApiError('too_large','RID');e.message='REMOTE_CANARY';throw e;});
   const big=await callTool('darktrace_list_model_breaches',{},ctx);
-  assert.equal(sc(big).errorCode,'too_large');assert.match(sc(big).hint,/narrow starttime\/endtime/);assert.match(sc(big).hint,/minimal:true/);
+  assert.equal(sc(big).errorCode,'response_limit_exceeded');assert.deepEqual(sc(big).error,{code:'response_limit_exceeded',message:'Response exceeds the configured byte limit.'});assert.match(sc(big).hint,/narrow starttime\/endtime/);assert.match(sc(big).hint,/minimal:true/);
   assert.doesNotMatch(JSON.stringify(big),/REMOTE_CANARY|RID/);
   const forbidden=context({},()=>{throw new DarktraceApiError('forbidden','RID',403);});
   const out=await callTool('darktrace_get_status',{},forbidden.ctx);
-  assert.match(sc(out).hint,/lacks permission/);assert.doesNotMatch(JSON.stringify(out),/403|RID/);
+  assert.equal(sc(out).errorCode,'upstream_forbidden');assert.deepEqual(sc(out).error,{code:'upstream_forbidden',message:'Appliance denied this operation.'});assert.match(sc(out).hint,/lacks permission/);assert.doesNotMatch(JSON.stringify(out),/403|RID/);
+  // Other upstream kinds collapse to upstream_error (with the kind's hint), invalid_response to schema_mismatch, cancelled to request_cancelled.
+  for (const [kind,code] of [['auth','upstream_error'],['not_found','upstream_error'],['server','upstream_error'],['network','upstream_error'],['timeout','upstream_error'],['invalid_response','schema_mismatch'],['cancelled','request_cancelled']] as const) {
+    const failing=context({},()=>{throw new DarktraceApiError(kind,'RID');});
+    const got=await callTool('darktrace_get_status',{},failing.ctx);
+    assert.equal(got.isError,true);assert.equal(sc(got).errorCode,code,kind);assert.equal(sc(got).error.code,code);assert.doesNotMatch(JSON.stringify(got),/RID/);
+  }
 });
 
 test('cheap defaults are applied and reported; list results always carry item counts',async()=>{
@@ -128,5 +136,7 @@ test('write descriptions name the required body fields within the description bu
   assert.match(tools.find(t=>t.name==='darktrace_antigena_action')!.description,/post_antigena \(body: codeid\)/);
   assert.match(tools.find(t=>t.name==='darktrace_list_model_breaches')!.description,/epoch ms/);
   assert.doesNotMatch(tools.find(t=>t.name==='darktrace_acknowledge_model_breach')!.description,/body:/);
-  for (const tool of tools) assert.ok(tool.description.length<=600,tool.name);
+  // The budget covers the code-owned description; the fixed sensitive+write notice is appended to free-text write tools.
+  assert.ok(tags.description.endsWith(' '+SENSITIVE_WRITE_NOTICE));
+  for (const tool of tools) assert.ok(tool.description.replace(' '+SENSITIVE_WRITE_NOTICE,'').length<=600,tool.name);
 });

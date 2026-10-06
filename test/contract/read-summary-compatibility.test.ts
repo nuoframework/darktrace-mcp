@@ -1,10 +1,11 @@
 import test from 'node:test';
-import { DarktraceApiError, errorHint, safeErrorMessage, type ApiErrorKind } from '../../src/client/errors.js';
+import { DarktraceApiError, errorHint, type ApiErrorKind } from '../../src/client/errors.js';
 import assert from 'node:assert/strict';
 import { operations, validateOperation, buildRequest } from '../../src/api/operations.js';
 import { checkRanges } from '../../src/api/validation.js';
 import { compileResponseView, selectResponseView, projectResponse, SUMMARY_LOGINPUT_VIEW, type ResponseView } from '../../src/api/response-view.js';
 import { callTool } from '../../src/tools/index.js';
+import { DENIAL_MESSAGES } from '../../src/policy/errors.js';
 import { parseConfig } from '../../src/config/schema.js';
 import { generateCoverage } from '../../src/coverage/report.js';
 import catalogue from '../../src/api/catalogue.generated.json' with {type:'json'};
@@ -91,15 +92,19 @@ test('effective coverage records conditional anchors and exact query-bound outpu
 
 test('API diagnostics return only exact code-owned enums and never remote exception properties',async()=>{
   const codes=['auth','forbidden','bad_request','not_found','rate_limited','server','network','timeout','cancelled','too_large','invalid_request','invalid_response','overloaded','clock_skew_suspected'] as const;
-  const invoke=(error:unknown)=>callTool(operations.get_status.tool!,{}, {cfg,client:{request:async()=>{throw error;}}});
+  // Read failures map onto the fixed denial vocabulary; the UX hint still comes from the code-owned kind.
+  const denial=(kind:ApiErrorKind)=>kind==='forbidden'?'upstream_forbidden':kind==='too_large'?'response_limit_exceeded':kind==='invalid_response'?'schema_mismatch':kind==='cancelled'?'request_cancelled':'upstream_error';
+  const audits:string[]=[];
+  const invoke=(error:unknown)=>callTool(operations.get_status.tool!,{}, {cfg,client:{request:async()=>{throw error;}},audit:{async record(id:string,outcome:string){audits.push(id+':'+outcome);}}});
   for(const kind of codes) {
     const error=new DarktraceApiError(kind,'SECRET_REQUEST_ID',401);
     error.message='REMOTE_CANARY https://private.example';error.stack='STACK_CANARY';
     const output=await invoke(error);
-    assert.equal(output.isError,true);assert.equal(output.structuredContent?.errorCode,kind);
+    assert.equal(output.isError,true);assert.equal(output.structuredContent?.errorCode,denial(kind),kind);
     assert.deepEqual(Object.keys(output.structuredContent!).sort(),['error','errorCode','hint']);
-    // The message and hint are looked up from the code-owned kind, never taken from the exception.
-    assert.equal(output.structuredContent?.error,safeErrorMessage(kind));
+    // The message and hint are looked up from code-owned tables, never taken from the exception.
+    assert.deepEqual(output.structuredContent?.error,{code:denial(kind),message:DENIAL_MESSAGES[denial(kind)]});
+    assert.equal(output.content[0].text,JSON.stringify(output.structuredContent));
     if(kind!=='too_large')assert.equal(output.structuredContent?.hint,errorHint(kind));
     assert.doesNotMatch(JSON.stringify(output),/CANARY|SECRET_REQUEST_ID|private\.example|401/);
   }
@@ -108,7 +113,9 @@ test('API diagnostics return only exact code-owned enums and never remote except
   Object.defineProperty(hostile,'kind',{get(){throw new Error('GETTER_CANARY');}});
   for(const error of [forged,hostile,new Error('REMOTE_CANARY'),{kind:'auth',message:'REMOTE_CANARY'},null]) {
     const output=await invoke(error);assert.equal(output.isError,true);
-    assert.deepEqual(Object.keys(output.structuredContent!),['error']);
+    assert.deepEqual(output.structuredContent,{error:{code:'upstream_error',message:DENIAL_MESSAGES.upstream_error},errorCode:'upstream_error'});
     assert.doesNotMatch(JSON.stringify(output),/CANARY|SECRET_REQUEST_ID/);
   }
+  // Upstream read failures write no audit record.
+  assert.deepEqual(audits,[]);
 });

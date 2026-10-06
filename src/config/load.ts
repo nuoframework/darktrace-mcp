@@ -20,7 +20,8 @@ const KNOWN_DARKTRACE_ENV = new Set([
   'DARKTRACE_MAX_TOOL_INPUT_DEPTH', 'DARKTRACE_MAX_TOOL_INPUT_ELEMENTS', 'DARKTRACE_MAX_TOOL_OUTPUT_CHARS',
   'DARKTRACE_MAX_CONCURRENT_REQUESTS', 'DARKTRACE_MAX_QUEUED_REQUESTS', 'DARKTRACE_MAX_PAGES',
   'DARKTRACE_RATE_LIMIT_PER_MINUTE', 'DARKTRACE_MAX_GET_RETRIES', 'DARKTRACE_MAX_RETRY_AFTER_MS', 'DARKTRACE_MAX_WRITES_PER_MINUTE',
-  'DARKTRACE_TOKEN_FILE_OWNER',
+  'DARKTRACE_TOKEN_FILE_OWNER', 'DARKTRACE_PROTECTED_TARGETS',
+  'DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE', 'DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL',
   ...FORBIDDEN_ENV,
 ]);
 
@@ -253,6 +254,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
     merged.profiles = { ...asObject(merged.profiles), [key]: value };
   }
 
+  for (const [variable, key] of [['DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE', 'acknowledgeSensitiveWrite'], ['DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL', 'acknowledgeHostApproval']] as const) {
+    const value = envBoolean(env[variable], variable);
+    if (value !== undefined) merged.profiles = { ...asObject(merged.profiles), [key]: value };
+  }
+  if (env.DARKTRACE_PROTECTED_TARGETS !== undefined) {
+    const targets = env.DARKTRACE_PROTECTED_TARGETS.split(',').map((item) => item.trim()).filter(Boolean);
+    if (targets.length === 0) throw new ConfigValidationError('DARKTRACE_PROTECTED_TARGETS must contain at least one identifier');
+    merged.policy = { ...asObject(merged.policy), protectedTargets: targets };
+  }
+
   const environmentLimits: ReadonlyArray<readonly [string, string]> = [
     ['DARKTRACE_MAX_RESPONSE_BYTES', 'limits.maxResponseBytes'],
     ['DARKTRACE_MAX_TOOL_INPUT_BYTES', 'limits.maxToolInputBytes'],
@@ -272,5 +283,25 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, fileOverride?: 
     if (parsed !== undefined) setNested(merged, key, parsed);
   }
 
-  return parseConfig(merged as ConfigSource);
+  const config = parseConfig(merged as ConfigSource);
+  assertOperatorAcknowledgements(config);
+  return config;
+}
+
+/**
+ * Startup-only gates (DR-W-03/16, MR-06, CR-11): the sensitive-read + write union lets untrusted sensitive content
+ * flow into free-text writes, and host approval delegates critical consent to the MCP host. Both need an explicit
+ * operator acknowledgement; a fixed, value-free notice is logged when they are in effect.
+ */
+export function assertOperatorAcknowledgements(config: Config): void {
+  const union = config.profiles.sensitiveRead && config.profiles.write;
+  if (union && !config.acknowledgements.sensitiveWrite) {
+    throw new ConfigValidationError('DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true is required when sensitive reads and writes are both enabled (profile all); results may carry untrusted content into write free-text fields');
+  }
+  const hostCritical = config.profiles.writeCritical && config.approval.critical === 'host';
+  if (hostCritical && !config.acknowledgements.hostApproval) {
+    throw new ConfigValidationError('DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true is required with DARKTRACE_CRITICAL_APPROVAL=host; critical consent is then delegated to the MCP host');
+  }
+  if (union) logEvent('sensitive_write_acknowledged');
+  if (hostCritical) logEvent('host_approval_acknowledged');
 }

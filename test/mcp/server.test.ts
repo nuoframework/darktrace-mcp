@@ -38,7 +38,9 @@ test('MCP lists critical tools only with write+critical; a forged critical-witho
  const enabled=await connected({write:true,writeCritical:true});
  try{const list=await enabled.client.listTools();const tool=list.tools.find((t:{name:string})=>t.name==='darktrace_antigena_manual_action') as any;
   assert.ok(tool);assert.equal(tool.annotations.destructiveHint,true);assert.equal(tool.annotations.readOnlyHint,false);assert.ok(tool.inputSchema.properties.confirm);
-  const preview=await enabled.client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:60}}});
-  assert.equal((preview.structuredContent as any).confirmationRequired,true);assert.equal(enabled.requests.length,0);
+  const unconfirmed=await enabled.client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:60}}});
+  assert.equal((unconfirmed.structuredContent as any).errorCode,'confirmation_required');assert.equal(enabled.requests.length,0);
+  const preview=await enabled.client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:60},dryRun:true}});
+  assert.match((preview.structuredContent as any).previewId,/^[a-f0-9]{32}$/);assert.equal(enabled.requests.length,0);
  }finally{await enabled.close();}
 });

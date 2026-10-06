@@ -102,7 +102,9 @@ export function fakeClock(t) {
 }
 export function scriptedServer(t, extra = {}) {
   const child = spawn(process.execPath, ['--import', fileURLToPath(new URL('./writes-preload.mjs', import.meta.url)), 'dist/src/index.js'],
-    { env: env({ AD_W_FAKE_TRANSPORT: '1', DARKTRACE_PROFILES: 'all', ...extra }), stdio: ['pipe', 'pipe', 'pipe'] });
+    { env: env({ AD_W_FAKE_TRANSPORT: '1', DARKTRACE_PROFILES: 'all',
+      // Operator acknowledgements required at startup for the sensitive+write union and critical host delegation.
+      DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE: 'true', ...(extra.DARKTRACE_CRITICAL_APPROVAL === 'host' ? { DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL: 'true' } : {}), ...extra }), stdio: ['pipe', 'pipe', 'pipe'] });
   let text = '', stderr = '', next = 1;
   const frames = [], waiters = new Map(), methods = new Map();
   const timer = setTimeout(() => child.kill('SIGKILL'), 8000);

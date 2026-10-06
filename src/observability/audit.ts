@@ -1,37 +1,54 @@
 import { writeSync } from 'node:fs';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { operations } from '../api/operations.js';
 import { redactValue } from './redact.js';
+import { canonicalJson, sha256Hex } from '../policy/canonical.js';
 export type AuditOutcome = 'start'|'ok'|'error'|'preview'|'unknown';
-export interface Audit { record(operationId:string,outcome:AuditOutcome,requestId?:string):Promise<void>; }
-export interface AuditRecord {audit:true;ts:string;requestId:string;operationId:string;outcome:AuditOutcome;seq:number;prevHash:string;hash:string;}
+export type AuditApprovalMode = 'none'|'elicitation'|'host';
+export interface AuditMeta { argsHash?:string|null; approvalMode?:AuditApprovalMode; }
+export interface Audit { record(operationId:string,outcome:AuditOutcome,requestId?:string,meta?:AuditMeta):Promise<void>; }
+export interface AuditRecord {audit:true;ts:string;requestId:string;operationId:string;outcome:AuditOutcome;argsHash:string|null;approvalMode:AuditApprovalMode;seq:number;prevHash:string;hash:string;}
 export const AUDIT_GENESIS='0'.repeat(64);
-/** hash = SHA-256 over the canonical record without its own hash; prevHash chains records so edits and gaps are detectable. */
-export function auditHash(record:Omit<AuditRecord,'hash'>):string {
-  const fields=['audit','ts','requestId','operationId','outcome','seq','prevHash'] as const;
-  return createHash('sha256').update(JSON.stringify(fields.map(key=>[key,record[key]]))).digest('hex');
+const OUTCOMES:readonly string[]=['start','ok','error','preview','unknown'];
+const MODES:readonly string[]=['none','elicitation','host'];
+/** hash = SHA-256 over canonical UTF-8 JSON (code-point key order) of every record field except `hash`. */
+export function auditHash(record:Record<string,unknown>):string {
+  const {hash:_hash,...unsigned}=record;
+  return sha256Hex(canonicalJson(unsigned));
 }
 /** Verify a sequence of parsed audit lines (one process run). Returns the index of the first broken record, or -1. */
 export function verifyAuditChain(records:readonly AuditRecord[]):number {
   let prev=AUDIT_GENESIS;
   for (const [index,record] of records.entries()) {
-    const {hash,...rest}=record;
-    if (record.seq!==index+1||record.prevHash!==prev||auditHash(rest)!==hash) return index;
-    prev=hash;
+    if (record.seq!==index+1||record.prevHash!==prev||auditHash(record as unknown as Record<string,unknown>)!==record.hash) return index;
+    prev=record.hash;
   }
   return -1;
 }
+/**
+ * Hash-chained JSONL audit. Emission is serialized: a record is built (seq, prevHash) only when the previous sink
+ * write has settled, so sequence order always equals emitted order. A failed sink write still advances the chain,
+ * leaving a detectable gap rather than a reused seq.
+ */
 export function createAudit(tokens:readonly string[]=[], sink:(line:string)=>void|Promise<void>=line=>{writeSync(2,line);}):Audit {
-  let seq=0,prevHash=AUDIT_GENESIS;
-  return {async record(operationId,outcome,requestId) {
-    if (!Object.hasOwn(operations,operationId) && operationId!=='unknown_operation') throw new Error('Invalid audit operation');
-    if (!['start','ok','error','preview','unknown'].includes(outcome)) throw new Error('Invalid audit outcome');
-    if (requestId!==undefined && (requestId.length===0 || requestId.length>128 || !/^[a-zA-Z0-9_-]+$/.test(requestId))) throw new Error('Invalid audit request ID');
-    // The chain advances before the sink is awaited: a failed write leaves a detectable gap, never a reused seq.
-    seq+=1;
-    const unsigned=redactValue({audit:true as const,ts:new Date().toISOString(),requestId:requestId??randomUUID(),operationId,outcome,seq,prevHash},tokens);
-    const record:AuditRecord={...unsigned,hash:auditHash(unsigned)};
-    prevHash=record.hash;
-    await sink(JSON.stringify(record)+'\n');
+  let seq=0,prevHash=AUDIT_GENESIS,tail:Promise<unknown>=Promise.resolve();
+  return {record(operationId,outcome,requestId,meta={}) {
+    if (!Object.hasOwn(operations,operationId) && operationId!=='unknown_operation') return Promise.reject(new Error('Invalid audit operation'));
+    if (!OUTCOMES.includes(outcome)) return Promise.reject(new Error('Invalid audit outcome'));
+    if (requestId!==undefined && (requestId.length===0 || requestId.length>128 || !/^[a-zA-Z0-9_-]+$/.test(requestId))) return Promise.reject(new Error('Invalid audit request ID'));
+    const argsHash=meta.argsHash??null,approvalMode=meta.approvalMode??'none';
+    if (argsHash!==null&&!/^[a-f0-9]{64}$/.test(argsHash)) return Promise.reject(new Error('Invalid audit args hash'));
+    if (!MODES.includes(approvalMode)) return Promise.reject(new Error('Invalid audit approval mode'));
+    const id=requestId??randomUUID();
+    const emit=async()=>{
+      seq+=1;
+      const unsigned=redactValue({audit:true as const,ts:new Date().toISOString(),requestId:id,operationId,outcome,argsHash,approvalMode,seq,prevHash},tokens);
+      const record:AuditRecord={...unsigned,hash:auditHash(unsigned)};
+      prevHash=record.hash;
+      await sink(JSON.stringify(record)+'\n');
+    };
+    const run=tail.then(emit,emit);
+    tail=run.catch(()=>undefined);
+    return run;
   }};
 }

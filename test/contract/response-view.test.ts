@@ -18,11 +18,12 @@ test('approved device projection strips unknown top-level and nested fields',asy
   assert.deepEqual(JSON.parse(JSON.stringify(result.structuredContent?.data)),[{did:1,hostname:'device.example',ip:'192.0.2.1',ips:[{ip:'192.0.2.1',timems:1791198000000,time:'2026-10-05 11:00:00',sid:4}]}]);
   for(const canary of ['TOP_CANARY','BODY_CANARY','NESTED_CANARY'])assert.equal(JSON.stringify(result).includes(canary),false);
 });
-test('excluded Advanced Search selector is denied before preview, audit, or network effects',async()=>{
+test('excluded Advanced Search selector is denied before preview, execution audit, or network effects',async()=>{
   const hash=Buffer.from(JSON.stringify({search:'x',fields:['unexpectedField','@message','rawMailBody'],timeframe:'3600'})).toString('base64');
-  const effects={calls:0,audits:0};
-  const result=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash},dryRun:true,sensitiveRead:true,providerEligible:true},{cfg,client:{async request(){effects.calls++;return {json:{}};}},audit:{async record(){effects.audits++;}}});
-  assert.equal(result.isError,true);assert.equal(effects.calls,0);assert.equal(effects.audits,0);
+  const effects={calls:0,audits:[] as string[]};
+  const result=await callTool('darktrace_advanced_search',{operation:'post_advancedsearch_api_search',body:{hash},dryRun:true,sensitiveRead:true,providerEligible:true},{cfg,client:{async request(){effects.calls++;return {json:{}};}},audit:{async record(_id:string,outcome:string){effects.audits.push(outcome);}}});
+  // The denial writes exactly one `error` audit record: never preview, start or ok.
+  assert.equal(result.isError,true);assert.equal(effects.calls,0);assert.deepEqual(effects.audits,['error']);assert.equal(result.structuredContent?.errorCode,'invalid_arguments');
   assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.preview,undefined);assert.equal(result.structuredContent?.outcome,undefined);
   assert.equal(JSON.stringify(result).includes(hash),false);
 });

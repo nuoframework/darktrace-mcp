@@ -2,14 +2,19 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { DarktraceApiError } from '../client/errors.js';
 import catalogue from './catalogue.generated.json' with { type: 'json' };
+import { TARGET_POLICIES, type TargetPolicy } from '../policy/targets.js';
 import { schemaFromOpenApi, checkInput, checkRanges, validatePathSegment, validateSearchHash, inputUnit, QUERY_DEFAULTS, BODY_DEFAULTS, type InputLimits } from './validation.js';
 export type Tier = 'read'|'medium'|'high'|'critical';
 export interface OperationDescriptor {
   operationId:string; method:'GET'|'POST'|'DELETE'; pathTemplate:string; tool:string|null;
   tier:Tier; sensitivity:string; status:'implemented'|'blocked'|'excluded'; reason:string|null;
   execution:string; parameters:any[]; bodies:any[]; bodyRequired:boolean; documentedIn:string; validatedOn:string[];
+  /** Darktrace/EMAIL only: pinned SDK schema digest, version and provenance (generated). */
+  schemaSha256?:string; schemaVersion?:string; schemaProvenance?:string;
 }
-export interface Operation extends OperationDescriptor { input:z.ZodObject<any>; }
+export interface Operation extends OperationDescriptor { input:z.ZodObject<any>;
+  /** Writes only: code-owned blast-radius policy (src/policy/targets.ts). */
+  targetPolicy?:TargetPolicy; maxTargets?:number; }
 export interface OperationArgs { operation?:string; path?:Record<string,unknown>; query?:Record<string,unknown>; body?:unknown; contentType?:string; dryRun?:boolean; confirm?:boolean; previewId?:string; }
 export interface ApiRequest {
   operationId:string; pathParams?:Record<string,string|number>; query?:ReadonlyArray<readonly [string,string]>;
@@ -44,11 +49,13 @@ export const operations:Readonly<Record<string,Operation>> = Object.freeze(Objec
   // Writes execute by default when the operator profile allows; dryRun:true returns a value-free preview.
   if (row.tier!=='read') {
     fields.dryRun=z.boolean().default(false).describe('true = preview only; nothing is sent.');
-    fields.previewId=z.string().regex(/^[a-f0-9]{32}$/).optional().describe(row.tier==='critical'?'Required with confirm:true: the previewId returned by the preview of these exact arguments.':'Optional: binds execution to an earlier preview of these exact arguments.');
+    if (row.tier==='critical') fields.previewId=z.string().regex(/^[a-f0-9]{32}$/).optional().describe('Required with confirm:true: the previewId returned by the dryRun:true preview of these exact arguments.');
   }
   // Critical writes additionally need explicit user approval expressed as confirm:true.
   if (row.tier==='critical') fields.confirm=z.boolean().default(false).describe('Must be true, after explicit user approval, to execute this critical action.');
-  return [row.operationId,Object.freeze({...row,input:z.strictObject(fields)})];
+  const targetPolicy=row.tier==='read'?undefined:TARGET_POLICIES[row.operationId];
+  if (row.tier!=='read'&&!targetPolicy) throw new Error(`Missing reviewed target policy: ${row.operationId}`);
+  return [row.operationId,Object.freeze({...row,input:z.strictObject(fields),...(targetPolicy?{targetPolicy,maxTargets:targetPolicy.maxTargets}:{})})];
 })));
 export const operationDescriptors = Object.values(operations).filter(op=>op.status==='implemented').map(({operationId,method,pathTemplate})=>({operationId,method,pathTemplate}));
 export function validateOperation(op:Operation, raw:unknown, limits:number|Partial<InputLimits>=5000): OperationArgs {

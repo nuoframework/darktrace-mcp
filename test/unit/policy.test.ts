@@ -53,9 +53,9 @@ test('tool output cap counts text and structured representations together',async
 test('write profile executes medium/high directly with awaited pre-audit; dryRun:true previews without dispatch',async()=>{
  const {ctx,requests}=context({write:true});const audits:string[]=[];const audited={...ctx,audit:{async record(id:string,outcome:string){audits.push(outcome);}}};
  const preview=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},dryRun:true},audited);
- assert.equal(preview.structuredContent?.dryRun,true);assert.deepEqual(preview.structuredContent?.parameterNames,['did','label']);assert.equal(requests.length,0);assert.deepEqual(audits,[]);
+ assert.equal(preview.structuredContent?.dryRun,true);assert.deepEqual(preview.structuredContent?.parameterNames,['did','label']);assert.equal(requests.length,0);assert.deepEqual(audits,['preview']);
  const done=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},audited);
- assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].contentType,'application/json');assert.deepEqual(audits,['start','ok']);
+ assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].contentType,'application/json');assert.deepEqual(audits,['preview','start','ok']);
 });
 test('form-only write keeps its documented content type',async()=>{
  const {ctx,requests}=context({write:true});
@@ -66,10 +66,10 @@ test('form-only write keeps its documented content type',async()=>{
 test('pre-audit failure fails closed before request; post-write audit failure reports completed and never retries',async()=>{
  const {ctx,requests}=context({write:true});
  const pre=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},{...ctx,audit:{async record(){throw new Error('PRIVATE_SECRET');}}});
- assert.equal(pre.isError,true);assert.equal(requests.length,0);assert.doesNotMatch(JSON.stringify(pre),/PRIVATE_SECRET/);
+ assert.equal(pre.isError,true);assert.equal((pre.structuredContent as any).errorCode,'audit_unavailable');assert.equal(requests.length,0);assert.doesNotMatch(JSON.stringify(pre),/PRIVATE_SECRET/);
  let n=0;const post=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},{...ctx,audit:{async record(){if(n++>0)throw new Error('PRIVATE_SECRET');}}});
- assert.equal(post.isError,true);assert.equal(post.structuredContent?.outcome,'completed');assert.equal(post.structuredContent?.auditFailed,true);assert.equal(requests.length,1);
- assert.match(String(post.structuredContent?.error),/Do not automatically repeat/);assert.doesNotMatch(JSON.stringify(post),/PRIVATE_SECRET/);
+ assert.equal(post.isError,true);assert.equal(post.structuredContent?.outcome,'completed');assert.equal((post.structuredContent as any).errorCode,'audit_failed');assert.ok(post.structuredContent?.requestId);assert.equal(requests.length,1);
+ assert.match(String(post.structuredContent?.hint),/Do not automatically repeat/);assert.doesNotMatch(JSON.stringify(post),/PRIVATE_SECRET/);
 });
 test('critical operations never execute without the critical profile and confirm:true',async()=>{
   const writeOnly=context({write:true});
@@ -79,8 +79,10 @@ test('critical operations never execute without the critical profile and confirm
   }
   assert.equal(writeOnly.requests.length,0);
   const {requests,ctx:base}=context({write:true,writeCritical:true});const ctx={...base,approve:async()=>'accept' as const};
-  const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
-  assert.equal(preview.structuredContent?.confirmationRequired,true);assert.match(String(preview.structuredContent?.hint),/confirm:true/);assert.equal(requests.length,0);
+  const unconfirmed=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
+  assert.equal((unconfirmed.structuredContent as any).errorCode,'confirmation_required');assert.match(String(unconfirmed.structuredContent?.hint),/confirm:true/);assert.equal(requests.length,0);
+  const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},dryRun:true},ctx);
+  assert.match(String(preview.structuredContent?.previewId),/^[a-f0-9]{32}$/);assert.ok(preview.structuredContent?.expiresAt);assert.equal(requests.length,0);
   const done=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true,previewId:preview.structuredContent?.previewId},ctx);
   assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].operationId,'post_antigena_manual');
 });
@@ -104,7 +106,7 @@ test('read-only multi-operation tools default to their listing operation',async(
   assert.equal((await callTool('darktrace_list_tags',{},ctx)).isError,undefined);
   assert.deepEqual(requests.map(r=>r.operationId),['get_modelbreaches','get_models','get_tags']);
   const ambiguous=await callTool('darktrace_get_reference_data',{},ctx);
-  assert.equal(ambiguous.isError,true);assert.equal(ambiguous.structuredContent?.errorCode,'invalid_operation');
+  assert.equal(ambiguous.isError,true);assert.equal(ambiguous.structuredContent?.errorCode,'invalid_arguments');
   assert.deepEqual(ambiguous.structuredContent?.operations,['get_enums','get_filtertypes']);assert.equal(requests.length,3);
   const w=context({write:true});assert.equal((await callTool('darktrace_acknowledge_model_breach',{path:{pbid:1},body:{acknowledge:true}},w.ctx)).isError,true);assert.equal(w.requests.length,0);
 });

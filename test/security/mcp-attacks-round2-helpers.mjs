@@ -40,7 +40,9 @@ export function hostileRecord(index = 0) {
   return JSON.parse(JSON.stringify(record).replace('"role"', '"__proto__":{"polluted":true},"role"'));
 }
 export const TOP_LEVEL = new Set(['data', 'source', 'validatedOn', 'unreviewedView', 'minimized', 'unmodeledFieldsOmitted', 'truncated', 'hint', 'controlCharsNeutralized',
-  'truncatedField', 'truncatedFields', 'returnedItems', 'totalItems', 'error', 'errorCode', 'outcome', 'requestId', 'auditFailed']);
+  'truncatedField', 'truncatedFields', 'returnedItems', 'totalItems', 'error', 'errorCode', 'outcome', 'requestId', 'auditFailed',
+  // Code-owned UX key (merged UX worker): defaults the server applied (count/time window), never upstream data.
+  'appliedDefaults']);
 
 const searchHash = Buffer.from(JSON.stringify({ search: 'synthetic', fields: [], timeframe: '3600' })).toString('base64');
 const pathValue = { uuid: 'synthetic-uuid', filename: 'synthetic.pcap', field: 'synthetic', analysis: 'mean', graphmode: 'count', query: searchHash };
