@@ -378,6 +378,16 @@ diagnostic `{"event":"audit_sink_failed"}`.
 - Each email operation pins `schemaSha256` (canonical JSON of its SDK path item), `schemaVersion`
   (`darktrace-sdk 0.10.1`) and `schemaProvenance`. A response that is not a JSON object/list, or that
   announces a `version` (none is pinned), is `schema_mismatch`.
+- **Lab C diagnosis (2026-10-06, [lab Email validation](security/lab-email-validation.md)).** On a second
+  7.1.0 lab, where the owner reports the Email module is enabled, all 13 email reads still answer 403
+  `{"error": "403 Forbidden"}`, and so does an unknown route under the same prefix. The Email service itself
+  rejects a wrong signature, or one computed without the `/agemail` prefix, with
+  `400 {"agemail": "API SIGNATURE ERROR"}` and accepts ours. Date format, query encoding and `Accept` have no
+  effect. Verdict: **PERMISSION**. The API token's user has no Darktrace/EMAIL access, or Email is not
+  linked to the instance. The doc lists the operator steps. Nothing changed: the reads stay
+  "not lab-validated", the email action stays `blocked` (the doc lists the evidence needed to enable it),
+  and `src/`, the catalogue and the contract fixture are unchanged.
+  Probe: `scripts/lab-email-probe.mjs`.
 
 ### 8.9 Sensitive + write union
 
