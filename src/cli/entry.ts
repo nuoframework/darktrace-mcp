@@ -28,6 +28,8 @@ export interface InstallSettings {
   readonly image?: string;
   readonly uid?: number;
   readonly gid?: number;
+  /** Host OS running Docker. darwin/win32 mean Docker Desktop, whose bind mounts surface as root-owned. */
+  readonly hostPlatform?: NodeJS.Platform;
 }
 
 export interface ServerEntry {
@@ -90,13 +92,16 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
     if (!s.dockerPath || !s.image || s.uid === undefined || s.gid === undefined) throw new SetupInputError('docker runtime requires docker path, image and uid/gid');
     if (s.uid === 0 || s.gid === 0) throw new SetupInputError('docker runtime refuses to run the container as root; run setup as a regular user');
     const bind = (src: string, dst: string): string => `type=bind,src=${src},dst=${dst},readonly`;
+    // Docker Desktop (macOS/Windows) shows bind-mounted files as uid 0 inside the container; Linux keeps the host uid.
+    const dockerDesktop = s.hostPlatform === 'darwin' || s.hostPlatform === 'win32';
     return {
       command: s.dockerPath,
       args: ['run', '--rm', '-i', '--init', '--pull=never', '--log-driver=none', '--read-only', '--cap-drop=ALL',
         '--security-opt=no-new-privileges', '--pids-limit=64', '--memory=256m', '--user', `${s.uid}:${s.gid}`,
         '--network=bridge', '--mount', bind(s.publicTokenFile, CONTAINER_PUBLIC), '--mount', bind(s.privateTokenFile, CONTAINER_PRIVATE),
         '-e', `DARKTRACE_URL=${s.url}`, '-e', `DARKTRACE_PUBLIC_TOKEN_FILE=${CONTAINER_PUBLIC}`,
-        '-e', `DARKTRACE_PRIVATE_TOKEN_FILE=${CONTAINER_PRIVATE}`, '-e', `DARKTRACE_PROFILES=${s.profiles}`, s.image],
+        '-e', `DARKTRACE_PRIVATE_TOKEN_FILE=${CONTAINER_PRIVATE}`, '-e', `DARKTRACE_PROFILES=${s.profiles}`,
+        ...(dockerDesktop ? ['-e', 'DARKTRACE_TOKEN_FILE_OWNER=root-or-current'] : []), s.image],
       env: {},
     };
   }

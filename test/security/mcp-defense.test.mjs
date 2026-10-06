@@ -14,6 +14,7 @@ import { assertSafeNetworkEnvironment, ConfigValidationError } from '../../dist/
 import { loadConfig } from '../../dist/src/config/load.js';
 import { startupVariable } from '../../dist/src/observability/log.js';
 import { runStdio } from '../../dist/src/server/stdio.js';
+import { clientIdentified } from '../../dist/src/server/createServer.js';
 import { cfg, env, PUBLIC, PRIVATE, CANARY, noCanaries } from './helpers.mjs';
 import { profiles, canonical, digest, toolContract, verifyRejectedReleaseProfiles } from './mcp-contracts.mjs';
 import { forbiddenCommand, distributionIssues } from './mcp-distribution.mjs';
@@ -91,7 +92,7 @@ for (const mode of modes) test('MR-02/06.STARTUP ' + (mode[0] ?? 'stdio') + ' gu
     const script = 'process.argv=' + JSON.stringify([process.execPath, resolve('dist/src/index.js'), ...mode]) + ';Object.assign(process.env,' + JSON.stringify(injected) + ');await import(' + JSON.stringify(resolve('dist/src/index.js')) + ');';
     const got = spawnSync(process.execPath, ['--import', resolve('test/security/diagnostic-guard.mjs'), '--input-type=module', '-e', script], { env: env(extra), input: '', encoding: 'utf8', timeout: 4000 });
     assert.equal(got.error, undefined); assert.equal(got.status, 1); assert.equal(got.stdout, ''); noCanaries(got.stderr);
-    const row = JSON.parse(got.stderr); assert.equal(row.event, 'startup_error'); assert.equal(row.variable, expected); assert.deepEqual(Object.keys(row).sort(), expected ? ['event', 'ts', 'variable'] : ['event', 'ts']);
+    const row = JSON.parse(got.stderr); assert.equal(row.event, 'startup_error'); assert.equal(row.variable, expected); assert.deepEqual(Object.keys(row).sort(), expected ? ['event', 'reason', 'ts', 'variable'] : ['event', 'reason', 'ts']); assert.equal(typeof row.reason, 'string'); if (expected) assert.ok(row.reason.startsWith(expected === 'NODE_OPTIONS' ? '--' : expected));
     assert.equal(got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false);
   }
 });
@@ -127,13 +128,37 @@ function session(t) {
   const request = value => new Promise((resolveReply, reject) => { const timeout = setTimeout(() => { waiters.delete(value.id); reject(new Error('Synthetic protocol reply timeout')); }, 3000); waiters.set(value.id, reply => { clearTimeout(timeout); resolveReply(reply); }); send(value); });
   return { stdin, handle, state, frames, send, request };
 }
-test('MR-05.LIFECYCLE pre-init tools/list/call and forged initialized reject with zero client; later proper init succeeds', async t => {
+test('MR-05.LIFECYCLE pre-init and malformed-init tools/list/call and forged initialized reject with zero client; completed initialize unlocks without the notification', async t => {
   const s = session(t); s.send(initialized);
   for (const frame of [listed(10), called(11)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
+  const malformed = await s.request({ jsonrpc: '2.0', id: 9, method: 'initialize', params: { protocolVersion: '2025-11-25' } }); assert.ok(malformed.error); assert.equal(malformed.result, undefined);
+  for (const frame of [listed(16), called(17)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
   const reply = await s.request(init()); assert.ok(reply.result.serverInfo);
-  for (const frame of [listed(12), called(13)]) { const reply = await s.request(frame); assert.ok(reply.error); assert.equal(s.state.calls, 0); }
-  s.send(initialized); assert.ok((await s.request(listed(14))).result.tools.length); assert.equal(s.state.calls, 0);
-  const result = await s.request(called(15)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1); clean(result.result); noCanaries(s.frames);
+  // Claude Code sends tools/list right after the initialize response, before notifications/initialized.
+  assert.ok((await s.request(listed(12))).result.tools.length); assert.equal(s.state.calls, 0);
+  const early = await s.request(called(13)); assert.equal(early.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1);
+  s.send(initialized); assert.ok((await s.request(listed(14))).result.tools.length); assert.equal(s.state.calls, 1);
+  const result = await s.request(called(15)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 2); clean(result.result); noCanaries(s.frames);
+});
+test('MR-05.ENVELOPE 2026-07-28 clients identify per request; missing/malformed envelopes and forged initialized reject with zero client', async t => {
+  const PV = 'io.modelcontextprotocol/protocolVersion', CAPS = 'io.modelcontextprotocol/clientCapabilities', INFO = 'io.modelcontextprotocol/clientInfo';
+  const good = { [PV]: '2026-07-28', [INFO]: { name: 'synthetic-modern', version: '1' }, [CAPS]: {} };
+  const enveloped = (frame, meta) => ({ ...frame, params: { ...frame.params, _meta: meta } });
+  const s = session(t);
+  const discovered = await s.request({ jsonrpc: '2.0', id: 'discover', method: 'server/discover', params: { _meta: good } }); assert.deepEqual(discovered.result.supportedVersions, ['2026-07-28']);
+  s.send(initialized);
+  let id = 40;
+  for (const meta of [undefined, { [PV]: '2026-07-28' }, { [CAPS]: {} }, { [PV]: '2026-07-28', [CAPS]: null }, { [PV]: '2026-07-28', [CAPS]: [] }, { [PV]: '2025-11-25', [CAPS]: {} },
+    { [PV]: CANARY, [CAPS]: {} }, { ...good, [INFO]: CANARY }, { ...good, [PV]: ['2026-07-28'] }]) {
+    for (const frame of [listed(id++), called(id++)]) { const reply = await s.request(meta === undefined ? frame : enveloped(frame, meta)); assert.ok(reply.error); assert.equal(reply.result, undefined); assert.equal(s.state.calls, 0); }
+  }
+  assert.ok((await s.request(enveloped(listed(60), good))).result.tools.length); assert.equal(s.state.calls, 0);
+  const result = await s.request(enveloped(called(61), good)); assert.equal(result.result.structuredContent.controlCharsNeutralized, true); assert.equal(s.state.calls, 1); clean(result.result); noCanaries(s.frames);
+  const missing = await s.request(called(62)); assert.ok(missing.error); assert.equal(s.state.calls, 1);
+  const none = { capabilities: undefined, clientInfo: undefined, version: undefined };
+  assert.equal(clientIdentified(none, undefined), false); assert.equal(clientIdentified(none, good), true);
+  assert.equal(clientIdentified({ capabilities: {}, clientInfo: undefined, version: '2025-11-25' }, undefined), false);
+  assert.equal(clientIdentified({ capabilities: {}, clientInfo: { name: 'x', version: '1' }, version: '2025-11-25' }, undefined), true);
 });
 test('MR-01/05.JSONRPC correlation IDs remain byte-for-byte even if containing controls or token literals', async t => {
   const s = session(t), id = PRIVATE + '\u202e\x1b' + String.fromCodePoint(0xe0049);
@@ -278,7 +303,7 @@ for (const mode of modes) for (const value of ['', '0', '1', CANARY]) test('IR-0
   const got = spawnSync(process.execPath, ['--import', resolve('test/security/diagnostic-guard.mjs'), 'dist/src/index.js', ...mode], { env: env({ NODE_USE_SYSTEM_CA: value, NODE_EXTRA_CA_CERTS: resolve('test/security/fixtures/ca.pem') }), input: '', encoding: 'utf8', timeout: 4000 });
   assert.equal(got.error, undefined); assert.equal(got.status, 1); assert.equal(got.stdout, ''); noCanaries(got.stderr);
   assert.equal(got.stderr.includes('ADVERSARIAL_FORBIDDEN_SIDE_EFFECT'), false); const row = irStartupMetadata(got.stderr, value);
-  assert.equal(row.event, 'startup_error'); assert.equal(row.variable, 'NODE_USE_SYSTEM_CA'); assert.deepEqual(Object.keys(row).sort(), ['event', 'ts', 'variable']);
+  assert.equal(row.event, 'startup_error'); assert.equal(row.variable, 'NODE_USE_SYSTEM_CA'); assert.deepEqual(Object.keys(row).sort(), ['event', 'reason', 'ts', 'variable']); assert.equal(row.reason, 'NODE_USE_SYSTEM_CA is unsupported; private CAs use NODE_EXTRA_CA_CERTS');
 });
 
 test('MR-04.STABLE forbidden release profile matrix rejects objects, SDK capture and production startup with zero sinks',async()=>{

@@ -169,7 +169,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     const files = tokenPaths(ctx);
     const settings: InstallSettings = {
       url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath,
-      ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid } : {}),
+      ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid, hostPlatform: ctx.platform } : {}),
     };
     if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
     const entry = buildServerEntry(settings, tokenMode === 'inline' ? tokens : undefined);
@@ -203,8 +203,10 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     }
     printResults(io, results);
     if (runtime === 'docker') {
-      write(io, '\nDocker: the container runs as your UID:GID so it can read the 0600 token files. On Docker Desktop for macOS/Windows,\n' +
-        'bind-mount ownership may differ; if startup reports a token-file ownership error, see docs/docker.md.\n');
+      write(io, '\nDocker: the container runs as your UID:GID so it can read the 0600 token files.' +
+        (ctx.platform === 'darwin' || ctx.platform === 'win32'
+          ? ' Docker Desktop shows bind mounts as root-owned,\nso the launcher sets DARKTRACE_TOKEN_FILE_OWNER=root-or-current (mode checks still apply; see docs/docker.md).\n'
+          : '\n'));
     }
     write(io, `\nNext: run \`darktrace-mcp test\` to check URL, TLS and tokens, then restart your AI clients.\n`);
     return results.some((r) => r.status === 'failed') ? 1 : 0;

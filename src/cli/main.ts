@@ -128,7 +128,7 @@ function configCommand(p: Parsed, io: CliIo): number {
     ...(runtime === 'docker' ? {
       dockerPath: findOnPath('docker', io.ctx.env, io.ctx.platform) ?? '/absolute/path/to/docker',
       image: imageFlag !== undefined ? validateImage(imageFlag) : saved?.image ?? 'REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT',
-      uid: io.uid && io.uid > 0 ? io.uid : 1000, gid: io.gid && io.gid > 0 ? io.gid : 1000,
+      uid: io.uid && io.uid > 0 ? io.uid : 1000, gid: io.gid && io.gid > 0 ? io.gid : 1000, hostPlatform: io.ctx.platform,
     } : {}),
   };
   const entry = buildServerEntry(settings);

@@ -5,7 +5,7 @@ const STARTUP_VARIABLES=new Set([
   'NODE_USE_ENV_PROXY','NODE_TLS_REJECT_UNAUTHORIZED','NODE_USE_SYSTEM_CA',
   'SSL_CERT_FILE','SSL_CERT_DIR','OPENSSL_CONF',
   'DARKTRACE_PROFILES','DARKTRACE_URL','DARKTRACE_BASE_URL','DARKTRACE_PUBLIC_TOKEN','DARKTRACE_PRIVATE_TOKEN',
-  'DARKTRACE_PUBLIC_TOKEN_FILE','DARKTRACE_PRIVATE_TOKEN_FILE','DARKTRACE_TIMEOUT_MS',
+  'DARKTRACE_PUBLIC_TOKEN_FILE','DARKTRACE_PRIVATE_TOKEN_FILE','DARKTRACE_TOKEN_FILE_OWNER','DARKTRACE_TIMEOUT_MS',
   'DARKTRACE_DESTINATION_ALLOWLIST','DARKTRACE_SENSITIVE_READ','DARKTRACE_WRITE_CRITICAL','DARKTRACE_CRITICAL_APPROVAL','DARKTRACE_WRITE_APPROVAL',
   'DARKTRACE_MAX_RESPONSE_BYTES','DARKTRACE_MAX_TOOL_INPUT_BYTES','DARKTRACE_MAX_TOOL_INPUT_DEPTH',
   'DARKTRACE_MAX_TOOL_INPUT_ELEMENTS','DARKTRACE_MAX_TOOL_OUTPUT_CHARS','DARKTRACE_MAX_CONCURRENT_REQUESTS',
@@ -21,11 +21,22 @@ export function startupVariable(error:unknown):string|undefined {
   const name=/^([A-Za-z_][A-Za-z0-9_]*)(?= |=)/.exec(error.message)?.[1];
   return name && STARTUP_VARIABLES.has(name)?name:undefined;
 }
+/**
+ * ConfigValidationError messages are written from fixed labels and variable names, never values, so they may be
+ * shown to the operator. A leading variable name outside the code-owned list (an unknown DARKTRACE_* name the
+ * operator set) is not reflected. Non-printable/non-ASCII characters are escaped and the text is bounded.
+ */
+export function startupReason(error:unknown):string|undefined {
+  if(!(error instanceof ConfigValidationError)) return undefined;
+  const message=error.message.replace(/^[A-Z][A-Za-z0-9_]*(?=[ =])/,name=>STARTUP_VARIABLES.has(name)?name:'an unrecognized variable');
+  return message.slice(0,300).replace(/[^\x20-\x7e]/gu,char=>'\\u{'+char.codePointAt(0)!.toString(16).toUpperCase()+'}');
+}
 export function logStartupError(error:unknown):void {
-  const variable=startupVariable(error);
-  writeSync(2,JSON.stringify({event:'startup_error',ts:new Date().toISOString(),...(variable?{variable}:{})})+'\n');
+  const variable=startupVariable(error), reason=startupReason(error);
+  // Any other error stays opaque: its text may come from the platform or upstream and is not reviewed for secrets.
+  writeSync(2,JSON.stringify({event:'startup_error',ts:new Date().toISOString(),...(variable?{variable}:{}),...(reason?{reason}:{})})+'\n');
 }
 // Logs take fixed event codes only, never arbitrary exceptions, arguments, config or upstream text.
-export function logEvent(event:'startup_error'|'protocol_error'|'shutdown'):void {
+export function logEvent(event:'startup_error'|'protocol_error'|'shutdown'|'token_file_owner_relaxed'):void {
   writeSync(2,JSON.stringify({event,ts:new Date().toISOString()})+'\n');
 }

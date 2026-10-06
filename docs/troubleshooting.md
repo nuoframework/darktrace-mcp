@@ -33,7 +33,7 @@ darktrace-mcp test
 2. Use absolute paths. Desktop apps do not see your shell `PATH`, so `node` alone may fail. Get the full path with `node -p 'process.execPath'`.
 3. Make sure you built the project: `dist/src/index.js` must exist (`npm run build`).
 4. Check the JSON or TOML syntax. On Windows, backslashes in JSON must be doubled.
-5. Look at the client's MCP log. Server messages go to stderr.
+5. Look at the client's MCP log. Server messages go to stderr. A configuration problem prints one line such as `{"event":"startup_error","reason":"could not read private token file"}`; `reason` names the setting, never its value. Other startup failures print only the event.
 
 A server that seems "idle" is normal: it waits for the client.
 
@@ -91,7 +91,7 @@ chmod 600 /absolute/private/darktrace/public-token /absolute/private/darktrace/p
 
 **Windows.** Native Windows file permissions cannot be checked the same way, so the server may refuse the files. Run the server inside WSL and use Linux paths there.
 
-**Docker Desktop.** Bind-mounted files can show a different owner inside the container. Run `--check-config` in the container (see [Docker guide](docker.md)). Fix ownership with `--user`, never by loosening the mode.
+**Docker Desktop.** On macOS and Windows, bind-mounted files show as owned by root inside the container, so `could not read ... token file` appears even with correct host permissions. Add `-e DARKTRACE_TOKEN_FILE_OWNER=root-or-current` to the `docker run` arguments (see [Docker guide](docker.md)) and run `--check-config` in the container. Never loosen the mode.
 
 ## Proxy variables are rejected
 

@@ -15,6 +15,7 @@ The server reads settings from **environment variables** and, optionally, a **JS
 | `DARKTRACE_URL` | `instance.baseUrl` | — (required) | HTTPS origin only, for example `https://darktrace.example.internal`. No path, query or user info |
 | `DARKTRACE_PUBLIC_TOKEN_FILE` | `auth.publicTokenFile` | — (required) | Absolute path to a file with the public token |
 | `DARKTRACE_PRIVATE_TOKEN_FILE` | `auth.privateTokenFile` | — (required) | Absolute path to a file with the private token |
+| `DARKTRACE_TOKEN_FILE_OWNER` | `auth.tokenFileOwner` | `current` | Who may own the token files. `root-or-current` also accepts root (uid 0); only for Docker Desktop, see below |
 | `DARKTRACE_CONFIG_FILE` | — | none | Absolute path to the JSON config file |
 | `DARKTRACE_DATE_FORMAT` | `auth.dateFormat` | `compact` | Signature date format. Alternative: `spaced` |
 | `DARKTRACE_QUERY_SIGNATURE_ENCODING` | `auth.querySignatureEncoding` | `unencoded` | Alternative: `encoded`. No automatic fallback |
@@ -31,6 +32,8 @@ Each token file must:
 - be owned by the user that runs the server;
 - have mode `0600` or `0400`;
 - contain only the token, optionally followed by one newline.
+
+**Docker Desktop (macOS and Windows).** Bind-mounted files appear inside the container as owned by root (uid 0), whatever their owner on the host, so the default check refuses them. Set `DARKTRACE_TOKEN_FILE_OWNER=root-or-current` (or `"auth": {"tokenFileOwner": "root-or-current"}`) to also accept root-owned token files. Every other check still applies: regular file, no symlink, 4 KiB cap and an owner-only mode. The server writes `{"event":"token_file_owner_relaxed"}` to stderr at startup while this is on. It is an operator setting; the model cannot change it. Leave it at `current` on Linux, where bind mounts keep the host owner. `darktrace-mcp setup` adds it automatically only for the Docker runtime on macOS and Windows.
 
 ```sh
 chmod 600 ~/.config/darktrace-mcp/public-token ~/.config/darktrace-mcp/private-token
