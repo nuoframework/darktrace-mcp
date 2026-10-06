@@ -74,6 +74,8 @@ test('argsDigest changes when the operation id or any bound argument changes', (
   fc.assert(fc.property(apiRecord, key.filter(k => !CONTROL_FIELDS.includes(k)), value, (args, k, extra) => {
     const base = argsDigest('post_tags', args);
     assert.notEqual(argsDigest('post_antigena', args), base);
-    if (canonicalJson(args[k]) !== canonicalJson(extra)) assert.notEqual(argsDigest('post_tags', { ...args, [k]: extra }), base);
+    // Only an own member is bound: an inherited name such as `constructor` is not part of the record.
+    const current = Object.hasOwn(args, k) ? canonicalJson(args[k]) : undefined;
+    if (current !== canonicalJson(extra)) assert.notEqual(argsDigest('post_tags', { ...args, [k]: extra }), base);
   }), RUNS);
 });
