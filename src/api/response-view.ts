@@ -1,3 +1,4 @@
+import { EMAIL_VIEWS } from './email-views.js';
 /** Code-owned output projection: no dynamic property maps or caller-selected allowlists. */
 export type ResponseView={kind:'string'|'number'|'boolean'|'null'|'summary'}|{kind:'object';fields:Record<string,ResponseView>}|{kind:'array';items:ResponseView}|{kind:'union';variants:ResponseView[]};
 /** Exact documented hourly aggregate variant; never selected from upstream keys. */
@@ -9,6 +10,7 @@ export function operationResponseVariants(operationId:string) {
 export const CODE_OWNED_VIEWS:Readonly<Record<string,ResponseView>>=Object.freeze({
   // Email action acknowledgement: only a status-like field is returned; message content never is.
   post_agemail_api_ep_api_v1_0_emails_uuid_action:{kind:'object',fields:{response:{kind:'string'},status:{kind:'string'},success:{kind:'boolean'}}},
+  ...EMAIL_VIEWS,
 });
 /**
  * Aggregate endpoints whose spec leaves the nested sections untyped, while each section is the record type of

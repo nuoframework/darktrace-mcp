@@ -31,6 +31,18 @@ export interface Config {
     readonly critical: ApprovalMode;
     readonly write: ApprovalMode;
   };
+  /**
+   * Operator acknowledgements recorded from configuration. Startup (loadConfig) refuses the sensitive+write union
+   * and critical host delegation unless the matching acknowledgement is true.
+   */
+  readonly acknowledgements: {
+    readonly sensitiveWrite: boolean;
+    readonly hostApproval: boolean;
+  };
+  /** Operator-owned target policy: literal identifiers (device ids, subnet ids, tag names) that high/critical writes may not touch. */
+  readonly policy: {
+    readonly protectedTargets: readonly string[];
+  };
   readonly limits: {
     /** Applied independently to cumulative response wire and decoded bytes. */
     readonly maxResponseBytes: number;
@@ -70,7 +82,10 @@ export interface ConfigSource {
     readonly writeApproval?: unknown;
     readonly export?: unknown;
     readonly email?: unknown;
+    readonly acknowledgeSensitiveWrite?: unknown;
+    readonly acknowledgeHostApproval?: unknown;
   };
+  readonly policy?: { readonly protectedTargets?: unknown };
   readonly limits?: {
     readonly maxResponseBytes?: unknown;
     readonly maxToolInputBytes?: unknown;
@@ -119,7 +134,8 @@ const CEILINGS = Object.freeze({
   rateLimitPerMinute: 120,
   maxGetRetries: 2,
   maxRetryAfterMs: 2_000,
-  maxWritesPerMinute: 60,
+  // Lower-only: the reviewed write budget (ST-22/A13) is also the ceiling.
+  maxWritesPerMinute: 10,
 });
 
 export class ConfigValidationError extends Error {
@@ -266,6 +282,21 @@ function destinationAllowlist(value: unknown): readonly string[] | undefined {
   return Object.freeze([...seen]);
 }
 
+const PROTECTED_TARGET = /^[A-Za-z0-9][A-Za-z0-9 ._:/@-]{0,127}$/;
+/** Literal identifiers only (no patterns); values are never echoed in errors. */
+function protectedTargets(value: unknown): readonly string[] {
+  if (value === undefined) return Object.freeze([]);
+  if (!Array.isArray(value) || value.length > 1_000) throw new ConfigValidationError('policy.protectedTargets must be an array of at most 1000 identifiers');
+  const seen = new Set<string>();
+  for (const item of value) {
+    if (typeof item !== 'string' || item.trim() !== item || !PROTECTED_TARGET.test(item)) {
+      throw new ConfigValidationError('policy.protectedTargets entries must be plain identifiers (letters, digits, space, . _ : / @ -; at most 128 characters)');
+    }
+    seen.add(item);
+  }
+  return Object.freeze([...seen]);
+}
+
 /** Validate an operator file/environment object without echoing supplied secret values. */
 export function parseConfig(source: unknown): Config {
   const root = record(source, 'config');
@@ -275,10 +306,12 @@ export function parseConfig(source: unknown): Config {
   const limits = record(root.limits, 'limits');
   const transport = record(root.transport, 'transport');
   const compat = record(root.compat, 'compat');
-  assertKeys(root, ['instance', 'auth', 'profiles', 'limits', 'transport', 'compat'], 'config');
+  const policy = record(root.policy, 'policy');
+  assertKeys(root, ['instance', 'auth', 'profiles', 'limits', 'transport', 'compat', 'policy'], 'config');
+  assertKeys(policy, ['protectedTargets'], 'policy');
   assertKeys(instance, ['baseUrl', 'timeoutMs', 'destinationAllowlist', 'tlsRejectUnauthorized', 'tlsInsecure', 'caFile'], 'instance');
   assertKeys(auth, ['publicToken', 'privateToken', 'dateFormat', 'querySignatureEncoding'], 'auth');
-  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'criticalApproval', 'writeApproval', 'export', 'email'], 'profiles');
+  assertKeys(profiles, ['read', 'write', 'sensitiveRead', 'writeCritical', 'criticalApproval', 'writeApproval', 'export', 'email', 'acknowledgeSensitiveWrite', 'acknowledgeHostApproval'], 'profiles');
   assertKeys(limits, Object.keys(CEILINGS).filter((key) => key !== 'timeoutMs'), 'limits');
   assertKeys(transport, ['kind', 'http'], 'transport');
   assertKeys(compat, ['assumeVersion'], 'compat');
@@ -317,6 +350,8 @@ export function parseConfig(source: unknown): Config {
   };
   const criticalApproval = approvalMode(profiles.criticalApproval, 'elicitation', 'profiles.criticalApproval');
   const writeApproval = approvalMode(profiles.writeApproval, 'host', 'profiles.writeApproval');
+  const acknowledgeSensitiveWrite = boolean(profiles.acknowledgeSensitiveWrite, false, 'profiles.acknowledgeSensitiveWrite');
+  const acknowledgeHostApproval = boolean(profiles.acknowledgeHostApproval, false, 'profiles.acknowledgeHostApproval');
 
   return Object.freeze({
     instance: Object.freeze({
@@ -327,6 +362,8 @@ export function parseConfig(source: unknown): Config {
     auth: Object.freeze({ publicToken, privateToken, dateFormat, querySignatureEncoding }),
     profiles: Object.freeze({ read: true as const, write, sensitiveRead, writeCritical }),
     approval: Object.freeze({ critical: criticalApproval, write: writeApproval }),
+    acknowledgements: Object.freeze({ sensitiveWrite: acknowledgeSensitiveWrite, hostApproval: acknowledgeHostApproval }),
+    policy: Object.freeze({ protectedTargets: protectedTargets(policy.protectedTargets) }),
     limits: Object.freeze({
       maxResponseBytes: boundedInteger(limits.maxResponseBytes, DEFAULT_LIMITS.maxResponseBytes, 'maxResponseBytes'),
       maxToolInputBytes: boundedInteger(limits.maxToolInputBytes, DEFAULT_LIMITS.maxToolInputBytes, 'maxToolInputBytes'),

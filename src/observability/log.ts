@@ -13,6 +13,7 @@ const STARTUP_VARIABLES=new Set([
   'DARKTRACE_MAX_GET_RETRIES','DARKTRACE_MAX_RETRY_AFTER_MS','DARKTRACE_MAX_WRITES_PER_MINUTE',
   'DARKTRACE_TLS_INSECURE','DARKTRACE_TLS_REJECT_UNAUTHORIZED','DARKTRACE_CA_FILE','DARKTRACE_ASSUME_VERSION',
   'DARKTRACE_EXPORT_DIR','DARKTRACE_ENABLE_HTTP','DARKTRACE_HTTP','DARKTRACE_BEARER_TOKENS','DARKTRACE_EMAIL',
+  'DARKTRACE_PROTECTED_TARGETS','DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE','DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL',
 ]);
 /** Only an exact, known first token of a local config error may become metadata. */
 export function startupVariable(error:unknown):string|undefined {
@@ -37,6 +38,10 @@ export function logStartupError(error:unknown):void {
   writeSync(2,JSON.stringify({event:'startup_error',ts:new Date().toISOString(),...(variable?{variable}:{}),...(reason?{reason}:{})})+'\n');
 }
 // Logs take fixed event codes only, never arbitrary exceptions, arguments, config or upstream text.
-export function logEvent(event:'startup_error'|'protocol_error'|'shutdown'|'token_file_owner_relaxed'):void {
+export function logEvent(event:'startup_error'|'protocol_error'|'shutdown'|'token_file_owner_relaxed'|'sensitive_write_acknowledged'|'host_approval_acknowledged'):void {
   writeSync(2,JSON.stringify({event,ts:new Date().toISOString()})+'\n');
+}
+/** Runtime diagnostics with fixed codes; never arguments, exception text or audit content. */
+export function logDiagnostic(event:'audit_sink_failed'):void {
+  try {process.stderr.write(JSON.stringify({event,ts:new Date().toISOString()})+'\n');} catch { /* diagnostics never fail a call */ }
 }

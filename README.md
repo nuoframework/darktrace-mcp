@@ -125,7 +125,7 @@ You choose what the model may do with `DARKTRACE_PROFILES` (the wizard asks you)
 
 Combine profiles with commas, for example `DARKTRACE_PROFILES=read,write`. Every write and critical call is audited. Your Darktrace token permissions still apply: the server cannot do more than the token allows.
 
-> **Data leaves your network.** Results go to your MCP client and its model provider. Check provider eligibility, retention and residency for your organization before you connect a production appliance.
+> **Data leaves your network.** Results go to your MCP client and its model provider. Check provider eligibility, retention and residency for your organization before you connect a production appliance. PCAP downloads are returned inline as Base64 and are forwarded to the host and its model provider like any other result.
 
 More: [security overview](docs/security.md) · [security policy](SECURITY.md).
 

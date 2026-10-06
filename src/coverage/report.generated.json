@@ -3,8 +3,8 @@
   "labValidated": false,
   "total": 79,
   "counts": {
-    "implemented": 78,
-    "blocked": 0,
+    "implemented": 77,
+    "blocked": 1,
     "excluded": 1
   },
   "inputBudgets": {
@@ -14205,21 +14205,18 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/emails/{uuid}/action",
       "tool": "darktrace_email_action",
       "tier": "critical",
-      "status": "implemented",
-      "reason": null,
-      "discovery": "profile dependent",
-      "releaseEligible": true,
+      "status": "blocked",
+      "reason": "signing and schema unvalidated; 403 on lab",
+      "discovery": "unavailable",
+      "releaseEligible": false,
       "releaseCapability": {
         "read": true,
         "sensitiveRead": true,
         "write": true,
         "writeCritical": true
       },
-      "execution": "confirm-required (write+critical profiles, confirm:true)",
-      "requiredProfiles": [
-        "write",
-        "critical"
-      ],
+      "execution": "blocked",
+      "requiredProfiles": [],
       "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
@@ -14236,8 +14233,8 @@
           "name": "uuid",
           "location": "path",
           "required": true,
-          "status": "accepted",
-          "reason": null,
+          "status": "blocked",
+          "reason": "signing and schema unvalidated; 403 on lab",
           "units": "identifier",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -14251,7 +14248,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "strict schema validation before request building",
+          "enforcement": "runtime operation policy rejection",
           "additionalRules": [
             {
               "id": "list_entries",
@@ -14265,8 +14262,8 @@
           "location": "body",
           "contentType": "application/json",
           "required": true,
-          "status": "accepted",
-          "reason": null,
+          "status": "blocked",
+          "reason": "signing and schema unvalidated; 403 on lab",
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -14325,7 +14322,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "strict schema validation before request building",
+          "enforcement": "runtime operation policy rejection",
           "additionalRules": [
             {
               "id": "freeform_json_object",
