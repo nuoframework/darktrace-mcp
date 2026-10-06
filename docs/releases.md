@@ -51,6 +51,13 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 
    `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
 
+### OpenSSF Best Practices registration (owner, one-time)
+
+1. Sign in at [bestpractices.dev](https://www.bestpractices.dev/) with the GitHub account that administers `nuoframework/darktrace-mcp` and choose **Get Your Badge Now** → add the repository URL `https://github.com/nuoframework/darktrace-mcp`.
+2. Answer the "passing" criteria. Most answers point to existing files: `SECURITY.md` (vulnerability reporting), `CONTRIBUTING.md`, `LICENSE`, `CHANGELOG.md`, the CI workflows (tests, `lint`, CodeQL) and [supply-chain checks](security/supply-chain-checks.md) (static analysis, dependency updates).
+3. Note the numeric project id from the project URL (`https://www.bestpractices.dev/projects/<id>`). In `README.md` and `README.es.md`, replace `<BESTPRACTICES_ID>` in the commented-out badge with that id and uncomment the badge once the project reaches a level worth showing. Enable the Scorecard badge next to it after the first `scorecard.yml` run on `main` has published a result.
+4. Both READMEs are release inputs, so this edit belongs in a release commit (the release pins change).
+
 ## v1.0.0 (previous release, private)
 
 Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.

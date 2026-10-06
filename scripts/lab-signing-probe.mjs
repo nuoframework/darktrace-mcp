@@ -23,7 +23,7 @@ import { createHmac } from 'node:crypto';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { request as httpsRequest } from 'node:https';
 import { fileURLToPath } from 'node:url';
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 import { homedir } from 'node:os';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -194,7 +194,6 @@ async function main() {
   let record = async (r) => {
     results.push(r);
     const flag = r.error ? `ERR ${r.error}` : `HTTP ${r.status}`;
-    // eslint-disable-next-line no-console
     console.log(`  [${r.shape}] ${r.label}: ${flag}  (${r.responseBytes ?? '-'}B, ${r.elapsedMs}ms)`);
     await delay(GAP_MS);
   };

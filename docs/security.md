@@ -36,6 +36,10 @@ This page explains, in plain terms, how the server protects your appliance and y
 - Some official Node.js builds still bundle OpenSSL 3.5.8 (CVE-2026-35189, TLS certificate processing). For native installs, check `node -p 'process.versions.openssl'` and prefer 3.5.9 or later.
 - Image scans and their review for v1.0.0 are recorded in the [Docker guide](docker.md#v100-image-at-a-glance-previous-release). The 1.1.0 image has no scan record yet ([status](docker.md#110-image-verification-status)).
 
+## Supply-chain checks
+
+CodeQL, ESLint with security rules, Dependabot and OpenSSF Scorecard run on the repository. What each one checks and how to read its results: [supply-chain checks](security/supply-chain-checks.md).
+
 ## Report a vulnerability
 
 Use GitHub private vulnerability reporting, as described in [SECURITY.md](../SECURITY.md). Do not post tokens, appliance data or exploit details in issues.

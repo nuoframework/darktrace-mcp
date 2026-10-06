@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Runtime dependencies are release-pinned (see docs/security/release-pins-1.1.0.md
+      # and scripts/verify-release.mjs); major upgrades are planned by hand.
+      - dependency-name: '@modelcontextprotocol/server'
+        update-types: ['version-update:semver-major']
+      - dependency-name: zod
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: build(deps)
+      prefix-development: build(deps-dev)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci(deps)
