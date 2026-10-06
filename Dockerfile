@@ -7,7 +7,7 @@ RUN npm ci --ignore-scripts
 COPY tsconfig.json tsconfig.generate.json ./
 COPY scripts/build.mjs scripts/generate-catalogue.ts ./scripts/
 COPY src/ ./src/
-COPY openapi/darktrace-threat-visualizer.yaml ./openapi/
+COPY openapi/darktrace-threat-visualizer.yaml openapi/darktrace-sdk.yaml ./openapi/
 COPY docs/operation-inventory.json ./docs/
 RUN npm run build
 RUN printf '{"type":"module"}\n' > /build/runtime-package.json
