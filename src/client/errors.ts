@@ -11,6 +11,7 @@ export type ApiErrorKind =
   | 'too_large'
   | 'invalid_request'
   | 'invalid_response'
+  | 'unsupported_encoding'
   | 'overloaded'
   | 'clock_skew_suspected';
 
@@ -27,6 +28,7 @@ const SAFE_MESSAGES: Readonly<Record<ApiErrorKind, string>> = Object.freeze({
   too_large: 'The Darktrace response exceeded the configured byte limit.',
   invalid_request: 'The request does not match a trusted Darktrace operation.',
   invalid_response: 'Darktrace returned an invalid response.',
+  unsupported_encoding: 'Darktrace returned an unsupported response encoding.',
   overloaded: 'The Darktrace client has reached its concurrency limit.',
   clock_skew_suspected: 'Darktrace authentication failed; the local clock may be outside the accepted window.',
 });
@@ -50,6 +52,7 @@ const ERROR_HINTS: Readonly<Record<ApiErrorKind, string>> = Object.freeze({
   too_large: 'The appliance response exceeded the byte limit before it could be trimmed. Request less: narrow starttime/endtime, lower count, add filters, or set minimal:true / responsedata where the operation supports them.',
   invalid_request: 'The request does not match a trusted operation route.',
   invalid_response: 'The appliance answered with data that is not valid JSON for this operation.',
+  unsupported_encoding: 'The appliance must return an uncompressed response (Content-Encoding: identity). Do not retry automatically.',
   overloaded: 'Too many concurrent requests. Wait for in-flight calls to finish, then retry.',
   clock_skew_suspected: 'Authentication failed and the local clock may be skewed. The operator must sync the host clock (NTP); retrying will not help.',
 });

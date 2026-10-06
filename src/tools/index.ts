@@ -109,7 +109,7 @@ export function eligibleTools(cfg:Config):ToolDefinition[] {
     return [defineTool(tool.name,ops,cfg.profiles.sensitiveRead&&cfg.profiles.write)];
   });
 }
-const API_ERROR_CODES = Object.freeze(['auth','forbidden','bad_request','not_found','rate_limited','server','network','timeout','cancelled','too_large','invalid_request','invalid_response','overloaded','clock_skew_suspected'] as const);
+const API_ERROR_CODES = Object.freeze(['auth','forbidden','bad_request','not_found','rate_limited','server','network','timeout','cancelled','too_large','invalid_request','invalid_response','unsupported_encoding','overloaded','clock_skew_suspected'] as const);
 function safeApiErrorCode(error:unknown):string|undefined {
   if (!(error instanceof DarktraceApiError)) return undefined;
   // Return the code-owned member, never the received property or exception text.
@@ -234,7 +234,7 @@ function upstreamDenial(error:unknown,op:Operation|undefined):{code:DenialCode;h
   const kind=safeApiErrorCode(error) as ApiErrorKind|undefined;
   if (!kind) return {code:'upstream_error'};
   const hint=kind==='too_large'?`The appliance response exceeded the byte limit before it could be trimmed. ${sizeAdvice(op)}`:errorHint(kind);
-  const code:DenialCode=kind==='forbidden'?'upstream_forbidden':kind==='too_large'?'response_limit_exceeded':kind==='invalid_response'?'schema_mismatch':kind==='cancelled'?'request_cancelled':'upstream_error';
+  const code:DenialCode=kind==='forbidden'?'upstream_forbidden':kind==='too_large'?'response_limit_exceeded':kind==='unsupported_encoding'?'unsupported_encoding':kind==='invalid_response'?'schema_mismatch':kind==='cancelled'?'request_cancelled':'upstream_error';
   return {code,...(hint?{hint}:{})};
 }
 const auditHealthy=new WeakMap<Audit,boolean>();

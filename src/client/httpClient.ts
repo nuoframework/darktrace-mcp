@@ -660,7 +660,7 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
             const contentEncoding = response.headers.get('content-encoding');
             if (contentEncoding !== null && contentEncoding.trim().toLowerCase() !== 'identity') {
               await response.body?.cancel().catch(() => undefined);
-              throw new DarktraceApiError('invalid_response', requestId, response.status);
+              throw new DarktraceApiError('unsupported_encoding', requestId, response.status);
             }
             const bytes = await readBounded(response, responseCap, used);
             if (response.status < 200 || response.status >= 300) {
