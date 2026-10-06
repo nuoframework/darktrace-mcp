@@ -5,7 +5,7 @@ import {
   CLIENT_IDS, clientLabel, clientSnippet, isClientId, removeClient, type CliContext, type ClientId, type ClientResult,
 } from './clients.js';
 import {
-  SetupInputError, buildServerEntry, cursorInstallLink, defaultEntryPath, normalizeProfiles, normalizeUrl, validateImage,
+  SENSITIVE_WRITE_NOTICE, SetupInputError, buildServerEntry, cursorInstallLink, needsSensitiveWriteAck, defaultEntryPath, normalizeProfiles, normalizeUrl, validateImage,
   vscodeInstallLink, vscodeInstallPayload, type InstallSettings, type Runtime,
 } from './entry.js';
 import { findOnPath, InstallerFileError } from './fsutil.js';
@@ -22,10 +22,10 @@ export class UsageError extends Error {
 interface Parsed { readonly command: string; readonly positional: string[]; readonly flags: Map<string, string[]> }
 
 const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image']);
-const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--purge', '--insiders', '--online']);
+const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online']);
 const ALLOWED: Readonly<Record<string, readonly string[]>> = {
-  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--tokens-from-stdin', '--inline-tokens-windows'],
-  config: ['--url', '--profiles', '--runtime', '--image', '--insiders'],
+  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write'],
+  config: ['--url', '--profiles', '--runtime', '--image', '--insiders', '--acknowledge-sensitive-write'],
   remove: ['--client', '--dry-run', '--yes', '-y', '--purge'],
   test: [],
   doctor: ['--online'],
@@ -117,9 +117,16 @@ function configCommand(p: Parsed, io: CliIo): number {
   // Through npx the running path is transient: prefer the fixed copy that `setup` installs.
   const transient = runtime === 'node' && isTransientInstall(io.entryPath, io.ctx);
   const fixedEntry = transient ? existingFixedCopyEntry(io.entryPath, io.ctx) : undefined;
+  const profiles = one(p, '--profiles') !== undefined ? normalizeProfiles(one(p, '--profiles') as string) : saved?.profiles ?? 'read';
+  const acknowledged = bool(p, '--acknowledge-sensitive-write') || saved?.acknowledgeSensitiveWrite === true;
+  if (needsSensitiveWriteAck(profiles) && !acknowledged) {
+    io.stderr.write(`${SENSITIVE_WRITE_NOTICE}\n`);
+    throw new UsageError(`profiles "${profiles}" need --acknowledge-sensitive-write after reading the notice above (or use read-write / read-sensitive)`);
+  }
   const settings: InstallSettings = {
     url: one(p, '--url') !== undefined ? normalizeUrl(one(p, '--url') as string) : saved?.url ?? 'https://darktrace.example.internal',
-    profiles: one(p, '--profiles') !== undefined ? normalizeProfiles(one(p, '--profiles') as string) : saved?.profiles ?? 'read',
+    profiles,
+    acknowledgeSensitiveWrite: acknowledged,
     runtime,
     tokenMode: io.ctx.platform === 'win32' && runtime === 'node' ? 'inline' : 'file',
     ...tokenPaths(io.ctx),
@@ -136,6 +143,7 @@ function configCommand(p: Parsed, io: CliIo): number {
   out.write(`# ${clientLabel(client)} — darktrace MCP server (no secrets below)\n`);
   if (saved === undefined && one(p, '--url') === undefined) out.write('# No saved setup: replace the placeholder URL, and create the token files (see `darktrace-mcp setup`).\n');
   if (transient && fixedEntry === undefined) out.write('# Running from the npx cache: the path below is temporary. Run `darktrace-mcp setup` once to install a fixed copy.\n');
+  if (needsSensitiveWriteAck(profiles)) out.write(SENSITIVE_WRITE_NOTICE.split('\n').map((line) => `# ${line}\n`).join('') + '# Acknowledged: the entry sets DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true.\n');
   if (settings.tokenMode === 'inline') out.write('# Windows: replace <public token>/<private token>; anyone able to read this config can use the tokens.\n');
   out.write(clientSnippet(client, entry, io.ctx));
   if (client === 'vscode' && runtime === 'node') {
@@ -179,6 +187,7 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
           dryRun: bool(p, '--dry-run'), yes: bool(p, '--yes', '-y'), clients: clientsFlag(p), url: one(p, '--url'),
           profiles: one(p, '--profiles'), runtime: runtimeFlag(p), image: one(p, '--image'),
           tokensFromStdin: bool(p, '--tokens-from-stdin'), inlineTokens: bool(p, '--inline-tokens-windows'),
+          acknowledgeSensitiveWrite: bool(p, '--acknowledge-sensitive-write'),
         }, io);
       }
       case 'config': return configCommand(p, io);

@@ -23,6 +23,7 @@ export function validateServer(server,label){
   const envNames=env.map(value=>value.split('=',1)[0]);assert.equal(new Set(envNames).size,envNames.length,label+': no duplicate environment overrides');
   assert(env.filter(value=>value.startsWith('DARKTRACE_PROFILES=')).every(value=>value==='DARKTRACE_PROFILES=read'),label+': no write profile override');
   assert(env.filter(value=>value.startsWith('DARKTRACE_WRITE_CRITICAL=')).every(value=>value==='DARKTRACE_WRITE_CRITICAL=false'),label+': no write-critical grant in consultation examples');
+  assert(!env.some(value=>/^DARKTRACE_ACKNOWLEDGE_(?:SENSITIVE_WRITE|HOST_APPROVAL)=/.test(value)),label+': consultation examples never pre-set a risk acknowledgement');
   for(const value of env)assert(!/^DARKTRACE_(?:PUBLIC|PRIVATE)_TOKEN=/.test(value)&&!/^NODE_TLS_REJECT_UNAUTHORIZED=/.test(value),label+': no token values/TLS bypass');
  }else{
   assert(server.command.endsWith('/node'),label+': fixed Node executable');
@@ -30,6 +31,7 @@ export function validateServer(server,label){
   assert.equal(server.args.length,1,label+': production stdio, no diagnostic or arbitrary arguments');
   assert.equal(server.env?.DARKTRACE_PROFILES,'read');assert(server.env?.DARKTRACE_SENSITIVE_READ===undefined||server.env.DARKTRACE_SENSITIVE_READ==='false',label+': no sensitive-read grant in consultation examples');
   assert(server.env?.DARKTRACE_WRITE_CRITICAL===undefined||server.env.DARKTRACE_WRITE_CRITICAL==='false',label+': no write-critical grant in consultation examples');
+  assert(!Object.keys(server.env).some(key=>/^DARKTRACE_ACKNOWLEDGE_/.test(key)),label+': consultation examples never pre-set a risk acknowledgement');
   for(const key of ['DARKTRACE_PUBLIC_TOKEN_FILE','DARKTRACE_PRIVATE_TOKEN_FILE'])assert(isAbsolute(server.env?.[key]??''),label+': token-file path');
   assert(!Object.hasOwn(server.env,'DARKTRACE_PUBLIC_TOKEN')&&!Object.hasOwn(server.env,'DARKTRACE_PRIVATE_TOKEN'));
  }

@@ -25,14 +25,19 @@ export function checkManifest(manifest, pkg) {
   need(server.mcp_config?.command === 'node', 'mcp_config.command must be node');
   need(JSON.stringify(server.mcp_config?.args) === JSON.stringify(['${__dirname}/dist/src/index.js']), 'mcp_config.args must use ${__dirname}');
   const env = server.mcp_config?.env ?? {};
-  for (const name of Object.keys(env)) need(/^DARKTRACE_(URL|PUBLIC_TOKEN|PRIVATE_TOKEN|PROFILES)$/.test(name), 'unexpected env ' + name);
+  for (const name of Object.keys(env)) need(/^DARKTRACE_(URL|PUBLIC_TOKEN|PRIVATE_TOKEN|PROFILES|ACKNOWLEDGE_SENSITIVE_WRITE)$/.test(name), 'unexpected env ' + name);
+  // The server refuses sensitive + write without the acknowledgement; the bundle must offer it, opt-in, and default to read.
+  need(env.DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE === '${user_config.acknowledge_sensitive_write}', 'DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE must map to user_config.acknowledge_sensitive_write');
+  need(manifest.user_config?.profiles?.default === 'read', 'profiles must default to read');
   for (const [name, value] of Object.entries(env)) {
     const match = /^\$\{user_config\.([a-z_]+)\}$/.exec(value);
     need(match !== null, name + ' must come from user_config');
     const option = match ? manifest.user_config?.[match[1]] : undefined;
     need(option !== undefined, name + ' references a missing user_config entry');
     if (option) {
-      need(option.type === 'string' && typeof option.title === 'string' && typeof option.description === 'string', match[1] + ' needs type string, title, description');
+      const type = name === 'DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE' ? 'boolean' : 'string';
+      need(option.type === type && typeof option.title === 'string' && typeof option.description === 'string', match[1] + ` needs type ${type}, title, description`);
+      if (type === 'boolean') need(option.default === false && option.required !== true, match[1] + ' must be opt-in (default false, not required)');
       if (SENSITIVE_ENV.includes(name)) need(option.sensitive === true && option.required === true, name + ' must be sensitive and required');
     }
   }

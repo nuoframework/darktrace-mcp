@@ -5,7 +5,54 @@ decision during the work: the repository becomes **public** and the package is p
 **public npm registry** (the earlier GitHub Packages plan was dropped before implementation).
 Nothing was published from this branch; every publish step runs only in `release.yml` on a tag.
 
-## What changed
+## 1.1.0 gate closure: release workflow (blockers B7 and B9)
+
+Follow-up to the final gate review (`docs/security/final-gate-review-1.1.0.md` §5). The counts and
+the CI pin in "Verification" below are historical (taken before the full-API merge).
+
+### `release.yml` changes
+
+| Job | Permissions | What it does |
+| --- | --- | --- |
+| `docker-gates` (new) | `contents: read`, `actions: read` | Runs in parallel with `prepare`. Polls the `ci.yml` runs for `head_sha == GITHUB_SHA` (the tag push triggers `ci.yml` on the same commit) for up to 110 minutes. Passes only when one completed, successful run has **both** `docker (amd64, …)` and `docker (arm64, …)` jobs concluded `success` at that SHA: vendor Node gates, functional and security counts, image configuration, SDK smoke over all eight contracts, and the byte binding to the security receipt. Fails fast when every run for the SHA completed without that. Writes the run and job URLs to `docker-gates.json` / `.md` (artifact, 90 days). |
+| `pack-mcpb` (new) | `contents: read` | Needs `prepare`. Checks out the tagged SHA, `npm ci --ignore-scripts`, validates the manifest with a pinned `@anthropic-ai/mcpb@2.1.2`, runs `npm run pack:mcpb`, then downloads the verified candidate and proves the bundle's `dist/src` is byte-identical (`diff -r`) to the verified tarball's `package/dist/src`, and that its `manifest.json` equals the reviewed one and matches the tag. Uploads `darktrace-mcp-<version>.mcpb` and its SHA-256. |
+| `publish-npm` | unchanged | Now `needs: [prepare, docker-gates]`. |
+| `publish-ghcr` | unchanged | Now `needs: [prepare, docker-gates]`, so no image is pushed unless both architectures passed the CI Docker gates at the tagged SHA. |
+| `github-release` (new) | `contents: write` | Needs `prepare`, `docker-gates`, `pack-mcpb`, `publish-npm`, `publish-ghcr-manifest`. Re-checks `SHA256SUMS`, adds the `.mcpb` line, re-checks again, and creates the GitHub Release for the tag (`gh release create --verify-tag`) with every file in `SHA256SUMS` (tarball, evidence, `release-notes.md`, `.mcpb`) plus `SHA256SUMS`. The release body is `release-notes.md` followed by the publication record: `npm view` integrity and tarball URL, the ghcr manifest-list digest and both per-arch digests, the `.mcpb` SHA-256, and the CI docker-gate run URLs. `release-notes.md` itself stays byte-identical, because it is listed in `SHA256SUMS`. |
+
+`actionlint` (with shellcheck) passes. Locally, `npm run pack:mcpb` and `npm pack` of the same tree
+give identical `dist/src` trees, which is the check `pack-mcpb` enforces.
+
+Residual: `publish-ghcr` still rebuilds the image on the release runners rather than pushing the
+exact image that `ci.yml` tested. Both builds use the same SHA, the same archived runtime inputs and
+the same Dockerfile, and the release notes record the digests that were pushed.
+
+### One-time owner steps (not automatable from the repository)
+
+1. **npm publisher.** Either configure a trusted publisher on npmjs.com for
+   `@nuoframework/darktrace-mcp`: organization/user `nuoframework`, repository `darktrace-mcp`,
+   workflow file `release.yml`, no environment. Or, if the package name does not exist yet (npm can
+   only attach a trusted publisher to an existing package), add a granular, publish-only,
+   short-lived `NPM_TOKEN` repository secret for the first release. Then configure the trusted
+   publisher, delete the secret and revoke the token. With the secret present, `publish-npm` uses it
+   and emits a warning.
+2. **ghcr visibility.** After the first `publish-ghcr` push, open the package
+   `ghcr.io/nuoframework/darktrace-mcp` in the organization's Packages settings. Set it to
+   **Public** and confirm it is linked to the repository (the `org.opencontainers.image.source`
+   label does that). Anonymous `docker pull` fails until then.
+3. **MCP Registry.** Only after `npm view @nuoframework/darktrace-mcp@<version>` shows the release
+   (the registry verifies `mcpName` in the published package) and the ghcr package is public:
+   `mcp-publisher login github` (or `github-oidc` from a workflow), `mcp-publisher validate
+   server.json`, then `mcp-publisher publish`.
+4. **Security reporting route.** `SECURITY.md` must describe a reporting route a public user can
+   follow, for example GitHub private vulnerability reporting enabled in the repository settings,
+   instead of the private-repository route. The documentation owner edits `SECURITY.md`; enabling
+   private vulnerability reporting is a repository setting.
+5. **Tag only after the pins are recomputed.** `ci.yml` and `scripts/verify-release.mjs` pin
+   `sourceTreeSha256`, the runtime hashes and the test counts. The B5 change touched `src/`, and
+   `docker-gates` will block publication until `ci.yml` is green at the tagged SHA.
+
+## What changed (initial distribution work)
 
 ### Package metadata
 

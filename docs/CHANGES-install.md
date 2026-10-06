@@ -207,6 +207,60 @@ both.
   (still rejects `true`), and validates OpenCode's `mcp.darktrace` command-array shape.
   Result: 9 JSON + 1 TOML examples, 8 documents, pass.
 
+## Sensitive + write acknowledgement (gate blocker B5)
+
+The server refuses to start when sensitive reads and writes are both enabled (`all`, or a list with
+`sensitive` and `write`) unless `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` is set. Before this
+change `setup`, the `.mcpb` bundle and `server.json` offered `all` but never emitted the variable, so
+those entries could not start. Option (a) of the gate review is now implemented:
+
+- `src/cli/entry.ts`: presets are `read`, `read-write`, `read-sensitive` (new) and `all`, with labels
+  that say what each adds. `SENSITIVE_WRITE_NOTICE` is the exact risk text (sensitive data +
+  untrusted content + write channels = exfiltration risk). `needsSensitiveWriteAck(profiles)` mirrors
+  the server rule. `buildServerEntry` refuses such profiles without `acknowledgeSensitiveWrite: true`
+  and, with it, adds `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` to the node `env` or as a docker
+  `-e` argument (image stays last). The variable is never emitted for profiles that do not need it.
+- `setup`: after the profile choice it prints the notice. Interactive: `[y/N]` question, default no.
+  Yes emits the acknowledgement and records `acknowledgeSensitiveWrite: true` in `setup.json`. No offers
+  `1) read + write` or `2) read + sensitive` (default 1). Non-interactive (`--yes`, or piped tokens
+  without a terminal): the new `--acknowledge-sensitive-write` flag is required, otherwise setup exits
+  with a setup error before any file is written.
+- `config <client>`: accepts `--acknowledge-sensitive-write`, or reuses the acknowledgement saved by
+  `setup`; without either it prints the notice on stderr and exits 2. When emitted, the snippet starts
+  with the notice as `#` comments. VS Code / Cursor one-click payloads carry the variable.
+- `test` / `doctor --online`: passes the saved acknowledgement with the saved profiles.
+- There is no installer option for `DARKTRACE_CRITICAL_APPROVAL`, so the installer never produces
+  `critical=host` entries and never needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL`. Operators who set host
+  approval by hand must add that acknowledgement themselves (documented in `--help`).
+- `manifest.json`: new `user_config.acknowledge_sensitive_write` (boolean, default `false`, not
+  required) mapped to `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` (MCPB substitutes booleans as
+  `"true"`/`"false"`, which the server parses). `profiles` still defaults to `read`; its description
+  states what each value adds, that the email action is not available, and that `all` needs the box.
+  `scripts/build-mcpb.mjs` `checkManifest` now requires the mapping, the opt-in default and the
+  `read` default. `npx -y @anthropic-ai/mcpb@2.1.2 validate manifest.json` passes.
+- `server.json`: both packages list `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` (`format: boolean`,
+  default `"false"`, risk description); the profile descriptions mention it. Validated against the
+  `2025-12-11` schema with Ajv (the `mcp-publisher` binary was not installed locally).
+- `--help` (`src/index.ts`): profiles described as implemented: email action not available; critical
+  needs a `dryRun:true` preview, then `confirm:true` with its `previewId`, otherwise it is refused
+  (`confirmation_required`); host critical approval needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`;
+  any sensitive + write set needs `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. Installer help lists the
+  new flag and preset.
+- Examples are all read-only consultation configurations and stay so. `scripts/validate-examples.mjs`
+  now also rejects any `DARKTRACE_ACKNOWLEDGE_*` variable in them (an acknowledgement must never be
+  pre-set by a copied example).
+- Tests: `test/cli/sensitive-write.test.ts` (11 tests; functional total 213 → 224): the rule and notice text; `--yes` without the
+  flag (also for `read,sensitive,write`) refused with nothing written; `--yes` with the flag emitting
+  the variable in a JSON client and in the Claude Code CLI argv, saved state, `test` env and `config
+  vscode` reuse; the compiled server's `--check-config` starting with the emitted env and refusing it
+  without the variable; docker `-e`; interactive yes; interactive no falling back to `read,write`,
+  `read,sensitive` and the default; empty answer = no; `config` refusing without, emitting with the flag
+  (node and docker), and not emitting for `read,write`; help text. `test/cli/links-mcpb.test.ts` checks
+  the manifest field, the checker and both `server.json` packages.
+
+This changes `src/` (`src/cli/*`, `src/index.ts`), so `sourceTreeSha256`, the runtime file hashes
+and the functional test count pinned in `ci.yml` and `verify-release.mjs` must be recomputed.
+
 ## Sources verified (2026-10-06)
 
 | Topic | Source |

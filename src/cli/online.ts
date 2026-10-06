@@ -36,6 +36,8 @@ export function onlineTestEnv(ctx: Pick<CliContext, 'home' | 'env'>): NodeJS.Pro
   if (saved === undefined) return env;
   env.DARKTRACE_URL = saved.url;
   env.DARKTRACE_PROFILES ??= saved.profiles;
+  // The acknowledgement recorded by `setup` travels with the saved profiles, exactly as in the client entries.
+  if (saved.acknowledgeSensitiveWrite === true && env.DARKTRACE_PROFILES === saved.profiles) env.DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE ??= 'true';
   if (saved.tokenMode === 'file' && env.DARKTRACE_PUBLIC_TOKEN === undefined && env.DARKTRACE_PRIVATE_TOKEN === undefined) {
     const files = tokenPaths(ctx);
     env.DARKTRACE_PUBLIC_TOKEN_FILE ??= files.publicTokenFile;
