@@ -113,7 +113,7 @@ Se pueden ejecutar 77 de las 79 operaciones de la API, agrupadas en 50 herramien
 | Darktrace/Email | paneles, datos de referencia, metadatos de correos, búsqueda, eventos de auditoría | `sensitive` |
 | Modelos, métricas, estado | modelos, componentes, métricas, estado, estadísticas | `read` |
 
-56 operaciones tienen evidencia de un laboratorio Darktrace 7.1.0; en 11 de ellas es parcial (por ejemplo, en Antigena solo `clear`). Las lecturas de correo **no están validadas en laboratorio** (not lab-validated: el token del laboratorio recibió 403). La [referencia de herramientas](docs/tools.md) muestra el estado de cada operación.
+59 operaciones tienen evidencia de un laboratorio Darktrace 7.1.0; en 6 de ellas es parcial (por ejemplo, en Antigena manual solo bloqueos `connection`). Las lecturas de correo **no están validadas en laboratorio** (not lab-validated: el token del laboratorio recibió 403). La [referencia de herramientas](docs/tools.md) muestra el estado de cada operación.
 
 ## Permisos y seguridad
 

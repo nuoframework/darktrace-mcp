@@ -113,7 +113,7 @@ darktrace-mcp test
 | Darktrace/Email | dashboards, reference data, email metadata, search, audit events | `sensitive` |
 | Models, metrics, status | models, components, metrics, status, statistics | `read` |
 
-56 operations have evidence from one Darktrace 7.1.0 lab; for 11 of them it is partial (for example, Antigena `clear` only). Email reads are **not lab-validated** (the lab token got 403). The [tool reference](docs/tools.md) shows the status of each operation.
+59 operations have evidence from one Darktrace 7.1.0 lab; for 6 of them it is partial (for example, manual Antigena `connection` blocks only). Email reads are **not lab-validated** (the lab token got 403). The [tool reference](docs/tools.md) shows the status of each operation.
 
 ## Permissions and safety
 
