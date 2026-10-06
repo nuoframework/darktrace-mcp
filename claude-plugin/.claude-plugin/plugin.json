@@ -19,9 +19,6 @@
     "incident-response",
     "network-detection"
   ],
-  "documentationUrl": "https://github.com/nuoframework/darktrace-mcp/blob/main/docs/getting-started.md",
-  "supportUrl": "https://github.com/nuoframework/darktrace-mcp/issues",
-  "privacyPolicyUrl": "https://github.com/nuoframework/darktrace-mcp/blob/main/SECURITY.md",
   "userConfig": {
     "appliance_url": {
       "type": "string",

@@ -2,8 +2,8 @@
   "mcpServers": {
     "darktrace": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@nuoframework/darktrace-mcp@1.1.1"],
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js"],
       "env": {
         "DARKTRACE_URL": "${user_config.appliance_url}",
         "DARKTRACE_PUBLIC_TOKEN": "${user_config.public_token}",
