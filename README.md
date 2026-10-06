@@ -25,7 +25,7 @@ Investigate your Darktrace appliance from your MCP client. Start read-only; choo
 You need **Node.js 22+**, your appliance URL (`https://…`) and a public/private API token pair (Darktrace: **System Config → Settings → API Token**).
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
 Choose `read`, then pick your clients. The wizard verifies TLS and the tokens with a signed request, stores the tokens in owner-only files on macOS/Linux, and backs up existing client configs before updating them. [Full guide](docs/getting-started.md).
@@ -38,7 +38,7 @@ Release 1.1.1 is in progress on **2026-10-06**. [Release status](docs/releases.m
 
 ### Claude Desktop
 
-Download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and open it; tokens go to the OS keychain.
+Download `darktrace-mcp-1.1.1.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and open it; tokens go to the OS keychain.
 
 ### Docker
 
@@ -46,7 +46,7 @@ With Docker installed, pull the pinned image first, then run the wizard. Client 
 
 ```sh
 docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker \
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
   --image ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511
 ```
 
@@ -91,20 +91,20 @@ Product names and logos identify compatibility only; they belong to their respec
 | Area | Tools / ops | Examples | Profiles | Lab evidence |
 |---|---:|---|---|---:|
 | [System and reference data](docs/tools.md#system-and-reference-data) | 5 / 6 | Health, network statistics, enums | `read` | 3 / 1 / 2 |
-| [Devices](docs/tools.md#devices) | 9 / 9 | Search, connections, metrics, labels | `read`, `write` | 8 / 0 / 1 |
+| [Devices](docs/tools.md#devices) | 9 / 9 | Search, connections, metrics, labels | `read`, `write` | 9 / 0 / 0 |
 | [Model breaches](docs/tools.md#model-breaches) | 4 / 7 | Read, acknowledge, comment | `read`, `write` | 7 / 0 / 0 |
 | [Models and metrics](docs/tools.md#models-and-metrics) | 3 / 6 | Model, component and metric definitions | `read` | 4 / 2 / 0 |
-| [AI Analyst](docs/tools.md#ai-analyst) | 8 / 11 | Incidents, pinning, investigations | `read`, `write` | 10 / 0 / 1 |
-| [Autonomous Response (Antigena)](docs/tools.md#autonomous-response-antigena) | 3 / 4 | List, activate, extend, clear | `read`, `critical` | 2 / 2 / 0 |
+| [AI Analyst](docs/tools.md#ai-analyst) | 8 / 11 | Incidents, pinning, investigations | `read`, `write` | 11 / 0 / 0 |
+| [Autonomous Response (Antigena)](docs/tools.md#autonomous-response-antigena) | 3 / 4 | List, activate, extend, clear | `read`, `critical` | 3 / 1 / 0 |
 | [Tags](docs/tools.md#tags) | 3 / 10 | List, create, assign, remove, delete | `read`, `write`, `critical` | 7 / 0 / 3 |
 | [Intel feed and subnets](docs/tools.md#intel-feed-and-subnets) | 4 / 4 | Watched Domains, subnet settings | `read`, `critical` | 2 / 2 / 0 |
-| [Packet captures](docs/tools.md#packet-captures) | 3 / 3 | List, request, download | `read`, `sensitive`, `write` | 1 / 1 / 1 |
-| [Advanced Search](docs/tools.md#advanced-search) | 1 / 4 | Queries, field analysis, graphs | `sensitive` | 1 / 3 / 0 |
+| [Packet captures](docs/tools.md#packet-captures) | 3 / 3 | List, request, download | `read`, `sensitive`, `write` | 3 / 0 / 0 |
+| [Advanced Search](docs/tools.md#advanced-search) | 1 / 4 | Queries, field analysis, graphs | `sensitive` | 4 / 0 / 0 |
 | [Darktrace/Email](docs/tools.md#darktraceemail) | 7 / 13 | Dashboards, metadata, search, audit | `sensitive` | 0 / 0 / 13 |
 
 **✓** lab evidence on Darktrace 7.1.0 · **◐** partial evidence (the [tool reference](docs/tools.md) states what was covered) · **—** not lab-validated, including blocked or failed checks.
 
-- 56 of 77 operations have lab evidence, 11 of them partial. Most write evidence predates the final write controls; only a few writes were re-checked afterwards.
+- 59 of 77 operations have lab evidence from two Darktrace 7.1.0 lab appliances, 6 of them partial. The write and critical paths were re-checked on the second lab after the final write controls.
 - All 13 Darktrace/Email reads are unvalidated (the lab token got HTTP 403). The email download returns size and SHA-256 only.
 - Not available: the Darktrace/Email action (excluded) and the deprecated `GET /aianalyst/incidents`.
 

@@ -37,7 +37,7 @@ node -p 'process.execPath'
 node -p 'require("node:path").resolve("dist/src/index.js")'
 ```
 
-Run the second command inside the `darktrace-mcp` folder. After the `npx` bootstrap the entry is `~/.local/share/darktrace-mcp/1.1.0/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`.
+Run the second command inside the `darktrace-mcp` folder. After the `npx` bootstrap the entry is `~/.local/share/darktrace-mcp/1.1.1/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`.
 
 ## One-line install per client
 
@@ -57,7 +57,7 @@ Never put `npx` in a client config: every launch would depend on the registry an
 
 ## Claude Desktop
 
-**Automatic.** Either run `darktrace-mcp setup`, or install the extension: download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) (or build it from a checkout with `npm run pack:mcpb`) and double-click it. Claude Desktop asks for the URL, tokens and profile. It stores the tokens in your OS keychain.
+**Automatic.** Either run `darktrace-mcp setup`, or install the extension: download `darktrace-mcp-1.1.1.mcpb` from the [v1.1.1 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) (or build it from a checkout with `npm run pack:mcpb`) and double-click it. Claude Desktop asks for the URL, tokens and profile. It stores the tokens in your OS keychain.
 
 **Manual.** Settings → Developer → Edit Config. Merge this into `mcpServers`, keeping your other servers:
 
@@ -284,15 +284,15 @@ Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool cal
 Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Pull the published image ([Docker guide](docker.md)), then let the wizard write the hardened entry pinned to its digest:
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
 **Manual.** Get the image ID (or use the `name@sha256:…` digest above):
 
 ```sh
-docker image inspect --format '{{.Id}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{.Id}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
 command -v docker
 ```
 

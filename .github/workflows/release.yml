@@ -409,6 +409,7 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/assets"
           mapfile -t files < "$RUNNER_TEMP/asset-list"
+          VERSION="${GITHUB_REF_NAME#v}"
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag \
-            --title "darktrace-mcp ${GITHUB_REF_NAME#v}" --notes-file "$RUNNER_TEMP/release-body.md" \
+            --title "Darktrace MCP v${VERSION}" --notes-file "$RUNNER_TEMP/release-body.md" \
             "${files[@]}" SHA256SUMS

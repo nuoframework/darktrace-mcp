@@ -4208,7 +4208,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4538,7 +4540,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]
@@ -4895,7 +4899,9 @@
       ],
       "bodyRequired": true,
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "requiredProfiles": [
         "write"
       ]

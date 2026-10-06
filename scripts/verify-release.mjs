@@ -12,7 +12,7 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const canonical=value=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value&&typeof value==='object'?'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}':JSON.stringify(value);
 // Full-API oracle: complete tools/list contracts for every supported operator profile combination.
 const fixturePath='test/security/fixtures/mcp-tool-contracts-full-api.json';
-const fixtureSha256='df8ca493e50a9f8eef2dd883c8e7a4f3b36b2effa0cba72cf36ed07ab488ded5'; // Generated for the full-API release; requires independent review before shared application.
+const fixtureSha256='86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6'; // Generated for the full-API release; requires independent review before shared application.
 // Historical oracles stay byte-pinned provenance; they no longer describe the shipped surface.
 const firstStableFixturePath='test/security/fixtures/mcp-tool-contracts-first-stable.json';
 const firstStableFixtureSha256='6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c';
@@ -21,7 +21,7 @@ const alphaFixtureSha256='37b5af95de1786ecce1b8762e12d2d63e577f171511a9db4964518
 const capabilityPath='src/policy/release-capability.ts';
 const capabilityValue=Object.freeze({read:true,sensitiveRead:true,write:true,writeCritical:true});
 const fixtureCapability=Object.freeze({...capabilityValue,grantedBy:'operator profiles only; model arguments cannot grant or escalate'});
-const profileHashes=Object.freeze({"read":"734a9e33dd8632df6efa4ec7b81c3f313d85dfbb478af3128bd3aec4f0b6833a","read+sensitive":"d885ce0e247f9dc7d55c7f27ed67be4396ffd8b35b2c7a6faf18d3f6a051b046","read+write":"1820b2b88e685e8058a79d26d97acf9f19f3d47a90cfd9e0862f4b37ce294f22","read+write+critical":"c5372a1b21079709f4f2766df8c298bd8e91151aa5c417fc2703c734d12c0aae","all":"90c0a24a18ed849bec6bb8f6c9a6a7a2a2672121c0ed5d1fcbe8fad206e5f53d","read+sensitive+write":"3ccf0ef5ace7817dfb69fdb83893dab1baa36911bf3cbb906062dae26ca5b64b","read+write+critical/critical-host":"f1b5457452b52acb25a9fe37df152d1a88f542580d3b8eadd73bae183a7ae646","read+write/write-elicitation":"cbd4ac4d9f9f904591ad905f8c3be9244614c982a8d511b9f1102457a968e5bd"});
+const profileHashes=Object.freeze({"read":"734a9e33dd8632df6efa4ec7b81c3f313d85dfbb478af3128bd3aec4f0b6833a","read+sensitive":"d885ce0e247f9dc7d55c7f27ed67be4396ffd8b35b2c7a6faf18d3f6a051b046","read+write":"c5daa9f8890a23059a4f55715244a83d9e8dacb22cd4c32ba06b70edcefa7ff2","read+write+critical":"c358306affc356ca3719c614c9f1777f7582ecb20d7c0b0b932a472949450615","all":"de987c3b3285bb1e53e4e8d0c806d739a31cc9ff864ba4f3aca02c336a79955e","read+sensitive+write":"e00ecf4a4c348d837bba433e50e88e316e58646bc5537f4dcdf998f87589dbe8","read+write+critical/critical-host":"4fd0a1ea10bc225b9fc450dbf12479e865eb4318f5b59c7f8ca8121cde82f2d9","read+write/write-elicitation":"3a706c271a515f3f3f2f311acdc86cb8d0ad24e496c4e93e6cbd017de97b7186"});
 // Independent oracle from the owner request: tools/operations per profile and the five implemented critical operations.
 const profileShape=Object.freeze({"read":[27,38],"read+sensitive":[36,56],"read+write":[36,54],"read+write+critical":[41,59],"all":[50,77],"read+sensitive+write":[45,72],"read+write+critical/critical-host":[41,59],"read+write/write-elicitation":[36,54]});
 const criticalOperations=Object.freeze(['delete_tags_tid','post_antigena','post_antigena_manual','post_intelfeed','post_subnets']);

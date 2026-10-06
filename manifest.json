@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "darktrace-mcp",
   "display_name": "Darktrace Threat Visualizer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Consult a Darktrace Threat Visualizer appliance (status, devices, model breaches, AI Analyst) over a hardened local MCP server.",
   "long_description": "Runs the @nuoframework/darktrace-mcp stdio server locally. Requests are HMAC-signed with your Darktrace API token pair over verified TLS to one fixed HTTPS origin. Tokens are stored by the host as sensitive values (OS keychain) and passed to the server as environment variables; they are never written to a client configuration file. Profiles default to read-only. Profiles that combine sensitive reads with writes (all, or a list with both sensitive and write) start only after you tick the risk acknowledgement.",
   "author": {
