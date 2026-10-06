@@ -1,12 +1,12 @@
-Registro fechado de la experiencia, los errores y la estabilidad del servidor en pruebas de laboratorio.
-
-[README](../README.md) · [Herramientas](tools.md) · [Configuración](configuration.md) · [Seguridad](security.md)
+# Informe de experiencia y estabilidad: el MCP visto por un agente
 
 **Español** · [English](en/ux-stability-report.md)
 
-<a id="ux-and-stability-report-the-mcp-as-seen-by-an-llm-agent"></a>
+[README](../README.md) · [Herramientas](tools.md) · [Configuración](configuration.md) · [Seguridad](security.md)
 
-# Informe de experiencia y estabilidad: el MCP visto por un agente
+Registro fechado de la experiencia, los errores y la estabilidad del servidor en pruebas de laboratorio.
+
+<a id="ux-and-stability-report-the-mcp-as-seen-by-an-llm-agent"></a>
 
 > **Registro fechado.** Esta ejecución es anterior a la exclusión de la acción Darktrace/Email y a los controles finales de escritura. Las «51 herramientas y 78 operaciones» y la vista previa de correo describen aquella compilación. La candidata 1.1.0 expone 50 herramientas y 77 operaciones ejecutables; consulta la [referencia](tools.md).
 
@@ -45,7 +45,7 @@ Laboratorio: Darktrace 7.1.0 (laboratorio A, nombre omitido), 2026-10-06. Servid
 
 La latencia procede casi enteramente del appliance. Los rechazos del cliente responden en 1–5 ms. El p95 bajó porque los listados de alertas de 24 h y 7 d ya no fallan con `too_large` ni se reintentan. El tamaño p50 creció al añadir recuentos, valores aplicados y pistas, y al devolver datos donde antes había respuestas vacías o fallidas.
 
-**Concurrencia** (3 rondas × 20 llamadas, por compilación, dos órdenes): 60/60 correctas en todos los grupos salvo el primero contra un appliance con caché fría. En ese grupo, `list_models` y `deviceinfo` agotaron 30 s. Ocurrió a `after` cuando fue primero, no cuando fue segundo: se atribuyó al calentamiento de caché, no a la compilación. Cada ronda duró 0,4–1,3 s y el p50 por llamada fue 300–560 ms.
+**Concurrencia** (3 rondas × 20 llamadas, por compilación, dos órdenes): 60/60 correctas en todos los grupos salvo el primero contra un appliance con caché fría. En ese grupo, `list_models` y `deviceinfo` agotaron 30 s. Le ocurrió a la compilación `after` cuando fue primero, no cuando fue segundo: se atribuyó al calentamiento de caché, no a la compilación. Cada ronda duró 0,4–1,3 s y el p50 por llamada fue 300–560 ms.
 
 **Carga regulada** (10 min, unas 100/min): antes 990/990 correctas; después 947/948 (un timeout transitorio en `metrics/{mlid}`). p50 59 ms en ambas; p95 191 ms antes y 234 ms después. Sin errores de memoria o protocolo ni llamadas atascadas (el banco tiene un supervisor de 60 s por llamada y detecta la salida del servidor).
 

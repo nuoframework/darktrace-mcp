@@ -171,3 +171,7 @@ Do these in the lab C UI. Then re-run `node scripts/lab-email-probe.mjs`.
   5. An action allowlist limited to the actions proven reversible in step 4, a body schema with no
      pass-through, a threat-model update (TM-18) and a new design review. Until then the operation stays
      `blocked` (`BLOCKED` in `scripts/generate-catalogue.ts`).
+
+## Later service outage — 2026-10-06, approximately 22:50
+
+Owner-reported follow-up, added on 2026-10-06: all routes under `/agemail` returned **HTTP 503** with an HTML page titled **“Darktrace Labs”**. The service was unavailable; **no MCP validation was possible**. This follows the earlier 403 token-permission results and does not change any operation's lab-validation status. No host, credentials, response data or identifiers are retained here. The time is approximate as reported by the owner; no timezone was supplied.

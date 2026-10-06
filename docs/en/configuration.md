@@ -1,10 +1,10 @@
-Reference for credentials, profiles, approval, limits and network settings.
-
-[README](../../README.en.md) · [Getting started](getting-started.md) · [Clients](clients.md) · [Troubleshooting](troubleshooting.md)
+# Configuration
 
 [Español](../configuration.md) · **English**
 
-# Configuration
+[README](../../README.en.md) · [Getting started](getting-started.md) · [Clients](clients.md) · [Troubleshooting](troubleshooting.md)
+
+Reference for credentials, profiles, approval, limits and network settings.
 
 The setup wizard writes all of this for you. Read this page to change settings by hand.
 
@@ -14,7 +14,7 @@ The server reads settings from **environment variables** and, optionally, a **JS
 
 | Variable | JSON field | Default | Notes |
 |---|---|---|---|
-| `DARKTRACE_URL` | `instance.baseUrl` | — (required) | HTTPS origin only, for example `https://<tu-appliance>`. No path, query or user info |
+| `DARKTRACE_URL` | `instance.baseUrl` | — (required) | HTTPS origin only, for example `https://<your-appliance>`. No path, query or user info |
 | `DARKTRACE_PUBLIC_TOKEN_FILE` | `auth.publicTokenFile` | — (required) | Absolute path to a file with the public token |
 | `DARKTRACE_PRIVATE_TOKEN_FILE` | `auth.privateTokenFile` | — (required) | Absolute path to a file with the private token |
 | `DARKTRACE_TOKEN_FILE_OWNER` | `auth.tokenFileOwner` | `current` | Who may own the token files. `root-or-current` also accepts root (uid 0); only for Docker Desktop, see below |
@@ -176,7 +176,7 @@ Instead of many environment variables, you can use one JSON file. Start from [op
 
 ```json
 {
-  "instance": { "baseUrl": "https://<tu-appliance>", "timeoutMs": 30000 },
+  "instance": { "baseUrl": "https://<your-appliance>", "timeoutMs": 30000 },
   "auth": {
     "publicTokenFile": "/absolute/private/darktrace/public-token",
     "privateTokenFile": "/absolute/private/darktrace/private-token"

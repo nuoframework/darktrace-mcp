@@ -1,12 +1,12 @@
-Diagnostica problemas de configuración, autenticación, reloj, TLS y permisos.
-
-[README](../README.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Clientes](clients.md)
+# Solución de problemas
 
 **Español** · [English](en/troubleshooting.md)
 
-<a id="troubleshooting"></a>
+[README](../README.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Clientes](clients.md)
 
-# Solución de problemas
+Diagnostica problemas de configuración, autenticación, reloj, TLS y permisos.
+
+<a id="troubleshooting"></a>
 
 Empieza con estos dos comandos, con el mismo entorno que usa tu cliente.
 

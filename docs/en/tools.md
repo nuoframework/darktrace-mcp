@@ -1,16 +1,16 @@
-Reference of operations, profiles and the precise scope of lab evidence.
-
-[README](../../README.en.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)
+# Tool reference
 
 [Español](../tools.md) · **English**
 
-# Tool reference
+[README](../../README.en.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)
 
-> Built by `npm run docs:tools` from the API catalogue, tool groups and `src/tools/descriptions.ts`. Do not edit by hand. Tool summaries and operation descriptions remain in English; summaries reproduce the code-owned text seen by the client (dynamic policy notes are added at runtime).
+Reference of operations, profiles and the precise scope of lab evidence.
 
-**50 tools** cover **77 executable operations** out of the 79 in the API inventory (Darktrace Threat Visualizer API 6.1). The other 2 are [not available](#not-available): 1 excluded (the email action) and 1 deprecated (`GET /aianalyst/incidents`).
+> Built by `npm run docs:tools` from the API catalogue, tool groups and `src/tools/descriptions.ts`. Do not edit by hand. MCP summaries below reproduce the English text seen by the client; dynamic policy notes are added at runtime. Operation descriptions are localized for readers.
 
-**Lab evidence.** 59 operations have evidence from two Darktrace 7.1.0 lab appliances (2026-10-06). For 6 of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all 13 Darktrace/Email reads (the lab token got HTTP 403). Some write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. The [gap campaign](../security/lab-gap-campaign-1.1.1.md) re-ran the critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and the device, investigation, PCAP and tag writes under those controls.
+**50 tools** cover **77 executable operations** out of 79 in the API inventory (Darktrace Threat Visualizer API 6.1). The other 2 are [not available](#not-available): 1 excluded (the email action) and 1 deprecated (`GET /aianalyst/incidents`).
+
+**Lab evidence.** 59 operations have evidence from 2 distinct Darktrace 7.1.0 appliances (2026-10-06): lab A for 1.1.0, lab B for the 1.1.1 gap campaign. 6 operations have partial evidence; the **Lab** column states its scope. The rest are *not lab-validated*: they follow API documentation but did not pass against a live appliance, including all 13 Email reads (HTTP 403; a later service outage returned 503, see the [Email record](../security/lab-email-validation.md)). Some write evidence predates the final approval, rate-limit, breaker and audit controls, which have offline coverage. The [gap campaign](../security/lab-gap-campaign-1.1.1.md) re-ran critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and device, investigation, PCAP and tag writes under those controls.
 
 ## Which profile do I need?
 
@@ -23,7 +23,7 @@ Reference of operations, profiles and the precise scope of lab evidence.
 
 Set profiles with `DARKTRACE_PROFILES`. `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. See [Configuration](configuration.md#profiles).
 
-Columns: **Tier** is the risk class from the API inventory. **Lab** shows whether, and how far, the operation passed a real-appliance test.
+Columns: **Tier** is the risk class from the API inventory. **Lab** states whether, and how far, the operation passed a real-appliance test.
 
 ## Contents
 
@@ -42,6 +42,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## System and reference data
 
+Literal MCP summaries (English):
+
 - **`darktrace_get_cves`**: CVE / vulnerability information for devices.
 - **`darktrace_get_network_stats`**: Network traffic statistics for the network, a subnet or a device.
 - **`darktrace_get_reference_data`**: Reference enumerations and filter types used by other endpoints.
@@ -58,6 +60,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_get_summary_statistics` | `GET /summarystatistics` | read | `read` | yes | Device counts, bandwidth and active response actions. |
 
 ## Devices
+
+Literal MCP summaries (English):
 
 - **`darktrace_get_connection_details`**: Raw connection/event history for a device or model breach.
 - **`darktrace_get_device_info`**: Detailed connection/traffic profile for one device.
@@ -83,6 +87,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Model breaches
 
+Literal MCP summaries (English):
+
 - **`darktrace_acknowledge_model_breach`**: Acknowledge or unacknowledge a model breach.
 - **`darktrace_comment_model_breach`**: Add a comment to a model breach.
 - **`darktrace_get_model_breach_comments`**: Read comments on model breaches.
@@ -100,6 +106,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Models and metrics
 
+Literal MCP summaries (English):
+
 - **`darktrace_list_components`**: List model components (filters/logic), or one by cid.
 - **`darktrace_list_metrics`**: List available metrics, or one metric by mlid.
 - **`darktrace_list_models`**: List detection models, or fetch one by pid.
@@ -114,6 +122,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_list_models` | `GET /models/{pid}` | read | `read` | yes | One model by `pid`. |
 
 ## AI Analyst
+
+Literal MCP summaries (English):
 
 - **`darktrace_acknowledge_ai_analyst_incident`**: Acknowledge or unacknowledge Cyber AI Analyst incident events.
 - **`darktrace_comment_ai_analyst_incident`**: Add a comment to a Cyber AI Analyst incident.
@@ -140,6 +150,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Autonomous Response (Antigena)
 
+Literal MCP summaries (English):
+
 - **`darktrace_antigena_action`**: Activate, extend or clear Darktrace RESPOND (Antigena) actions.
 - **`darktrace_antigena_manual_action`**: Create a manual RESPOND action (e.g. quarantine or block a device).
 - **`darktrace_list_antigena_actions`**: Darktrace RESPOND (Antigena) actions: list actions or the pending/active summary.
@@ -152,6 +164,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_list_antigena_actions` | `GET /antigena/summary` | read | `read` | yes | Summary of active and pending response actions. |
 
 ## Tags
+
+Literal MCP summaries (English):
 
 - **`darktrace_delete_tag`**: Delete a tag definition.
 - **`darktrace_list_tags`**: Tags and tagged entities: list tags, one tag, or which devices carry which tags.
@@ -172,6 +186,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Intel feed and subnets
 
+Literal MCP summaries (English):
+
 - **`darktrace_get_intel_feed`**: Read the watched-domains / intel feed list.
 - **`darktrace_list_subnets`**: List monitored subnets.
 - **`darktrace_update_intel_feed`**: Add or remove watched domains in the intel feed (removeall wipes the list).
@@ -186,6 +202,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Packet captures
 
+Literal MCP summaries (English):
+
 - **`darktrace_download_pcap`**: Download a finished packet capture file (base64, size-bounded, never written to disk).
 - **`darktrace_list_pcaps`**: List packet captures and their status.
 - **`darktrace_request_pcap`**: Request a new packet capture for a connection.
@@ -198,6 +216,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 
 ## Advanced Search
 
+Literal MCP summaries (English):
+
 - **`darktrace_advanced_search`**: Advanced Search (log/event search) plus analyze/graph. query/hash = base64 of JSON {"search":"<query>","fields":[],"timeframe":"3600"} (seconds, max 604800).
 
 | Tool | Method and path | Tier | Profile | Lab | What it does |
@@ -208,6 +228,8 @@ Columns: **Tier** is the risk class from the API inventory. **Lab** shows whethe
 | `darktrace_advanced_search` | `GET /advancedsearch/api/search/{query}` | read | `sensitive` | yes | Advanced Search query (GET form). |
 
 ## Darktrace/Email
+
+Literal MCP summaries (English):
 
 - **`darktrace_download_email`**: Darktrace/EMAIL: download the raw message of one email (size-bounded).
 - **`darktrace_email_audit_events`**: Darktrace/EMAIL: read audit events.

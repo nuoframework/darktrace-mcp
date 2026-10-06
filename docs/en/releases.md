@@ -1,10 +1,10 @@
-Where each version is published, how to verify it and how to prepare a reproducible release.
-
-[README](../../README.en.md) · [Getting started](getting-started.md) · [Changelog](../../CHANGELOG.md)
+# Releases and distribution
 
 [Español](../releases.md) · **English**
 
-# Releases and distribution
+[README](../../README.en.md) · [Getting started](getting-started.md) · [Changelog](../../CHANGELOG.md)
+
+Where each version is published, how to verify it and how to prepare a reproducible release.
 
 > Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.1 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
 

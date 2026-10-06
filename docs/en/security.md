@@ -1,10 +1,10 @@
-How the server protects your appliance and data, and where its limits are.
-
-[README](../../README.en.md) · [Security policy](../../SECURITY.md) · [Configuration](configuration.md) · [Architecture](../architecture.md)
+# Security overview
 
 [Español](../security.md) · **English**
 
-# Security overview
+[README](../../README.en.md) · [Security policy](../../SECURITY.md) · [Configuration](configuration.md) · [Architecture](../architecture.md)
+
+How the server protects your appliance and data, and where its limits are.
 
 This page explains, in plain terms, how the server protects your appliance and your data, and where the limits are. Detailed reviews and test records are in [docs/security/](#detailed-records).
 
@@ -32,7 +32,7 @@ This page explains, in plain terms, how the server protects your appliance and y
 
 ## Lab validation
 
-59 operations have evidence from two Darktrace 7.1.0 lab appliances (2026-10-06); for 6 of them the evidence is partial (for example, manual Antigena `connection` blocks only, subnet `label` and `uniqueHostnames` only). The rest, including every Darktrace/Email read and the three tag DELETE operations (applied, but the lab gateway answers HTTP 502), are marked **not lab-validated**. Some write evidence predates the final write controls; the [gap campaign](../security/lab-gap-campaign-1.1.1.md) re-ran the critical flows under them. The [tool reference](tools.md) shows the status of each operation, and the [known limitations](../../CHANGELOG.md#known-limitations-in-110) list what is not covered. Test writes on a non-production appliance first.
+59 operations have evidence from two distinct Darktrace 7.1.0 lab appliances (2026-10-06): lab A for 1.1.0 and lab B for the 1.1.1 gap campaign; for 6 of them the evidence is partial (for example, manual Antigena `connection` blocks only, subnet `label` and `uniqueHostnames` only). The rest, including every Darktrace/Email read and the three tag DELETE operations (applied, but the lab gateway answers HTTP 502), are marked **not lab-validated**. Some write evidence predates the final write controls; the [gap campaign](../security/lab-gap-campaign-1.1.1.md) re-ran the critical flows under them. The [tool reference](tools.md) shows the status of each operation, and the [known limitations](../../CHANGELOG.md#known-limitations-in-110) list what is not covered. Test writes on a non-production appliance first.
 
 ## Runtime notes
 

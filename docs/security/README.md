@@ -1,8 +1,8 @@
-Índice de las revisiones, campañas y decisiones que sustentan las afirmaciones de seguridad.
+# Evidencia de seguridad
 
 [README](../../README.md) · [Resumen de seguridad](../security.md) · [Herramientas](../tools.md) · [Versiones](../releases.md)
 
-# Evidencia de seguridad
+Índice de las revisiones, campañas y decisiones que sustentan las afirmaciones de seguridad.
 
 Los documentos originales se conservan **en inglés**, con sus fechas, alcance y resultados. Son registros de auditoría; una aprobación histórica no certifica versiones posteriores. Empieza por la revisión final de tu versión y consulta sus hashes y riesgos residuales. Los JSON de [evidence/](evidence/) contienen los registros estructurados citados por las campañas.
 

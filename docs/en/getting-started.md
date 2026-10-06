@@ -1,10 +1,10 @@
-Install the server, protect tokens and verify your first connection.
-
-[README](../../README.en.md) · [Clients](clients.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+# Getting started
 
 [Español](../getting-started.md) · **English**
 
-# Getting started
+[README](../../README.en.md) · [Clients](clients.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+
+Install the server, protect tokens and verify your first connection.
 
 This guide takes you from nothing to a working Darktrace MCP server in your client. It takes about ten minutes.
 
@@ -14,7 +14,7 @@ You need:
 
 | Item | Where to get it |
 |---|---|
-| Darktrace appliance address | For example `https://<tu-appliance>`. HTTPS only |
+| Darktrace appliance address | For example `https://<your-appliance>`. HTTPS only |
 | Public API token and private API token | Darktrace Threat Visualizer: **System Config → Settings → API Token**. Ask your Darktrace admin |
 | Node.js 22 or later (npm and `npx` come with it) | [nodejs.org](https://nodejs.org) or your package manager |
 | Approval to send Darktrace data to your model provider | Your security or compliance team |

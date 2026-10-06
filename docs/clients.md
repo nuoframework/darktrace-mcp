@@ -1,12 +1,12 @@
-Configura cada cliente MCP automáticamente o con rutas y archivos explícitos.
-
-[README](../README.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
+# Configurar clientes
 
 **Español** · [English](en/clients.md)
 
-<a id="client-setup"></a>
+[README](../README.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
 
-# Configurar clientes
+Configura cada cliente MCP automáticamente o con rutas y archivos explícitos.
+
+<a id="client-setup"></a>
 
 Cada cliente se puede configurar de dos formas:
 
@@ -615,7 +615,7 @@ Sirve para cualquier cliente que acepte `command` + `args` (Claude Desktop, Curs
 npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-El asistente comprueba que el daemon de Docker responde, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (la versión del paquete), ofrece descargarla si falta y escribe la entrada endurecida con el ID local de la imagen y `--pull=never`. Muestra el ID de la imagen y el digest del registro y guarda ambos en `~/.config/darktrace-mcp/setup.json`; compara el digest con las notas de la versión. Sin preguntas: `setup --yes --runtime docker --pull --url https://<tu-appliance> --tokens-from-stdin`. `--image` también acepta otra etiqueta, un digest `nombre@sha256:…` o un ID local `sha256:…`. `darktrace-mcp config <cliente>` reutiliza el ID guardado, y `darktrace-mcp test` ejecuta primero `--check-config` en el contenedor con los mismos montajes y usuario (sin red) y después comprueba el appliance desde el host. Detalles: [guía de Docker](docker.md#install) (en inglés).
+El asistente comprueba que el daemon de Docker responde, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (la versión del paquete), ofrece descargarla si falta y escribe la entrada endurecida con el ID local de la imagen y `--pull=never`. Muestra el ID de la imagen y el digest del registro y guarda ambos en `~/.config/darktrace-mcp/setup.json`; compara el digest con las notas de la versión. Sin preguntas: `setup --yes --runtime docker --pull --url https://<tu-appliance> --tokens-from-stdin`. `--image` también acepta otra etiqueta, un digest `nombre@sha256:…` o un ID local `sha256:…`. `darktrace-mcp config <cliente>` reutiliza el ID guardado, y `darktrace-mcp test` ejecuta primero `--check-config` en el contenedor con los mismos montajes y usuario (sin red) y después comprueba el appliance desde el host. Detalles: [guía de Docker](docker.md#install).
 
 **Manual.** Obtén el ID de la imagen (o usa el digest `nombre@sha256:…` anterior):
 

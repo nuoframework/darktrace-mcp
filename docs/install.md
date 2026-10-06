@@ -1,10 +1,10 @@
-Instala el servidor con un comando y elige la vía adecuada para tu cliente.
-
-[README](../README.md) · [Clientes](clients.md) · [Matriz de instalación](install-matrix.md) · [Primeros pasos](getting-started.md) · [Docker](docker.md) · [Problemas](troubleshooting.md)
+# Instalar
 
 **Español** · [English](en/install.md)
 
-# Instalar
+[README](../README.md) · [Clientes](clients.md) · [Matriz de instalación](install-matrix.md) · [Primeros pasos](getting-started.md) · [Docker](docker.md) · [Problemas](troubleshooting.md)
+
+Instala el servidor con un comando y elige la vía adecuada para tu cliente.
 
 > **Alcance por versión.** Los ocho clientes originales del asistente están en npm 1.1.1. Los 13 adaptadores adicionales, la ruta nueva de Windsurf y la herramienta del modo de configuración describen la [PR de instalación #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Usa sus fragmentos manuales con 1.1.1; los identificadores nuevos de `setup --client` requieren ese cambio y una versión nueva publicada. El comando fijado a 1.1.1 no los incluye.
 
@@ -16,7 +16,7 @@ npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 
 Reinicia el cliente y pide: **«lista mis dispositivos Darktrace»**.
 
-Necesitas Node.js 22+, la dirección `https://<tu-appliance>` y el par de tokens API (Darktrace: **System Config → Settings → API Token**). No se escriben ajustes, tokens ni entradas de cliente antes de superar la comprobación del appliance; `--dry-run` muestra el plan sin escribir. Las cinco preguntas numeradas corresponden a la nueva presentación del asistente de la PR indicada.
+Necesitas Node.js 22+, la dirección `https://<tu-appliance>` y el par de tokens API (Darktrace: **System Config → Settings → API Token**). No se escriben ajustes, tokens ni entradas de cliente antes de superar la comprobación del appliance; `--dry-run` muestra el plan sin escribir.
 
 ## Elige tu cliente
 
@@ -33,21 +33,23 @@ Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuofram
 | **Windsurf (Devin Desktop)** | `setup --client windsurf` | Próxima ruta `~/.config/devin/mcp_config.json`; ruta anterior en 1.1.1 ([detalles](clients.md#windsurf)) |
 | **OpenCode** | `setup --client opencode` | `~/.config/opencode/opencode.json` ([detalles](clients.md#opencode)) |
 | **Gemini CLI** | `setup --client gemini` | `~/.gemini/settings.json` ([detalles](clients.md#gemini-cli)) |
-| **Zed** | `setup --client zed` (si hay comentarios, muestra un fragmento para pegar) | `~/.config/zed/settings.json` → `context_servers` ([detalles](clients.md#zed)) |
-| **Cline** | `setup --client cline` | `cline_mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#cline)) |
-| **Roo Code** | `setup --client roo` | `mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#roo-code)) |
-| **Continue** | `setup --client continue` (añade un elemento marcado a `mcpServers`) | `~/.continue/config.yaml` ([detalles](clients.md#continue)) |
-| **Kiro** | `setup --client kiro`; `config kiro` muestra también un enlace `kiro.dev/launch` | `~/.kiro/settings/mcp.json` ([detalles](clients.md#kiro)) |
-| **Amp** | `setup --client amp` | `~/.config/amp/settings.json` → `amp.mcpServers` ([detalles](clients.md#amp)) |
-| **GitHub Copilot CLI** | `setup --client copilot-cli` | `~/.copilot/mcp-config.json` ([detalles](clients.md#github-copilot-cli)) |
-| **Warp** | `setup --client warp` | `~/.warp/.mcp.json` ([detalles](clients.md#warp)) |
-| **Goose** | `setup --client goose` (añade una entrada marcada a `extensions`) | `~/.config/goose/config.yaml` ([detalles](clients.md#goose)) |
-| **LM Studio** | `setup --client lmstudio`; `config lmstudio` muestra `lmstudio://add_mcp` | `~/.lmstudio/mcp.json` ([detalles](clients.md#lm-studio)) |
-| **Antigravity** | `setup --client antigravity` | `~/.gemini/config/mcp_config.json` ([detalles](clients.md#antigravity)) |
-| **JetBrains Junie** | `setup --client junie` | `~/.junie/mcp/mcp.json` ([detalles](clients.md#jetbrains-junie)) |
-| **JetBrains AI Assistant** | `config jetbrains`, pega en Settings \| Tools \| AI Assistant \| MCP \| Add (o «Import from Claude» tras configurar Desktop) | Sin archivo documentado ([detalles](clients.md#jetbrains-ai-assistant)) |
+| **Zed** (1.1.3) | `setup --client zed` (si hay comentarios, muestra un fragmento para pegar) | `~/.config/zed/settings.json` → `context_servers` ([detalles](clients.md#zed)) |
+| **Cline** (1.1.3) | `setup --client cline` | `cline_mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#cline)) |
+| **Roo Code** (1.1.3) | `setup --client roo` | `mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#roo-code)) |
+| **Continue** (1.1.3) | `setup --client continue` (añade un elemento marcado a `mcpServers`) | `~/.continue/config.yaml` ([detalles](clients.md#continue)) |
+| **Kiro** (1.1.3) | `setup --client kiro`; `config kiro` muestra también un enlace `kiro.dev/launch` | `~/.kiro/settings/mcp.json` ([detalles](clients.md#kiro)) |
+| **Amp** (1.1.3) | `setup --client amp` | `~/.config/amp/settings.json` → `amp.mcpServers` ([detalles](clients.md#amp)) |
+| **GitHub Copilot CLI** (1.1.3) | `setup --client copilot-cli` | `~/.copilot/mcp-config.json` ([detalles](clients.md#github-copilot-cli)) |
+| **Warp** (1.1.3) | `setup --client warp` | `~/.warp/.mcp.json` ([detalles](clients.md#warp)) |
+| **Goose** (1.1.3) | `setup --client goose` (añade una entrada marcada a `extensions`) | `~/.config/goose/config.yaml` ([detalles](clients.md#goose)) |
+| **LM Studio** (1.1.3) | `setup --client lmstudio`; `config lmstudio` muestra `lmstudio://add_mcp` | `~/.lmstudio/mcp.json` ([detalles](clients.md#lm-studio)) |
+| **Antigravity** (1.1.3) | `setup --client antigravity` | `~/.gemini/config/mcp_config.json` ([detalles](clients.md#antigravity)) |
+| **JetBrains Junie** (1.1.3) | `setup --client junie` | `~/.junie/mcp/mcp.json` ([detalles](clients.md#jetbrains-junie)) |
+| **JetBrains AI Assistant** (1.1.3) | `config jetbrains`, pega en Settings \| Tools \| AI Assistant \| MCP \| Add (o «Import from Claude» tras configurar Desktop) | Sin archivo documentado ([detalles](clients.md#jetbrains-ai-assistant)) |
 
 Varios clientes: `setup` lista los detectados y los preselecciona en la nueva presentación; `setup --client all` configura los que tienen archivo. Comparten los mismos archivos de token.
+
+El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o una imagen local fijada con `--pull=never`. Los botones y el plugin tienen sus propios métodos de arranque.
 
 ## Qué hace el botón
 
@@ -67,7 +69,7 @@ Omitir la versión en `npx -y @nuoframework/darktrace-mcp setup` descarga la úl
 
 - **Docker.** `setup --runtime docker` comprueba el daemon, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.1`, descarga con permiso y escribe una entrada protegida con ID inmutable y `--pull=never`. [Guía](docker.md#install).
 - **Extensión Claude Desktop.** `darktrace-mcp-1.1.1.mcpb` de GitHub Release o `npm run pack:mcpb` desde el checkout. [Detalles](clients.md#claude-desktop).
-- **Plugin y marketplace Codex.** Mantenidos por el trabajo de plugins en `claude-plugin/`, `.claude-plugin/` y `.agents/`.
+- **Plugin y marketplace Codex.** Consulta la [guía de instalación y distribución](plugin-distribution.md).
 - **Manual.** `darktrace-mcp config <cliente>` muestra rutas reales; [Clientes](clients.md) detalla archivos y formatos.
 - **Desde fuentes.** [Alternativa](getting-started.md#fallback-build-from-source).
 

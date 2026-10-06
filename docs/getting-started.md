@@ -1,12 +1,12 @@
-Instala el servidor, protege los tokens y comprueba tu primera conexión.
-
-[README](../README.md) · [Clientes](clients.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
+# Primeros pasos
 
 **Español** · [English](en/getting-started.md)
 
-<a id="getting-started"></a>
+[README](../README.md) · [Clientes](clients.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
 
-# Primeros pasos
+Instala el servidor, protege los tokens y comprueba tu primera conexión.
+
+<a id="getting-started"></a>
 
 Esta guía te lleva de cero a un servidor Darktrace MCP funcionando en tu cliente. Son unos diez minutos.
 
@@ -56,7 +56,7 @@ Si no, donde esta guía diga `darktrace-mcp …`, ejecuta `npx -y @nuoframework/
 
 ### Windows
 
-El mismo comando `npx` funciona en PowerShell. Windows nativo no puede garantizar archivos de token legibles solo por su dueño, así que el servidor los rechaza; el asistente pide consentimiento explícito antes de escribir los valores de los tokens en la configuración de los clientes. Prefiere la [extensión de Claude Desktop](clients.md#claude-desktop), [Docker](docker.md) (inglés) o WSL con el comando de Linux. Consulta [solución de problemas](troubleshooting.md#permisos-de-los-archivos-de-token).
+El mismo comando `npx` funciona en PowerShell. Windows nativo no puede garantizar archivos de token legibles solo por su dueño, así que el servidor los rechaza; el asistente pide consentimiento explícito antes de escribir los valores de los tokens en la configuración de los clientes. Prefiere la [extensión de Claude Desktop](clients.md#claude-desktop), [Docker](docker.md) o WSL con el comando de Linux. Consulta [solución de problemas](troubleshooting.md#permisos-de-los-archivos-de-token).
 
 <a id="fallback-build-from-source"></a>
 
@@ -161,10 +161,10 @@ Quita la entrada `darktrace` de los clientes que configuró el asistente. Borra 
 | Método | Guía |
 |---|---|
 | Extensión de Claude Desktop (`.mcpb`, desde la release de GitHub) | [Clientes: Claude Desktop](clients.md#claude-desktop) |
-| Imagen Docker `ghcr.io/nuoframework/darktrace-mcp` | [Guía de Docker](docker.md) (inglés) y [Clientes: Docker](clients.md#docker) |
+| Imagen Docker `ghcr.io/nuoframework/darktrace-mcp` | [Guía de Docker](docker.md) y [Clientes: Docker](clients.md#docker) |
 | Una línea por cliente | [Clientes: una línea por cliente](clients.md#una-línea-por-cliente) |
 | Configuración manual de un cliente | [Clientes](clients.md) |
-| Archivos de la release (`.tgz`, `.mcpb`, `SHA256SUMS`) | [Releases](releases.md) (inglés) |
+| Archivos de la release (`.tgz`, `.mcpb`, `SHA256SUMS`) | [Releases](releases.md) |
 
 <a id="native-install-and-openssl"></a>
 
@@ -176,4 +176,4 @@ La imagen Docker incluye OpenSSL 3.5.9. Algunas versiones oficiales de Node.js t
 node -p 'process.versions.openssl'
 ```
 
-Usa un entorno con OpenSSL 3.5.9 o posterior, o usa Docker. Detalles: [resumen de seguridad](security.md) (inglés).
+Usa un entorno con OpenSSL 3.5.9 o posterior, o usa Docker. Detalles: [resumen de seguridad](security.md).

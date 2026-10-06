@@ -1,10 +1,10 @@
-Auditoría fechada de las vías de instalación por cliente, sistema operativo y método de distribución.
-
-[README](../README.md) · [Instalar](install.md) · [Clientes](clients.md) · [Primeros pasos](getting-started.md) · [Docker](docker.md)
+# Matriz de instalación
 
 **Español** · [English](en/install-matrix.md)
 
-# Matriz de instalación
+[README](../README.md) · [Instalar](install.md) · [Clientes](clients.md) · [Primeros pasos](getting-started.md) · [Docker](docker.md)
+
+Auditoría fechada de las vías de instalación por cliente, sistema operativo y método de distribución.
 
 > **Alcance por versión.** Los ocho clientes originales del asistente están en npm 1.1.1. Los 13 adaptadores adicionales, la nueva ruta Windsurf y el modo de configuración describen la [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pendiente de publicación. Sus nuevos identificadores requieren ese cambio y una versión publicada que lo incluya; con 1.1.1 usa configuración manual.
 

@@ -1,12 +1,12 @@
-Referencia de credenciales, perfiles, aprobación, límites y opciones de red.
-
-[README](../README.md) · [Primeros pasos](getting-started.md) · [Clientes](clients.md) · [Solución de problemas](troubleshooting.md)
+# Configuración
 
 **Español** · [English](en/configuration.md)
 
-<a id="configuration"></a>
+[README](../README.md) · [Primeros pasos](getting-started.md) · [Clientes](clients.md) · [Solución de problemas](troubleshooting.md)
 
-# Configuración
+Referencia de credenciales, perfiles, aprobación, límites y opciones de red.
+
+<a id="configuration"></a>
 
 El asistente de configuración escribe todo esto por ti. Lee esta página si quieres cambiar algo a mano.
 

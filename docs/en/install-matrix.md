@@ -1,10 +1,10 @@
-Dated audit of installation paths by client, operating system and delivery method.
-
-[README](../../README.en.md) · [Install page](install.md) · [Clients](clients.md) · [Getting started](getting-started.md) · [Docker](docker.md)
+# Install matrix
 
 [Español](../install-matrix.md) · **English**
 
-# Install matrix
+[README](../../README.en.md) · [Install page](install.md) · [Clients](clients.md) · [Getting started](getting-started.md) · [Docker](docker.md)
+
+Dated audit of installation paths by client, operating system and delivery method.
 
 > **Version scope.** The eight original wizard clients are available in npm 1.1.1. The additional 13 client adapters, updated Windsurf path and setup-mode tool below describe [installation PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), pending release. Use their manual snippets with 1.1.1; the new `setup --client` IDs require that change and a newly published version. Do not expect the pinned 1.1.1 command to include them.
 

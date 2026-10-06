@@ -1,10 +1,10 @@
-Diagnose configuration, authentication, clock, TLS and permission problems.
-
-[README](../../README.en.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Clients](clients.md)
+# Troubleshooting
 
 [Español](../troubleshooting.md) · **English**
 
-# Troubleshooting
+[README](../../README.en.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Clients](clients.md)
+
+Diagnose configuration, authentication, clock, TLS and permission problems.
 
 Start with these two commands. Use the same environment your client uses.
 

@@ -1,12 +1,12 @@
-Contenido, instalación y publicación del plugin para clientes que ejecutan el servidor localmente.
-
-[README](../README.md) · [Clientes](clients.md) · [Versiones](releases.md) · [Seguridad](security.md)
+# Distribución del plugin
 
 **Español** · [English](en/plugin-distribution.md)
 
-<a id="plugin-distribution"></a>
+[README](../README.md) · [Clientes](clients.md) · [Versiones](releases.md) · [Seguridad](security.md)
 
-# Distribución del plugin
+Contenido, instalación y publicación del plugin para clientes que ejecutan el servidor localmente.
+
+<a id="plugin-distribution"></a>
 
 La carpeta `claude-plugin/` empaqueta el servidor como plugin para Claude Code, Cowork y Codex; el repositorio es marketplace para ambos clientes. Esta página empieza por instalar, y después explica el contenido, el envío a Claude Directory, los cambios por versión, las pruebas locales y los límites.
 

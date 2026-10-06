@@ -1,22 +1,22 @@
-Revisión propia de la documentación española predeterminada y su espejo inglés, con fuentes y comprobaciones reproducibles.
+# Revisión del README — ronda 3
 
 [README](../../README.md) · [README inglés](../../README.en.md) · [Seguridad](../security.md) · [Versiones](../releases.md)
 
-# Revisión del README — ronda 3
+Revisión propia de la documentación española predeterminada y su espejo inglés, con fuentes y comprobaciones reproducibles.
 
-Fecha: 2026-10-06. Revisión del borrador documental, pendiente de la revisión independiente del orquestador. No constituye una nueva validación contra appliances ni una aprobación de publicación del runtime.
+Fecha: 2026-10-06. Revisión propia del borrador documental; la revisión independiente está publicada en la PR #19. No constituye una nueva validación contra appliances ni una aprobación de publicación del runtime.
 
 ## Petición del propietario
 
 | Criterio | Comprobación |
 |---|---|
 | Completo | Presentación, instalación, funcionamiento, capacidades, validación por área, tres matrices, seguridad, releases, contribución, soporte y licencia, en ese orden |
-| Sencillo y fácil | Un comando inicial; una línea por cliente; lectura por defecto; profundidad en guías enlazadas; ambos README de 217 líneas |
+| Sencillo y fácil | Un comando inicial; una línea por cliente; lectura por defecto; profundidad en guías enlazadas; ambos README de 220 líneas |
 | Detallado | Herramientas/operaciones por área, 53 completas + 6 parciales + 18 sin validar, límites PCAP y resultados DELETE desconocidos; fuentes enlazadas |
-| Profesional | Español neutro con tratamiento de tú; condición no oficial y sin afiliación; banner variante B, insignias, procedencia de marca y GIF existentes |
+| Profesional | Español de España con tratamiento de tú; condición no oficial y sin afiliación; banner variante B, insignias, procedencia de marca y GIF existentes |
 | Español primero | `README.md` español, `README.en.md` inglés; guías predeterminadas españolas y espejos en `docs/en/`; movimientos mediante `git mv` |
 | Diagramas | Arquitectura, secuencia crítica con reversión condicionada y escala de perfiles; tres Mermaid por idioma, renderizados sin errores |
-| Email | 14 operaciones inventariadas: 13 lecturas sensibles ejecutables, acción excluida. Ninguna validada en vivo; HTTP 403 con tokens, consola en otro host con sesión, permisos/esquema/pruebas pendientes |
+| Email | 14 operaciones inventariadas: 13 lecturas sensibles ejecutables, acción excluida. Ninguna validada en vivo; HTTP 403 con tokens y posterior 503 del servicio (2026-10-06, aproximadamente 22:50), consola en otro host con sesión, permisos/esquema/pruebas pendientes |
 | Matrices | Clientes × sistema × instalación; runtime y firma; aprobación por cliente/capacidad, distinguiendo rutas documentadas de pruebas ejecutadas |
 | Paridad | Mismas secciones, tablas y bloques de ejemplos en las once guías manuales; los 77 registros de operaciones generados coinciden en nombre, método/ruta, riesgo y perfil |
 | Evidencia histórica | Informes de `docs/security/` conservan idioma y contenido; nuevo índice español con una línea por archivo. Solo se adapta un enlace al README renombrado |
@@ -54,15 +54,24 @@ Fecha: 2026-10-06. Revisión del borrador documental, pendiente de la revisión 
 
 ## Adaptaciones de integración
 
-- `package.json`: ambos README en el paquete; generación y comprobación bilingües; `lint` llama a `docs:check`, aprovechando la entrada que ya usa CI. La configuración inicial no tenía una comprobación específica del generador en CI.
+- `package.json`: ambos README en el paquete; generación y comprobación bilingües mediante tabla de mensajes, sin sustituciones de texto y con errores explícitos ante claves o traducciones ausentes; `lint` llama a `docs:check`, aprovechando la entrada que ya usa CI. La configuración inicial no tenía una comprobación específica del generador en CI.
 - `.dockerignore`, `scripts/prepare-release.mjs`, `scripts/verify-release.mjs`, `scripts/validate-examples.mjs` y `scripts/demo/verify.py`: nuevas rutas. El verificador conserva las comprobaciones de archivo normal, modo, tamaño y vinculación al origen del espejo, ahora con campos `readmeEnSha256` y `readmeEnSourceBinding`.
 - Se integró la documentación de [PR #18](https://github.com/nuoframework/darktrace-mcp/pull/18), rama `origin/feat/install-everywhere`, commit `2f12f9d96e6e002fb2c71c4377ff9d96a2d13013`: botones exactos en ambos idiomas, guías `install` y `install-matrix`, y 13 secciones adicionales de clientes con sus ejemplos. Se tradujeron completas y se diferencian los ocho adaptadores publicados en 1.1.1 de los 13 pendientes. No se incorporó código ajeno de `src/` ni pruebas de esa rama. Sus cambios de código deben fusionarse por su PR; la futura versión publicada deberá actualizar los comandos fijados.
 - **Integración de tests resuelta con permiso del propietario:** los dos ejecutores aislados y el comprobador de distribución usan `README.md` + `README.en.md`; el fixture de distribución conserva la correspondencia de idiomas. Las dos comprobaciones de avisos escritos en inglés leen `README.en.md`. No se cambian aserciones ni casos de seguridad. `npm test`: 267/267, sin omisiones. `npm run test:security`: 1.150 subcasos, 1.147 correctos, cero fallos y 3 omisiones de bits de permisos en macOS. Registro generado conservado fuera del repositorio; árbol de producción `98e58ced6311366e666077de7878cf0e4eed3f504535373cc464effdb540f9ad`.
 - Rebase sobre `main` en `cf9d5e3`: se conservó la instalación del plugin desde su bloqueo y se reflejaron sus instrucciones actualizadas en ambos idiomas; no se editaron sus archivos.
-- Revisión independiente: pendiente del orquestador; los hallazgos se resolverán en este mismo PR. No activar fusión automática.
+- Revisión independiente: publicada; las correcciones y sus comprobaciones se entregan en este mismo PR. No activar fusión automática.
 
 ## Seguimiento de integración y revisión
 
 - Rebase sobre `origin/main` en `a287e3a` tras #15: se conservan íntegramente los controles de cadena de suministro y las instrucciones de firmas/procedencia se incorporan en español e inglés.
 - #18 sigue pendiente de fusión; se repetirá el rebase con sus documentos definitivos.
-- La revisión independiente de #19 todavía no ha publicado hallazgos; se responderá a cada comentario en la PR.
+- La revisión independiente de #19 publicó 27 hallazgos; el seguimiento por punto se mantiene en la respuesta de la PR.
+
+### Correcciones tras la revisión independiente
+
+- Tabla de mensajes por idioma y descripciones de operaciones en español. La generación falla si falta una traducción o si sus claves/tipos no coinciden; prueba negativa ejecutada eliminando una clave en una copia temporal. Los resúmenes literales MCP se identifican como inglés para conservar el contrato que recibe el cliente.
+- Instalación en tres pasos, tabla de clientes y botones dentro de un desplegable, instrucciones Cursor completas; diagrama de perfiles ramificado y seis Mermaid renderizados de nuevo. Ambos README respetan 220 líneas.
+- H1 primero, selector de idioma, navegación y resumen; marcadores ingleses, etiquetas de idioma y enlaces de SECURITY.md corregidos.
+- Dos appliances confirmados por el propietario: lab A para 1.1.0, lab B para 1.1.1; CHANGELOG y generador alineados. El registro Email incorpora únicamente los metadatos del 503 confirmados por el propietario.
+- El saneamiento de atribuciones de los registros históricos se gestiona por separado en #21 por decisión del propietario; no forma parte de estas correcciones.
+- Las referencias a versión e instalación se actualizarán tras la fusión de la release 1.1.2 (#20) y de #18, en ese orden; las novedades de #18 se documentarán para 1.1.3.

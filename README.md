@@ -1,13 +1,10 @@
-**Español** · [English](README.en.md)
-
-<picture>
-  <source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-es-mobile.svg">
-  <img src="docs/assets/banner-variants/b/readme-banner-es.svg" width="1280" alt="Darktrace MCP — con un grafo de red decorativo. MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
-</picture>
-
 # Darktrace MCP
 
-**MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace.**
+**Español** · [English](README.en.md)
+
+<picture><source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-es-mobile.svg">
+  <img src="docs/assets/banner-variants/b/readme-banner-es.svg" width="1280" alt="Darktrace MCP — con un grafo de red decorativo. MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
+</picture>
 
 Darktrace MCP conecta tu cliente de IA con la API de Darktrace Threat Visualizer para investigar dispositivos, alertas e incidentes y, si lo permites, realizar cambios. Es un servidor MCP local de un tercero: **no es un producto oficial ni está afiliado a Darktrace**. Empieza en lectura y amplía los permisos cuando los necesites.
 
@@ -20,25 +17,23 @@ Darktrace MCP conecta tu cliente de IA con la API de Darktrace Threat Visualizer
 [![npm version](https://img.shields.io/npm/v/@nuoframework/darktrace-mcp)](docs/releases.md)
 [![Release](https://img.shields.io/github/v/release/nuoframework/darktrace-mcp?display_name=tag)](https://github.com/nuoframework/darktrace-mcp/releases)
 
-[Primeros pasos](docs/getting-started.md) · [Herramientas ](docs/tools.md) · [Configuración](docs/configuration.md) · [Seguridad ](docs/security.md) · [Solución de problemas](docs/troubleshooting.md)
+[Primeros pasos](docs/getting-started.md) · [Herramientas](docs/tools.md) · [Configuración](docs/configuration.md) · [Seguridad](docs/security.md) · [Solución de problemas](docs/troubleshooting.md)
 
 ## Instalación en 1 minuto
 
-Necesitas **Node.js 22+**, acceso HTTPS a `https://<tu-appliance>` y dos tokens API (público y privado, desde **System Config → Settings → API Token**). Empieza con `read`:
+1. **Prepara la conexión.** Node.js 22+, `https://<tu-appliance>` y dos tokens API (público y privado, desde **System Config → Settings → API Token**).
+2. **Ejecuta el asistente** y elige `read` para empezar:
 
-```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
-```
+   ```sh
+   npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+   ```
 
-El asistente comprueba TLS y la firma, guarda los tokens en archivos privados y configura los clientes con una copia fija. Reinicia tu cliente y pide: «Resume los model breaches de la última hora». [Primeros pasos](docs/getting-started.md) · [Configuración](docs/configuration.md) · [Problemas frecuentes](docs/troubleshooting.md).
+3. **Reinicia tu cliente** y pide: «Resume los model breaches de la última hora».
 
-[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-desktop) [![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-code) [![Codex](https://img.shields.io/badge/Codex-412991?style=flat-square)](docs/clients.md#codex) [![Cursor](https://img.shields.io/badge/Cursor-111111?style=flat-square&logo=cursor&logoColor=white)](docs/clients.md#cursor) [![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square)](docs/clients.md#vs-code) [![Windsurf](https://img.shields.io/badge/Windsurf-087F8C?style=flat-square&logo=windsurf&logoColor=white)](docs/clients.md#windsurf) [![OpenCode](https://img.shields.io/badge/OpenCode-222222?style=flat-square&logo=opencode&logoColor=white)](docs/clients.md#opencode) [![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](docs/clients.md#gemini-cli) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](docs/clients.md#docker)
+[Guía de instalación](docs/install.md) · [Primeros pasos](docs/getting-started.md) · [Problemas frecuentes](docs/troubleshooting.md). Windows: consulta las [opciones para proteger tokens](docs/getting-started.md#windows).
 
-Un clic: Cursor añade la entrada; ejecuta `setup` antes de arrancar 1.1.1. VS Code pide los datos de conexión. [Guía de instalación completa](docs/install.md).
-
-[![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMSJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D)
-[![Instalar en VS Code](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
-[![Instalar en VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
+<details>
+<summary>Elige tu cliente: comandos y botones de instalación</summary>
 
 | Tu cliente | Instalación directa |
 |---|---|
@@ -52,9 +47,16 @@ Un clic: Cursor añade la entrada; ejecuta `setup` antes de arrancar 1.1.1. VS C
 | Gemini CLI | `npx -y @nuoframework/darktrace-mcp@1.1.1 setup --client gemini` |
 | Docker (cualquier cliente) | `npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker` |
 
-[Plugin para Claude Code y Codex](docs/plugin-distribution.md) · [Docker y verificación del digest](docs/docker.md). El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o una imagen local fijada con `--pull=never`. Los botones y el plugin tienen sus propios métodos de arranque. Windows nativo: prefiere `.mcpb`, Docker o WSL; consulta los límites de protección de tokens en la [guía](docs/getting-started.md#windows).
+[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-desktop) [![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?style=flat-square&logo=anthropic&logoColor=white)](docs/clients.md#claude-code) [![Codex](https://img.shields.io/badge/Codex-412991?style=flat-square)](docs/clients.md#codex) [![Cursor](https://img.shields.io/badge/Cursor-111111?style=flat-square&logo=cursor&logoColor=white)](docs/clients.md#cursor) [![VS Code](https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square)](docs/clients.md#vs-code) [![Windsurf](https://img.shields.io/badge/Windsurf-087F8C?style=flat-square&logo=windsurf&logoColor=white)](docs/clients.md#windsurf) [![OpenCode](https://img.shields.io/badge/OpenCode-222222?style=flat-square&logo=opencode&logoColor=white)](docs/clients.md#opencode) [![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](docs/clients.md#gemini-cli) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](docs/clients.md#docker)
+[![Instalar en Cursor](https://cursor.com/deeplink/mcp-install-dark.png)](cursor://anysphere.cursor-deeplink/mcp/install?name=darktrace&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBudW9mcmFtZXdvcmsvZGFya3RyYWNlLW1jcEAxLjEuMSJdLCJlbnYiOnsiREFSS1RSQUNFX1BST0ZJTEVTIjoicmVhZCJ9fQ%3D%3D)
+[![Instalar en VS Code](https://img.shields.io/badge/VS_Code-Install_darktrace-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
+[![Instalar en VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_darktrace-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode-insiders:mcp/install?%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.1%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D)
 
-Para desinstalar: `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall` muestra el plan y pide confirmación. `--dry-run` solo lo muestra; `--docker` incluye la imagen fijada.
+**Cursor:** el botón solo añade la entrada. Ejecuta después `npx -y @nuoframework/darktrace-mcp@1.1.1 setup --client cursor` para completarla con tu appliance y tus tokens. VS Code pide esos datos en su propio diálogo.
+
+</details>
+
+Para desinstalar: `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall`. Muestra el plan y pide confirmación; `--dry-run` solo lo muestra y `--docker` incluye la imagen fijada.
 
 ## Cómo funciona
 
@@ -63,7 +65,7 @@ Para desinstalar: `npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall` muestra e
 ```mermaid
 flowchart LR
     C["Cliente de IA"] <-->|stdio| S["Servidor MCP local"]
-    T["Ficheros de token · 0600"] --> S
+    T["Archivos de token · 0600"] --> S
     S <--> P{"Perfiles y política"}
     P <-->|"HTTPS firmado HMAC · TLS verificado"| D["Appliance Darktrace"]
     S --> A["Auditoría de escrituras en stderr"]
@@ -102,9 +104,9 @@ La vista previa dura **5 minutos** y sirve una sola vez. Rechazar, cancelar o no
 ```mermaid
 flowchart LR
     R["read · consultas"] --> S["sensitive · datos sensibles"]
-    S --> W["write · cambios"]
-    W --> C["critical · impacto alto"]
-    S -.-> A["sensitive + write o all: acknowledgement explícito"]
+    R --> W["write · cambios"]
+    W --> C["critical · impacto alto (requiere write)"]
+    S -.-> A["sensitive + write o all: confirmación explícita"]
     W -.-> A
 ```
 
@@ -155,8 +157,9 @@ La última columna de la tabla es **completa / parcial / sin validar**, por oper
 
 - **Dispositivos, model breaches, AI Analyst, PCAP y Advanced Search:** evidencia para las operaciones listadas. PCAP devuelve Base64 completo solo dentro del límite (unos 45 KB); por encima devuelve tamaño y SHA-256.
 - **Sistema, modelos y métricas:** `models`, `components` y `enums` solo con `responsedata`; CVEs devolvió 500 en el laboratorio no OT y `filtertypes`, una redirección 302 rechazada.
-- **Respuesta, intel feed y subredes:** cobertura parcial por parámetros; consulta la [campaña 1.1.1](docs/security/lab-gap-campaign-1.1.1.md). Las tres eliminaciones de etiquetas se aplicaron, pero devolvieron 502: se informa `write_outcome_unknown`, no éxito.
-- **Darktrace/Email en 1.1.1:** **14 operaciones inventariadas: 13 lecturas disponibles detrás de `sensitive` y una acción excluida de todos los perfiles**. Ninguna está validada contra un appliance real. Las 13 rutas API `/agemail` probadas con tokens devolvieron 403. La consola usa otro host y autenticación de sesión; abrirla no demuestra acceso por API. La descarga de correo devuelve solo tamaño y SHA-256, nunca contenido.
+- **Respuesta, intel feed y subredes:** cobertura parcial por parámetros; consulta la [campaña 1.1.1](docs/security/lab-gap-campaign-1.1.1.md).
+- **Etiquetas:** las tres eliminaciones se aplicaron, pero devolvieron 502: se informa `write_outcome_unknown`, no éxito.
+- **Darktrace/Email en 1.1.1:** **14 operaciones inventariadas: 13 lecturas disponibles detrás de `sensitive` y una acción excluida de todos los perfiles**. Ninguna está validada contra un appliance real. Las 13 rutas API `/agemail` probadas con tokens devolvieron 403; más tarde, el servicio devolvió 503 con HTML «Darktrace Labs», sin validación posible. La consola usa otro host y autenticación de sesión; abrirla no demuestra acceso por API. La descarga de correo devuelve solo tamaño y SHA-256, nunca contenido.
 
 Para validar Email hacen falta un despliegue habilitado, un token con permisos **Email Logs**, el esquema OpenAPI de la instancia revisado y fijado, y pruebas de las 13 lecturas por MCP con datos de laboratorio. La acción requiere además un esquema restrictivo, prueba de firma y efectos/reversión, y una nueva revisión de diseño; liberar un correo implica exposición irreversible. [Prueba bloqueada por 403](docs/security/lab-email-validation.md) · [API observada en consola y trabajo pendiente](docs/security/email-api-observed.md).
 
@@ -204,7 +207,7 @@ El modo crítico `host` requiere `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` y ma
 
 TLS obligatorio, tokens privados, perfiles al arrancar, límites de entrada/salida, escrituras sin reintento y auditoría con cadena de hashes en stderr. Tres escrituras fallidas o desconocidas consecutivas bloquean nuevas escrituras hasta reiniciar. La auditoría no cubre lecturas sensibles ni tiene anclaje externo. Ningún filtro garantiza eliminar todos los datos sensibles o toda inyección de instrucciones.
 
-Evidencia fechada: [modelo de amenazas](docs/security/threat-model-writes.md), [revisión independiente](docs/security/design-review-writes.md), [rondas adversariales](docs/security/adversarial-results-writes.md), [campañas de laboratorio](docs/security/final-lab-campaign-1.1.0.md) y [revisión final](docs/security/final-gate-review-1.1.0.md). Los registros de 1.1.0 recogen 230 pruebas funcionales y 1.150 subcasos de seguridad; macOS omite tres por plataforma. Las insignias OpenSSF enlazan a sus resultados, no son una certificación. [Resumen y límites](docs/security.md) · [Índice de auditorías](docs/security/README.md).
+Evidencia fechada: [modelo de amenazas](docs/security/threat-model-writes.md), [revisión independiente](docs/security/design-review-writes.md), [rondas adversariales](docs/security/adversarial-results-writes.md), [campañas de laboratorio](docs/security/final-lab-campaign-1.1.0.md) y [revisión final](docs/security/final-gate-review-1.1.0.md). Los [valores fijados 1.1.0](docs/security/release-pins-1.1.0.md) recogen 230 pruebas funcionales y 1.150 subcasos de seguridad; macOS omite tres por plataforma. Las insignias OpenSSF enlazan a sus resultados, no son una certificación. [Resumen y límites](docs/security.md) · [Índice de auditorías](docs/security/README.md).
 
 ## Versiones y releases
 
@@ -212,6 +215,6 @@ Paquete npm: **`@nuoframework/darktrace-mcp`**; el nombre sin ámbito no es este
 
 ## Contribuir, soporte y licencia
 
-Lee [CONTRIBUTING.md](CONTRIBUTING.md). Para dudas o errores, abre una [issue](https://github.com/nuoframework/darktrace-mcp/issues) con datos sintéticos. Para vulnerabilidades, usa el [canal privado](SECURITY.md). Licencia [Apache-2.0](LICENSE).
+Lee [CONTRIBUTING.md](CONTRIBUTING.md). Para dudas o errores, abre una [incidencia (issue)](https://github.com/nuoframework/darktrace-mcp/issues) con datos sintéticos. Para vulnerabilidades, usa el [canal privado](SECURITY.md). Licencia [Apache-2.0](LICENSE).
 
-Darktrace y su logotipo pertenecen a Darktrace; su uso identifica el producto integrado y no implica respaldo ni autorización. [Procedencia del logotipo](docs/assets/brand/darktrace/README.md). Reclamaciones de marca o retirada: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). El proyecto no envía correo por su cuenta.
+Darktrace y su logotipo pertenecen a Darktrace; su uso identifica el producto integrado y no implica respaldo ni autorización. [Procedencia del logotipo](docs/assets/brand/darktrace/README.md). Reclamaciones de marca o retirada: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com).

@@ -1,12 +1,12 @@
-Cómo protege el servidor tu appliance y tus datos, y cuáles son sus límites.
-
-[README](../README.md) · [Política de seguridad](../SECURITY.md) · [Configuración](configuration.md) · [Arquitectura](architecture.md)
+# Resumen de seguridad
 
 **Español** · [English](en/security.md)
 
-<a id="security-overview"></a>
+[README](../README.md) · [Política de seguridad](../SECURITY.md) · [Configuración](configuration.md) · [Arquitectura](architecture.md)
 
-# Resumen de seguridad
+Cómo protege el servidor tu appliance y tus datos, y cuáles son sus límites.
+
+<a id="security-overview"></a>
 
 Esta página explica las protecciones en términos prácticos. Las revisiones y los registros detallados están en [docs/security/](#registros-detallados).
 
@@ -40,7 +40,7 @@ Esta página explica las protecciones en términos prácticos. Las revisiones y 
 
 ## Validación de laboratorio
 
-59 operaciones tienen evidencia de dos appliances Darktrace 7.1.0 (2026-10-06); en 6 es parcial (por ejemplo, Antigena manual solo con bloqueos `connection`, subredes solo con `label` y `uniqueHostnames`). El resto, incluidas todas las lecturas Darktrace/Email y las tres operaciones DELETE de etiquetas (se aplicaron, pero el gateway devolvió HTTP 502), figura como **sin validar en laboratorio**. Parte de la evidencia de escritura es anterior a los controles finales; la [campaña de cobertura](security/lab-gap-campaign-1.1.1.md) repitió los flujos críticos con ellos. La [referencia](tools.md) detalla cada operación y las [limitaciones conocidas](../CHANGELOG.md#known-limitations-in-110) explican qué no está cubierto. Prueba primero las escrituras en un appliance no productivo.
+59 operaciones tienen evidencia de dos appliances distintos Darktrace 7.1.0 (2026-10-06): lab A en 1.1.0 y lab B en la campaña de huecos 1.1.1; en 6 es parcial (por ejemplo, Antigena manual solo con bloqueos `connection`, subredes solo con `label` y `uniqueHostnames`). El resto, incluidas todas las lecturas Darktrace/Email y las tres operaciones DELETE de etiquetas (se aplicaron, pero el gateway devolvió HTTP 502), figura como **sin validar en laboratorio**. Parte de la evidencia de escritura es anterior a los controles finales; la [campaña de cobertura](security/lab-gap-campaign-1.1.1.md) repitió los flujos críticos con ellos. La [referencia](tools.md) detalla cada operación y las [limitaciones conocidas](../CHANGELOG.md#known-limitations-in-110) explican qué no está cubierto. Prueba primero las escrituras en un appliance no productivo.
 
 <a id="runtime-notes"></a>
 

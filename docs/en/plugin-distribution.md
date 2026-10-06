@@ -1,10 +1,10 @@
-Contents, installation and publication of the plugin for clients running the server locally.
-
-[README](../../README.en.md) · [Client setup](clients.md) · [Releases](releases.md) · [Security](security.md)
+# Plugin distribution
 
 [Español](../plugin-distribution.md) · **English**
 
-# Plugin distribution
+[README](../../README.en.md) · [Client setup](clients.md) · [Releases](releases.md) · [Security](security.md)
+
+Contents, installation and publication of the plugin for clients running the server locally.
 
 The folder `claude-plugin/` packages the server as a plugin for Claude Code, Cowork and Codex, and the repository is a plugin marketplace for both clients. This page starts with the install commands, then describes the folder, the Claude Directory submission, the per-release version bump, the local tests and the limitations.
 
@@ -132,13 +132,13 @@ A marketplace install copies the plugin into Claude Code's cache and runs the lo
 claude --plugin-dir ./claude-plugin \
   -p "List the Darktrace tools you have and nothing else" \
   --allowedTools "mcp__plugin_darktrace-mcp_darktrace__*" \
-  --settings '{"pluginConfigs":{"darktrace-mcp":{"appliance_url":"https://<tu-appliance>","public_token":"dummy","private_token":"dummy","profiles":"read","acknowledge_sensitive_write":"false","date_format":"compact"}}}'
+  --settings '{"pluginConfigs":{"darktrace-mcp":{"appliance_url":"https://<your-appliance>","public_token":"dummy","private_token":"dummy","profiles":"read","acknowledge_sensitive_write":"false","date_format":"compact"}}}'
 ```
 
 Replace the address placeholder locally before testing; it is not an executable address. With a valid address and synthetic tokens, the server starts and lists the 27 read-profile tools; it only contacts the appliance when a tool is called. The same environment shape can be checked without Claude Code, from any directory outside this repository:
 
 ```sh
-DARKTRACE_URL='https://<tu-appliance>' DARKTRACE_PUBLIC_TOKEN=dummy DARKTRACE_PRIVATE_TOKEN=dummy \
+DARKTRACE_URL='https://<your-appliance>' DARKTRACE_PUBLIC_TOKEN=dummy DARKTRACE_PRIVATE_TOKEN=dummy \
 DARKTRACE_PROFILES=read DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=false DARKTRACE_DATE_FORMAT=compact \
 npx -y @nuoframework/darktrace-mcp@1.1.1 --check-config
 ```

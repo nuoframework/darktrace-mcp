@@ -1,12 +1,12 @@
-Instala y ejecuta el servidor por stdio en Docker con imagen fijada, tokens privados y controles de contenedor.
-
-[README](../README.md) · [Clientes: Docker](clients.md#docker) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
+# Uso con Docker
 
 **Español** · [English](en/docker.md)
 
-<a id="docker-use"></a>
+[README](../README.md) · [Clientes: Docker](clients.md#docker) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
 
-# Uso con Docker
+Instala y ejecuta el servidor por stdio en Docker con imagen fijada, tokens privados y controles de contenedor.
+
+<a id="docker-use"></a>
 
 La imagen ejecuta MCP por stdio y no abre puertos. Desde v1.1.0, el flujo de publicación la distribuye como `ghcr.io/nuoframework/darktrace-mcp:<version>` para linux/amd64 y linux/arm64; fija siempre el digest. [Estado de verificación](#110-image-verification-status).
 

@@ -1,10 +1,10 @@
-Configure each MCP client automatically or with explicit paths and files.
-
-[README](../../README.en.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+# Client setup
 
 [Español](../clients.md) · **English**
 
-# Client setup
+[README](../../README.en.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+
+Configure each MCP client automatically or with explicit paths and files.
 
 Every client can be set up two ways:
 
@@ -47,13 +47,13 @@ Run the second command inside the `darktrace-mcp` folder. After the `npx` bootst
 
 | Client | Command |
 |---|---|
-| Claude Code | `claude mcp add --scope user --env DARKTRACE_URL='https://<tu-appliance>' --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read --transport stdio darktrace -- /abs/node /abs/index.js` |
-| Codex | `codex mcp add darktrace --env DARKTRACE_URL='https://<tu-appliance>' --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read -- /abs/node /abs/index.js` |
+| Claude Code | `claude mcp add --scope user --env DARKTRACE_URL='https://<your-appliance>' --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read --transport stdio darktrace -- /abs/node /abs/index.js` |
+| Codex | `codex mcp add darktrace --env DARKTRACE_URL='https://<your-appliance>' --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read -- /abs/node /abs/index.js` |
 | Claude Code (plugin) | `claude plugin marketplace add nuoframework/darktrace-mcp` then `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code asks for the URL, the tokens and the profile ([plugin guide](plugin-distribution.md)) |
 | Codex (plugin) | `codex plugin marketplace add nuoframework/darktrace-mcp` then `codex plugin add darktrace-mcp@darktrace-mcp`; the skill loads, the connection still comes from `darktrace-mcp setup` ([plugin guide](plugin-distribution.md#install-from-the-repository-marketplace)) |
 | VS Code | `code --add-mcp '{"name":"darktrace","type":"stdio","command":"/abs/node","args":["/abs/index.js"],"env":{…}}'`; `darktrace-mcp config vscode` prints it filled in, plus a `vscode:mcp/install` link whose password inputs keep the tokens in VS Code's secret storage |
 | Cursor | `darktrace-mcp config cursor` prints a `cursor://anysphere.cursor-deeplink/mcp/install?…` link |
-| Gemini CLI | `gemini mcp add --scope user -e DARKTRACE_URL='https://<tu-appliance>' -e DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token -e DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token -e DARKTRACE_PROFILES=read darktrace /abs/node /abs/index.js` |
+| Gemini CLI | `gemini mcp add --scope user -e DARKTRACE_URL='https://<your-appliance>' -e DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token -e DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token -e DARKTRACE_PROFILES=read darktrace /abs/node /abs/index.js` |
 | Claude Desktop | `.mcpb` from the release (below) |
 | Windsurf, OpenCode | JSON snippets below (no CLI) |
 
@@ -72,7 +72,7 @@ Use absolute paths in manual client configuration; the wizard writes them automa
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read",
@@ -100,7 +100,7 @@ claude plugin install darktrace-mcp@darktrace-mcp
 
 ```sh
 claude mcp add --scope user \
-  --env DARKTRACE_URL='https://<tu-appliance>' \
+  --env DARKTRACE_URL='https://<your-appliance>' \
   --env DARKTRACE_PUBLIC_TOKEN_FILE=/absolute/private/darktrace/public-token \
   --env DARKTRACE_PRIVATE_TOKEN_FILE=/absolute/private/darktrace/private-token \
   --env DARKTRACE_PROFILES=read \
@@ -130,7 +130,7 @@ command = "/absolute/path/to/node"
 args = ["/absolute/path/to/darktrace-mcp/dist/src/index.js"]
 
 [mcp_servers.darktrace.env]
-DARKTRACE_URL = "https://<tu-appliance>"
+DARKTRACE_URL = "https://<your-appliance>"
 DARKTRACE_PUBLIC_TOKEN_FILE = "/absolute/private/darktrace/public-token"
 DARKTRACE_PRIVATE_TOKEN_FILE = "/absolute/private/darktrace/private-token"
 DARKTRACE_PROFILES = "read"
@@ -157,7 +157,7 @@ Open the printed `cursor://` link and confirm in Cursor.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read",
@@ -190,7 +190,7 @@ Open the printed link and confirm in VS Code.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read",
@@ -216,7 +216,7 @@ Use **MCP: List Servers** to start or inspect it. Prefer the user configuration 
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read",
@@ -244,7 +244,7 @@ Refresh the MCP list in Windsurf's Cascade panel.
       "command": ["/absolute/path/to/node", "/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "enabled": true,
       "environment": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -262,7 +262,7 @@ Refresh the MCP list in Windsurf's Cascade panel.
 
 ```sh
 gemini mcp add --scope user \
-  -e DARKTRACE_URL='https://<tu-appliance>' \
+  -e DARKTRACE_URL='https://<your-appliance>' \
   -e DARKTRACE_PUBLIC_TOKEN_FILE=/absolute/private/darktrace/public-token \
   -e DARKTRACE_PRIVATE_TOKEN_FILE=/absolute/private/darktrace/private-token \
   -e DARKTRACE_PROFILES=read \
@@ -279,7 +279,7 @@ or add to `~/.gemini/settings.json`:
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read",
@@ -307,7 +307,7 @@ Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool cal
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -332,7 +332,7 @@ Verify: the server appears under Settings → AI → MCP Servers.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -359,7 +359,7 @@ Keep `autoApprove` empty so Cline asks before each tool call. The Cline CLI uses
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -387,7 +387,7 @@ mcpServers:
     args:
       - /absolute/path/to/darktrace-mcp/dist/src/index.js
     env:
-      DARKTRACE_URL: https://<tu-appliance>
+      DARKTRACE_URL: https://<your-appliance>
       DARKTRACE_PUBLIC_TOKEN_FILE: /absolute/private/darktrace/public-token
       DARKTRACE_PRIVATE_TOKEN_FILE: /absolute/private/darktrace/private-token
       DARKTRACE_PROFILES: read
@@ -408,7 +408,7 @@ MCP tools are available in Continue's agent mode. Verify with the tools icon in 
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -435,7 +435,7 @@ Kiro reloads the file on save; the server shows in the MCP Servers view.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -461,7 +461,7 @@ Verify with `amp mcp list`.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -487,7 +487,7 @@ Copilot CLI passes only the variables listed in `env` to the server (plus `PATH`
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -515,7 +515,7 @@ extensions:
     args: ["/absolute/path/to/darktrace-mcp/dist/src/index.js"]
     timeout: 300
     envs:
-      DARKTRACE_URL: https://<tu-appliance>
+      DARKTRACE_URL: https://<your-appliance>
       DARKTRACE_PUBLIC_TOKEN_FILE: /absolute/private/darktrace/public-token
       DARKTRACE_PRIVATE_TOKEN_FILE: /absolute/private/darktrace/private-token
       DARKTRACE_PROFILES: read
@@ -537,7 +537,7 @@ Goose's `goose://extension` links accept only `npx`, `uvx`, `jbang`, `goosed` or
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -562,7 +562,7 @@ Saving the file loads the server. Local models may have smaller context windows 
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -587,7 +587,7 @@ Tools default to Ask mode in Antigravity; keep it that way for write profiles.
       "command": "/absolute/path/to/node",
       "args": ["/absolute/path/to/darktrace-mcp/dist/src/index.js"],
       "env": {
-        "DARKTRACE_URL": "https://<tu-appliance>",
+        "DARKTRACE_URL": "https://<your-appliance>",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
@@ -611,7 +611,7 @@ Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor
 npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-The wizard checks that the Docker daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (the package version), offers to pull it when it is missing, and writes the hardened entry with the local image ID and `--pull=never`. It prints the image ID and the registry digest and keeps both in `~/.config/darktrace-mcp/setup.json`; compare the digest with the release notes. Without prompts: `setup --yes --runtime docker --pull --url https://<tu-appliance> --tokens-from-stdin`. `--image` also accepts another tag, a `name@sha256:…` digest or a local `sha256:…` image ID. `darktrace-mcp config <client>` reuses the saved image ID, and `darktrace-mcp test` first runs `--check-config` in the container with the same mounts and user (no network), then checks the appliance from the host. Details: [Docker guide](docker.md#install).
+The wizard checks that the Docker daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.1` (the package version), offers to pull it when it is missing, and writes the hardened entry with the local image ID and `--pull=never`. It prints the image ID and the registry digest and keeps both in `~/.config/darktrace-mcp/setup.json`; compare the digest with the release notes. Without prompts: `setup --yes --runtime docker --pull --url https://<your-appliance> --tokens-from-stdin`. `--image` also accepts another tag, a `name@sha256:…` digest or a local `sha256:…` image ID. `darktrace-mcp config <client>` reuses the saved image ID, and `darktrace-mcp test` first runs `--check-config` in the container with the same mounts and user (no network), then checks the appliance from the host. Details: [Docker guide](docker.md#install).
 
 **Manual.** Get the image ID (or use the `name@sha256:…` digest above):
 
@@ -633,7 +633,7 @@ Replace the last argument with that `sha256:…` ID and `command` with the full 
         "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
         "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
         "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
-        "-e", "DARKTRACE_URL=https://<tu-appliance>",
+        "-e", "DARKTRACE_URL=https://<your-appliance>",
         "-e", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
         "-e", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
         "-e", "DARKTRACE_PROFILES=read",

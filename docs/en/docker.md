@@ -1,10 +1,10 @@
-Install and run the stdio server in Docker with a pinned image, private tokens and container controls.
-
-[README](../../README.en.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+# Docker use
 
 [Español](../docker.md) · **English**
 
-# Docker use
+[README](../../README.en.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+
+Install and run the stdio server in Docker with a pinned image, private tokens and container controls.
 
 The image runs the MCP server over stdio and opens no network port. From v1.1.0 the release workflow publishes it as `ghcr.io/nuoframework/darktrace-mcp:<version>` for linux/amd64 and linux/arm64; always pin the digest. Verification status: [below](#110-image-verification-status).
 
@@ -136,7 +136,7 @@ Example client configuration (replace the executable and private paths, and set 
         "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
         "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
         "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
-        "--env", "DARKTRACE_URL=https://<tu-appliance>",
+        "--env", "DARKTRACE_URL=https://<your-appliance>",
         "--env", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
         "--env", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
         "--env", "DARKTRACE_PROFILES=read",

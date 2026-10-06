@@ -1,10 +1,10 @@
-Dated record of user experience, errors and server stability in lab testing.
-
-[README](../../README.en.md) · [Tools](tools.md) · [Configuration](configuration.md) · [Security](security.md)
+# UX and stability report: the MCP as seen by an LLM agent
 
 [Español](../ux-stability-report.md) · **English**
 
-# UX and stability report: the MCP as seen by an LLM agent
+[README](../../README.en.md) · [Tools](tools.md) · [Configuration](configuration.md) · [Security](security.md)
+
+Dated record of user experience, errors and server stability in lab testing.
 
 > **Dated record.** This run predates the exclusion of the Darktrace/Email action and the final write controls. Its "51 tools and 78 operations" and the email-action preview describe that build. The 1.1.0 candidate exposes 50 tools and 77 executable operations; see the [tool reference](tools.md).
 
