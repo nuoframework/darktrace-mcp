@@ -68,3 +68,28 @@ These rows replace only the listed baseline assumptions for this surface. Severi
 [ST-17–29](security-test-plan-writes.md) define measurable contracts. Preserve original tests; separately scope old blocked-shape/profile oracles to the historical baseline and add new-surface tests rather than weakening them to pass. Obtain at least two independent design-review rounds, implementation review on exact hashes, isolated adversarial receipts, fresh artifact/Docker evidence, provider/ACL decisions and separately authorized non-production lab evidence. Lab writes require exact operations, sacrificial targets, created-by-test objects, finite budget, undo and verified cleanup; no live work is authorized here.
 
 All controls and tests here are unvalidated. Host-mode approval assurance, combined sensitive/write data flow, target restrictions/circuit breaker, EMAIL schema provenance, 78-operation manifest and S4/S5/S6 compatibility remain finite release gates. Documentary completeness is not closure of implementation findings or acceptance of residual risk.
+
+## Review notes (design review DR-W, 2026-10-06)
+
+Added by the independent review in [design-review-writes.md](design-review-writes.md). The rows above are unchanged. These notes add missing threats and correct facts. Status: proposed; the threat-model owner must adopt them.
+
+**Corrections.**
+- A9: the merged code makes `critical` without `write` a startup error. Adopt that rule.
+- TM-24 / ST-23: `post_aianalyst_investigations` has no free-text field (`did`, `investigateTime` only). The free-text sinks are comment `message` (×2), tag `name`/`data.description`, device `label`, intel-feed text fields, subnet `label`, and the free-form email-action body.
+- A13: the code's ceiling is 60/min, not lower-only 10.
+- A12: the code's elicitation schema is empty, with no `approved` boolean.
+- A14: the code's audit has no `argsHash` or `approvalMode`.
+- Pending controls (targets, breaker, pending-approval bounds) are not implemented.
+
+These divergences are listed in DR-W §2 and must be reconciled (DR-W-18) before any ST-17–29 result is recorded.
+
+| ID | STRIDE / severity | Threat and boundary | Required control | Residual risk | Observable tests |
+|---|---|---|---|---|---|
+| TM-32 | I,T / Critical | Session taint: after a sensitive read, later free-text writes in the same process carry that data. No per-process flow state exists (B4→B1→B3). | Process taint flag set on the first sensitive read result. Afterwards, every free-text write sink needs elicitation approval regardless of `writeApproval`, and is denied without the capability. Combined profiles require a startup acknowledgement (`DARKTRACE_ACCEPT_COMBINED_PROFILE=TM-24`). | A human may approve a copy. Cross-process relay through the host model is not covered. | ST-30.ACK, ST-30.TAINT |
+| TM-33 | I / High | Free-text write bodies as an exfiltration channel: 8,192-character strings in comments (cannot be deleted, visible to all appliance users), labels and tag text. Throughput is up to the write ceiling per process (B3/B7). | Per-field length and charset bounds sized for operations use (for example comment ≤1,000, labels ≤128 with a restricted charset). `destructiveHint` on irreversible sinks. TM-32 taint. | Low-bandwidth covert copying stays possible within valid text. | ST-23 (sink list corrected), ST-24.ANNOT |
+| TM-34 | S,T / Critical | Elicitation summary spoofing through the escape round-trip: a literal `\u{000A}` in a value becomes a real newline in the dialog and forges lines (B4/B1). Instance of TM-30, reproduced by the review. | Neutralize each value separately with no reverse transform, or use a structured read-only schema. Refuse overlong summaries before elicitation, and show a binding digest. | Natural-language deception inside one visible value. | ST-27.ESCAPE, ST-27.OVERLONG |
+| TM-35 | D,T,R / High | Multi-process limits: hosts start one stdio process per client or session, which multiplies write and critical budgets and creates indistinguishable audit chains (same genesis) (B1/B3). | Documented multiplier. A per-process `bootId` in every audit record. Optional operator-set host-wide lock or state directory. Appliance-side rate limits recommended. | Without a shared state, no aggregate guarantee exists. | ST-22.MULTIPROC |
+| TM-36 | E,R / High | Approval downgrade: `criticalApproval=host` with an "always allow" host, a client that auto-answers elicitation, legacy variables re-widening `DARKTRACE_PROFILES`, and the installer's one-click `all` preset reach critical execution or combined profiles without a deliberate human decision (B1/B2). | Host mode and combined profiles need startup acknowledgement tokens. Tool descriptions depend on the configured approval mode. `approvalMode` in the audit. Legacy variables may only narrow. | The server cannot verify that a person answered. | ST-24.DESC, ST-18.REPLIES, config unit tests |
+| TM-37 | R,I / Medium | Sensitive data access and refused or declined critical attempts leave no audit record, so data access and attempted disruptive actions cannot be traced (B1). | Chained `read` records for sensitive reads (opId and argsHash only), and `error` records with a fixed reason for declines, cancels, unavailable approval, rate limits and denials. A sink failure never enables an action. | stderr retention is external (TM-13). | ST-21.DECISIONS, ST-21.SENSITIVE |
+
+TM-26 refinement: add an operator docs table mapping each profile to the minimum Darktrace API token permission. The installer recommends separate tokens for `write`/`critical` deployments (DR-W-15).
