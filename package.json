@@ -26,7 +26,8 @@
     "start": "node dist/src/index.js",
     "test:security": "node test/security/run-isolated.mjs",
     "release:prepare": "node scripts/prepare-release.mjs",
-    "release:verify": "node scripts/verify-release.mjs"
+    "release:verify": "node scripts/verify-release.mjs",
+    "docs:tools": "node scripts/generate-tools-doc.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.0",

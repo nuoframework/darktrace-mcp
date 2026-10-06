@@ -1,6 +1,6 @@
 # Current validated-consultation lab procedure
 
-Only an authorized operator may run lab commands; this documentation worker made no API calls or credential reads. Native and hardened Docker MCP passed all 19 distinct permitted selectors on accepted source `9e7c7070…`, as recorded with exact sanitized receipt hashes and cleanup in [the lab checkpoint](security/validated-consultations-lab-checkpoint.md). Earlier missing-identifier and permission failures remain historical. This is bounded recipe evidence, not full API compatibility or final suite completion; OpenSSL 3.5.8 / CVE-2026-35189 still blocks stable publication.
+Only an authorized operator may run lab commands; this documentation worker made no API calls or credential reads. Native and hardened Docker MCP passed all 19 distinct permitted selectors on accepted source `9e7c7070…`, as recorded with exact sanitized receipt hashes and cleanup in [the lab checkpoint](../security/validated-consultations-lab-checkpoint.md). Earlier missing-identifier and permission failures remain historical. This is bounded recipe evidence, not full API compatibility or final suite completion; OpenSSL 3.5.8 / CVE-2026-35189 still blocks stable publication.
 
 Both profiles have the same 15 tools / 19 GET ceiling. Do not select broader historical recipes below: excluded operations are denied before preview, audit or network. Root must create a protected source/runtime manifest for exact accepted bytes after every bound helper/harness change. No retry, pagination, invented identifier, hidden discovery or relaxed safety limit is permitted.
 
@@ -10,7 +10,7 @@ A supported endpoint subset uses status first and discovers a valid IP in memory
 node scripts/lab-read-smoke.mjs --config /absolute/private/operator.json --runtime-manifest /absolute/private/reviewed-runtime.json --validation-profile inventory --operations get_status,get_devicesearch,get_endpointdetails
 ```
 
-For a status-only smoke, use `--tools darktrace_get_status` instead of `--operations`; never combine flags. Docker uses the same protected runtime binding and an exact image ID; root owns secret-volume provisioning and verified cleanup. See [the complete current mapping](architecture.md#11-current-implementation-snapshot).
+For a status-only smoke, use `--tools darktrace_get_status` instead of `--operations`; never combine flags. Docker uses the same protected runtime binding and an exact image ID; root owns secret-volume provisioning and verified cleanup. See [the complete current mapping](../architecture.md#11-current-implementation-snapshot).
 
 ## Historical broader campaign procedures — superseded, not active instructions
 
@@ -332,7 +332,7 @@ docker rm "$HELPER"
 
 After the campaign, **root alone** destroys the volume with `docker volume rm "$VOLUME"` and confirms that `docker volume ls --filter name=$VOLUME` is empty. The harness must not do it.
 
-**Synthetic evidence (worker, 2026-10-05).** Fake tokens, a synthetic test CA and base URL `https://127.0.0.1`, which the connector refuses before opening any socket. Image `sha256:cb0330dd…`, harness and manifest frozen as recorded in [docker-volume-review](security/docker-volume-review.md).
+**Synthetic evidence (worker, 2026-10-05).** Fake tokens, a synthetic test CA and base URL `https://127.0.0.1`, which the connector refuses before opening any socket. Image `sha256:cb0330dd…`, harness and manifest frozen as recorded in [docker-volume-review](../security/docker-volume-review.md).
 - **Rejections:** CLI negatives, missing volume, driver options, missing file, extra file, mode 0640, symlink, hard link, mismatched `--user` and volume in use were all rejected with the codes above.
 - **Valid volume:** reached `initialize`/`tools/list` and failed only the refused tool call.
 - **Network-none probe:** through the volume it initialized and listed 27 tools.
@@ -371,7 +371,7 @@ Root separately approved `get_metricdata` **only in inventory**: explicitly sele
 node scripts/lab-read-smoke.mjs --config /absolute/private/operator.json --runtime-manifest /absolute/private/new-reviewed-runtime.json --validation-profile inventory --operations get_status,get_devices,get_metrics,get_metricdata
 ```
 
-The allowlist remains exactly 37 GET selectors: minimal has 34 schema-accepted synthetic recipes and three semantic blockers. In the historical inventory freeze, inventory had 35 and two. Since the [summary and endpoint recipes below](#inventory-summary-aggregate-and-endpoint-details-source-4f6ef96), inventory has 37 recipes and no semantic blocker; minimal keeps all three. Those counts are offline recipe readiness, not live compatibility. See [inventory contract review](security/lab-campaign-inventory-review.md) for exact local evidence, summary source issues and redirect refusal.
+The allowlist remains exactly 37 GET selectors: minimal has 34 schema-accepted synthetic recipes and three semantic blockers. In the historical inventory freeze, inventory had 35 and two. Since the [summary and endpoint recipes below](#inventory-summary-aggregate-and-endpoint-details-source-4f6ef96), inventory has 37 recipes and no semantic blocker; minimal keeps all three. Those counts are offline recipe readiness, not live compatibility. See [inventory contract review](../security/lab-campaign-inventory-review.md) for exact local evidence, summary source issues and redirect refusal.
 
 Every JSONL outcome now includes fixed `validationProfile` and `validationPolicySha256`, including sanitized failures. The policy digest is SHA-256 of UTF-8 `JSON.stringify(validationPolicy)`, whose code-owned contents include the two fixed profiles, 37 recipes, inventory metric override/name pattern, three smoke definitions and common limits. Current digest: `d501a0591b1a78ea1dd5363118c233cd78c59aca2400ffd3eadfddc474c15212`. It contains no discovered values; it is policy evidence, not an attestation. Existing fixed operation/tool, booleans/error codes, elapsed time, optional numeric version and verified manifest digest remain the only outcome metadata. No counts of returned data, args/body/IDs/names/URLs or remote messages are emitted.
 
@@ -392,7 +392,7 @@ Example (fictitious paths; not executed by the worker against any appliance):
 node scripts/lab-read-smoke.mjs --config /absolute/private/operator.json --runtime-manifest /absolute/private/new-reviewed-runtime.json --validation-profile inventory --operations get_status,get_devicesearch,get_endpointdetails
 ```
 
-Offline evidence is in [read-campaign-final-review](security/read-campaign-final-review.md). It covers the source-bound fixture (43/43), native end-to-end synthetic runs with a refused `127.0.0.1` origin (`apiErrorCode:"network"`, zero sockets) and the Docker volume regression. None of it is lab evidence.
+Offline evidence is in [read-campaign-final-review](../security/read-campaign-final-review.md). It covers the source-bound fixture (43/43), native end-to-end synthetic runs with a refused `127.0.0.1` origin (`apiErrorCode:"network"`, zero sockets) and the Docker volume regression. None of it is lab evidence.
 
 
 ## Validated19 bounded endpoint-IP discovery checkpoint

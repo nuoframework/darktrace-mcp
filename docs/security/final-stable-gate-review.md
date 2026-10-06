@@ -108,7 +108,7 @@ Git state [O]:
 - **Linux Node 22 [H]:** 324/324, from receipt `linux-node22-2026-10-05T17-38-34-552Z`, run on an earlier source.
 - **Native lab, current source [R], manifest `963cbf0c`:** status, devices, subnets, aianalyst_stats, intelfeed, modelbreaches and devicesearch PASS today.
   - **New failure:** `get_deviceinfo` (minimal) returned `OUTPUT_SHAPE_MISMATCH` with `safeProjectionFallback=true`. The batch stopped, so `get_similardevices` was not called.
-  - **Still open from [stable-readiness](../stable-readiness.md):**
+  - **Still open from [stable-readiness](../history/stable-readiness.md):**
     - three semantic blockers: endpointdetails, metricdata and summarystatistics (inventory profile: two);
     - `/filtertypes` HTTP 302, which is refused;
     - 32 KiB `too_large` refusals on full collections;

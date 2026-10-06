@@ -1,48 +1,30 @@
-# Darktrace MCP server: design baseline
+# Darktrace MCP server: architecture
 
-**Status: private alpha `0.1.0-alpha.0`; stable release conditional.** Date: 2026-10-05, current-runtime notes updated 2026-10-06. This document began as the design baseline; catalogue and deferred-write sections below are historical design material, not active first-stable capabilities. [§1.1](#11-current-implementation-snapshot) records the current release surface. Security evidence is dated, synthetic and offline (see §3); it is not a certification. The current arm64 image passed the 19 permitted bounded recipes on lab 7.1.0 ([lab checkpoint](security/patched-runtime-lab-checkpoint.md)). Full API compatibility is not established.
+[README](../README.md) · [Configuration](configuration.md) · [Tools](tools.md) · [Security overview](security.md)
 
-Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK comparison](../openapi/DIFF-sdk-vs-docs.md), [API contract](api-contract.md), [79-operation inventory](operation-inventory.json), and the unchanged [independent review](security/design-review.md). The target lab is **7.1**, not the documented **6.1**. [Design decisions and closure matrix](security/design-decisions.md) resolve B1–B8/F1–F15; their evidence is documentary. The repo is private; there is no npm publication. Raw `docs-src/` material must not be committed or packaged.
+This document explains how the server is built. Sections 1–4 describe the current design. Sections 5–15 are the original design baseline (2026-10-05), kept for reference: where they say writes are unavailable, list 15 tools / 19 selectors, or call the release read-only, they describe that earlier release, not today's behaviour.
+
+Inputs: [OpenAPI 6.1](../openapi/darktrace-threat-visualizer.yaml), [SDK comparison](../openapi/DIFF-sdk-vs-docs.md), [API contract](api-contract.md), [79-operation inventory](operation-inventory.json), [independent review](security/design-review.md) and [design decisions](security/design-decisions.md). The lab target is Darktrace **7.1**; the documented API is **6.1**.
 
 ## 1. Decisions in one screen
 
-| Area | Baseline decision |
+| Area | Decision |
 |---|---|
-| Deployment | One HTTPS origin and credential pair per process; **stdio only**, no HTTP listener/configuration. |
-| Policy | Immutable first-stable gate allows only the exact 19 validated GET selectors; non-read operations are denied before registration and signing. |
-| Changes and critical operations | No write execution or dry-run previews are available; medium/high and critical operations are deferred to a later release and need new review. |
-| Sensitive read | Cannot expand the 19-selector / 15-tool ceiling; Advanced Search is excluded even with opt-in. |
-| Blocked | Email, export, deprecated operation, S4 query+JSON, S5 DELETE+query and S6 GET/base64 paths. |
-| Canonicalization | Explicit startup `encoded` or `unencoded` query-signature mode; default `unencoded` per local SDK comparison, lab-unverified; no fallback. |
-| Network | Dedicated `node:https` connector, pinned initial DNS, preserved SNI and hostname verification, explicit `rejectUnauthorized:true`. |
+| Deployment | One HTTPS origin and credential pair per process; **stdio only**, no HTTP listener. |
+| Surface | 78 of 79 catalogue operations, grouped into 51 tools ([tool reference](tools.md)). The deprecated `GET /aianalyst/incidents` is excluded. |
+| Profiles | Set by the operator at startup with `DARKTRACE_PROFILES`: `read` (default), `sensitive`, `write`, `critical`, `all`. Tools outside the enabled profiles are not registered and are denied before signing. |
+| Changes | `write` operations accept `dryRun:true` previews. `critical` operations return a preview unless the call carries `confirm:true`. Every write is audited. POST/DELETE are never retried. |
+| Validation | 19 read operations passed a Darktrace 7.1.0 lab; all others are marked *not lab-validated*. |
+| Canonicalization | Explicit `encoded` or `unencoded` query-signature mode; default `unencoded`; no fallback. |
+| Network | Dedicated `node:https` connector, pinned initial DNS, hostname verification, `rejectUnauthorized:true`, proxies refused. |
 | Budgets | §5.3 hard ceilings; configuration can only lower them. |
-| Delivery | Private local build and inspected image ID. Docker runtime: Alpine-maintained Node.js 24.18.1 with shared OpenSSL 3.5.9. Release status: [releases](releases.md#version-100). |
+| Delivery | Source install with setup wizard, Claude Desktop `.mcpb`, or Docker (Alpine Node.js 24 with OpenSSL 3.5.9). |
 
 ### 1.1 Current implementation snapshot
 
-The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both read profiles expose the same complete contract; sensitive read cannot expand the ceiling. All excluded selectors, including writes, are refused before preview, audit or network access.
+The [79-operation coverage catalogue](../src/coverage/report.generated.json) and [tool groups](../src/api/tool-groups.json) define the operation-to-tool mapping. The generated [tool reference](tools.md) lists each operation with its tier, profile and lab status. Model or host approval is never authorization: the operator's profiles and the appliance token's permissions are.
 
-The [79-operation coverage catalogue](../src/coverage/report.generated.json) is design accounting; §6 preserves conceptual deferred tools, not release eligibility. The active oracle is [the first-stable full fixture](../test/security/fixtures/mcp-tool-contracts-first-stable.json).
-
-| MCP tool | Permitted GET selectors |
-|---|---|
-| `darktrace_get_status` | `get_status` |
-| `darktrace_get_devices` | `get_devices` |
-| `darktrace_list_subnets` | `get_subnets` |
-| `darktrace_get_ai_analyst_stats` | `get_aianalyst_stats` |
-| `darktrace_get_intel_feed` | `get_intelfeed` |
-| `darktrace_list_model_breaches` | `get_modelbreaches` |
-| `darktrace_search_devices` | `get_devicesearch` |
-| `darktrace_get_similar_devices` | `get_similardevices` |
-| `darktrace_list_ai_analyst_incidents` | `get_aianalyst_groups`, `get_aianalyst_incidentevents` |
-| `darktrace_list_ai_analyst_investigations` | `get_aianalyst_investigations` |
-| `darktrace_get_model_breach_comments` | `get_mbcomments` |
-| `darktrace_get_connection_details` | `get_details` |
-| `darktrace_list_tags` | `get_tags_entities`, `get_tags_tid`, `get_tags_tid_entities` |
-| `darktrace_get_endpoint_details` | `get_endpointdetails` |
-| `darktrace_list_antigena_actions` | `get_antigena`, `get_antigena_summary` |
-
-Both profiles advertise these exact 15 tools with unchanged read-only, idempotent, non-destructive annotations. `write` and `writeCritical` cannot be enabled; no write preview exists. The [predecessor's bounded native/Docker 19/19 lab evidence](security/validated-consultations-lab-checkpoint.md) is history; the current arm64 image's [19/19 lab result](security/patched-runtime-lab-checkpoint.md) is separate from the remaining suites and stable publication.
+The first stable (1.0.0) exposed only 15 read tools covering 19 GET operations; that history is in [docs/history](history/README.md).
 
 ## 2. Runtime and dependency baseline
 
@@ -92,22 +74,25 @@ The server never asks the model for credentials, origins or policy. Returned res
 ```mermaid
 flowchart LR
     accTitle: Profile decisions
-    accDescr: Each tool call is checked against the operation inventory and the immutable release policy. Read is on by default. Non-read operations, including writes and critical operations, are denied before signing; no write previews are available. Sensitive read cannot expand the validated ceiling. Export, email and HTTP are rejected.
+    accDescr: Each tool call is checked against the operation inventory and the operator's profiles. Reads run when their profile is on. Writes can be previewed with dryRun. Critical operations return a preview unless confirm is true. Anything outside the enabled profiles is denied before signing.
     T["tools/call"] --> Q{"Operation in inventory<br/>and profile enabled?"}
     Q -->|"no"| X["Denied<br/>no signing, no network"]
-    Q -->|"read · default on"| RD["Bounded read"]
-    Q -->|"excluded selector · any profile"| X
-    Q -->|"write · critical"| X
-    Q -->|"export · email · HTTP"| NO["Rejected<br/>configuration error"]
+    Q -->|"read · sensitive"| RD["Bounded read"]
+    Q -->|"write"| W{"dryRun?"}
+    W -->|"yes"| PV["Preview only"]
+    W -->|"no"| EX["Signed change<br/>audited, never retried"]
+    Q -->|"critical"| CF{"confirm:true?"}
+    CF -->|"no"| PV
+    CF -->|"yes"| EX
     classDef core fill:#030D11,stroke:#FF6B00,stroke-width:2px,color:#FFFFFF
     classDef allow fill:#FFFFFF,stroke:#4B00D7,stroke-width:2px,color:#030D11
     classDef deny fill:#FFFFFF,stroke:#FF00D9,stroke-width:2px,stroke-dasharray:5 3,color:#030D11
-    class T,Q core
-    class RD allow
-    class X,NO deny
+    class T,Q,W,CF core
+    class RD,PV,EX allow
+    class X deny
 ```
 
-Only the operator sets profiles, at startup. The release rejects write and critical settings; no client or model approval can enable those capabilities. Model or host approval is never authorization; appliance token ACLs remain authoritative. Writes are deferred to a later release (§8.2).
+Only the operator sets profiles, at startup. The model cannot enable a profile, and its approval is not authorization; appliance token permissions remain authoritative. `confirm:true` should reflect an explicit user decision after reading the preview.
 
 ### 3.3 Docker runtime
 
@@ -142,9 +127,9 @@ The runtime image is `scratch` plus 22 signed, hash-pinned Alpine 3.24 packages:
 flowchart TB
     H[MCP host/model] -->|stdio untrusted arguments| V[Bounded input validation]
     V --> P[Runtime operation policy]
-    P -->|denied non-read operation| D[No tool registration or signing]
-    P -->|eligible read operation only| O[Recheck read policy and budgets]
-    O --> B[Build immutable read request]
+    P -->|profile not enabled| D[No tool registration or signing]
+    P -->|enabled operation| O[Recheck policy, preview/confirm gate and budgets]
+    O --> B[Build immutable request]
     B --> S[Request signer]
     S --> N[Pinned node:https connector]
     N -->|verified HTTPS| DT[Single Darktrace origin]
@@ -156,9 +141,11 @@ Policy denies before builder/signer/network. Registration is a usability filter,
 
 ## 4. Repository responsibilities
 
-`src/config/` validates operator-only startup state; `src/server/` handles bounded stdio input and lifecycle; `src/tools/` defines curated tools; `src/policy/` enforces the immutable read-only release gate; `src/api/` contains static spec-derived descriptors and validation; `src/client/` handles canonicalization and the pinned HTTPS connector; `src/shape/` minimizes and redacts output; `src/observability/` owns diagnostics. `scripts/` may generate static catalogue data from the local spec at build time. No production module fetches schemas or code from an appliance. Historical write-preview and audit flows below are future design material, not active release behavior.
+`src/config/` validates operator-only startup state; `src/server/` handles bounded stdio input and lifecycle; `src/tools/` defines curated tools; `src/policy/` enforces the operator's profiles; `src/api/` contains static spec-derived descriptors and validation; `src/client/` handles canonicalization and the pinned HTTPS connector; `src/shape/` minimizes and redacts output; `src/observability/` owns diagnostics. `scripts/` may generate static catalogue data from the local spec at build time. No production module fetches schemas or code from an appliance. Sections 5–15 below are the original design baseline, kept for reference.
 
 ## 5. Module interfaces
+
+> **Design baseline (history).** Sections 5–15 are the 2026-10-05 design record. Current behaviour: §1 and [configuration](configuration.md).
 
 ### 5.1 Configuration and credentials
 
@@ -297,6 +284,8 @@ On an oversized complete or partial frame, close the stdio session, abort pendin
 Stdout is protocol only. Structured logs/audit go to redacted stderr or an operator-provisioned sink with observable asynchronous write failures. Never log raw request/response bodies, even at debug. Audit stores exactly the `AuditRecord` allowlist in §5.6: audit marker, generated timestamp, mandatory correlation ID, operationId and outcome; no tier, separate event, target metadata, secrets or payload values. Local records are not immutable evidence and do not establish human identity.
 
 ## 6. Tool catalogue (curated)
+
+> The current, generated list is the [tool reference](tools.md). The catalogue below is the original design plan.
 
 Current counts are in [§1.1](#11-current-implementation-snapshot); this section is the original design catalogue. Naming: `darktrace_<verb>_<object>`. Tier and annotations follow `operation-inventory.json`. Operations column uses the spec's `operationId`s. This is a design catalogue, not a claim of implemented or registered tool counts. Current runtime input uses a fixed `operation: operationId` enum for multi-operation tools with strict `path`, `query` and `body` groups; a single-operation tool defaults its operation. Descriptions below do not promise separate ergonomic aliases. Broader catalogue validation remains deferred; only the 19 current permitted recipes have native/Docker 7.1.0 evidence. Registration and execution are filtered by §5.6, including shape gates.
 

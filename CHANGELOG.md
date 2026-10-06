@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Full API surface with profiles.** 78 of the 79 catalogue operations are available as 51 tools (the deprecated `GET /aianalyst/incidents` stays excluded). `DARKTRACE_PROFILES` selects `read` (default), `sensitive`, `write`, `critical` or `all`. Non-critical writes accept `dryRun:true`; critical actions need `confirm:true` and otherwise return a preview. All writes are audited. `DARKTRACE_SENSITIVE_READ` and `DARKTRACE_WRITE_CRITICAL` keep working. Operations without lab evidence are marked "not lab-validated".
+- **Easier installation.** New `darktrace-mcp setup` wizard (hidden token entry, `0600` token files under `~/.config/darktrace-mcp/`, permission preset, automatic configuration of Claude Desktop, Claude Code, Codex, Cursor, VS Code, Windsurf, OpenCode and Gemini CLI with backups), plus `config <client>`, `remove` and `test`. One-line installers `scripts/install.sh` and `scripts/install.ps1`.
+- **Claude Desktop extension.** `npm run pack:mcpb` builds a `.mcpb` bundle; Claude Desktop stores the tokens in the OS keychain.
+- **Documentation restructure.** Short bilingual READMEs; task-oriented guides (getting started, clients, configuration, troubleshooting, security overview) with Spanish versions in `docs/es/`; generated tool reference (`npm run docs:tools`); past review and release reports moved to `docs/history/`.
+
 ## 1.0.0 — prepared 2026-10-06
 
 - Reviewed lab harness now requires schema-2 source/runtime and complete installed host SDK/Zod tree binding before SDK import; bounded deterministic hashing rejects symlinks and special files. Docker preflight/session use init, PID and memory limits. This is offline readiness, not final lab or image approval.

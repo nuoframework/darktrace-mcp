@@ -1,10 +1,22 @@
 # Docker use
 
-The image runs the MCP server over stdio. It exposes no TCP port and is built for a local, private deployment. No image has been published to a registry.
+[README](../README.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
 
-The release candidate enforces **19 validated GET selectors across 15 MCP tools**, identical in `read` and `read` + `sensitiveRead` ([mapping](../README.md#tools-in-this-release)). Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access.
+The image runs the MCP server over stdio. It opens no network port and is built for local, private use. No image is published to a public registry.
+
+The image exposes the same tools as a native install. Profiles work the same way: set `DARKTRACE_PROFILES` with `-e` (default `read`). See [profiles](configuration.md#profiles).
+
+> **Release archives.** The v1.0.0 image archives contain the earlier read-only build (15 tools). For the full API surface, build the image from the current checkout ([Build](#build)) or use a later release.
+
+## Quick steps
+
+1. Load or build the image ([Install options](#install-options)).
+2. Run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)).
+3. Add the client snippet from [Clients: Docker](clients.md#docker), with the image ID.
 
 ## Current candidate at a glance
+
+This table records the reviewed v1.0.0 image (read-only build).
 
 | Item | Status (2026-10-06) |
 |---|---|
