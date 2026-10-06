@@ -133,3 +133,24 @@ export const OPERATION_PURPOSES: Readonly<Record<string, string>> = Object.freez
   post_intelfeed: 'update intel feed',
   post_subnets: 'update subnet',
 });
+
+/**
+ * Preferred default for read tools with several listing operations: the first call an analyst makes.
+ * Used only when the call omits "operation".
+ */
+export const DEFAULT_OPERATIONS: Readonly<Record<string, string>> = Object.freeze({
+  darktrace_list_ai_analyst_incidents: 'get_aianalyst_groups',
+  darktrace_list_antigena_actions: 'get_antigena',
+  darktrace_list_tags: 'get_tags',
+});
+
+/** Short, code-owned usage notes for operations whose naive call fails or is too large. */
+export const OPERATION_HINTS: Readonly<Record<string, string>> = Object.freeze({
+  get_modelbreaches: 'The listing defaults to minimal:true (set minimal:false for full records on a narrow window).',
+  get_details: 'Needs a did or pbid filter.',
+  get_models: 'The full list exceeds the response cap: set responsedata (comma list, e.g. "pid,name") or fetch one by pid.',
+  get_components: 'The full list exceeds the response cap: set responsedata (e.g. "cid,mlid") or fetch one by cid.',
+  get_enums: 'The full set exceeds the response cap: set responsedata to one enum name (e.g. "Protocol", "Country").',
+  get_metrics: 'Each metric lists many filtertypes: set responsedata (e.g. "mlid,name,label") or fetch one by mlid.',
+  get_cves: 'Darktrace/OT deployments only.',
+});
