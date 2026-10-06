@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the 12 self-contained SVG choices and six desktop PNG previews."""
+"""Build the 12 self-contained SVG choices and desktop PNG previews and the selected mobile preview."""
 from html import escape
 from pathlib import Path
 import re
@@ -194,16 +194,16 @@ def main():
                 assert LOGO in svg
                 assert len(svg.encode()) <= 150_000
                 path.write_text(svg)
-                if not mobile:
+                if not mobile or (variant == 'b' and lang == 'en'):
                     with tempfile.TemporaryDirectory(prefix='banner-preview-') as tmp:
                         raw = str(Path(tmp)/'raw.png')
-                        png = HERE/'preview'/f'{variant}-{lang}.png'
-                        subprocess.run(['rsvg-convert','-o',raw,str(path)],check=True)
+                        png = HERE/'preview'/f'{variant}-{lang}{'-mobile' if mobile else ''}.png'
+                        subprocess.run(['rsvg-convert', *(['-w','600'] if mobile else []), '-o',raw,str(path)],check=True)
                         subprocess.run(['ffmpeg','-y','-v','error','-i',raw,
                             '-filter_complex','split[a][b];[a]palettegen=reserve_transparent=0[p];[b][p]paletteuse=dither=bayer',
                             '-frames:v','1',str(png)],check=True)
                         assert png.stat().st_size <= 150_000
-    print('Generated 12 SVGs and 6 desktop PNG previews.')
+    print('Generated 12 SVGs, 6 desktop PNG previews and the selected 600px mobile preview.')
 
 
 if __name__ == '__main__':
