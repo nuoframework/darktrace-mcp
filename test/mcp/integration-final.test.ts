@@ -42,10 +42,14 @@ test('audit exact allowlist generates a correlation ID and awaits sink failure',
   await assert.rejects(audit.record('post_caller_chosen','start'));
   await assert.rejects(audit.record('get_status','ok',''));
 });
-test('release write denial occurs before every audit sink and client regardless of forged profile',async()=>{
+test('write denial without the write profile occurs before every audit sink and client; forged critical-without-write stays denied',async()=>{
  let requests=0,audits=0;const client={async request(){requests++;return {};}};
- const forged={...cfg,profiles:{...cfg.profiles,write:true,writeCritical:true}};
- for(const dryRun of [undefined,true,false]){const result=await callTool('darktrace_update_device',{body:{did:1,label:'test'},...(dryRun===undefined?{}:{dryRun})},{cfg:forged,client,audit:{async record(){audits++;throw new Error('fail');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.outcome,undefined);assert.equal(result.structuredContent?.dryRun,undefined);}
+ for(const profiles of [cfg.profiles,{...cfg.profiles,writeCritical:true},{...cfg.profiles,sensitiveRead:true}]) for(const dryRun of [undefined,true,false]){
+  const result=await callTool('darktrace_update_device',{body:{did:1,label:'test'},...(dryRun===undefined?{}:{dryRun})},{cfg:{...cfg,profiles},client,audit:{async record(){audits++;throw new Error('fail');}}});
+  assert.equal(result.isError,true);assert.equal(result.structuredContent?.outcome,undefined);assert.equal(result.structuredContent?.dryRun,undefined);
+  const critical=await callTool('darktrace_update_subnet',{body:{sid:1,label:'x'},confirm:true},{cfg:{...cfg,profiles},client,audit:{async record(){audits++;}}});
+  assert.equal(critical.isError,true);
+ }
  assert.equal(requests,0);assert.equal(audits,0);
 });
 

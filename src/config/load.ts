@@ -131,16 +131,24 @@ function setNested(base: RawConfig, key: string, value: unknown): void {
   base[section] = sectionValue;
 }
 
+/**
+ * DARKTRACE_PROFILES: comma list of read, sensitive, write, critical, or the shortcut all
+ * (= read,sensitive,write,critical). When set it replaces the file's profile flags; read is always on.
+ */
+export function parseProfilesVariable(value: string): { read: true; sensitiveRead: boolean; write: boolean; writeCritical: boolean } {
+  const requested = value.split(',').map((name) => name.trim()).filter(Boolean);
+  const allowed = new Set(['read', 'sensitive', 'write', 'critical', 'all']);
+  if (requested.length === 0 || requested.some((name) => !allowed.has(name)) || new Set(requested).size !== requested.length ||
+    (requested.includes('all') && requested.length !== 1)) {
+    throw new ConfigValidationError('DARKTRACE_PROFILES must be a comma list of read, sensitive, write, critical (each once) or all');
+  }
+  const has = (name: string) => requested.includes('all') || requested.includes(name);
+  return { read: true, sensitiveRead: has('sensitive'), write: has('write'), writeCritical: has('critical') };
+}
+
 function applyProfiles(raw: RawConfig, value: string | undefined): void {
   if (value === undefined) return;
-  const requested = value.split(',').map((name) => name.trim()).filter(Boolean);
-  const allowed = new Set(['read', 'write']);
-  if (requested.some((name) => !allowed.has(name)) || new Set(requested).size !== requested.length) {
-    throw new ConfigValidationError('DARKTRACE_PROFILES may contain read and write once each; email/export are unsupported');
-  }
-  if(requested.includes('write')) throw new ConfigValidationError('DARKTRACE_PROFILES write is unavailable in this read-only release');
-  const existing = asObject(raw.profiles);
-  raw.profiles = { ...existing, read: true, write: requested.includes('write') };
+  raw.profiles = { ...asObject(raw.profiles), ...parseProfilesVariable(value) };
 }
 
 function parseDestinationAllowlist(value: string | undefined): readonly string[] | undefined {

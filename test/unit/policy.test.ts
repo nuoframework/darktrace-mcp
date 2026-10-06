@@ -19,20 +19,6 @@ test('hidden direct writes and blocked export are denied before network',async()
   const download=await callTool('darktrace_download_pcap',{path:{filename:'capture.pcap'}},{...ctx,cfg:config()});
   assert.equal(download.isError,true);assert.equal(requests.length,0);
 });
-test('release denial replaces historical operator write profile enables medium/high, critical remains preview-only even confirm',async()=>{
- const {ctx,requests}=context({write:true,writeCritical:true});let audits=0;
- for(const dryRun of [undefined,true,false]) {const result=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},...(dryRun===undefined?{}:{dryRun})},{...ctx,audit:{async record(){audits++;throw new Error('PRIVATE_SECRET');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.outcome,undefined);}
- assert.equal(requests.length,0);assert.equal(audits,0);
-});
-
-test('all critical operations (including blocked email) cannot execute',async()=>{
-  const {requests,ctx}=context({write:true,writeCritical:true});
-  for(const op of Object.values(operations).filter(op=>op.tier==='critical')) {
-    const res=await callTool(op.tool!,{operation:op.operationId,confirm:true,dryRun:false},ctx);
-    assert.ok(res.isError||res.structuredContent?.dryRun);
-  }
-  assert.equal(requests.length,0);
-});
 test('unknown fields, prototype keys, traversal, excessive arrays and ranges denied',async()=>{
   const {requests,ctx}=context();
   const inputs=[{query:{fast:true,headers:{Authorization:'secret'}}},JSON.parse('{"__proto__":{"polluted":true}}'),{query:{constructor:'PRIVATE_SECRET'}}, {query:{fast:true},origin:'https://attacker.example'}];
@@ -52,24 +38,6 @@ test('errors and successful remote JSON are redacted and bounded',async()=>{
   const huge=await callTool('darktrace_get_status',{}, {...ctx,client:{async request(){return {json:{version:'x'.repeat(70000)}};}}});
   assert.equal(huge.structuredContent?.truncated,true);
 });
-test('release denial replaces historical form-only operation respects content type and writes preview without dispatch',async()=>{
- const {ctx,requests}=context({write:true,writeCritical:true});let audits=0;
- for(const dryRun of [undefined,true,false]) {const result=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},...(dryRun===undefined?{}:{dryRun})},{...ctx,audit:{async record(){audits++;throw new Error('PRIVATE_SECRET');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.outcome,undefined);}
- assert.equal(requests.length,0);assert.equal(audits,0);
-});
-
-test('release denial replaces historical writes default to preview and async preaudit fails closed before request',async()=>{
- const {ctx,requests}=context({write:true,writeCritical:true});let audits=0;
- for(const dryRun of [undefined,true,false]) {const result=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},...(dryRun===undefined?{}:{dryRun})},{...ctx,audit:{async record(){audits++;throw new Error('PRIVATE_SECRET');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.outcome,undefined);}
- assert.equal(requests.length,0);assert.equal(audits,0);
-});
-
-test('release denial replaces historical post-write audit failure reports completed effect and never retries',async()=>{
- const {ctx,requests}=context({write:true,writeCritical:true});let audits=0;
- for(const dryRun of [undefined,true,false]) {const result=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},...(dryRun===undefined?{}:{dryRun})},{...ctx,audit:{async record(){audits++;throw new Error('PRIVATE_SECRET');}}});assert.equal(result.isError,true);assert.equal(result.structuredContent?.dryRun,undefined);assert.equal(result.structuredContent?.outcome,undefined);}
- assert.equal(requests.length,0);assert.equal(audits,0);
-});
-
 test('sensitive AdvancedSearch is hidden and direct calls rejected without operator opt-in',async()=>{
  const {ctx,requests}=context();assert.equal(eligibleTools(ctx.cfg).some(t=>t.name==='darktrace_advanced_search'),false);
  const hash=Buffer.from(JSON.stringify({search:'@type:dns',fields:[],timeframe:'3600'})).toString('base64');
@@ -80,4 +48,39 @@ test('tool output cap counts text and structured representations together',async
  const {ctx}=context();
  const response=await callTool('darktrace_get_status',{}, {...ctx,client:{async request(){return {json:{version:'x'.repeat(35000),hostname:'y'.repeat(35000)}};}}});
  assert.equal(response.structuredContent?.truncated,true);assert.ok(JSON.stringify(response).length<=60000);
+});
+
+test('write profile executes medium/high directly with awaited pre-audit; dryRun:true previews without dispatch',async()=>{
+ const {ctx,requests}=context({write:true});const audits:string[]=[];const audited={...ctx,audit:{async record(id:string,outcome:string){audits.push(outcome);}}};
+ const preview=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'},dryRun:true},audited);
+ assert.equal(preview.structuredContent?.dryRun,true);assert.deepEqual(preview.structuredContent?.parameterNames,['did','label']);assert.equal(requests.length,0);assert.deepEqual(audits,[]);
+ const done=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},audited);
+ assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].contentType,'application/json');assert.deepEqual(audits,['start','ok']);
+});
+test('form-only write keeps its documented content type',async()=>{
+ const {ctx,requests}=context({write:true});
+ const done=await callTool('darktrace_pin_ai_analyst_incident',{operation:'post_aianalyst_pin',body:{uuid:'abc'}},ctx);
+ assert.equal(done.isError,undefined);assert.equal(requests[0].contentType,'application/x-www-form-urlencoded');
+ assert.equal((await callTool('darktrace_pin_ai_analyst_incident',{operation:'post_aianalyst_pin',body:{uuid:'abc'},contentType:'application/json'},ctx)).isError,true);
+});
+test('pre-audit failure fails closed before request; post-write audit failure reports completed and never retries',async()=>{
+ const {ctx,requests}=context({write:true});
+ const pre=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},{...ctx,audit:{async record(){throw new Error('PRIVATE_SECRET');}}});
+ assert.equal(pre.isError,true);assert.equal(requests.length,0);assert.doesNotMatch(JSON.stringify(pre),/PRIVATE_SECRET/);
+ let n=0;const post=await callTool('darktrace_update_device',{body:{did:1,label:'synthetic'}},{...ctx,audit:{async record(){if(n++>0)throw new Error('PRIVATE_SECRET');}}});
+ assert.equal(post.isError,true);assert.equal(post.structuredContent?.outcome,'completed');assert.equal(post.structuredContent?.auditFailed,true);assert.equal(requests.length,1);
+ assert.match(String(post.structuredContent?.error),/Do not automatically repeat/);assert.doesNotMatch(JSON.stringify(post),/PRIVATE_SECRET/);
+});
+test('critical operations never execute without the critical profile and confirm:true',async()=>{
+  const writeOnly=context({write:true});
+  for(const op of Object.values(operations).filter(op=>op.tier==='critical')) {
+    assert.equal(eligibleTools(writeOnly.ctx.cfg).some(t=>t.name===op.tool),false);
+    assert.equal((await callTool(op.tool!,{confirm:true},writeOnly.ctx)).isError,true);
+  }
+  assert.equal(writeOnly.requests.length,0);
+  const {requests,ctx}=context({write:true,writeCritical:true});
+  const preview=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600}},ctx);
+  assert.equal(preview.structuredContent?.confirmationRequired,true);assert.match(String(preview.structuredContent?.hint),/confirm:true/);assert.equal(requests.length,0);
+  const done=await callTool('darktrace_antigena_manual_action',{body:{did:1,action:'quarantine',duration:600},confirm:true},ctx);
+  assert.equal(done.isError,undefined);assert.equal(requests.length,1);assert.equal(requests[0].operationId,'post_antigena_manual');
 });

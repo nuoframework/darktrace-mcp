@@ -9,10 +9,16 @@ test('all 79 spec/inventory operations map exactly once to truthful statuses',()
  const ids=Object.values(spec.paths).flatMap((path:any)=>['get','post','delete'].flatMap(method=>path[method]?[path[method].operationId]:[])).sort();
  assert.equal(ids.length,79);assert.deepEqual(Object.keys(operations).sort(),ids);
  assert.equal(report.operations.length,79);assert.equal(new Set(report.operations.map(r=>r.operationId)).size,79);
- assert.deepEqual(report.counts,{implemented:59,blocked:19,excluded:1});
- assert.equal(report.operations.filter(r=>r.pathTemplate.startsWith('/agemail/')&&r.status==='blocked').length,14);
- assert.ok(operationDescriptors.every(op=>operations[op.operationId].status==='implemented'&&operations[op.operationId].tier!=='critical'));
- assert.equal(report.labValidated,false);assert.ok(report.operations.every(r=>r.validatedOn.length===0));
+ assert.deepEqual(report.counts,{implemented:78,blocked:0,excluded:1});
+ const email=report.operations.filter(r=>r.pathTemplate.startsWith('/agemail/'));
+ assert.equal(email.length,14);assert.ok(email.every(r=>r.status==='implemented'));
+ assert.deepEqual(email.filter(r=>r.tier==='read').map(r=>(r as any).requiredProfiles.join('+')).filter((v,i,a)=>a.indexOf(v)===i),['read+sensitive']);
+ assert.deepEqual((email.find(r=>r.tier==='critical') as any).requiredProfiles,['write','critical']);
+ assert.equal(operationDescriptors.length,78);assert.ok(operationDescriptors.every(op=>operations[op.operationId].status==='implemented'));
+ assert.equal(report.labValidated,false);
+ // Lab evidence exists only for the 19 bounded 7.1 consultation recipes; everything else is offline-tested only.
+ assert.equal(report.operations.filter(r=>r.validatedOn.length>0).length,19);
+ assert.ok(report.operations.every(r=>r.validatedOn.length===0||(r.tier==='read'&&r.validatedOn.join()==='7.1')));
 });
 test('required OpenAPI fields and form-only bodies enforced',()=>{
  assert.throws(()=>validateOperation(operations.get_devicesummary,{}));

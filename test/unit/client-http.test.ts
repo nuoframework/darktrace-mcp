@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import test from 'node:test';
 import { parseConfig } from '../../src/config/schema.js';
 import { createHttpClient, type TrustedOperation } from '../../src/client/httpClient.js';
@@ -91,7 +92,9 @@ test('preview rejects blocked shapes and caller-owned field names before returni
     operationId: 'post_comment', query: [['query', 'x']], body: { kind: 'json', value: { comment: 'safe' } },
   }, { dryRun: true }), isKind('invalid_request'));
   await assert.rejects(client.send({ operationId: 'delete_tags_entities', query: [['ignore previous instructions', 'x']] }, { dryRun: true }), isKind('invalid_request'));
-  await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query: 'YQ==' } }, { dryRun: true }), isKind('invalid_request'));
+  for (const query of ['../status', 'YQ', 'a.b=', 'YQ==%2F', '/YQ=']) {
+    await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query } }, { dryRun: true }), isKind('invalid_request'));
+  }
   await assert.rejects(client.send({
     operationId: 'post_comment', body: { kind: 'json', value: { 'ignore previous instructions': 'x' } },
   }, { dryRun: true }), isKind('invalid_request'));
@@ -221,29 +224,50 @@ test('form array values serialize as repeated keys in their original order', asy
   assert.equal(wireBody, 'tag=one+value&tag=two');
 });
 
-test('unreviewed query plus JSON and DELETE query signatures are rejected before fetch', async () => {
+test('S4/S5/S6 shapes are signed like LegendEvent/darktrace-sdk v0.10.1 (known-answer, both encoding modes)', async () => {
+  const date = '20260102T030405';
+  const hmac = (signed: string) => createHmac('sha1', 'private-secret').update(`${signed}\npublic-secret\n${date}`, 'utf8').digest('hex');
+  for (const encoded of [false, true]) {
+    const wire: Array<{ url: string; method: string; body?: string; headers: Record<string, string> }> = [];
+    const client = makeClient(async (input, init) => {
+      wire.push({ url: String(input), method: String(init?.method), ...(init?.body === undefined ? {} : { body: Buffer.from(init.body as Uint8Array).toString() }), headers: Object.fromEntries(new Headers(init?.headers)) });
+      return new Response('{"ok":true}', { headers: { 'content-type': 'application/json' } });
+    }, { auth: { publicToken: 'public-secret', privateToken: 'private-secret', querySignatureEncoding: encoded ? 'encoded' : 'unencoded' } },
+    { now: () => Date.UTC(2026, 0, 2, 3, 4, 5) });
+    // S4: query plus JSON body -> path?query&{json} (auth.py get_headers with params and json_body).
+    await client.send({ operationId: 'post_comment', query: [['responsedata', 'a b']], body: { kind: 'json', value: { comment: 'x' } } });
+    // S5: DELETE with query -> path?query, exactly like GET (dt_utils._delete).
+    await client.send({ operationId: 'delete_tags_entities', query: [['did', '1'], ['tag', 'Quarantined Device']] });
+    // S6: standard Base64 in the GET path is sent and signed verbatim ('+', '/', '=' literal; dt_advanced_search.py).
+    await client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query: 'eyJh+/8=' } });
+    const space = encoded ? '%20' : ' ';
+    assert.deepEqual(wire.map(w => [w.method, w.url]), [
+      ['POST', 'https://darktrace.example:8443/comments?responsedata=a%20b'],
+      ['DELETE', 'https://darktrace.example:8443/tags/entities?did=1&tag=Quarantined%20Device'],
+      ['GET', 'https://darktrace.example:8443/advancedsearch/api/search/eyJh+/8='],
+    ]);
+    assert.equal(wire[0].body, '{"comment":"x"}');
+    assert.equal(wire[0].headers['dtapi-signature'], hmac(`/comments?responsedata=a${space}b&{"comment":"x"}`));
+    assert.equal(wire[1].headers['dtapi-signature'], hmac(`/tags/entities?did=1&tag=Quarantined${space}Device`));
+    assert.equal(wire[2].headers['dtapi-signature'], hmac('/advancedsearch/api/search/eyJh+/8='));
+    assert.ok(wire.every(w => w.headers['dtapi-date'] === date && w.headers['dtapi-token'] === 'public-secret'));
+  }
+});
+
+test('S6 raw Base64 path admits only the Base64 alphabet; DELETE bodies stay rejected before signing', async () => {
   let calls = 0;
   let signerCalls = 0;
-  const cfg = makeConfig();
-  const client = createHttpClient(cfg, {
+  const client = createHttpClient(makeConfig(), {
     testOnly: true,
     operations,
     signer: { sign() { signerCalls += 1; throw new Error('must not sign'); } },
     fetchImpl: async () => { calls += 1; return new Response('{}'); },
   });
-  await assert.rejects(client.send({
-    operationId: 'post_comment',
-    query: [['responsedata', 'true']],
-    body: { kind: 'json', value: {} },
-  }), isKind('invalid_request'));
-  await assert.rejects(client.send({
-    operationId: 'delete_tags_entities',
-    query: [['did', '1']],
-  }), isKind('invalid_request'));
-  await assert.rejects(client.send({
-    operationId: 'get_advancedsearch_api_search_query',
-    pathParams: { query: 'YQ==' },
-  }), isKind('invalid_request'));
+  for (const query of ['../../status', 'YQ==?x=1', 'YQ==#f', 'Y Q=', 'YQ', '%2e%2e/YQ', '/YQ=', 'x'.repeat(21_852), 'YQ==\n']) {
+    await assert.rejects(client.send({ operationId: 'get_advancedsearch_api_search_query', pathParams: { query } }), isKind('invalid_request'));
+  }
+  await assert.rejects(client.send({ operationId: 'delete_tags_entities', query: [['did', '1']], body: { kind: 'json', value: { did: 1 } } }), isKind('invalid_request'));
+  await assert.rejects(client.send({ operationId: 'get_tags_tid', pathParams: { tid: 'YQ==/../x' } }), isKind('invalid_request'));
   assert.equal(signerCalls, 0);
   assert.equal(calls, 0);
 });

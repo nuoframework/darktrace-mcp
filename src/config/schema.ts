@@ -1,4 +1,3 @@
-import { RELEASE_CAPABILITY } from '../policy/release-capability.js';
 import { canonicalIpAddress } from './address.js';
 
 export type DateFormat = 'compact' | 'spaced';
@@ -170,11 +169,10 @@ function boolean(value: unknown, fallback: boolean, label: string): boolean {
   return value;
 }
 
-/** Also used before file/environment overlays, so unsupported file grants cannot be hidden. */
+/** Also used before file/environment overlays, so malformed file grants cannot be hidden by an override. */
 export function assertReleaseProfiles(value:unknown):void {
   const profiles=record(value,'profiles');
-  if(boolean(profiles.write,false,'profiles.write')&&!RELEASE_CAPABILITY.write) throw new ConfigValidationError('profiles.write is unavailable in this read-only release');
-  if(boolean(profiles.writeCritical,false,'profiles.writeCritical')&&!RELEASE_CAPABILITY.writeCritical) throw new ConfigValidationError('profiles.writeCritical is unavailable in this read-only release');
+  for (const key of ['read','write','sensitiveRead','writeCritical'] as const) boolean(profiles[key],false,`profiles.${key}`);
 }
 
 function requiredToken(value: unknown, label: string): string {
@@ -293,7 +291,6 @@ export function parseConfig(source: unknown): Config {
   if (!read) throw new ConfigValidationError('profiles.read must remain enabled');
   const write = boolean(profiles.write, false, 'profiles.write');
   const sensitiveRead = boolean(profiles.sensitiveRead, false, 'profiles.sensitiveRead');
-  if (sensitiveRead && write) throw new ConfigValidationError('profiles.sensitiveRead and profiles.write cannot be enabled together');
   const writeCritical = boolean(profiles.writeCritical, false, 'profiles.writeCritical');
   if (writeCritical && !write) throw new ConfigValidationError('profiles.writeCritical requires profiles.write');
 

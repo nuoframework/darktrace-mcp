@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import { generateCoverage } from '../../src/coverage/report.js';
 import { operations, validateOperation } from '../../src/api/operations.js';
 import { schemaFromOpenApi } from '../../src/api/validation.js';
-test('coverage preserves 79 operation rows, blocked S5 and every declared parameter/body property',()=>{
+test('coverage preserves 79 operation rows, enabled S5 and every declared parameter/body property',()=>{
   const report=generateCoverage();assert.equal(report.total,79);assert.equal(new Set(report.operations.map(o=>o.operationId)).size,79);
-  assert.equal(report.operations.find(o=>o.operationId==='delete_tags_entities')?.status,'blocked');
+  assert.equal(report.operations.find(o=>o.operationId==='delete_tags_entities')?.status,'implemented');
+  assert.deepEqual((report.operations.find(o=>o.operationId==='delete_tags_entities') as any)?.requiredProfiles,['write']);
   for(const op of Object.values(operations)) {
     const row=report.operations.find(r=>r.operationId===op.operationId)!;
-    assert.deepEqual(row.validatedOn,[]);
+    assert.deepEqual(row.validatedOn,op.validatedOn);
     for(const p of op.parameters) assert.ok(row.parameters.some(r=>r.name===p.name&&r.location===p.in));
     for(const b of op.bodies) for(const name of Object.keys(b.schema.properties??{})) assert.ok(row.parameters.some(r=>r.name===name&&r.contentType===b.contentType));
     for(const p of row.parameters) {assert.ok(p.bounds);assert.ok(p.units);assert.ok(p.default);assert.ok(p.enforcement);}
@@ -22,13 +23,19 @@ test('documented millisecond ranges enforce seven days even near epoch and defau
   assert.throws(()=>validateOperation(op,{query:{from:'2026-02-30 00:00:00',to:'2026-03-01 00:00:00'}}));
   const args=validateOperation(op,{});assert.equal(Number(args.query!.endtime)-Number(args.query!.starttime),3600000);assert.ok(Number(args.query!.endtime)>1e12);
 });
-test('unknown temporal forms are explicitly blocked and cannot dispatch via generic string/numeric schema',()=>{
-  assert.throws(()=>validateOperation(operations.get_devices,{query:{iptime:'unreviewed format'}}));
-  assert.throws(()=>validateOperation(operations.post_intelfeed,{body:{expiry:'unreviewed units'}}));
-  assert.throws(()=>validateOperation(operations.post_tags_entities,{body:{did:1,tag:'test',duration:3600}}));
+test('undocumented single-value time fields are bounded opaque values; unknown paired/range forms stay blocked',()=>{
+  assert.doesNotThrow(()=>validateOperation(operations.get_devices,{query:{iptime:'2026-01-01 00:00:00'}}));
+  assert.doesNotThrow(()=>validateOperation(operations.post_intelfeed,{body:{addentry:'example.com',expiry:'2026-01-01T00:00:00Z'}}));
+  assert.doesNotThrow(()=>validateOperation(operations.post_tags_entities,{body:{did:1,tag:'test',duration:3600}}));
+  assert.doesNotThrow(()=>validateOperation(operations.post_aianalyst_investigations,{body:{did:1,investigateTime:'1700000000'}}));
+  for(const bad of ['x;drop','a'.repeat(65),'line\nbreak','<script>','']) {
+    assert.throws(()=>validateOperation(operations.get_devices,{query:{iptime:bad}}));
+    assert.throws(()=>validateOperation(operations.post_intelfeed,{body:{addentry:'example.com',expiry:bad}}));
+  }
+  assert.throws(()=>validateOperation(operations.post_tags_entities,{body:{did:1,tag:'test',duration:86401}}));
   const rows=generateCoverage().operations;
   for(const [op,name] of [['get_devices','iptime'],['post_intelfeed','expiry'],['post_tags_entities','duration']]) {
-    const p=rows.find(r=>r.operationId===op)!.parameters.find(r=>r.name===name)!;assert.equal(p.status,'blocked');assert.equal(p.units,'unknown');assert.match(String(p.enforcement),/rejection/);
+    const p=rows.find(r=>r.operationId===op)!.parameters.find(r=>r.name===name)!;assert.equal(p.status,'accepted');assert.equal(p.units,'unknown');
   }
 });
 test('effective schemas reject count/score/coordinates/hue/list overflow and undocumented fields',()=>{

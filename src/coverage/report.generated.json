@@ -3,8 +3,8 @@
   "labValidated": false,
   "total": 79,
   "counts": {
-    "implemented": 59,
-    "blocked": 19,
+    "implemented": 78,
+    "blocked": 0,
     "excluded": 1
   },
   "inputBudgets": {
@@ -25,15 +25,20 @@
       "pathTemplate": "/tags/entities",
       "tool": "darktrace_manage_tags",
       "tier": "high",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -55,8 +60,8 @@
           "name": "did",
           "location": "query",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "identifier",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -70,14 +75,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "tag",
           "location": "query",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -91,7 +96,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -103,13 +108,19 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -158,13 +169,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -232,15 +248,21 @@
       "pathTemplate": "/advancedsearch/api/analyze/{field}/{analysis}/{query}",
       "tool": "darktrace_advanced_search",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -628,8 +650,8 @@
           "name": "field",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -643,14 +665,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "analysis",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -679,14 +701,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "query",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -700,7 +722,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -710,15 +732,21 @@
       "pathTemplate": "/advancedsearch/api/graph/{graphmode}/{interval}/{query}",
       "tool": "darktrace_advanced_search",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -932,8 +960,8 @@
           "name": "graphmode",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -954,14 +982,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "interval",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "seconds",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -975,14 +1003,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "query",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -996,7 +1024,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -1006,15 +1034,21 @@
       "pathTemplate": "/advancedsearch/api/search/{query}",
       "tool": "darktrace_advanced_search",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -1141,8 +1175,8 @@
           "name": "query",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Unvalidated DELETE query or base64 GET path signing shape disabled pending independent fixtures and lab evidence",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1156,7 +1190,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -1166,16 +1200,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/admin/decode_link",
       "tool": "darktrace_email_decode_link",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1186,7 +1226,29 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "link",
+          "location": "query",
+          "required": true,
+          "status": "accepted",
+          "reason": null,
+          "units": "not applicable",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192
+          },
+          "default": "required; absence rejected",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_action_summary",
@@ -1194,16 +1256,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/dash/action_summary",
       "tool": "darktrace_email_dashboard",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1214,7 +1282,50 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "days",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "dimensionless",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "limit",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_dash_stats",
@@ -1222,16 +1333,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/dash/dash_stats",
       "tool": "darktrace_email_dashboard",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1242,7 +1359,50 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "days",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "dimensionless",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "limit",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_data_loss",
@@ -1250,16 +1410,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/dash/data_loss",
       "tool": "darktrace_email_dashboard",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1270,7 +1436,50 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "days",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "dimensionless",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "limit",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_dash_user_anomaly",
@@ -1278,16 +1487,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/dash/user_anomaly",
       "tool": "darktrace_email_dashboard",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1298,7 +1513,50 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "days",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "dimensionless",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "limit",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_emails_uuid",
@@ -1306,16 +1564,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/emails/{uuid}",
       "tool": "darktrace_email_get",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1331,8 +1595,8 @@
           "name": "uuid",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Instance email schema and authentication contract required",
+          "status": "accepted",
+          "reason": null,
           "units": "identifier",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1346,7 +1610,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection",
+          "enforcement": "strict schema validation before request building",
           "additionalRules": [
             {
               "id": "list_entries",
@@ -1354,6 +1618,25 @@
             }
           ],
           "additionalRule": "At most 100 comma/newline-separated entries"
+        },
+        {
+          "name": "include_headers",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "not applicable",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "boolean"
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -1363,16 +1646,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/emails/{uuid}/download",
       "tool": "darktrace_download_email",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1388,8 +1677,8 @@
           "name": "uuid",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Instance email schema and authentication contract required",
+          "status": "accepted",
+          "reason": null,
           "units": "identifier",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1403,7 +1692,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection",
+          "enforcement": "strict schema validation before request building",
           "additionalRules": [
             {
               "id": "list_entries",
@@ -1420,16 +1709,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/resources/actions",
       "tool": "darktrace_email_reference_data",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1448,16 +1743,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/resources/filters",
       "tool": "darktrace_email_reference_data",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1476,16 +1777,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/resources/tags",
       "tool": "darktrace_email_reference_data",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1504,16 +1811,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/system/audit/events",
       "tool": "darktrace_email_audit_events",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1524,7 +1837,71 @@
         "unmodeledStructures": "fixed safe summary",
         "labValidated": false
       },
-      "parameters": []
+      "parameters": [
+        {
+          "name": "eventType",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "not applicable",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "limit",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        },
+        {
+          "name": "offset",
+          "location": "query",
+          "required": false,
+          "status": "accepted",
+          "reason": null,
+          "units": "items",
+          "bounds": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "default": "omitted; no client default",
+          "provenance": [
+            "local OpenAPI 6.1 parameter/schema",
+            "src/api/validation.ts schemaFromOpenApi",
+            "src/api/operations.ts validateOperation"
+          ],
+          "enforcement": "strict schema validation before request building"
+        }
+      ]
     },
     {
       "operationId": "get_agemail_api_ep_api_v1_0_system_audit_eventTypes",
@@ -1532,16 +1909,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/system/audit/eventTypes",
       "tool": "darktrace_email_reference_data",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -1565,12 +1948,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -2062,13 +2452,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -2158,12 +2553,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -2677,10 +3079,13 @@
       "discovery": "unavailable",
       "releaseEligible": false,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "blocked",
+      "requiredProfiles": [],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -2928,12 +3333,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -3072,12 +3484,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -3276,12 +3695,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -3591,12 +4017,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -3702,13 +4135,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -3828,13 +4266,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -3972,13 +4415,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -4123,12 +4571,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -4677,13 +5132,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -5028,12 +5488,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -5194,12 +5661,15 @@
           "name": "iptime",
           "location": "query",
           "required": false,
-          "status": "blocked",
-          "reason": "Unknown time units or format; form blocked pending reviewed contract",
+          "status": "accepted",
+          "reason": null,
           "units": "unknown",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "not": {}
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
           },
           "default": "omitted; no client default",
           "provenance": [
@@ -5207,7 +5677,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "schema rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "opaque_time",
+              "description": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
+            }
+          ],
+          "additionalRule": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
         },
         {
           "name": "mac",
@@ -5412,12 +5889,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -5697,13 +6181,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -5772,12 +6261,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -6041,13 +6537,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6205,13 +6706,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6278,12 +6784,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -6404,12 +6917,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -6560,13 +7080,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -6972,13 +7497,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -7051,13 +7581,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -7151,12 +7686,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -8166,13 +8708,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9202,13 +9749,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9290,13 +9842,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9434,13 +9991,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -9568,13 +10130,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10222,13 +10789,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10277,15 +10849,21 @@
       "pathTemplate": "/pcaps/{filename}",
       "tool": "darktrace_download_pcap",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Independent export approval, retention and aggregate disk quota pending",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -10302,8 +10880,8 @@
           "name": "filename",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Independent export approval, retention and aggregate disk quota pending",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -10317,7 +10895,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building"
         }
       ]
     },
@@ -10332,12 +10910,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -10510,12 +11095,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -10624,12 +11216,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -10742,13 +11341,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -11085,13 +11689,18 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -11199,12 +11808,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -11381,12 +11997,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -11489,12 +12112,19 @@
       "discovery": "profile dependent",
       "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
       "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read"
+      ],
       "documentedIn": "6.1",
-      "validatedOn": [],
+      "validatedOn": [
+        "7.1"
+      ],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
         "fields": {
@@ -11647,13 +12277,19 @@
       "tier": "read",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12117,16 +12753,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/emails/search",
       "tool": "darktrace_email_search",
       "tier": "read",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "read",
+        "sensitive"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -12143,14 +12785,59 @@
           "location": "body",
           "contentType": "application/json",
           "required": true,
-          "status": "blocked",
-          "reason": "Instance email schema and authentication contract required",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema0"
+            },
+            "$defs": {
+              "__schema0": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.-]+$"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                ]
+              }
+            }
           },
           "default": "required; absence rejected",
           "provenance": [
@@ -12158,7 +12845,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "freeform_json_object",
+              "description": "Undocumented free-form JSON object (Darktrace/EMAIL instance schema): keys 1..128 chars [A-Za-z0-9_.-], strings <=8192, arrays <=100, depth/elements/bytes bounded by the tool input budget"
+            }
+          ],
+          "additionalRule": "Undocumented free-form JSON object (Darktrace/EMAIL instance schema): keys 1..128 chars [A-Za-z0-9_.-], strings <=8192, arrays <=100, depth/elements/bytes bounded by the tool input budget"
         }
       ]
     },
@@ -12168,16 +12862,22 @@
       "pathTemplate": "/agemail/api/ep/api/v1.0/emails/{uuid}/action",
       "tool": "darktrace_email_action",
       "tier": "critical",
-      "status": "blocked",
-      "reason": "Instance email schema and authentication contract required",
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "status": "implemented",
+      "reason": null,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "blocked",
-      "documentedIn": "6.1",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
+      "documentedIn": "6.1 (routes) + darktrace-sdk v0.10.1 (parameters)",
       "validatedOn": [],
       "outputView": {
         "source": "local 6.1 response schema and code-owned response-fields.json",
@@ -12193,8 +12893,8 @@
           "name": "uuid",
           "location": "path",
           "required": true,
-          "status": "blocked",
-          "reason": "Instance email schema and authentication contract required",
+          "status": "accepted",
+          "reason": null,
           "units": "identifier",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -12208,7 +12908,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection",
+          "enforcement": "strict schema validation before request building",
           "additionalRules": [
             {
               "id": "list_entries",
@@ -12222,14 +12922,59 @@
           "location": "body",
           "contentType": "application/json",
           "required": true,
-          "status": "blocked",
-          "reason": "Instance email schema and authentication contract required",
+          "status": "accepted",
+          "reason": null,
           "units": "not applicable",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "type": "object",
-            "properties": {},
-            "additionalProperties": false
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_.-]+$"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema0"
+            },
+            "$defs": {
+              "__schema0": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_.-]+$"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/__schema0"
+                    }
+                  }
+                ]
+              }
+            }
           },
           "default": "required; absence rejected",
           "provenance": [
@@ -12237,7 +12982,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "runtime operation policy rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "freeform_json_object",
+              "description": "Undocumented free-form JSON object (Darktrace/EMAIL instance schema): keys 1..128 chars [A-Za-z0-9_.-], strings <=8192, arrays <=100, depth/elements/bytes bounded by the tool input budget"
+            }
+          ],
+          "additionalRule": "Undocumented free-form JSON object (Darktrace/EMAIL instance schema): keys 1..128 chars [A-Za-z0-9_.-], strings <=8192, arrays <=100, depth/elements/bytes bounded by the tool input budget"
         }
       ]
     },
@@ -12249,13 +13001,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12343,13 +13100,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12458,13 +13220,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12495,7 +13262,10 @@
             "type": "object",
             "properties": {
               "investigateTime": {
-                "not": {}
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 8192,
+                "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
               },
               "did": {
                 "type": "integer",
@@ -12522,12 +13292,15 @@
           "location": "body",
           "contentType": "application/json",
           "required": true,
-          "status": "blocked",
-          "reason": "Unknown time units or format; form blocked pending reviewed contract",
+          "status": "accepted",
+          "reason": null,
           "units": "unknown",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "not": {}
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
           },
           "default": "required; absence rejected",
           "provenance": [
@@ -12535,7 +13308,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "schema rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "opaque_time",
+              "description": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
+            }
+          ],
+          "additionalRule": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
         },
         {
           "name": "did",
@@ -12569,13 +13349,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12663,13 +13448,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12757,13 +13547,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -12851,13 +13646,19 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13038,13 +13839,19 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13439,13 +14246,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13744,13 +14556,19 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -13796,7 +14614,10 @@
                 "maxLength": 255
               },
               "expiry": {
-                "not": {}
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 8192,
+                "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
               },
               "hostname": {
                 "type": "boolean"
@@ -13913,12 +14734,15 @@
           "location": "body",
           "contentType": "application/json",
           "required": false,
-          "status": "blocked",
-          "reason": "Unknown time units or format; form blocked pending reviewed contract",
+          "status": "accepted",
+          "reason": null,
           "units": "unknown",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "not": {}
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
           },
           "default": "omitted; no client default",
           "provenance": [
@@ -13926,7 +14750,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "schema rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "opaque_time",
+              "description": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
+            }
+          ],
+          "additionalRule": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
         },
         {
           "name": "hostname",
@@ -14067,7 +14898,10 @@
                 "maxLength": 255
               },
               "expiry": {
-                "not": {}
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 8192,
+                "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
               },
               "hostname": {
                 "type": "boolean"
@@ -14184,12 +15018,15 @@
           "location": "body",
           "contentType": "application/x-www-form-urlencoded",
           "required": false,
-          "status": "blocked",
-          "reason": "Unknown time units or format; form blocked pending reviewed contract",
+          "status": "accepted",
+          "reason": null,
           "units": "unknown",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "not": {}
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 8192,
+            "pattern": "^[0-9A-Za-z:.+\\- ]{1,64}$"
           },
           "default": "omitted; no client default",
           "provenance": [
@@ -14197,7 +15034,14 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "schema rejection"
+          "enforcement": "strict schema validation before request building",
+          "additionalRules": [
+            {
+              "id": "opaque_time",
+              "description": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
+            }
+          ],
+          "additionalRule": "Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged"
         },
         {
           "name": "hostname",
@@ -14320,13 +15164,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14493,13 +15342,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14601,13 +15455,18 @@
       "tier": "medium",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -14774,13 +15633,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15062,13 +15926,19 @@
       "tier": "critical",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "confirm-required (write+critical profiles, confirm:true)",
+      "requiredProfiles": [
+        "write",
+        "critical"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15648,13 +16518,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15919,13 +16794,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {
@@ -15961,7 +16841,9 @@
                 "maximum": 9007199254740991
               },
               "duration": {
-                "not": {}
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 86400
               },
               "tag": {
                 "type": "string",
@@ -16010,12 +16892,14 @@
           "location": "body",
           "contentType": "application/x-www-form-urlencoded",
           "required": false,
-          "status": "blocked",
-          "reason": "Unknown time units or format; form blocked pending reviewed contract",
+          "status": "accepted",
+          "reason": null,
           "units": "unknown",
           "bounds": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "not": {}
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400
           },
           "default": "omitted; no client default",
           "provenance": [
@@ -16023,7 +16907,7 @@
             "src/api/validation.ts schemaFromOpenApi",
             "src/api/operations.ts validateOperation"
           ],
-          "enforcement": "schema rejection"
+          "enforcement": "strict schema validation before request building"
         },
         {
           "name": "tag",
@@ -16057,13 +16941,18 @@
       "tier": "high",
       "status": "implemented",
       "reason": null,
-      "discovery": "unavailable",
-      "releaseEligible": false,
+      "discovery": "profile dependent",
+      "releaseEligible": true,
       "releaseCapability": {
-        "write": false,
-        "writeCritical": false
+        "read": true,
+        "sensitiveRead": true,
+        "write": true,
+        "writeCritical": true
       },
-      "execution": "release capability denied",
+      "execution": "operator profile dependent",
+      "requiredProfiles": [
+        "write"
+      ],
       "documentedIn": "6.1",
       "validatedOn": [],
       "outputView": {

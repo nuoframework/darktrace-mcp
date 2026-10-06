@@ -17,7 +17,10 @@ export function inputUnit(raw:Schema,name:string):string {
   if (/id$|^master$|^viewsubnet$/i.test(name)) return 'identifier';
   return ['number','integer'].includes(raw.type)?'dimensionless':'not applicable';
 }
+/** Single-value time/duration fields with an undocumented format: passed through as bounded opaque values; the appliance validates them. */
+export const OPAQUE_TIME_FIELDS:ReadonlySet<string>=Object.freeze(new Set(['iptime','investigateTime','expiry','duration','expiryDuration']));
 export function blockedInputReason(raw:Schema,name:string):string|null {
+  if (OPAQUE_TIME_FIELDS.has(name)) return null;
   return inputUnit(raw,name)==='unknown'?'Unknown time units or format; form blocked pending reviewed contract':null;
 }
 /** Reject unsafe keys before schema parsing can strip or transform them. */
@@ -60,6 +63,8 @@ interface StringRule extends ValidationRule {
 }
 const documentedLength=(raw:Schema)=>String(raw.description??'').match(/(?:under|must be under) (\d+) characters/i);
 const stringRules:readonly StringRule[]=[
+  {id:'opaque_time',description:'Undocumented time/duration format: 1..64 chars of [0-9A-Za-z :.+-], forwarded unchanged',matches:(_s,n)=>OPAQUE_TIME_FIELDS.has(n),
+    apply:s=>s.regex(/^[0-9A-Za-z:.+\- ]{1,64}$/)},
   {id:'decimal_count',description:'Decimal integer string 1..1000',matches:(_s,n)=>/^(count|limit|size)$/i.test(n),
     apply:s=>s.regex(/^[1-9][0-9]{0,3}$/).refine(v=>Number(v)<=1000)},
   {id:'decimal_offset',description:'Decimal integer string 0..100000',matches:(_s,n)=>/^(offset|page)$/i.test(n),
@@ -79,6 +84,12 @@ const stringRules:readonly StringRule[]=[
 const SEARCH_SECONDS_RULE:ValidationRule={id:'search_seconds',description:'Decimal relative timeframe 1..604800 seconds; custom endpoint form rejected pending documented units/format'};
 export const SEARCH_HASH_RULE:ValidationRule=Object.freeze({id:'search_hash',description:'Canonical Base64; decoded bytes <=16384; fatal UTF-8 decoding, bounded strict SearchSchema, paired custom endpoints required and unknown endpoint units rejected'});
 
+export const FREEFORM_JSON_RULE:ValidationRule=Object.freeze({id:'freeform_json_object',description:'Undocumented free-form JSON object (Darktrace/EMAIL instance schema): keys 1..128 chars [A-Za-z0-9_.-], strings <=8192, arrays <=100, depth/elements/bytes bounded by the tool input budget'});
+const freeformKey=z.string().min(1).max(128).regex(/^[A-Za-z0-9_.-]+$/).refine(key=>!forbidden.has(key));
+const freeformValue:z.ZodType<any>=z.lazy(()=>z.union([z.string().max(8192),z.number().finite(),z.boolean(),z.null(),
+  z.array(freeformValue).max(100),z.record(freeformKey,freeformValue)]));
+/** Only for request bodies the spec types as an open object with no properties. Depth is bounded by checkInput. */
+export function freeformObject():z.ZodType<any> {return registerRules(z.record(freeformKey,freeformValue),[FREEFORM_JSON_RULE]);}
 export function schemaFromOpenApi(raw: Schema, name = '', depth = 0): z.ZodType<any> {
   if (depth > 8) throw new Error('Schema depth exceeds budget');
   let s = raw;
@@ -91,6 +102,7 @@ export function schemaFromOpenApi(raw: Schema, name = '', depth = 0): z.ZodType<
   let result: z.ZodType<any>;
   if (Array.isArray(s.enum) && s.enum.length) result = z.union(s.enum.map((v: any) => z.literal(v)) as any);
   else if (s.oneOf || s.anyOf) result = z.union((s.oneOf ?? s.anyOf).map((v: Schema)=>schemaFromOpenApi(v,name,depth+1)) as any);
+  else if (s.type === 'object' && !s.properties && s.additionalProperties === true) result = freeformObject();
   else if (s.type === 'object' || s.properties) {
     const shape: Record<string,z.ZodType<any>> = {};
     for (const [key,v] of Object.entries(s.properties ?? {})) {
@@ -109,6 +121,7 @@ export function schemaFromOpenApi(raw: Schema, name = '', depth = 0): z.ZodType<
     if (name==='similardevices') num=num.int().min(0).max(100);
     if (/^(offset|page)$/i.test(name)) num = num.int().min(0).max(100000);
     if (/^(hours|intervalhours)$/i.test(name)) num = num.min(1).max(168);
+    if (name==='days') num=num.int().min(1).max(365);
     if (/^(port|port1|port2|sourceport|destinationport)$/i.test(name)) num=num.int().min(1).max(65535);
     if (/^(did|ddid|odid|excludedid|excludesid|master|viewsubnet|pbid|pid|sid|tid|teid|mlid|cid|codeid)$/i.test(name)) num=num.int().min(1);
     if (name==='priority') num=num.int().min(-5).max(5);

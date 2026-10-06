@@ -30,9 +30,15 @@ test('MCP tools/list default, fixture read, hidden write, untrusted args',async(
   assert.equal(injection.isError,true);assert.equal(connection.requests.length,1);
  } finally {await connection.close();}
 });
-test('MCP refuses writeCritical configuration and forged config still hides critical tools',async()=>{
- assert.throws(()=>config({write:true,writeCritical:true}),/read-only release/);
- const requests:ApiRequest[]=[];const base=config();const server=createServer({cfg:{...base,profiles:{...base.profiles,write:true,writeCritical:true}},client:{async request(req){requests.push(req);return {};}}});
+test('MCP lists critical tools only with write+critical; a forged critical-without-write config still hides them',async()=>{
+ assert.throws(()=>config({writeCritical:true}),/requires profiles.write/);
+ const requests:ApiRequest[]=[];const base=config();const server=createServer({cfg:{...base,profiles:{...base.profiles,writeCritical:true}},client:{async request(req){requests.push(req);return {};}}});
  const client=new Client({name:'release-denial',version:'1'});const[a,b]=InMemoryTransport.createLinkedPair();
- try{await server.connect(b);await client.connect(a);const list=await client.listTools();assert.equal(list.tools.some((t: {name:string})=>t.name==='darktrace_antigena_manual_action'),false);const result=await client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1},dryRun:false}});assert.equal(result.isError,true);assert.equal(requests.length,0);}finally{await client.close();await server.close();}
+ try{await server.connect(b);await client.connect(a);const list=await client.listTools();assert.equal(list.tools.some((t: {name:string})=>t.name==='darktrace_antigena_manual_action'),false);const result=await client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:60},confirm:true}});assert.equal(result.isError,true);assert.equal(requests.length,0);}finally{await client.close();await server.close();}
+ const enabled=await connected({write:true,writeCritical:true});
+ try{const list=await enabled.client.listTools();const tool=list.tools.find((t:{name:string})=>t.name==='darktrace_antigena_manual_action') as any;
+  assert.ok(tool);assert.equal(tool.annotations.destructiveHint,true);assert.equal(tool.annotations.readOnlyHint,false);assert.ok(tool.inputSchema.properties.confirm);
+  const preview=await enabled.client.callTool({name:'darktrace_antigena_manual_action',arguments:{body:{did:1,action:'quarantine',duration:60}}});
+  assert.equal((preview.structuredContent as any).confirmationRequired,true);assert.equal(enabled.requests.length,0);
+ }finally{await enabled.close();}
 });
