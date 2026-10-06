@@ -112,3 +112,20 @@ The installer acknowledgement flow added CLI tests and changed `src/`, so the pi
 | Full-API contract fixture | `df8ca493…ded5` | unchanged |
 
 Receipt: `test/security/evidence/2026-10-06T13-37-08-463Z.json` (macOS arm64: 1150 tests, 1147 pass, 3 platform skips).
+
+## CI closure for B1 / B7 (2026-10-06)
+
+Green `ci.yml` run at commit `5edc8fc` (branch `feat/full-api-easy-install`, PR #1):
+https://github.com/nuoframework/darktrace-mcp/actions/runs/37476050725
+
+| Job | Result |
+|---|---|
+| offline (24) | success ([log](https://github.com/nuoframework/darktrace-mcp/actions/runs/37476050725/job/112311613028)) |
+| offline (22) | success ([log](https://github.com/nuoframework/darktrace-mcp/actions/runs/37476050725/job/112311613577)) |
+| docker (arm64, ubuntu-24.04-arm) | success ([log](https://github.com/nuoframework/darktrace-mcp/actions/runs/37476050725/job/112313125669)) |
+| docker (amd64, ubuntu-24.04) | success ([log](https://github.com/nuoframework/darktrace-mcp/actions/runs/37476050725/job/112313125772)) |
+
+Two earlier amd64 failures (runs 37470095768, 37473477924, 37474709434) were the isolated security
+suite exceeding the harness's 120 s child timeout on the 2-vCPU amd64 runner (no summary line was
+written); the budget is now 10 minutes (`test/security/run-isolated.mjs`). The Linux runs report
+1150/1150 security and 224/224 functional tests with zero skips on both architectures.
