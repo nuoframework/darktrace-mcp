@@ -1,17 +1,19 @@
 {
-  "mcpServers": {
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
     "darktrace": {
-      "type": "stdio",
-      "command": "/absolute/path/to/node",
-      "args": [
+      "type": "local",
+      "command": [
+        "/absolute/path/to/node",
         "/absolute/path/to/darktrace-mcp/dist/src/index.js"
       ],
-      "env": {
+      "environment": {
         "DARKTRACE_URL": "https://darktrace.example.internal",
         "DARKTRACE_PUBLIC_TOKEN_FILE": "/absolute/private/darktrace/public-token",
         "DARKTRACE_PRIVATE_TOKEN_FILE": "/absolute/private/darktrace/private-token",
         "DARKTRACE_PROFILES": "read"
-      }
+      },
+      "enabled": true
     }
   }
 }
