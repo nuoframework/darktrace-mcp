@@ -81,7 +81,7 @@ RUN cd /apks && sha256sum -c /pins-${TARGETARCH} && \
     ldd /usr/bin/node | tee /linkage.txt && \
     mkdir -p /rootfs/etc/apk/keys && cp /etc/apk/keys/* /rootfs/etc/apk/keys/ && \
     apk --root /rootfs --initdb --no-network --no-scripts add /apks/*.apk && \
-    rm -rf /rootfs/bin /rootfs/sbin /rootfs/usr/sbin /rootfs/etc/apk /rootfs/lib/apk/db/scripts.tar && \
+    rm -rf /rootfs/bin /rootfs/sbin /rootfs/usr/sbin /rootfs/etc/apk /rootfs/lib/apk/db/scripts.tar /rootfs/lib/apk/db/scripts.tar.gz /rootfs/var/log/apk.log && \
     mkdir -p /rootfs/nodejs/bin /rootfs/etc /rootfs/licenses && \
     ln -s /usr/bin/node /rootfs/nodejs/bin/node && \
     printf 'NAME="Alpine Linux"\nID=alpine\nVERSION_ID=3.24.2\n' > /rootfs/etc/os-release && \
@@ -111,6 +111,19 @@ COPY --from=runtime-apks /licenses/ /rootfs/licenses/
 COPY --from=runtime-apks /LICENSE-SHA256SUMS /license-pins
 RUN echo 'ff0b7ab3ad3b2b0fdee3b6b4112b878ebabbcef661c0818c74a72660b719ad7f  /license-pins' | sha256sum -c - && \
     cd /rootfs/licenses && sha256sum -c /license-pins
+# Reject unreviewed license context extras, symlinks and special files.
+RUN node --input-type=commonjs <<'NODE'
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const expected=fs.readFileSync('/license-pins','utf8').trim().split('\n').map(l=>l.split('  ')[1]);
+assert.equal(expected.length,84);
+const directories=new Set();for(const name of expected){let d=path.posix.dirname(name);while(d!=='.'){directories.add(d);d=path.posix.dirname(d);}}
+const actual=[];function walk(dir,relative=''){
+ for(const name of fs.readdirSync(dir)){const p=path.join(dir,name),r=relative+name,st=fs.lstatSync(p);assert.ok(!st.isSymbolicLink(),`license symlink: ${r}`);
+  if(st.isDirectory()){assert.ok(directories.has(r),`extra license directory: ${r}`);fs.chmodSync(p,0o755);assert.equal(fs.statSync(p).mode&0o777,0o755);walk(p,r+'/');}
+  else {assert.ok(st.isFile(),`license special file: ${r}`);fs.chmodSync(p,0o644);assert.equal(fs.statSync(p).mode&0o777,0o644);actual.push(r);}
+ }
+}fs.chmodSync('/rootfs/licenses',0o755);assert.equal(fs.statSync('/rootfs/licenses').mode&0o777,0o755);walk('/rootfs/licenses');assert.deepEqual(actual.sort(),expected.sort());
+NODE
 # Execute the curated loader/library closure, not only the builder's Node.
 RUN chroot /rootfs /nodejs/bin/node -e 'const a=require("node:assert/strict"),f=require("node:fs");a.equal(process.versions.node,"24.18.1");a.equal(process.config.variables.node_shared_openssl,true);a.ok(process.versions.openssl.startsWith("3.5."));a.ok(process.versions.openssl.split(".").map(Number).reduce((n,v)=>n*1000+v,0)>=3005009);console.log(JSON.stringify({node:process.versions.node,openssl:process.versions.openssl,shared:process.config.variables.node_shared_openssl}));for(const p of ["/bin/sh","/bin/busybox","/usr/bin/ssl_client","/usr/bin/c_rehash","/usr/bin/npm","/sbin/apk","/usr/sbin/update-ca-certificates"])a.equal(f.existsSync(p),false)'
 

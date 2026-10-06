@@ -1,9 +1,8 @@
 // Fetch immutable, signed Alpine runtime inputs; no production files are changed.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, renameSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, renameSync, lstatSync, realpathSync, statSync, openSync, closeSync, writeSync } from 'node:fs';
 import { resolve, join, dirname, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 const base='alpine@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6';
 const repository='https://dl-cdn.alpinelinux.org/alpine/v3.24/main';
@@ -218,6 +217,37 @@ const output=resolve(args[0]), arch=args[1];assert.ok(['amd64','arm64'].includes
 const dockerfile=readFileSync(new URL('../Dockerfile',import.meta.url),'utf8');
 const pins=new RegExp(String.raw`COPY <<EOF /pins-${arch}\n([\s\S]*?)EOF`).exec(dockerfile)?.[1];
 assert.ok(pins,'Committed architecture APK pins must exist');
+const markerName='.darktrace-runtime-inputs.json';
+const markerBytes=JSON.stringify({schemaVersion:1,owner:'darktrace-mcp/prepare-docker-runtime'})+'\n';
+assert.ok(typeof process.getuid==='function','Preparation requires a Unix Docker host');
+const uid=process.getuid(),gid=process.getgid();
+function checkAncestors(target){
+ let current=target;
+ while(current!==dirname(current)){
+  const st=lstatSync(current,{throwIfNoEntry:false});
+  if(st)assert.ok(st.isDirectory()&&!st.isSymbolicLink(),`Unsafe output ancestor: ${current}`);
+  current=dirname(current);
+ }
+}
+function checkTree(dir){
+ for(const e of readdirSync(dir,{withFileTypes:true})){
+  const name=join(dir,e.name),st=lstatSync(name);
+  assert.ok(!st.isSymbolicLink()&&(st.isDirectory()||st.isFile()),`Unsafe archive entry: ${name}`);
+  assert.equal(st.uid,uid,`Archive entry must be owned by the preparing user: ${name}`);
+  if(st.isDirectory())checkTree(name);
+ }
+}
+checkAncestors(output);
+if(existsSync(output)){
+ const st=lstatSync(output);assert.equal(st.uid,uid,'Output directory must be owned by the preparing user');
+ const marker=join(output,markerName),m=lstatSync(marker,{throwIfNoEntry:false});
+ assert.ok(m?.isFile()&&!m.isSymbolicLink()&&m.uid===uid,'Refusing existing non-helper output directory');
+ assert.equal(readFileSync(marker,'utf8'),markerBytes,'Invalid helper output marker');checkTree(output);
+}else{
+ mkdirSync(output,{recursive:true,mode:0o700});assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink path');
+ writeFileSync(join(output,markerName),markerBytes,{flag:'wx',mode:0o600});
+}
+assert.equal(realpathSync(output),output,'Output must be a canonical nonsymlink path');
 const archive=join(output,arch), downloaded=join(output,'vendor-sources');
 mkdirSync(join(archive,'apks'),{recursive:true});mkdirSync(downloaded,{recursive:true});
 function run(argv){const r=spawnSync(argv[0],argv.slice(1),{stdio:'inherit'});if(r.error)throw r.error;assert.equal(r.status,0,`${argv[0]} failed`);}
@@ -231,16 +261,26 @@ cp /etc/apk/repositories /archive/repositories
 cp /var/cache/apk/* /archive/ 2>/dev/null || true
 apk fetch --recursive --output /archive/apks nodejs=24.18.1-r0 libssl3=3.5.9-r0 libcrypto3=3.5.9-r0 ca-certificates-bundle=20260909-r0
 apk verify /archive/apks/*.apk
+chown -R ${uid}:${gid} /archive
 `;
 run(['docker','run','--rm','--platform',`linux/${arch}`,'--mount',`type=bind,src=${archive},dst=/archive`,base,'sh','-ec',fetchScript]);
 writeFileSync(join(archive,'SHA256SUMS'),pins);
 const expected=new Map(pins.trim().split('\n').map(l=>l.split(/  /)));
 assert.equal(readdirSync(join(archive,'apks')).length,expected.size);
 for(const [hash,name] of expected)assert.equal(createHash('sha256').update(readFileSync(join(archive,'apks',name))).digest('hex'),hash,name);
+const maximumDownloadBytes=128*1024*1024;
 async function download(url,file,hash,algorithm){
- if(!existsSync(file)){
-  const r=await fetch(url,{redirect:'error'});assert.ok(r.ok,`${url}: ${r.status}`);
-  writeFileSync(file,Buffer.from(await r.arrayBuffer()));
+ checkAncestors(dirname(file));
+ const existing=lstatSync(file,{throwIfNoEntry:false});
+ if(existing){assert.ok(existing.isFile()&&!existing.isSymbolicLink());assert.equal(existing.uid,uid);assert.ok(existing.size<=maximumDownloadBytes);}
+ else{
+  const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(120000)});assert.ok(r.ok,`${url}: ${r.status}`);
+  const advertised=r.headers.get('content-length');if(advertised!==null)assert.ok(Number.isSafeInteger(Number(advertised))&&Number(advertised)>=0&&Number(advertised)<=maximumDownloadBytes,'Oversized response');
+  const temporary=file+'.partial';const fd=openSync(temporary,'wx',0o600);let bytes=0;
+  try{
+   for await(const chunk of r.body){bytes+=chunk.length;assert.ok(bytes<=maximumDownloadBytes,'Download byte cap exceeded');let offset=0;while(offset<chunk.length)offset+=writeSync(fd,chunk,offset,chunk.length-offset);}
+   closeSync(fd);assert.equal(createHash(algorithm).update(readFileSync(temporary)).digest('hex'),hash,file);renameSync(temporary,file);
+  }catch(error){try{closeSync(fd);}catch{}rmSync(temporary,{force:true});throw error;}
  }
  assert.equal(createHash(algorithm).update(readFileSync(file)).digest('hex'),hash,file);
 }
@@ -251,8 +291,8 @@ for(const source of sources){
  writeFileSync(join(downloaded,`${source.origin}.members`),source.licenses.join('\n')+'\n');
 }
 const licenseDir=join(archive,'licenses');rmSync(licenseDir,{recursive:true,force:true});mkdirSync(licenseDir);
-const extract=sources.map(s=>`mkdir -p /archive/licenses/${s.origin}; tar -xf /sources/${s.file} -C /archive/licenses/${s.origin} -T /sources/${s.origin}.members --no-same-permissions`).join('\n');
-run(['docker','run','--rm','--network','none','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges','--mount',`type=bind,src=${archive},dst=/archive`,'--mount',`type=bind,src=${downloaded},dst=/sources,readonly`,base,'sh','-ec','set -eu\n'+extract]);
+const extract=sources.map(s=>`mkdir -p /archive/licenses/${s.origin}; tar -xf /sources/${s.file} -C /archive/licenses/${s.origin} -T /sources/${s.origin}.members --no-same-permissions -o`).join('\n');
+run(['docker','run','--rm','--user',`${uid}:${gid}`,'--network','none','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges','--mount',`type=bind,src=${archive},dst=/archive`,'--mount',`type=bind,src=${downloaded},dst=/sources,readonly`,base,'sh','-ec','set -eu\n'+extract]);
 renameSync(join(licenseDir,'nodejs/node-v24.18.1/LICENSE'),join(licenseDir,'nodejs/LICENSE'));rmSync(join(licenseDir,'nodejs/node-v24.18.1'),{recursive:true});
 const sqlite=join(licenseDir,'sqlite/sqlite-autoconf-3530400/sqlite3.h');const text=readFileSync(sqlite,'utf8');writeFileSync(join(dirname(sqlite),'public-domain-NOTICE.txt'),text.slice(0,text.indexOf('*/')+2)+'\n');rmSync(sqlite);
 const ca=join(licenseDir,'ca-certificates/ca-certificates-20260909');
