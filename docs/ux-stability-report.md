@@ -2,7 +2,7 @@
 
 > **Dated record.** This run predates the exclusion of the Darktrace/Email action and the final write controls. Its "51 tools and 78 operations" and the email-action preview describe that build. The 1.1.0 candidate exposes 50 tools and 77 executable operations; see the [tool reference](tools.md).
 
-Lab: Darktrace 7.1.0 (`drqixbzh56.visualiser.labs.darktrace.com`), 2026-10-06. Server under test: `dist/src/index.js`
+Lab: Darktrace 7.1.0 (lab A, hostname withheld), 2026-10-06. Server under test: `dist/src/index.js`
 over stdio, MCP protocol 2025-06-18. The question was whether an agent can work fluidly: few errors, errors it can
 act on, sensible defaults, no silent truncation, consistent shapes. No response data is recorded here. The harness
 logged only metadata: tool, operation, argument *shape*, ok/error, errorCode, latency, bytes, truncation flags,

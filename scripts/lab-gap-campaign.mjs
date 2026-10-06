@@ -3,7 +3,7 @@
 // owner-authorised lab appliance, exactly as a client would, and prints one line per call with the outcome only.
 //
 // Usage:
-//   LAB_URL=https://<lab>.visualiser.labs.darktrace.com node scripts/lab-gap-campaign.mjs <calls.json>
+//   LAB_URL=https://<appliance> node scripts/lab-gap-campaign.mjs <calls.json>
 //
 // calls.json is a JSON array of steps:
 //   "list"                                           list tool names
