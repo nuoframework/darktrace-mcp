@@ -15,32 +15,27 @@
   <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-es.svg" alt="transporte: solo stdio"></a>
   <a href="package.json"><img src="docs/assets/badges/node-22-es.svg" alt="entorno: Node.js 22+"></a>
   <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-es.svg" alt="licencia: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-es.svg" alt="docker: build local, ID de imagen fijado"></a>
+  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-es.svg" alt="docker: archivo de imagen privado o build local, ID de imagen fijado"></a>
   <a href="docs/security/mcp-corrections-acceptance.md"><img src="docs/assets/badges/security-tests-es.svg" alt="pruebas de seguridad: offline, 2026-10-05"></a>
-  <a href="docs/stable-readiness.md"><img src="docs/assets/badges/private-alpha-es.svg" alt="estado: alfa privada"></a>
 </p>
 
 [Empieza en cinco minutos](docs/es/getting-started.md) · [Configuración de clientes](docs/clients.md) · [Configuración](docs/configuration.md) · [Inicio rápido en inglés](docs/getting-started.md)
 
 ## Investigación con límites
 
-Investiga dispositivos, infracciones de modelos e incidentes de analistas desde un cliente MCP, con un inventario fijo de operaciones, perfiles controlados por el operador y salida acotada. Esta es una **alpha privada con evidencia de laboratorio acotada a 19 selectores** para `nuoframework/darktrace-mcp`. No hay publicación npm, imagen pública ni despliegue de producción verificado.
+Investiga dispositivos, infracciones de modelos e incidentes de analistas desde un cliente MCP, con un inventario fijo de operaciones, perfiles controlados por el operador y salida acotada. Es un **candidato de versión privado** de `nuoframework/darktrace-mcp`. No hay publicación en npm ni en un registro público, y no se ha verificado ningún despliegue de producción.
 
-| Capacidad | Comportamiento de la base | Evidencia/estado |
+| Área | Candidato actual | Estado |
 |---|---|---|
-| Investigación | 19 selectores GET validados / 15 herramientas MCP aplicados en ambos perfiles | Fuente y contrato completo fijado aceptados de forma independiente; Advanced Search aplazado |
-| Cambios | La política inmutable de primera versión estable deniega todas las capacidades no de lectura | No hay ejecución ni vista previa de escrituras; se aplazan a una versión posterior |
-| Operaciones críticas | No disponibles en esta versión | Sin campo `confirm` ni mecanismo para eludir la política |
-| Email, exportación PCAP, HTTP | No disponibles; se rechaza su habilitación en configuración | Requieren una revisión de diseño futura y separada |
-| Cobertura | Catálogo de diseño de **79 operaciones**; **19 GET / 15 herramientas** habilitados | El catálogo no describe las herramientas habilitadas |
-| Compatibilidad | Darktrace **7.1.0: 19/19 selectores PASS nativos y Docker** | Solo recetas acotadas; no compatibilidad completa de API. [Evidencia](docs/security/validated-consultations-lab-checkpoint.md) |
-| Seguridad | Aceptación independiente de fuente; revisión de migración y suites/paquete finales pendientes | **Bloqueo OpenSSL 3.5.8; Grype informa 11 High** en componentes OS sin cambios; sin publicación estable |
+| Herramientas | **15 herramientas MCP / 19 selectores GET validados**, idénticos en `read` y `read` + `sensitiveRead` | [Correspondencia completa](#herramientas-de-esta-versión) |
+| Cambios | No hay escrituras, operaciones críticas, email, exportación PCAP ni transporte HTTP | Las escrituras llegarán en una versión posterior con revisión propia |
+| Runtime Docker | Alpine 3.24, **Node.js 24.18.1** mantenido por Alpine con **OpenSSL 3.5.9** compartido, en arm64 y amd64 | No root, sin shell, basado en `scratch`. [Guía Docker](docs/docker.md) |
+| Pruebas | arm64: 130 funcionales + 325 de seguridad superadas, 0 omitidas. amd64: 130 funcionales superadas | El gate de seguridad de 325 pruebas en amd64 se ejecuta en CI nativa; su resultado consta en las notas de la versión |
+| Escaneo de imagen | Trivy: 0 coincidencias. Grype: 1 High (zlib, CVE-2026-85091) + 1 Medium (`ada`, CVE-2024-9410) | Se conservan las coincidencias. Revisión independiente en arm64: la biblioteca zlib está afectada, pero su código `gz*` vulnerable no está en la ruta de ejecución de la aplicación; la coincidencia de `ada` es una colisión de nombre de producto. zlib **no está corregido** (aún sin paquete Alpine). Sin afirmación de cero CVE |
+| Lab (Darktrace 7.1.0) | Imagen arm64 `sha256:8cd85604…`: **19/19 consultas reales superadas** el 2026-10-06, sin escrituras, limpieza verificada | El lab está cerrado. Las imágenes publicadas usan la misma implementación de consultas y políticas y las mismas dependencias; la única diferencia en el código de producción es el literal de versión. No se volvieron a probar en vivo. Recetas acotadas, no compatibilidad completa con la API. [Registro de lab](docs/security/patched-runtime-lab-checkpoint.md) |
+| Versión | `1.0.0`, privada | Se publica como archivos de una GitHub Release privada solo tras superar la CI nativa y la aceptación de artefactos. Hashes y evidencia de CI en las notas de la versión. [Preparación](docs/stable-readiness.md) |
 
-El [inventario de cobertura](src/coverage/report.generated.json) conserva el catálogo de diseño de 79 operaciones; no define la elegibilidad de esta versión. El candidato aceptado de forma independiente aplica **19 selectores GET validados en 15 herramientas MCP**. `read` y `read` + `sensitiveRead` exponen el mismo contrato completo; la lectura sensible no puede ampliar este límite. Advanced Search y todos los demás selectores excluidos, incluidas las escrituras, se rechazan antes de cualquier vista previa, auditoría o acceso de red. [Herramientas actuales](docs/architecture.md#11-current-implementation-snapshot).
-
-**Estado actual (2026-10-06 Europe/Madrid; evidencia del 5 de octubre UTC):** la fuente aceptada `9e7c7070…` supera los **19 selectores GET permitidos distintos en MCP nativo y Docker endurecido** sobre lab 7.1.0. Son recetas acotadas y comprobaciones de forma de respuesta, no todas las combinaciones de parámetros, variantes con recursos no vacíos ni compatibilidad completa de la API. Se eliminó el volumen secreto exacto de la campaña y se verificó su ausencia de forma independiente. Los rechazos anteriores por falta de identificadores y los fallos de permisos siguen siendo evidencia histórica. [Recibos de lab vinculados](docs/security/validated-consultations-lab-checkpoint.md).
-
-La fuente y el contrato completo cuentan con aceptación independiente; la aceptación de helpers es acotada y la revisión final de migración de pruebas sigue siendo un gate separado. **Aún no se acredita la finalización de la suite del candidato**; el preflight reproducible del paquete debe consumir los bytes finales de documentación. **La publicación estable sigue bloqueada por OpenSSL 3.5.8 / CVE-2026-35189** y los gates finales pendientes. No se ha creado versión ni etiqueta estable. [Preparación](docs/stable-readiness.md).
+La lectura sensible no puede ampliar el límite. Advanced Search y todos los demás selectores excluidos, incluidas las escrituras, se rechazan antes de cualquier vista previa, auditoría o acceso de red. El [inventario de cobertura de 79 operaciones](src/coverage/report.generated.json) es contabilidad de diseño, no la superficie habilitada. Los resultados de lab son recetas acotadas y comprobaciones de forma de respuesta, no compatibilidad completa con la API.
 
 ```mermaid
 flowchart TB
@@ -75,13 +70,64 @@ Más detalle (en inglés): [perfiles y límites de confianza](docs/architecture.
 
 **Antes de cualquier despliegue:** los resultados del appliance pueden entrar en el contexto del cliente y del proveedor del modelo. Evalúa elegibilidad organizativa, procesamiento del proveedor, retención, residencia y reenvío del cliente para cada despliegue, incluso de solo lectura. La lectura sensible no amplía el límite validado ni certifica la elegibilidad del proveedor.
 
-## Instalar una prerelease privada versionada
+## Ejecutar con Docker (recomendado)
 
-Descarga la [prerelease privada publicada v0.1.0-alpha.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v0.1.0-alpha.0). Sigue la guía de [GitHub Releases versionadas](docs/releases.md) para descargar el `.tgz` revisado y `SHA256SUMS`, verificar los checksums e instalar con `npm install --ignore-scripts --omit=dev`. Esa alpha se publicó antes de los cambios actuales de Docker. La release incluye un SBOM de runtime verificable; esa alpha histórica no acredita la compatibilidad 7.1 actual, y la elegibilidad del proveedor y los requisitos de versión estable son independientes.
+La imagen ejecuta el servidor por stdio como UID `1000`, sin shell, gestor de paquetes, listener ni puerto publicado. Su sistema de archivos raíz pertenece a root y se ejecuta en solo lectura, con todas las capacidades descartadas y `no-new-privileges`. Los tokens llegan solo como archivos montados en solo lectura. Se recomienda Docker porque incluye OpenSSL 3.5.9 parcheado; las releases oficiales de Node.js upstream examinadas el 2026-10-05 siguen incluyendo 3.5.8.
+
+**Soporte del runtime, sin rodeos.** Node.js es aquí la compilación musl de Alpine, mantenida por la distribución, no un binario Tier 1 de Node.js upstream. Node.js 24 clasifica x64 musl como Experimental y no incluye arm64 musl. Las actualizaciones de seguridad dependen del mantenimiento de paquetes de Alpine. [Detalles](docs/docker.md#runtime-support).
+
+**Opciones de instalación**
+
+1. **Archivo de imagen en una GitHub Release privada (la vía más sencilla).** Descarga el archivo de tu arquitectura (`linux-arm64` o `linux-amd64`) y `SHA256SUMS`, verifica y carga. No hay imagen en un registro público ni se descarga nada de Docker Hub.
+
+```sh
+gh release download v1.0.0 --repo nuoframework/darktrace-mcp \
+  --pattern 'darktrace-mcp-1.0.0-linux-arm64.tar.gz' --pattern SHA256SUMS
+shasum -a 256 --ignore-missing -c SHA256SUMS
+docker load --input darktrace-mcp-1.0.0-linux-arm64.tar.gz
+docker image inspect --format '{{.Id}}' darktrace-mcp:1.0.0-arm64
+```
+
+   En amd64, sustituye `arm64` por `amd64` en el nombre del archivo y en la etiqueta `darktrace-mcp:1.0.0-amd64`. Compara el ID de imagen con el de las notas de la versión antes de configurar un cliente.
+2. **Compilar desde el checkout revisado.** Descarga y verifica los paquetes Alpine fijados y compila para tu arquitectura (`arm64` o `amd64`):
+
+```sh
+node scripts/prepare-docker-runtime.mjs /absolute/private/darktrace-runtime arm64
+docker buildx build --platform linux/arm64 \
+  --build-context runtime-apks=/absolute/private/darktrace-runtime/arm64 \
+  --load --tag darktrace-mcp:local .
+docker image inspect --format '{{.Id}}' darktrace-mcp:local
+```
+
+El helper necesita Docker y HTTPS público. Autentica el índice firmado de paquetes de Alpine con las claves Alpine fijadas, comprueba el SHA-256 de los 22 paquetes, los SHA-512 de las fuentes upstream y los hashes de licencias, y no escribe nada en el checkout.
+
+En el cliente MCP, configura `command` con la **ruta absoluta al ejecutable Docker del host** (localízala con `command -v docker` y usa la ruta completa; no dependas de `PATH` ni de un shell). Pasa los argumentos de Docker mediante `args`. Conserva `-i`, omite `-t` y añade `--log-driver=none` para que el daemon no persista el stdio del contenedor; esto no impide que el host MCP envíe resultados al proveedor. No guardes stdout MCP sin filtrar con `docker logs`. Este ejemplo usa el UID no root `1000` de la imagen; los dos archivos token montados deben pertenecer a ese UID dentro del contenedor y tener permisos `0600` o más restrictivos. Como alternativa, configura `--user` con un UID:GID no cero que coincida y haz que ese UID sea propietario de ambos archivos montados. Monta ambos tokens en modo de solo lectura; nunca incluyas sus valores en la configuración del cliente ni en un archivo de entorno.
+
+```json
+{
+  "command": "/absolute/path/to/docker",
+  "args": [
+    "run", "--rm", "-i", "--init", "--pull=never", "--log-driver=none",
+    "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
+    "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
+    "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
+    "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
+    "-e", "DARKTRACE_URL=https://darktrace.example.internal",
+    "-e", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
+    "-e", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
+    "-e", "DARKTRACE_PROFILES=read",
+    "-e", "DARKTRACE_SENSITIVE_READ=false",
+    "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
+  ]
+}
+```
+
 
 ## Instalar desde el código fuente en cinco minutos
 
 Usa una cuenta autenticada de GitHub CLI con acceso al repositorio privado, Node.js 22+ y npm. Revisa el checkout y las versiones fijadas de dependencias antes de compilar.
+
+> **OpenSSL del runtime.** Docker es la vía recomendada. Las releases oficiales de Node.js upstream examinadas el 2026-10-05 incluyen OpenSSL 3.5.8, afectado por CVE-2026-35189. Usar Node 22 o 24 **no** basta por sí solo para tener una instalación nativa parcheada. Para instalar en nativo, usa un runtime Node.js mantenido cuyo OpenSSL hayas verificado de forma independiente como **3.5.9 o posterior**, por ejemplo con `node -p 'process.versions.openssl'` y los registros de paquetes de tu distribución.
 
 ```sh
 gh auth status
@@ -106,45 +152,35 @@ node dist/src/index.js --check-config
 
 `--check-config` valida localmente sin contactar con el appliance. No valida autenticación, conectividad ni compatibilidad 7.1. Configura tu [cliente MCP](docs/clients.md) con las **rutas absolutas del ejecutable Node y del punto de entrada compilado**. El arranque normal (`node /absolute/checkout/dist/src/index.js`) habla MCP por stdin/stdout; el cliente lo lanza.
 
-## Ejecutar la imagen Docker privada local
+## Prerelease privada anterior
 
-Docker es una alternativa opcional a la [instalación desde código](#instalar-desde-el-código-fuente-en-cinco-minutos). Compila desde el checkout revisado; `darktrace-mcp:local` es una etiqueta privada local. Usa el ID exacto inspeccionado con `--pull=never`. La fuente aceptada `9e7c7070…` produjo `sha256:eb3a7681…`: ambos perfiles SDK de 15 herramientas coinciden con el contrato completo fijado y los 19 selectores GET permitidos superaron recetas acotadas de lab por MCP inicializado. [Guía Docker](docs/docker.md) · [Vínculo exacto imagen/runtime](docs/security/validated-consultations-docker-checkpoint.md).
+La [prerelease privada v0.1.0-alpha.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v0.1.0-alpha.0) es histórica: es anterior al contrato de 15 herramientas y al runtime parcheado. [Versiones](docs/releases.md) explica la descarga, la verificación de `SHA256SUMS` y `npm install --ignore-scripts --omit=dev`.
 
-Los escaneos históricos de la imagen anterior `dc9b8f14…` registran las mismas 31 coincidencias en paquetes Debian: Trivy 0.74.0 clasifica 23 MEDIUM y 8 LOW; Grype 0.118.0 clasifica 11 HIGH, 10 MEDIUM, 3 LOW y 7 NEGLIGIBLE, sin corrección indicada por ninguno. La imagen final aceptada conserva esos componentes con igualdad de bytes verificada de forma independiente; no es un escaneo con una base de datos nueva. Su SBOM omite Node y sus bibliotecas incluidas, inventariadas por separado. OpenSSL 3.5.8 incluido está afectado por **CVE-2026-35189 (severidad oficial Low)** durante el procesamiento de certificados TLS; 3.5.9 lo corrige. A 5 de octubre, ninguna release oficial soportada de Node 22/24/26 examinada incluía ese fix. El problema aplicable bloquea la publicación estable pese a las comprobaciones funcionales aprobadas; no es una imagen con cero CVE. [Aviso primario OpenSSL](https://openssl-library.org/news/secadv/20260929.txt). La imagen stdio no tiene listener; no publiques puertos. [Límites del runtime](docs/architecture.md#33-docker-runtime).
+## Herramientas de esta versión
 
-```sh
-docker build --pull -t darktrace-mcp:local .
-docker image inspect --format '{{.Id}}' darktrace-mcp:local
-```
+Las 15 herramientas son de solo lectura, idempotentes y no destructivas, y aparecen igual en ambos perfiles.
 
-En el cliente MCP, configura `command` con la **ruta absoluta al ejecutable Docker del host** (localízala con `command -v docker` y usa la ruta completa; no dependas de `PATH` ni de un shell). Pasa los argumentos de Docker mediante `args`. Conserva `-i`, omite `-t` y añade `--log-driver=none` para que el daemon no persista el stdio del contenedor; esto no impide que el host MCP envíe resultados al proveedor. No guardes stdout MCP sin filtrar con `docker logs`. Este ejemplo usa el UID no root `1000` de la imagen; los dos archivos token montados deben pertenecer a ese UID dentro del contenedor y tener permisos `0600` o más restrictivos. Como alternativa, configura `--user` con un UID:GID no cero que coincida y haz que ese UID sea propietario de ambos archivos montados. Monta ambos tokens en modo de solo lectura; nunca incluyas sus valores en la configuración del cliente ni en un archivo de entorno.
-
-```json
-{
-  "command": "/absolute/path/to/docker",
-  "args": [
-    "run", "--rm", "-i", "--init", "--pull=never", "--log-driver=none",
-    "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
-    "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
-    "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
-    "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
-    "-e", "DARKTRACE_URL=https://darktrace.example.internal",
-    "-e", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
-    "-e", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
-    "-e", "DARKTRACE_PROFILES=read",
-    "-e", "DARKTRACE_SENSITIVE_READ=false",
-    "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
-  ]
-}
-```
-
-Sustituye el marcador por el ID exacto `sha256:...` obtenido arriba. Usa rutas absolutas del host para montar los tokens. No añadas `-p`/`--publish`; esta imagen stdio no tiene listener. El sistema de archivos raíz de solo lectura, las capacidades descartadas, `no-new-privileges` y `--log-driver=none` forman parte de las restricciones de ejecución del ejemplo. El registro del daemon no controla el reenvío del host MCP/proveedor. Comprueba la traducción de UID y permisos de archivos de Docker Desktop en el host; no relajes los permisos de los tokens para resolver una discrepancia. Prefiere un perfil MCP de usuario; revisa todos los comandos, argumentos, valores de entorno y preloads del host antes de habilitar configuración compartida del proyecto. Cuando sea posible, usa un perfil de host MCP o una cuenta del sistema operativo dedicada para este servidor. Antes de compartir un proceso del host, revisa los comandos, el entorno y los montajes de los demás servidores MCP configurados; todos se ejecutan con los privilegios del host. La imagen de runtime incluye la licencia `LICENSE` del proyecto, la licencia de Node.js, los archivos de licencia distribuidos con sus dependencias de producción y los archivos de copyright de los paquetes Debian; revísalas antes de usarla. Consulta la [guía de Docker](docs/docker.md) para verificar la imagen local y las transferencias privadas.
+| Herramienta MCP | Selectores GET validados |
+|---|---|
+| `darktrace_get_status` | `get_status` |
+| `darktrace_get_devices` | `get_devices` |
+| `darktrace_list_subnets` | `get_subnets` |
+| `darktrace_get_ai_analyst_stats` | `get_aianalyst_stats` |
+| `darktrace_get_intel_feed` | `get_intelfeed` |
+| `darktrace_list_model_breaches` | `get_modelbreaches` |
+| `darktrace_search_devices` | `get_devicesearch` |
+| `darktrace_get_similar_devices` | `get_similardevices` |
+| `darktrace_list_ai_analyst_incidents` | `get_aianalyst_groups`, `get_aianalyst_incidentevents` |
+| `darktrace_list_ai_analyst_investigations` | `get_aianalyst_investigations` |
+| `darktrace_get_model_breach_comments` | `get_mbcomments` |
+| `darktrace_get_connection_details` | `get_details` |
+| `darktrace_list_tags` | `get_tags_entities`, `get_tags_tid`, `get_tags_tid_entities` |
+| `darktrace_get_endpoint_details` | `get_endpointdetails` |
+| `darktrace_list_antigena_actions` | `get_antigena`, `get_antigena_summary` |
 
 ## Operar con decisiones explícitas
 
-El candidato aceptado de forma independiente aplica **19 selectores GET validados en 15 herramientas MCP**. `read` y `read` + `sensitiveRead` exponen el mismo contrato completo; la lectura sensible no puede ampliar este límite. Advanced Search y todos los demás selectores excluidos, incluidas las escrituras, se rechazan antes de cualquier vista previa, auditoría o acceso de red. La aprobación del modelo/cliente **no es autorización**; las ACL del token en el appliance siguen siendo la autoridad.
-
-Esta versión no tiene operaciones de mutación. Si una versión posterior revisada habilita una escritura, trata los timeouts o la pérdida de conexión como un resultado **desconocido** e inspecciona el estado y la auditoría del appliance antes de actuar; el cliente nunca debe reproducir solicitudes POST/DELETE. La firma usa un modo configurado explícitamente, sin probar otro tras errores de autenticación. La verificación TLS es obligatoria; usa `NODE_EXTRA_CA_CERTS` para una CA privada aprobada.
+La aprobación del modelo o del cliente **no es autorización**; las ACL del token en el appliance siguen siendo la autoridad. La firma usa un único modo configurado explícitamente, sin alternativa ante errores de autenticación. La verificación TLS es obligatoria; usa `NODE_EXTRA_CA_CERTS` para una CA privada aprobada. Si una versión posterior revisada habilita escrituras, trata un timeout o una desconexión como resultado **desconocido** y revisa el estado del appliance antes de actuar; nunca repitas solicitudes POST/DELETE.
 
 ## Documentación
 
@@ -159,7 +195,7 @@ Salvo el inicio rápido en español, las guías enlazadas están en inglés.
 | [Arquitectura](docs/architecture.md) · [Contrato API](docs/api-contract.md) | Diagramas, herramientas por perfil, diseño y evidencia fuente de 6.1 |
 | [Modelo de amenazas](docs/security/threat-model.md) · [Decisiones de diseño](docs/security/design-decisions.md) | Supuestos de seguridad y condiciones pendientes |
 | [Política de seguridad](SECURITY.md) · [Contribuir](CONTRIBUTING.md) | Comunicación privada de problemas y desarrollo |
-| [Changelog](CHANGELOG.md) | Cambios de la alpha versionada |
+| [Changelog](CHANGELOG.md) | Cambios por versión |
 | [Releases](docs/releases.md) · [Preparación de release](docs/release-preparation.md) | Artefactos privados versionados, SBOM y evidencia actual de verificación |
 
 ## Empaquetado privado

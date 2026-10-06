@@ -1,6 +1,6 @@
 # Security policy
 
-This private alpha is under implementation and independent review. Offline tests and packaging checks do not establish appliance compatibility, production security or accepted residual risk. The 7.1 lab target remains NOT VALIDATED.
+This private release candidate (version `1.0.0`, distributed only as private GitHub Release assets) exposes 15 read-only tools covering 19 validated GET selectors. On 2026-10-06 the arm64 Docker image passed 19/19 bounded queries on a Darktrace 7.1.0 lab. That is not full API compatibility, production security or acceptance of residual risk. Open scanner findings and remaining gates are listed in the [Docker guide](docs/docker.md#current-candidate-at-a-glance).
 
 ## Report a vulnerability privately
 
@@ -14,7 +14,7 @@ Complaints, trademark or branding claims about this unofficial, unaffiliated pro
 
 ## Baseline boundaries
 
-Stdio only; one HTTPS origin and credential pair per process. Read enabled by default; sensitive reads disabled by default. Medium/high writes default to unsigned previews and require operator opt-in for execution. Critical execution, email, PCAP export and HTTP transport are blocked. Model approval cannot authorize an appliance action. Unknown mutation outcomes require investigation, never automatic retries.
+Stdio only; one HTTPS origin and credential pair per process. Read enabled by default; sensitive reads disabled by default and unable to widen the 19-selector ceiling. Writes, write previews, critical execution, email, PCAP export and HTTP transport are unavailable in this release. Model approval cannot authorize an appliance action. Unknown mutation outcomes require investigation, never automatic retries.
 
 Token files must be regular, bounded to 4,096 bytes, owned by the runtime user, mode 0600 or stricter and opened without following symlinks. TLS verification is mandatory; private CA trust uses NODE_EXTRA_CA_CERTS. Operators must assess provider processing, retention, residency and host forwarding for any deployment, plus extra eligibility for Advanced Search.
 
@@ -22,4 +22,4 @@ See the [threat model](docs/security/threat-model.md), [design decisions](docs/s
 
 ## Distribution
 
-Private repository; no npm or image publication. Review exact dependency pins, shrinkwrap and actual artifact contents/tree before internal distribution. Private/internal [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) currently require GitHub Enterprise Cloud; this repository’s entitlement is unverified. Future attestations/SBOMs require owner review and verification, not an assumed guarantee. No supported production release or patch SLA is currently declared.
+Private repository; no npm or public registry publication. Release artifacts, when the owner publishes them, are private GitHub Release assets (per-architecture Docker image archives, npm tarball and `SHA256SUMS`). Review exact dependency pins, shrinkwrap and actual artifact contents/tree before internal distribution. Private/internal [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) currently require GitHub Enterprise Cloud; this repository’s entitlement is unverified. Future attestations/SBOMs require owner review and verification, not an assumed guarantee. No supported production release or patch SLA is currently declared.

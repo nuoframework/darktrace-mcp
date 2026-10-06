@@ -15,32 +15,27 @@
   <a href="docs/architecture.md#91-baseline-stdio"><img src="docs/assets/badges/stdio-only-en.svg" alt="transport: stdio only"></a>
   <a href="package.json"><img src="docs/assets/badges/node-22-en.svg" alt="runtime: Node.js 22+"></a>
   <a href="LICENSE"><img src="docs/assets/badges/apache-2.0-en.svg" alt="license: Apache-2.0"></a>
-  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: local build, pinned image ID"></a>
+  <a href="docs/docker.md"><img src="docs/assets/badges/docker-local-en.svg" alt="docker: private image archive or local build, pinned image ID"></a>
   <a href="docs/security/mcp-corrections-acceptance.md"><img src="docs/assets/badges/security-tests-en.svg" alt="security tests: offline, 2026-10-05"></a>
-  <a href="docs/stable-readiness.md"><img src="docs/assets/badges/private-alpha-en.svg" alt="status: private alpha"></a>
 </p>
 
 [Start in five minutes](docs/getting-started.md) · [Client setup](docs/clients.md) · [Configuration](docs/configuration.md) · [Inicio rápido en español](docs/es/getting-started.md)
 
 ## Investigation, with boundaries
 
-Investigate devices, model breaches and analyst incidents from an MCP host, with a fixed operation inventory, operator-controlled profiles and bounded output. This is a **private alpha with bounded 19-selector lab evidence** for `nuoframework/darktrace-mcp`. There is no npm publication, public image or verified production deployment.
+Investigate devices, model breaches and analyst incidents from an MCP host, with a fixed operation inventory, operator-controlled profiles and bounded output. This is a **private release candidate** for `nuoframework/darktrace-mcp`. Nothing is published to npm or a public registry, and no production deployment has been verified.
 
-| Capability | Baseline behavior | Evidence/status |
+| Area | Current candidate | Status |
 |---|---|---|
-| Investigation | Enforced 19 validated GET selectors / 15 MCP tools in both profiles | Independently accepted source and full pinned contract; Advanced Search deferred |
-| Changes | All non-read capabilities are denied by the immutable first-stable policy | No write execution or dry-run preview; writes are deferred to a later release |
-| Critical operations | Unavailable in this release | No `confirm` field or approval bypass |
-| Email, PCAP export, HTTP | Unavailable; enabling configuration rejected | Separate future design review required |
-| Coverage | **79-operation** design catalogue; **19 GET / 15 tools** enabled | Catalogue counts do not describe enabled tools |
-| Compatibility | Darktrace **7.1.0: 19/19 native and Docker selectors PASS** | Bounded recipes only; not full API compatibility. [Lab evidence](docs/security/validated-consultations-lab-checkpoint.md) |
-| Security | Independent source acceptance; migration review and final candidate suites/package gates remain | **OpenSSL 3.5.8 hold; Grype reports 11 High** in unchanged scanned OS components; no stable publication |
+| Tools | **15 MCP tools / 19 validated GET selectors**, identical in `read` and `read` + `sensitiveRead` | [Full mapping](#tools-in-this-release) |
+| Changes | Writes, critical operations, email, PCAP export and HTTP transport are unavailable | Writes are planned for a later, separately reviewed release |
+| Docker runtime | Alpine 3.24, Alpine-maintained **Node.js 24.18.1** with shared **OpenSSL 3.5.9**, on arm64 and amd64 | Nonroot, shell-free, `scratch`-based. [Docker guide](docs/docker.md) |
+| Tests | arm64: 130 functional + 325 security tests pass, 0 skipped. amd64: 130 functional pass | The amd64 325-test security gate runs on native CI; its result is recorded in the release notes |
+| Image scan | Trivy: 0 matches. Grype: 1 High (zlib, CVE-2026-85091) + 1 Medium (`ada`, CVE-2024-9410) | Raw matches kept. Independent arm64 review: the zlib library is affected, but its vulnerable `gz*` code is not in the application's execution path; the `ada` match is a product-name collision. zlib is **not fixed** (no Alpine package yet). Not a zero-CVE claim |
+| Lab (Darktrace 7.1.0) | arm64 image `sha256:8cd85604…`: **19/19 real queries PASS** on 2026-10-06, no writes, cleanup verified | The lab is closed. Released images use the same query/policy implementation and dependencies; the only production source difference is the version literal. They were not retested live. Bounded recipes, not full API compatibility. [Lab record](docs/security/patched-runtime-lab-checkpoint.md) |
+| Release | `1.0.0`, private | Published as private GitHub Release assets only after native CI and artifact acceptance pass. Hashes and CI evidence are in the release notes. [Readiness](docs/stable-readiness.md) |
 
-The generated [coverage inventory](src/coverage/report.generated.json) preserves the 79-operation design catalogue; it does not define release eligibility. The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. [Current tools](docs/architecture.md#11-current-implementation-snapshot).
-
-**Current checkpoint (2026-10-06 Europe/Madrid; evidence dated October 5 UTC):** accepted source `9e7c7070…` passed all **19 distinct permitted GET selectors in native MCP and hardened Docker** against lab 7.1.0. These are bounded recipes and expected response-shape checks, not every parameter combination, nonempty resource variant or full API compatibility. The exact campaign secret volume was removed and its absence independently verified. Earlier missing-identifier refusals and permission failures remain historical evidence. [Bound lab receipts](docs/security/validated-consultations-lab-checkpoint.md).
-
-Source and full tool contract have independent acceptance; helper acceptance is scoped and final test-migration review remains a separate gate. **Final candidate test-suite completion is not yet established**; reproducible package preparation must consume the final documentation bytes. **Stable publication remains blocked by OpenSSL 3.5.8 / CVE-2026-35189** and outstanding final release gates. No stable version or tag has been created. [Readiness](docs/stable-readiness.md).
+Sensitive read cannot widen the ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. The [79-operation coverage inventory](src/coverage/report.generated.json) is design accounting, not the enabled surface. Lab results are bounded recipes and response-shape checks, not full API compatibility.
 
 ```mermaid
 flowchart TB
@@ -75,13 +70,64 @@ More detail: [profiles and trust boundaries](docs/architecture.md#32-profiles-an
 
 **Before any deployment:** appliance results can enter the host and model provider context. Assess organizational eligibility, provider processing, retention, residency and host forwarding for every deployment, including read-only use. Sensitive read cannot expand the validated ceiling or certify provider eligibility.
 
-## Install a versioned private prerelease
+## Run with Docker (recommended)
 
-Download the published [v0.1.0-alpha.0 private prerelease](https://github.com/nuoframework/darktrace-mcp/releases/tag/v0.1.0-alpha.0). Use [versioned GitHub Releases](docs/releases.md) to download the reviewed `.tgz` and `SHA256SUMS`, verify checksums, and install with `npm install --ignore-scripts --omit=dev`. That published alpha predates the current working-tree Docker changes. The release includes a verifiable runtime SBOM; that historical alpha does not establish current 7.1 compatibility, and provider eligibility plus stable-release gates remain separate.
+The image runs the server over stdio as UID `1000`, with no shell, package manager, listener or published port. Its root filesystem is root-owned and run read-only, with all capabilities dropped and `no-new-privileges`. Tokens arrive only as read-only mounted files. Docker is recommended because it ships a patched OpenSSL 3.5.9; official upstream Node.js releases examined on 2026-10-05 still bundle 3.5.8.
+
+**Runtime support, honestly stated.** Node.js here is Alpine's musl build, maintained by the Alpine distribution, not an upstream Node.js Tier 1 binary. Node.js 24 lists x64 musl as Experimental and does not list arm64 musl. Security updates for this runtime depend on Alpine's package maintenance. [Details](docs/docker.md#runtime-support).
+
+**Install options**
+
+1. **Private GitHub Release image archive (easiest).** Download your architecture's archive (`linux-arm64` or `linux-amd64`) and `SHA256SUMS`, verify, then load. There is no public registry image; nothing is pulled from Docker Hub.
+
+```sh
+gh release download v1.0.0 --repo nuoframework/darktrace-mcp \
+  --pattern 'darktrace-mcp-1.0.0-linux-arm64.tar.gz' --pattern SHA256SUMS
+shasum -a 256 --ignore-missing -c SHA256SUMS
+docker load --input darktrace-mcp-1.0.0-linux-arm64.tar.gz
+docker image inspect --format '{{.Id}}' darktrace-mcp:1.0.0-arm64
+```
+
+   On amd64, replace `arm64` with `amd64` in the file name and the `darktrace-mcp:1.0.0-amd64` tag. Compare the image ID with the one in the release notes before configuring a client.
+2. **Build from the reviewed checkout.** Fetch and verify the pinned Alpine packages, then build for your architecture (`arm64` or `amd64`):
+
+```sh
+node scripts/prepare-docker-runtime.mjs /absolute/private/darktrace-runtime arm64
+docker buildx build --platform linux/arm64 \
+  --build-context runtime-apks=/absolute/private/darktrace-runtime/arm64 \
+  --load --tag darktrace-mcp:local .
+docker image inspect --format '{{.Id}}' darktrace-mcp:local
+```
+
+The helper needs Docker and public HTTPS. It authenticates Alpine's signed package index with the pinned Alpine keys, checks the SHA-256 of all 22 packages, the upstream source SHA-512s and the license hashes, and writes nothing into the checkout.
+
+For an MCP client, set `command` to the **absolute path of the host's Docker executable** (resolve it with `command -v docker`, then use that full path; do not rely on `PATH` or a shell). Pass Docker arguments as `args`. Keep `-i` and omit `-t` so stdio remains available to the MCP host. This example uses the image's nonroot UID `1000`; both mounted token files must be owned by that UID inside the container and have mode `0600` or stricter. Alternatively, set `--user` to a matching nonzero UID:GID and make both mounted files owned by that UID. Mount both tokens read-only; never put token values in client configuration or an env file.
+
+```json
+{
+  "command": "/absolute/path/to/docker",
+  "args": [
+    "run", "--rm", "-i", "--init", "--pull=never", "--log-driver=none",
+    "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
+    "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
+    "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
+    "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
+    "-e", "DARKTRACE_URL=https://darktrace.example.internal",
+    "-e", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
+    "-e", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
+    "-e", "DARKTRACE_PROFILES=read",
+    "-e", "DARKTRACE_SENSITIVE_READ=false",
+    "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
+  ]
+}
+```
+
 
 ## Five-minute source install
 
 Use an authenticated GitHub CLI account with access to the private repository, Node.js 22+ and npm. Review the checkout and dependency pins before building.
+
+> **Runtime OpenSSL.** Docker is the recommended route. Official upstream Node.js releases examined on 2026-10-05 bundle OpenSSL 3.5.8, affected by CVE-2026-35189. Being on Node 22 or 24 does **not** by itself make a native install patched. For a native install, use a maintained Node.js runtime whose OpenSSL you have independently verified as **3.5.9 or later**, for example with `node -p 'process.versions.openssl'` and your distribution's package records.
 
 ```sh
 gh auth status
@@ -106,45 +152,35 @@ node dist/src/index.js --check-config
 
 `--check-config` validates locally without contacting the appliance. It does not validate authentication, connectivity or 7.1 compatibility. Configure your [MCP client](docs/clients.md) with the **absolute Node executable and compiled entrypoint paths**. Normal startup (`node /absolute/checkout/dist/src/index.js`) speaks MCP on stdin/stdout; the client launches it.
 
-## Run the private local Docker image
+## Earlier private prerelease
 
-Docker is an optional alternative to the [source install](#five-minute-source-install). Build from the reviewed checkout; `darktrace-mcp:local` is a private local inspection tag. Use the exact inspected image ID with `--pull=never`. Accepted source `9e7c7070…` produced image `sha256:eb3a7681…`: both 15-tool SDK profiles match the pinned complete contract, and all 19 permitted GET selectors passed bounded initialized-MCP lab checks. [Docker guide](docs/docker.md) · [Exact image/runtime binding](docs/security/validated-consultations-docker-checkpoint.md).
+The published [v0.1.0-alpha.0 private prerelease](https://github.com/nuoframework/darktrace-mcp/releases/tag/v0.1.0-alpha.0) is historical: it predates the 15-tool contract and the patched runtime. [Releases](docs/releases.md) explains download, `SHA256SUMS` verification and `npm install --ignore-scripts --omit=dev`.
 
-Historical fresh scans of predecessor `dc9b8f14…` found the same 31 Debian-package matches: Trivy 0.74.0 rated 23 MEDIUM and 8 LOW; Grype 0.118.0 rated 11 HIGH, 10 MEDIUM, 3 LOW and 7 NEGLIGIBLE, with no fix indicated by either scanner. The accepted final image has independently checked component equality to those scanned bytes; this is not a fresh database scan. Their SBOM omits Node and its bundled libraries, which were separately inventoried. Bundled OpenSSL 3.5.8 is affected by **CVE-2026-35189 (official severity Low)** during TLS certificate processing; 3.5.9 fixes it. On October 5, no official supported Node 22/24/26 release examined supplied that fix. This applicable issue blocks stable publication despite the successful functional checks; it is not a zero-CVE image. [Primary OpenSSL advisory](https://openssl-library.org/news/secadv/20260929.txt). The stdio image has no listener; do not publish ports. [Runtime boundaries](docs/architecture.md#33-docker-runtime).
+## Tools in this release
 
-```sh
-docker build --pull -t darktrace-mcp:local .
-docker image inspect --format '{{.Id}}' darktrace-mcp:local
-```
+All 15 tools are read-only, idempotent and non-destructive, and appear identically in both profiles.
 
-For an MCP client, set `command` to the **absolute path of the host's Docker executable** (resolve it with `command -v docker`, then use that full path; do not rely on `PATH` or a shell). Pass Docker arguments as `args`. Keep `-i` and omit `-t` so stdio remains available to the MCP host. This example uses the image's nonroot UID `1000`; both mounted token files must be owned by that UID inside the container and have mode `0600` or stricter. Alternatively, set `--user` to a matching nonzero UID:GID and make both mounted files owned by that UID. Mount both tokens read-only; never put token values in client configuration or an env file.
-
-```json
-{
-  "command": "/absolute/path/to/docker",
-  "args": [
-    "run", "--rm", "-i", "--init", "--pull=never", "--log-driver=none",
-    "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges",
-    "--pids-limit=64", "--memory=256m", "--user", "1000:1000",
-    "--mount", "type=bind,src=/absolute/private/darktrace/public-token,dst=/run/secrets/public-token,readonly",
-    "--mount", "type=bind,src=/absolute/private/darktrace/private-token,dst=/run/secrets/private-token,readonly",
-    "-e", "DARKTRACE_URL=https://darktrace.example.internal",
-    "-e", "DARKTRACE_PUBLIC_TOKEN_FILE=/run/secrets/public-token",
-    "-e", "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
-    "-e", "DARKTRACE_PROFILES=read",
-    "-e", "DARKTRACE_SENSITIVE_READ=false",
-    "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
-  ]
-}
-```
-
-Replace the image placeholder with the exact `sha256:...` ID returned above. Use absolute host paths for the token mounts. Do not add `-p`/`--publish`; this stdio image has no listener. The read-only root filesystem, dropped capabilities, `no-new-privileges`, and `--log-driver=none` setting are part of the example's runtime restrictions. Docker daemon logging does not control forwarding by the MCP host/provider. Docker Desktop UID and file-permission translation must be checked on the host; do not loosen token-file permissions to work around a mismatch. Prefer user-scoped MCP configuration; review every command, argument, environment value and host preload before enabling project-shared configuration. Use a dedicated MCP host profile or OS account for this server when available. Before sharing a host process, review the commands, environment, and mounts of every other configured MCP server; each runs with the host's privileges. The runtime image includes the project `LICENSE`, the Node.js license, the license files shipped with its production dependencies and the Debian package copyright files; review them before use. See the [Docker guide](docs/docker.md) for local image and private transfer verification steps.
+| MCP tool | Validated GET selectors |
+|---|---|
+| `darktrace_get_status` | `get_status` |
+| `darktrace_get_devices` | `get_devices` |
+| `darktrace_list_subnets` | `get_subnets` |
+| `darktrace_get_ai_analyst_stats` | `get_aianalyst_stats` |
+| `darktrace_get_intel_feed` | `get_intelfeed` |
+| `darktrace_list_model_breaches` | `get_modelbreaches` |
+| `darktrace_search_devices` | `get_devicesearch` |
+| `darktrace_get_similar_devices` | `get_similardevices` |
+| `darktrace_list_ai_analyst_incidents` | `get_aianalyst_groups`, `get_aianalyst_incidentevents` |
+| `darktrace_list_ai_analyst_investigations` | `get_aianalyst_investigations` |
+| `darktrace_get_model_breach_comments` | `get_mbcomments` |
+| `darktrace_get_connection_details` | `get_details` |
+| `darktrace_list_tags` | `get_tags_entities`, `get_tags_tid`, `get_tags_tid_entities` |
+| `darktrace_get_endpoint_details` | `get_endpointdetails` |
+| `darktrace_list_antigena_actions` | `get_antigena`, `get_antigena_summary` |
 
 ## Operate deliberately
 
-The independently accepted candidate enforces **19 validated GET selectors across 15 MCP tools**. Both `read` and `read` + `sensitiveRead` expose the same complete contract; sensitive read cannot expand this ceiling. Advanced Search and every other excluded selector, including writes, are refused before preview, audit or network access. Model/client approval is **not authorization**; appliance token ACLs remain authoritative.
-
-This release has no mutation operations. If a later reviewed release enables a write, treat a timeout or lost connection as an **unknown** result and inspect appliance state and audit records before any action; the client must never replay POST/DELETE requests. Signing uses one explicitly configured mode, with no fallback on authentication errors. TLS verification is mandatory; use `NODE_EXTRA_CA_CERTS` for an approved private CA.
+Model or client approval is **not authorization**; appliance token ACLs remain authoritative. Signing uses one explicitly configured mode, with no fallback on authentication errors. TLS verification is mandatory; use `NODE_EXTRA_CA_CERTS` for an approved private CA. If a later reviewed release enables writes, treat a timeout or lost connection as an **unknown** result and check appliance state before acting; never replay POST/DELETE requests.
 
 ## Documentation
 
@@ -158,7 +194,7 @@ This release has no mutation operations. If a later reviewed release enables a w
 | [Threat model](docs/security/threat-model.md) · [Design decisions](docs/security/design-decisions.md) | Security assumptions and outstanding gates |
 | [Docker](docs/docker.md) | Local build, hardened stdio runtime and private artifact verification |
 | [Security policy](SECURITY.md) · [Contributing](CONTRIBUTING.md) | Private reporting and development |
-| [Changelog](CHANGELOG.md) | Versioned alpha changes |
+| [Changelog](CHANGELOG.md) | Versioned changes |
 | [Releases](docs/releases.md) · [Release preparation](docs/release-preparation.md) | Versioned private artifacts, SBOM and current verification evidence |
 
 ## Private packaging
