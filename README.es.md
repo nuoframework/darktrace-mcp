@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-es-mobile.svg">
-  <img src="docs/assets/banner-variants/b/readme-banner-es.svg" width="1280" alt="Darktrace MCP — MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
+  <img src="docs/assets/banner-variants/b/readme-banner-es.svg" width="1280" alt="Darktrace MCP — con un grafo de red decorativo. MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación ni autorización de Darktrace. El pie muestra el logotipo oficial de Darktrace, etiquetado como proyecto independiente de un tercero; su uso no implica autorización ni carácter oficial.">
 </picture>
 
 # Darktrace MCP
@@ -30,14 +30,19 @@ npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 
 Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario en macOS/Linux y hace una copia de seguridad de las configuraciones existentes antes de actualizarlas. [Guía completa](docs/es/getting-started.md).
 
-`npx` solo se usa para instalar. El asistente copia una versión fija y configura los clientes con rutas absolutas a Node y `dist/src/index.js`. Windows nativo no puede proteger los archivos de tokens: usa [.mcpb, Docker o WSL](docs/es/getting-started.md#windows). [Guía completa](docs/es/getting-started.md).
+`npx` solo se usa para instalar. El asistente copia una versión fija y configura los clientes con rutas absolutas a Node y `dist/src/index.js`. Windows nativo no puede proteger los archivos de tokens: usa [.mcpb, Docker o WSL](docs/es/getting-started.md#windows).
 
 Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
-**Otras vías.**
+La publicación de 1.1.1 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
 
-- **Claude Desktop:** descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema.
-- **Docker:** con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
+### Claude Desktop
+
+Descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema.
+
+### Docker
+
+Con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
 
 ```sh
 docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:dd79adb2dfe78134fa9721508a1f46776ed1736158dcf0b7f54e1dd0bca2d511

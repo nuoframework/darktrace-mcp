@@ -4,6 +4,10 @@
 
 > Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.0 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
 
+## Release status (2026-10-06)
+
+**1.1.0 is published** on npm, ghcr and GitHub Release. **1.1.1 is being released on 2026-10-06; publication is in progress.** The installation commands and digest below remain pinned to the published 1.1.0 artifacts.
+
 ## Published 1.1.0 (2026-10-06)
 
 Version 1.1.0 is published on [npm with a provenance attestation](https://registry.npmjs.org/@nuoframework%2fdarktrace-mcp/1.1.0), in ghcr, and as the [v1.1.0 GitHub Release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0). The release includes the `.mcpb`, npm tarball, `SHA256SUMS`, runtime SBOM and evidence files. Publication status was checked on 2026-10-06; the dated gate reviews below retain their original scope and findings.
