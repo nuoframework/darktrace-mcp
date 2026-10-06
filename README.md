@@ -56,7 +56,7 @@ Investigate your Darktrace appliance from your MCP client. Start read-only; choo
 | Kiro, Amp, Copilot CLI, Warp | `setup --client kiro` / `amp` / `copilot-cli` / `warp` |
 | Goose, LM Studio, Antigravity | `setup --client goose` / `lmstudio` / `antigravity` |
 | JetBrains Junie / AI Assistant | `setup --client junie`; AI Assistant: `config jetbrains` and paste into Settings \| Tools \| AI Assistant \| MCP |
-| Docker | `setup --runtime docker` pulls `ghcr.io/nuoframework/darktrace-mcp:1.1.2` and pins the image ID ([Docker guide](docs/docker.md)) |
+| Docker | `setup --runtime docker` pulls `ghcr.io/nuoframework/darktrace-mcp:1.1.2` (published index digest `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`) and pins the local image ID ([Docker guide](docs/docker.md)) |
 | Uninstall | `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall` removes every entry (backups kept), the tokens and the fixed copies |
 
 Windows, manual snippets, `test`, when to pin the version and what the buttons do: [install page](docs/install.md) · [install matrix](docs/install-matrix.md).

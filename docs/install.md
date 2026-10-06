@@ -61,7 +61,7 @@ npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 
 ## Other paths
 
-- **Docker.** `setup --runtime docker` checks that the daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.2`, pulls it on request and writes a hardened entry that starts the immutable image ID with `--pull=never`. [Docker guide](docker.md#install).
+- **Docker.** `setup --runtime docker` checks that the daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.2` (published index digest `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`; pass it as `--image ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee` to pin it yourself), pulls it on request and writes a hardened entry that starts the immutable image ID with `--pull=never`. [Docker guide](docker.md#install).
 - **Claude Desktop extension.** `darktrace-mcp-1.1.2.mcpb` from the GitHub release, or `npm run pack:mcpb` from a checkout. [Details](clients.md#claude-desktop).
 - **Claude Code plugin.** `claude plugin marketplace add nuoframework/darktrace-mcp`, then `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code asks for the URL, tokens and profile and keeps the tokens in the OS credential store. Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp`, then `setup` once for the connection. [Plugin guide](plugin-distribution.md).
 - **Manual.** `darktrace-mcp config <client>` prints the snippet with real paths; every client's file and shape is listed in [Clients](clients.md).
