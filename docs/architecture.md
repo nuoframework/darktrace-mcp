@@ -445,7 +445,7 @@ HTTP is outside this baseline and has no enabling field or handler example here.
 
 ### 10.1 Private package and actual dependency tree
 
-The repository and package remain private; **no npm publication is authorized or claimed**. The immediate path is a reviewed local build or private tarball, with `dist/src/index.js` as the manifest entry point. Do not present an unverified release URL or hypothetical npm package as installable.
+The package is published as `@nuoframework/darktrace-mcp` on npm from the release workflow only (trusted publishing, provenance), with `dist/src/index.js` as the bin and MCPB entry point. `npx` serves only as a one-time bootstrap for `setup`, which installs a fixed copy and writes absolute paths; a client configuration never launches `npx`. Do not document a version before its tag has been published.
 
 An exact top-level package version does not pin transitives. Build with committed lock metadata and `npm ci --ignore-scripts`; future distributed tarballs must include **npm-shrinkwrap.json** locking the actual runtime tree (or a separately reviewed fully bundled equivalent). ST-15 installs the packed artifact into a clean isolated directory, inspects its dependency tree and integrity against that shrinkwrap, and rejects drift. `package-lock.json` in a source tree alone is insufficient distribution evidence. Verify `files` allowlist, actual pack contents and image layers; exclude secrets, `.env`, raw portal material and build-only sources. No install lifecycle scripts.
 

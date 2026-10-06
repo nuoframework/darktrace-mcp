@@ -131,4 +131,4 @@ Responses over 2 MiB and tool output over 60,000 characters are refused. Narrow 
 
 ## Still stuck
 
-Collect the output of `darktrace-mcp --check-config` and `darktrace-mcp --version`, remove any internal hostnames, and open an issue in the private repository. Never share tokens or raw appliance data. Security problems: see [SECURITY.md](../SECURITY.md).
+Collect the output of `darktrace-mcp --check-config` and `darktrace-mcp --version`, remove any internal hostnames, and open an issue in the repository. Never share tokens or raw appliance data. Security problems: see [SECURITY.md](../SECURITY.md).

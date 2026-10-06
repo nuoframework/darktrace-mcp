@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { callTool, eligibleTools, type Approver, type ToolContext } from '../tools/index.js';
 /** A human has two minutes to answer a confirmation dialog; silence means no. */
 export const APPROVAL_TIMEOUT_MS=120_000;
-export const VERSION='1.0.0';
+export const VERSION='1.1.0';
 export function createServer(ctx:ToolContext):McpServer {
   const server=new McpServer({name:'darktrace-mcp',version:VERSION},{capabilities:{tools:{listChanged:false}},maxToolInputElements:Math.min(ctx.cfg.limits.maxToolInputElements,5000)});
   let initialized=false;

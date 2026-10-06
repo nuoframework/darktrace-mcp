@@ -1,10 +1,39 @@
-# Versioned private GitHub Releases
+# Releases and distribution
 
 [README](../README.md) · [Getting started](getting-started.md) · [Changelog](../CHANGELOG.md)
 
-> Most users should install with the [setup wizard](getting-started.md). This page is for installing or preparing a specific versioned release. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README arrive in a later release.
+> Most users should install with the [setup wizard](getting-started.md): `npx -y @nuoframework/darktrace-mcp@1.1.0 setup`. This page describes where each version is published and how the owner publishes one. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README ship from 1.1.0.
 
-## Current private stable: v1.0.0
+## Distribution channels (1.1.0 and later)
+
+| Channel | Name | Produced by |
+|---|---|---|
+| npm (public) | [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp), exact versions only | `publish-npm` job: publishes the byte-verified `release:prepare` tarball with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, `id-token: write`) and `--provenance --access public` |
+| GitHub Container Registry (public) | `ghcr.io/nuoframework/darktrace-mcp:<version>`, linux/amd64 + linux/arm64, pin by digest | `publish-ghcr` (one native build per architecture, pushed by digest) and `publish-ghcr-manifest` (one `<version>` tag; no `latest` tag is ever moved) |
+| GitHub Release assets | `nuoframework-darktrace-mcp-<version>.tgz`, `darktrace-mcp-<version>.mcpb`, `SHA256SUMS`, SBOM, evidence | owner, from the `darktrace-mcp-release-candidate` workflow artifact |
+| MCP Registry | `io.github.nuoframework/darktrace-mcp` ([`server.json`](../server.json), `mcpName` in `package.json`) | owner, with `mcp-publisher` (below) |
+
+The same tarball bytes go to npm and to the Release assets; `SHA256SUMS` and `verification.json` from the `prepare` job describe them. `npx` is only a one-time bootstrap: `setup` installs a fixed copy and writes absolute paths, so no client ever launches the registry.
+
+### Publishing a version (owner)
+
+1. Set the same `version` in `package.json`, `package-lock.json`, `npm-shrinkwrap.json`, `manifest.json` and `server.json`, update `CHANGELOG.md`, commit, then create and push the tag `v<version>` on the reviewed commit. `release.yml` refuses a tag that does not match the package version.
+2. The workflow runs `prepare` exactly as before (clean install, typecheck, tests, security suite, two reproducible builds, tarball verification). Only when it passes do `publish-npm` and `publish-ghcr*` run, both from the verified bytes.
+3. **npm trusted publisher (one-time).** On npmjs.com open the package → Settings → Trusted publisher → GitHub Actions: organization `nuoframework`, repository `darktrace-mcp`, workflow filename `release.yml`, no environment, allow `npm publish`. Until this exists (for example for the very first publish of the package name) the job falls back to an `NPM_TOKEN` repository secret (granular access token, publish-only, scoped to this package) and prints a warning; delete the secret once the trusted publisher works. Provenance statements are generated either way.
+4. **ghcr visibility (one-time).** The first push creates the package as private. In the organization's Packages settings set `darktrace-mcp` to public and confirm it is linked to this repository (the image carries `org.opencontainers.image.source`). Copy the digest from the `publish-ghcr-manifest` summary or the `ghcr-image-digest` artifact into the release notes.
+5. **Release assets.** Download the `darktrace-mcp-release-candidate` artifact, verify `SHA256SUMS`, build the extension from the tag (`npm ci --ignore-scripts && npm run pack:mcpb`), then create the release with `gh release create v<version> --verify-tag --draft --notes-file release-notes.md <assets>` and publish it after inspection.
+6. **MCP Registry.** After the npm version is live (the registry checks `mcpName` in the published `package.json`):
+
+```sh
+curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+./mcp-publisher validate server.json
+./mcp-publisher login github
+./mcp-publisher publish
+```
+
+   `login github` proves ownership of the `io.github.nuoframework` namespace through GitHub; in CI, `login github-oidc` with `id-token: write` does the same without a browser. Check the result at `https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest`.
+
+## v1.0.0 (previous release, private)
 
 Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.
 

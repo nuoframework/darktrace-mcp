@@ -1,4 +1,4 @@
-// Verifies a private npm archive in an empty installation; never runs package hooks.
+// Verifies the npm archive in an empty installation; never runs package hooks.
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,readdirSync,lstatSync,chmodSync} from 'node:fs';
@@ -139,7 +139,7 @@ export function verifyReleaseEvidence(archive,out,base=checkout){
  assert.equal(verification.readmeEsSha256,source['README.es.md']);assert.equal(verification.checks.readmeEsSourceBinding,true);
  assert.equal(build.sourceProductionTreeSha256,sha(JSON.stringify(Object.fromEntries(Object.entries(source).filter(([p])=>p.startsWith('src/')).map(([p,h])=>[p.slice(4),h])))));
  const receipt=read('security-receipt.json');assert.equal(receipt.receiptComplete,true);assert.equal(receipt.build.status,0);assert.equal(receipt.tests.status,0);assert.equal(receipt.sourceTreeSha256,build.sourceProductionTreeSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts-full-api.json'],fixtureSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts-first-stable.json'],firstStableFixtureSha256);assert.equal(receipt.fixtureHashes['mcp-tool-contracts.json'],alphaFixtureSha256);
- for(const check of ['tarAllowlist','regularFiles','private','noLifecycle','installedBytes','exactThreeDependencies','shrinkwrapSRI','downloadedDependencySRI','help','version','doctor','checkConfig','invalidProfilesRejected'])assert.equal(verification.checks[check],true);
+ for(const check of ['tarAllowlist','regularFiles','publicPackageMetadata','noLifecycle','installedBytes','exactThreeDependencies','shrinkwrapSRI','downloadedDependencySRI','help','version','doctor','checkConfig','invalidProfilesRejected'])assert.equal(verification.checks[check],true);
  assert.equal(verification.checks.binMode,'0755');
  return {archive:archiveName,archiveSha256:build.archiveSha256,checksums:expected.length,mcpToolContracts:build.mcpToolContracts,networkProbe:false};
 }
@@ -166,7 +166,7 @@ for(const name of names) assert(lstatSync(join(work,name)).isFile(),'regular fil
 const packed=join(work,'package');
 const readmeEs=join(packed,'README.es.md'),readmeEsStat=lstatSync(readmeEs);assert(readmeEsStat.isFile()&&readmeEsStat.size>0&&readmeEsStat.size<=1048576);assert.equal(readmeEsStat.mode&0o7777,0o644);assert.equal(hash(readFileSync(readmeEs)),hash(readFileSync(join(checkout,'README.es.md'))),'Spanish README source binding');
 const pkg=JSON.parse(readFileSync(join(packed,'package.json')));
-assert.equal(pkg.name,'darktrace-mcp');assert.equal(pkg.private,true);
+assert.equal(pkg.name,'@nuoframework/darktrace-mcp');assert.equal(pkg.private,undefined,'public npm publication: no private flag');assert.deepEqual(pkg.publishConfig,{access:'public',registry:'https://registry.npmjs.org'});assert.equal(pkg.mcpName,'io.github.nuoframework/darktrace-mcp');
 assert.equal(lstatSync(join(packed,'dist/src/index.js')).mode&0o777,0o755);
 assert(!Object.keys(pkg.scripts??{}).some(k=>['preinstall','install','postinstall','prepare','prepublish','prepublishOnly','postpublish'].includes(k)));
 assert.deepEqual(pkg.dependencies,{'@modelcontextprotocol/server':'2.3.0',zod:'4.2.0'});
@@ -177,15 +177,15 @@ for(const [path,p] of wanted){const name=path.slice('node_modules/'.length),slug
 const install=join(work,'install');mkdirSync(install);
 writeFileSync(join(install,'package.json'),JSON.stringify({name:'private-release-verification',version:'1.0.0',private:true}));
 run('npm',['install','--ignore-scripts','--omit=dev','--no-audit','--no-fund',archive],install);
-const root=join(install,'node_modules/darktrace-mcp');
+const root=join(install,'node_modules/'+pkg.name);
 const actual=JSON.parse(readFileSync(join(install,'package-lock.json'))).packages;
-assert.equal(Object.keys(actual).filter(k=>k&&k!=='node_modules/darktrace-mcp').length,3);
+assert.equal(Object.keys(actual).filter(k=>k&&k!=='node_modules/'+pkg.name).length,3);
 function files(dir,prefix=''){const result={};for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){if(e.name==='node_modules')continue;const p=join(dir,e.name),name=prefix+e.name;assert(!e.isSymbolicLink());if(e.isDirectory())Object.assign(result,files(p,name+'/'));else {assert(e.isFile());result[name]=hash(readFileSync(p));}}return result;}
 const rootFiles=files(root);for(const name of names){const relative=name.slice(8);assert.equal(rootFiles[relative],hash(readFileSync(join(packed,relative))));}
 assert.deepEqual(files(join(packed,'dist/src')),Object.fromEntries(Object.entries(files(join(checkout,'dist/src'))).filter(([name])=>/\.(js|json)$/.test(name))),'archive JS/JSON runtime must match the reviewed contract-generating build');
-const inventories={'darktrace-mcp':rootFiles};
+const inventories={[pkg.name]:rootFiles};
 const components=[];
-for(const [path,p] of wanted){const key=actual[path]?path:'node_modules/darktrace-mcp/'+path;const a=actual[key];assert(a);for(const field of ['version','integrity','resolved'])assert.equal(a[field],p[field]);const location=join(install,key),manifest=JSON.parse(readFileSync(join(location,'package.json')));assert.equal(manifest.version,p.version);assert.equal(manifest.license,p.license);
+for(const [path,p] of wanted){const key=actual[path]?path:'node_modules/'+pkg.name+'/'+path;const a=actual[key];assert(a);for(const field of ['version','integrity','resolved'])assert.equal(a[field],p[field]);const location=join(install,key),manifest=JSON.parse(readFileSync(join(location,'package.json')));assert.equal(manifest.version,p.version);assert.equal(manifest.license,p.license);
  const depDir=join(work,'dependency-'+components.length);mkdirSync(depDir);const [packedDep]=JSON.parse(run('npm',['pack','--ignore-scripts','--json','--pack-destination',depDir,p.resolved],depDir));const bytes=readFileSync(join(depDir,packedDep.filename));assert.equal('sha512-'+hash(bytes,'sha512','base64'),p.integrity,'dependency SRI');
  inventories[manifest.name]=files(location);
  components.push({type:'library','bom-ref':manifest.name,name:manifest.name,version:manifest.version,purl:`pkg:npm/${manifest.name.replace('@','%40')}@${manifest.version}`,licenses:[{license:{id:manifest.license}}],hashes:[{alg:'SHA-256',content:hash(bytes)},{alg:'SHA-512',content:hash(bytes,'sha512')}],externalReferences:[{type:'distribution',url:p.resolved}],properties:[{name:'npm:integrity',value:p.integrity}]});
@@ -203,7 +203,7 @@ const rootComponent={type:'application','bom-ref':pkg.name,name:pkg.name,version
 const sbom={bomFormat:'CycloneDX',specVersion:'1.5',version:1,metadata:{component:rootComponent},components,dependencies:[{ref:pkg.name,dependsOn:['@modelcontextprotocol/server','zod']},{ref:'@modelcontextprotocol/server',dependsOn:['@modelcontextprotocol/core','zod']},{ref:'@modelcontextprotocol/core',dependsOn:['zod']},{ref:'zod',dependsOn:[]}]};
 writeFileSync(join(out,'runtime-sbom.cdx.json'),JSON.stringify(sbom,null,2)+'\n');
 writeFileSync(join(out,'runtime-files.sha256.json'),JSON.stringify(inventories,null,2)+'\n');
-const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readFileSync(readmeEs)),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,private:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,invalidProfilesRejected:true},work};
+const report={node:process.version,npm:run('npm',['--version']).trim(),platform:process.platform,arch:process.arch,archiveSha256:hash(readFileSync(archive)),files:names.length,readmeEsSha256:hash(readFileSync(readmeEs)),releaseCapability,mcpToolContracts,runtimeDependencies:components.map(c=>({name:c.name,version:c.version,license:c.licenses[0].license.id})),checks:{tarAllowlist:true,regularFiles:true,binMode:'0755',readmeEsSourceBinding:true,publicPackageMetadata:true,noLifecycle:true,installedBytes:true,exactThreeDependencies:true,shrinkwrapSRI:true,downloadedDependencySRI:true,help:true,version:true,doctor:true,checkConfig:true,invalidProfilesRejected:true},work};
 writeFileSync(join(out,'verification.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await main();

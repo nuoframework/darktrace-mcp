@@ -35,17 +35,27 @@ node -p 'process.execPath'
 node -p 'require("node:path").resolve("dist/src/index.js")'
 ```
 
-Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`.
+Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranque con `npx`, la entrada es `~/.local/share/darktrace-mcp/1.1.0/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`.
+
+## Una línea por cliente
+
+`darktrace-mcp setup` ejecuta estos comandos por ti. Para lanzarlos tú mismo, usa tu ruta absoluta de Node (`node -p process.execPath`), la ruta de entrada anterior y los archivos de token que creó el asistente en `~/.config/darktrace-mcp/`.
+
+| Cliente | Comando |
+|---|---|
+| Claude Code | `claude mcp add --scope user --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read --transport stdio darktrace -- /abs/node /abs/index.js` |
+| Codex | `codex mcp add darktrace --env DARKTRACE_URL=https://… --env DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token --env DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token --env DARKTRACE_PROFILES=read -- /abs/node /abs/index.js` |
+| VS Code | `code --add-mcp '{"name":"darktrace","type":"stdio","command":"/abs/node","args":["/abs/index.js"],"env":{…}}'`; `darktrace-mcp config vscode` lo imprime relleno, más un enlace `vscode:mcp/install` cuyas entradas de contraseña guardan los tokens en el almacén secreto de VS Code |
+| Cursor | `darktrace-mcp config cursor` imprime un enlace `cursor://anysphere.cursor-deeplink/mcp/install?…` |
+| Gemini CLI | `gemini mcp add --scope user -e DARKTRACE_URL=https://… -e DARKTRACE_PUBLIC_TOKEN_FILE=/abs/public-token -e DARKTRACE_PRIVATE_TOKEN_FILE=/abs/private-token -e DARKTRACE_PROFILES=read darktrace /abs/node /abs/index.js` |
+| Claude Desktop | `.mcpb` de la release (abajo) |
+| Windsurf, OpenCode | Fragmentos JSON de abajo (sin CLI) |
+
+Nunca pongas `npx` en la configuración de un cliente: cada arranque dependería del registro y recogería código nuevo sin avisar. El asistente siempre escribe rutas absolutas.
 
 ## Claude Desktop
 
-**Automática.** Ejecuta `darktrace-mcp setup` o instala la extensión:
-
-```sh
-npm run pack:mcpb
-```
-
-Haz doble clic en el archivo `.mcpb` generado. Claude Desktop pide la URL, los tokens y el perfil, y guarda los tokens en el llavero del sistema.
+**Automática.** Ejecuta `darktrace-mcp setup` o instala la extensión: descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) (o constrúyela desde un checkout con `npm run pack:mcpb`) y haz doble clic. Claude Desktop pide la URL, los tokens y el perfil, y guarda los tokens en el llavero del sistema.
 
 **Manual.** Settings → Developer → Edit Config. Añade esto dentro de `mcpServers`, sin borrar tus otros servidores:
 
@@ -264,10 +274,18 @@ No pongas `"trust": true`: mantén la confirmación de Gemini en cada llamada.
 
 ## Docker
 
-Sirve para cualquier cliente que acepte `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Carga o construye la imagen primero ([guía de Docker](../docker.md), en inglés) y obtén su ID:
+Sirve para cualquier cliente que acepte `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Descarga la imagen publicada ([guía de Docker](../docker.md), en inglés) y deja que el asistente escriba la entrada endurecida fijada a su digest:
 
 ```sh
-docker image inspect --format '{{.Id}}' darktrace-mcp:local
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+```
+
+**Manual.** Obtén el ID de la imagen (o usa el digest `nombre@sha256:…` anterior):
+
+```sh
+docker image inspect --format '{{.Id}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
 command -v docker
 ```
 

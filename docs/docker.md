@@ -2,7 +2,7 @@
 
 [README](../README.md) · [Clients: Docker](clients.md#docker) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
 
-The image runs the MCP server over stdio. It opens no network port and is built for local, private use. No image is published to a public registry.
+The image runs the MCP server over stdio and opens no network port. Since v1.1.0 the release workflow publishes it as `ghcr.io/nuoframework/darktrace-mcp:<version>` for linux/amd64 and linux/arm64; always pin the digest.
 
 The image exposes the same tools as a native install. Profiles work the same way: set `DARKTRACE_PROFILES` with `-e` (default `read`). See [profiles](configuration.md#profiles).
 
@@ -10,7 +10,7 @@ The image exposes the same tools as a native install. Profiles work the same way
 
 ## Quick steps
 
-1. Load or build the image ([Install options](#install-options)).
+1. Pull, load or build the image ([Install options](#install-options)).
 2. Run `--check-config` inside the container with your token mounts ([below](#mcp-client-configuration)).
 3. Add the client snippet from [Clients: Docker](clients.md#docker), with the image ID.
 
@@ -33,7 +33,16 @@ This is not a zero-CVE claim, and it is not stable-release approval.
 
 ## Install options
 
-1. **Private GitHub Release image archive (easiest; v1.0.0).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`. No public registry image exists.
+1. **Public image on GitHub Container Registry (easiest; v1.1.0 and later).** Built by `.github/workflows/release.yml` on the reviewed tag, natively on amd64 and arm64 runners, and combined into one tag. The manifest digest is recorded in the workflow summary and in the release notes.
+
+```sh
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
+npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+```
+
+   Compare the digest with the release notes before using it. The wizard writes the hardened `docker run` entry with `--pull=never` and the `name@sha256:…` reference, so clients only ever start the inspected bytes; a tag is mutable, a digest is not. For a manual snippet use the local image ID (`docker image inspect --format '{{.Id}}'`) as shown under [MCP client configuration](#mcp-client-configuration).
+2. **GitHub Release image archive (v1.0.0, previous release).** Assets: `darktrace-mcp-1.0.0-linux-amd64.tar.gz`, `darktrace-mcp-1.0.0-linux-arm64.tar.gz`, `darktrace-mcp-1.0.0.tgz` (npm package) and `SHA256SUMS`.
 
 ```sh
 gh release download v1.0.0 --repo nuoframework/darktrace-mcp \
@@ -43,8 +52,8 @@ docker load --input darktrace-mcp-1.0.0-linux-arm64.tar.gz
 docker image inspect --format '{{.Id}}' darktrace-mcp:1.0.0-arm64
 ```
 
-   On x86-64 hosts, use the `amd64` archive and the `darktrace-mcp:1.0.0-amd64` tag. Check that the loaded image ID matches the release notes, then use that `sha256:…` ID with `--pull=never`. Release asset availability is shown on the private v1.0.0 release page.
-2. **Build from the reviewed checkout** (below).
+   On x86-64 hosts, use the `amd64` archive and the `darktrace-mcp:1.0.0-amd64` tag. Check that the loaded image ID matches the release notes, then use that `sha256:…` ID with `--pull=never`.
+3. **Build from the reviewed checkout** (below).
 
 ## Build
 

@@ -171,9 +171,13 @@ test('MR-07.DUPLICATES escaped keys and nested duplicate scopes reject; strings/
     assert.equal(output, duplicate?'{}\n':raw+'\n');
   }
 });
-test('MR-03.DISTRIBUTION only verified private tgz/local source examples; documentary scanner distinguishes warnings and installs', () => {
-  for (const line of ['npx darktrace-mcp', 'npx -y darktrace-mcp@0.1.0', 'npx --package=darktrace-mcp@latest node', 'npm i darktrace-mcp', 'npm install --ignore-scripts darktrace-mcp', 'npm exec -- darktrace-mcp', 'npm exec --package=darktrace-mcp node']) assert.equal(forbiddenCommand(line), true, line);
-  for (const line of ['Do not run npx darktrace-mcp', '# npx darktrace-mcp is forbidden', 'npm ci --ignore-scripts', 'npm install --ignore-scripts ./darktrace-mcp-0.1.tgz', 'npm install /absolute/private/darktrace-mcp.tgz', 'node /absolute/path/dist/src/index.js']) assert.equal(forbiddenCommand(line), false, line);
+test('MR-03.DISTRIBUTION only the scoped published package, pinned exactly, and never as a client launcher; documentary scanner distinguishes warnings and installs', () => {
+  for (const line of ['npx darktrace-mcp', 'npx -y darktrace-mcp@0.1.0', 'npx --package=darktrace-mcp@latest node', 'npm i darktrace-mcp', 'npm install --ignore-scripts darktrace-mcp', 'npm exec -- darktrace-mcp', 'npm exec --package=darktrace-mcp node',
+    'npx -y @nuoframework/darktrace-mcp setup', 'npx -y @nuoframework/darktrace-mcp@latest setup', 'npm install -g @nuoframework/darktrace-mcp@^1', 'npx --package=@nuoframework/darktrace-mcp@1 darktrace-mcp']) assert.equal(forbiddenCommand(line), true, line);
+  for (const line of ['Do not run npx darktrace-mcp', '# npx darktrace-mcp is forbidden', 'npm ci --ignore-scripts', 'npm install --ignore-scripts ./darktrace-mcp-0.1.tgz', 'npm install /absolute/private/darktrace-mcp.tgz', 'node /absolute/path/dist/src/index.js',
+    'npx -y @nuoframework/darktrace-mcp@1.1.0 setup', 'npm install -g @nuoframework/darktrace-mcp@1.1.0']) assert.equal(forbiddenCommand(line), false, line);
+  // Client configurations must launch an absolute executable: even the exactly pinned package is not a launcher.
+  for (const line of ['npx -y @nuoframework/darktrace-mcp@1.1.0', 'npm exec --package=@nuoframework/darktrace-mcp@1.1.0 darktrace-mcp']) assert.equal(forbiddenCommand(line, true), true, line);
   assert.deepEqual(distributionIssues(resolve('.')), []);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr03-')); mkdirSync(join(directory, 'docs')); mkdirSync(join(directory, 'examples'));
   writeFileSync(join(directory, 'README.es.md'), 'No ejecutar paquetes no verificados.\n');
@@ -181,6 +185,8 @@ test('MR-03.DISTRIBUTION only verified private tgz/local source examples; docume
   writeFileSync(join(directory, 'docs/unsafe.md'), '```sh\nnpx -y darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 1);
   writeFileSync(join(directory, 'examples/unsafe.json'), JSON.stringify({ mcpServers: { unsafe: { command: 'npx', args: ['-y', 'darktrace-mcp'] } } })); assert.equal(distributionIssues(directory).length, 2);
   writeFileSync(join(directory, 'README.es.md'), '```sh\nnpm install darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 3);
+  writeFileSync(join(directory, 'examples/pinned-launcher.json'), JSON.stringify({ mcpServers: { darktrace: { command: '/usr/local/bin/npx', args: ['-y', '@nuoframework/darktrace-mcp@1.1.0'] } } })); assert.equal(distributionIssues(directory).length, 4);
+  writeFileSync(join(directory, 'docs/bootstrap.md'), '```sh\nnpx -y @nuoframework/darktrace-mcp@1.1.0 setup\n```\n'); assert.equal(distributionIssues(directory).length, 4);
 });
 
 // IR-01/02 supplements: all preceding 62 cases remain byte-for-byte unchanged.

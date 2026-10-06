@@ -131,4 +131,4 @@ Se rechazan respuestas de más de 2 MiB y salidas de más de 60.000 caracteres. 
 
 ## Si sigues atascado
 
-Recoge la salida de `darktrace-mcp --check-config` y `darktrace-mcp --version`, elimina nombres de host internos y abre una issue en el repositorio privado. Nunca compartas tokens ni datos del appliance. Problemas de seguridad: consulta [SECURITY.md](../../SECURITY.md).
+Recoge la salida de `darktrace-mcp --check-config` y `darktrace-mcp --version`, elimina nombres de host internos y abre una issue en el repositorio. Nunca compartas tokens ni datos del appliance. Problemas de seguridad: consulta [SECURITY.md](../../SECURITY.md).
