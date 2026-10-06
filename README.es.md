@@ -27,16 +27,16 @@ Investiga tu appliance Darktrace desde tu cliente MCP. Empieza en modo lectura y
 Necesitas **Node.js 22+**, la URL del appliance (`https://…`) y el par de tokens API público/privado (Darktrace: **System Config → Settings → API Token**).
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
 Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario en macOS/Linux y hace una copia de seguridad de las configuraciones existentes antes de actualizarlas. [Guía completa](docs/es/getting-started.md).
 
 `npx` solo se usa para instalar. El asistente copia una versión fija y configura los clientes con rutas absolutas a Node y `dist/src/index.js`. Windows nativo no puede proteger los archivos de tokens: usa [.mcpb, Docker o WSL](docs/es/getting-started.md#windows).
 
-Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
+Las tres vías ya distribuyen 1.1.1: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](docs/es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
-La publicación de 1.1.1 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
+La publicación de 1.1.2 está en curso a fecha de **2026-10-06**. [Estado de la versión (EN)](docs/releases.md#release-status-2026-10-06).
 
 ### Plugin para Claude Code y Codex
 
@@ -51,24 +51,24 @@ Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin 
 
 ### Claude Desktop
 
-Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema.
+Descarga `darktrace-mcp-1.1.2.mcpb` de la [release v1.1.2](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.2) y ábrelo; los tokens van al llavero del sistema.
 
 ### Docker
 
 Con Docker instalado, descarga primero la imagen fijada y después ejecuta el asistente. Los lanzadores de los clientes usan `--pull=never`.
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
-  --image ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
+docker pull ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup --runtime docker \
+  --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
-Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.0`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).
+Imagen multiarquitectura (linux/amd64, linux/arm64), fijada por el digest del índice. Usa el digest, no la etiqueta variable `1.1.2`, en la configuración del cliente. [Guía Docker (EN)](docs/docker.md).
 
 ### Desinstalar
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 uninstall
+npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
 Muestra un plan y pregunta una vez; después quita la entrada `darktrace` de todos los clientes (con copias de seguridad), los tokens y ajustes guardados y las copias fijas. `--dry-run` solo muestra el plan; `--docker` borra también el ID de imagen que fijó setup. [Detalles](docs/es/clients.md#desinstalar).

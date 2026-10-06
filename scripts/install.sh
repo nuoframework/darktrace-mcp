@@ -1,6 +1,6 @@
 #!/bin/sh
 # darktrace-mcp source installer for macOS and Linux (POSIX sh). Fallback path.
-# The primary install is the published package:  npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+# The primary install is the published package:  npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 # Usage (inside a checkout):  sh scripts/install.sh [setup options]
 #        (one-liner; read the script before running it):
 #   curl -fsSLO https://raw.githubusercontent.com/nuoframework/darktrace-mcp/main/scripts/install.sh

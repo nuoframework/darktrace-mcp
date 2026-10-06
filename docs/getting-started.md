@@ -24,25 +24,25 @@ Give the token only the Darktrace permissions you want the model to have. The se
 ### macOS, Linux and Windows
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.1 setup
+npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
-`npx` downloads the exact published version `1.1.1` (npm checks its integrity) and starts the setup wizard (Step 2). Because the `npx` cache is temporary, the wizard first copies the package and its three locked dependencies to a fixed directory and registers that absolute path in your clients:
+`npx` downloads the exact published version `1.1.2` (npm checks its integrity) and starts the setup wizard (Step 2). Because the `npx` cache is temporary, the wizard first copies the package and its three locked dependencies to a fixed directory and registers that absolute path in your clients:
 
 | OS | Fixed copy |
 |---|---|
-| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.1/` (or `$XDG_DATA_HOME/darktrace-mcp/1.1.1/`) |
-| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.1\` |
+| macOS, Linux | `~/.local/share/darktrace-mcp/1.1.2/` (or `$XDG_DATA_HOME/darktrace-mcp/1.1.2/`) |
+| Windows | `%LOCALAPPDATA%\darktrace-mcp\1.1.2\` |
 
 Clients start the server as `/absolute/path/to/node …/node_modules/@nuoframework/darktrace-mcp/dist/src/index.js`; they never run `npx` and never need the registry again. Re-running the command reuses the copy.
 
 To get a `darktrace-mcp` command on your `PATH` (optional), install it globally with the same pinned version:
 
 ```sh
-npm install -g @nuoframework/darktrace-mcp@1.1.1
+npm install -g @nuoframework/darktrace-mcp@1.1.2
 ```
 
-Otherwise, wherever this guide says `darktrace-mcp …`, run `npx -y @nuoframework/darktrace-mcp@1.1.1 …`.
+Otherwise, wherever this guide says `darktrace-mcp …`, run `npx -y @nuoframework/darktrace-mcp@1.1.2 …`.
 
 ### Windows
 
