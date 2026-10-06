@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { performance } from 'node:perf_hooks';
 import { assertSafeNetworkEnvironment, type Config } from '../config/schema.js';
@@ -53,6 +53,8 @@ export interface ApiResponse<T = unknown> {
   readonly status: number;
   readonly json?: T;
   readonly bytes?: Uint8Array;
+  /** Code-owned refusal for a complete binary response that cannot fit the tool output budget. */
+  readonly outputLimitExceeded?: { readonly errorCode: 'output_limit_exceeded'; readonly size: number; readonly sha256: string };
   /** Sanitized media type (type/subtype only) for binary responses. */
   readonly contentType?: string;
   readonly truncated: boolean;
@@ -94,8 +96,8 @@ interface RuntimeOperation {
   readonly pathTemplate: string;
   readonly pathParamNames: readonly string[];
   readonly parameterNames: readonly string[];
-  /** S6: standard-Base64 path parameters sent and signed verbatim (darktrace-sdk behaviour). */
-  readonly rawBase64Params: readonly string[];
+  /** S6: standard-Base64 path parameters percent-encoded identically for signing and transport. */
+  readonly base64PathParams: readonly string[];
 }
 
 interface EncodedBody {
@@ -113,13 +115,14 @@ const TRANSIENT_PRE_RESPONSE_CODES = new Set([
   'ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE', 'ECONNABORTED', 'ENETUNREACH', 'EHOSTUNREACH',
 ]);
 /** S6: Advanced Search GET routes carry a standard-Base64 query in their final path segment(s). */
-const RAW_BASE64_ROUTES: Readonly<Record<string, string>> = Object.freeze({
+const BASE64_PATH_ROUTES: Readonly<Record<string, string>> = Object.freeze({
   '/advancedsearch/api/search/{query}': 'query',
   '/advancedsearch/api/analyze/{field}/{analysis}/{query}': 'query',
   '/advancedsearch/api/graph/{graphmode}/{interval}/{query}': 'query',
 });
 const MAX_BASE64_PATH_CHARS = 21_848; // 16 KiB decoded search document
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+const MAX_PATH_DECODE_PASSES = 16;
 const MAX_RESPONSE_HARD_CAP = 2_097_152;
 const RATE_WINDOW_MS = 60_000;
 const productionAttemptTimes: number[] = [];
@@ -161,23 +164,28 @@ function operationRegistry(entries: readonly TrustedOperation[]): ReadonlyMap<st
       pathTemplate: entry.pathTemplate,
       pathParamNames: Object.freeze(names),
       parameterNames: Object.freeze([...names, ...parameterNames]),
-      rawBase64Params: Object.freeze(entry.method === 'GET' && Object.hasOwn(RAW_BASE64_ROUTES, entry.pathTemplate) ? [RAW_BASE64_ROUTES[entry.pathTemplate]] : []),
+      base64PathParams: Object.freeze(entry.method === 'GET' && Object.hasOwn(BASE64_PATH_ROUTES, entry.pathTemplate) ? [BASE64_PATH_ROUTES[entry.pathTemplate]] : []),
     }));
   }
   if (result.size === 0) throw new TypeError('trusted operation registry must not be empty');
   return result;
 }
 
-function hasPathTraversal(value: string): boolean {
+function hasUnsafePathSegment(value: string): boolean {
   let candidate = value;
-  for (let pass = 0; pass < 4; pass += 1) {
-    if (/(^|[\\/])\.{1,2}(?:[\\/]|$)/.test(candidate)) return true;
+  for (let pass = 0; pass < MAX_PATH_DECODE_PASSES; pass += 1) {
+    if (candidate === '.' || candidate === '..' || /[\\/?#\u0000-\u001f\u007f]/.test(candidate)) return true;
     let decoded: string;
     try { decoded = decodeURIComponent(candidate); } catch { return true; }
     if (decoded === candidate) return false;
     candidate = decoded;
   }
-  return /%[0-9a-f]{2}/i.test(candidate);
+  return true;
+}
+
+function isStrictBase64(value: string): boolean {
+  return value.length > 0 && value.length <= MAX_BASE64_PATH_CHARS && value.length % 4 === 0 &&
+    /^[A-Za-z0-9+/]+={0,2}$/.test(value) && Buffer.from(value, 'base64').toString('base64') === value;
 }
 
 function expandPath(operation: RuntimeOperation, supplied: ClientRequest['pathParams']): string {
@@ -193,14 +201,13 @@ function expandPath(operation: RuntimeOperation, supplied: ClientRequest['pathPa
       throw new TypeError('path parameter has an invalid value');
     }
     const text = String(value);
-    if (text.length === 0 || CONTROL_CHARS.test(text) || hasPathTraversal(text)) throw new TypeError('path parameter has an invalid value');
-    if (operation.rawBase64Params.includes(name)) {
-      // S6: the darktrace-sdk signs and sends standard Base64 unencoded ('/', '+', '=' literal).
-      // Only the Base64 alphabet is admitted, so no '.', '%', '\\', '?', '#' or control can appear.
-      if (typeof value !== 'string' || text.length > MAX_BASE64_PATH_CHARS || text.length % 4 !== 0 ||
-        !/^[A-Za-z0-9+/]+={0,2}$/.test(text) || text.startsWith('/')) throw new TypeError('path parameter has an invalid value');
-      return text;
+    if (text.length === 0 || CONTROL_CHARS.test(text)) throw new TypeError('path parameter has an invalid value');
+    if (operation.base64PathParams.includes(name)) {
+      // S6 accepts standard Base64 as data; percent-encode it once so HMAC and wire paths match byte-for-byte.
+      if (typeof value !== 'string' || !isStrictBase64(text)) throw new TypeError('path parameter has an invalid value');
+      return rfc3986(text);
     }
+    if (hasUnsafePathSegment(text)) throw new TypeError('path parameter has an invalid value');
     return rfc3986(text);
   });
 }
@@ -398,28 +405,36 @@ async function readBounded(
     throw new Error('too_large');
   }
   if (response.body === null) return new Uint8Array();
+  // Own one bounded destination buffer; retaining copied chunks and then consolidating doubles raw memory.
   const chunks: Uint8Array[] = [];
-  let total = 0;
+  void chunks;
+  const total = Math.min(cap - used.wire, cap - used.decoded);
+  const bytes = new Uint8Array(total);
+  let offset = 0;
   try {
     for await (const chunk of response.body) {
       const byteLength = chunk.byteLength;
-      total += byteLength;
-      used.wire += byteLength;
-      used.decoded += byteLength;
-      if (used.wire > cap || used.decoded > cap) {
+      if (used.wire + byteLength > cap || used.decoded + byteLength > cap || offset + byteLength > bytes.byteLength) {
         await response.body.cancel().catch(() => undefined);
         throw new Error('too_large');
       }
-      chunks.push(new Uint8Array(chunk));
+      bytes.set(chunk, offset);
+      offset += byteLength;
+      used.wire += byteLength;
+      used.decoded += byteLength;
     }
   } catch (error) {
     if (error instanceof Error && error.message === 'too_large') throw error;
     throw new Error('stream_failed');
   }
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-  return bytes;
+  return bytes.subarray(0, offset);
+}
+
+function binaryOutputWouldExceed(size: number, outputLimit: number): boolean {
+  const base64Chars = 4 * Math.ceil(size / 3);
+  const envelopeChars = JSON.stringify({ kind: 'pcap', encoding: 'base64', byteLength: size, data: '' }).length;
+  // Leave room for the ordinary result wrapper, source/provenance text, and JSON punctuation.
+  return base64Chars + envelopeChars + 512 > outputLimit;
 }
 
 function retryDelay(
@@ -553,8 +568,11 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
         query = encodeQuery(req.query);
         body = encodeBody(req.body);
       } catch { throw new DarktraceApiError('invalid_request', requestId); }
-      // S4 query+JSON (path?query&{json}), S5 DELETE+query (path?query, like GET) and S6 raw Base64 GET
-      // paths are signed exactly as LegendEvent/darktrace-sdk v0.10.1 does; see docs/CHANGES-core.md.
+      if (body?.kind === 'json' && query.length > 0) {
+        // S4 is blocked: 7.1.0 accepts path?{json} only; no catalogue route needs query plus JSON.
+        throw new DarktraceApiError('invalid_request', requestId);
+      }
+      // S5 DELETE+query is signed like GET; S6 Base64 path segments are percent-encoded as sent.
       const shaped = [req.pathParams, req.query, req.body?.value].filter((value) => value !== undefined);
       if (!checkShapes(shaped, cfg.limits.maxToolInputDepth, cfg.limits.maxToolInputElements)) {
         throw new DarktraceApiError('invalid_request', requestId);
@@ -666,6 +684,14 @@ export function createHttpClient(cfg: Config, options: HttpClientOptions): HttpC
                 try { json = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)); }
                 catch { throw new DarktraceApiError('invalid_response', requestId, response.status); }
                 return Object.freeze({ status: response.status, json: json as T, truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
+              }
+              if (binaryOutputWouldExceed(bytes.byteLength, cfg.limits.maxToolOutputChars)) {
+                const outputLimitExceeded = Object.freeze({
+                  errorCode: 'output_limit_exceeded' as const,
+                  size: bytes.byteLength,
+                  sha256: createHash('sha256').update(bytes).digest('hex'),
+                });
+                return Object.freeze({ status: response.status, outputLimitExceeded, truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
               }
               return Object.freeze({ status: response.status, bytes, ...(mediaType === undefined ? {} : { contentType: mediaType }), truncated: false, elapsedMs: Math.max(0, performance.now() - startedAt), requestId });
             }

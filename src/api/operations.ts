@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
+import { DarktraceApiError } from '../client/errors.js';
 import catalogue from './catalogue.generated.json' with { type: 'json' };
-import { schemaFromOpenApi, checkInput, checkRanges, validateSearchHash, inputUnit, type InputLimits } from './validation.js';
+import { schemaFromOpenApi, checkInput, checkRanges, validatePathSegment, validateSearchHash, inputUnit, type InputLimits } from './validation.js';
 export type Tier = 'read'|'medium'|'high'|'critical';
 export interface OperationDescriptor {
   operationId:string; method:'GET'|'POST'|'DELETE'; pathTemplate:string; tool:string|null;
@@ -72,7 +74,7 @@ export function validateOperation(op:Operation, raw:unknown, limits:number|Parti
   checkRanges((args.body&&typeof args.body==='object'?args.body:{}) as Record<string,unknown>,Object.fromEntries(Object.entries(bodyProperties).map(([name,schema])=>[name,inputUnit(schema as any,name)])));
   for (const [key,value] of Object.entries(args.path??{})) {
     if (key==='query' && op.pathTemplate.startsWith('/advancedsearch/')) validateSearchHash(String(value));
-    else if (typeof value==='string' && (/[/\\?#\u0000\r\n]/.test(value)||value==='.'||value==='..'||/%(?:2e|2f|5c|25)/i.test(value))) throw new Error('Invalid path segment');
+    else if (typeof value==='string') validatePathSegment(value);
   }
   if (op.operationId==='post_advancedsearch_api_search') validateSearchHash(String((args.body as any)?.hash));
   return args;
@@ -89,7 +91,10 @@ export function buildRequest(op:Operation,args:OperationArgs,signal?:AbortSignal
     } else query.push([p.name,String(value)]);
   }
   const contentType = args.contentType??op.bodies[0]?.contentType;
-  // Query plus JSON body (S4) is signed as path?query&{json}, matching darktrace-sdk v0.10.1 auth.py.
+  if (args.body!==undefined && contentType==='application/json' && query.length>0) {
+    // S4 is blocked: if a future appliance route needs it, 7.1.0 accepts path?{json} only.
+    throw new DarktraceApiError('invalid_request',randomUUID());
+  }
   return {operationId:op.operationId,pathParams:args.path as Record<string,string|number>|undefined,query,
     ...(args.body===undefined?{}:{body:args.body,contentType}),...(signal?{signal}:{}),
     ...(BINARY_OPERATIONS.has(op.operationId)?{accept:'binary' as const}:{})};
