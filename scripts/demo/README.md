@@ -1,34 +1,39 @@
-# README demo recordings
+# README terminal recordings
 
-These are recordings of the built server with synthetic fixtures, not real appliance evidence. No production credentials, private keys or real appliance results are committed. The recordings use English; both READMEs share the GIFs. Product names identify compatible clients, not authors or endorsements.
+These are real terminal recordings of the built server against **synthetic HTTPS fixtures**, with dummy tokens and no production data. They demonstrate workflows, not appliance compatibility. Product names identify clients, not authors or endorsements. Both READMEs share the English recordings.
 
-| Recording | What actually runs | Result |
-|---|---|---|
-| [setup.cast](setup.cast) | `node dist/src/index.js setup`, driven through a PTY | HTTPS/token probe succeeds; `read` selected; OpenCode entry written under a temporary `XDG_CONFIG_HOME`; token files checked as `0600` |
-| [analyst.cast](analyst.cast) | Authenticated Claude Code headless session, strict isolated MCP config | Calls `darktrace_get_devices` and `darktrace_list_model_breaches`; answers from their synthetic results |
-| [approval.cast](approval.cast) | Small MCP host using the real server's form elicitation | `dryRun:true` → `previewId` → `confirm:true` → exact server dialog → decline → `approval_denied` |
+| Recording | Source and actual execution |
+|---|---|
+| Setup | [setup.tape](setup.tape) drives `node dist/src/index.js setup` with typed URL, hidden dummy tokens, preset 1 (`read`), and OpenCode only. [setup.cast](setup.cast) captures the terminal output. The signed probe succeeds and the results table confirms a temporary client entry. |
+| Analyst | [analyst.mjs](analyst.mjs) runs an authenticated `claude --mcp-config <tmp.json> --strict-mcp-config -p "…"` session. [analyst.cast](analyst.cast) captures the live tool events and streamed answer; [analyst.tape](analyst.tape) renders that cast with VHS. |
+| Approval | [approval.tape](approval.tape) drives [approval-client.mjs](approval-client.mjs), a real interactive Claude Code session using the built MCP server. It previews `post_antigena`, confirms the same action, displays the native “MCP server darktrace requests your input” form, selects **Decline**, and shows the refusal. |
 
-The approval UI is a **demo host**, not a Claude Code screenshot. Its driver can only decline, and the recorder sends Enter after displaying the dialog. This demonstrates protocol handling, not independent proof that a human answered. The analyst presentation formats live `stream-json` tool events and answer text; it has no canned answer. Waiting time is capped during GIF rendering. The analyst cast height was increased from 32 to 36 rows for legibility; output is unchanged. The `.cast` files preserve the captured timing and output; input capture is disabled, so hidden token entry is absent.
+The analyst display formats actual `stream-json` events and partial text; there is no canned answer. Received words are paced for readability and idle gaps are capped at 1.2 seconds during playback. The displayed command abbreviates the temporary filename, prompt and rendering flags; the script contains the exact invocation. The answer can vary. The approval tape hides startup and network waits, then captures the actual client dialog and response. [render-approval.sh](render-approval.sh) crops the top 108 pixels to remove the native startup banner; the tool output, dialog, and response are not rewritten. Its scripted keystrokes decline: this is protocol/UI evidence, not proof of an independent human decision. No action executes; the mock write log must remain unchanged.
 
 ## Prerequisites
 
-Node.js 22+, Python 3, OpenSSL, an authenticated `claude` executable for the analyst recording, and:
+Node.js 22+, Python 3, OpenSSL, an authenticated `claude` executable, and:
 
 ```sh
-brew install asciinema agg
+brew install vhs asciinema agg
 npm ci --ignore-scripts
 npm run build
+claude auth status
 ```
 
-Recorded with asciinema 3.2.1 and agg 1.9.0. No production code is modified or loaded through a test override. Scripts use temporary token files containing only `mock-public-token` / `mock-private-token`; Node receives the private CA through `NODE_EXTRA_CA_CERTS`. Temporary client config and token files are removed on successful completion. A forcibly killed run may leave `darktrace-demo-*` / `darktrace-setup-*` directories in the OS temporary directory; inspect and remove only those demo directories.
+The shipped recordings use VHS 0.12.1, asciinema 3.2.1 and Claude Code 2.1.289. VHS uses Menlo 18 px, a dark theme, a roughly 100 × 30 terminal and a requested capture rate of 30 fps. Its GIF encoder can coalesce/resample frames; verify the actual output with `ffprobe`. VHS needs permission to launch its local terminal/browser renderer. The client also needs access to its existing login (a sandbox can prevent keychain access).
+
+Only dummy Darktrace tokens are used: `mock-public-token` / `mock-private-token`, stored in temporary files with mode `0600`. Node trusts the mock CA using an **absolute** `NODE_EXTRA_CA_CERTS` path. The setup helper isolates `XDG_CONFIG_HOME` and checks the resulting token modes. The analyst isolates MCP configuration, disables built-in tools, skips user/project settings, and allows only the two read tools. The native approval client uses an isolated MCP config with `DARKTRACE_PROFILES=all` and `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`; server elicitation remains enabled. Synthetic tool results are sent to the authenticated client's provider.
+
+Temporary token/config directories are removed on normal exit. A killed run may leave `darktrace-demo-*` / `darktrace-setup-*` directories in the OS temporary directory; inspect and remove only those demo directories. The native client may retain its normal local conversation history. Never commit client configs, token files, CA private keys, certificates, or mock request logs.
 
 ## Start the synthetic appliance
 
-The supplied scratchpad mock binds to `127.0.0.1:8443` and has a certificate for `localhost` and `127.0.0.1`. The production destination policy rejects loopback **even with that valid certificate**. These recordings therefore use a copy of its server and unchanged fixtures, bound to the recording machine's private IPv4 address on port 8444, with a fresh matching certificate. TLS and destination checks stay enabled. Nothing calls a real Darktrace appliance.
+The supplied scratchpad mock binds to loopback and has a localhost certificate. The production destination policy rejects loopback even with a valid certificate. These recordings use the same fixture snapshot and server, with only a configurable private bind address and matching certificate SAN. TLS and destination checks stay enabled; no production server is contacted.
 
-Use a trusted test network: the mock will be reachable on the chosen private interface and its dummy credentials are public. It validates signatures but does not emulate state changes, permission scopes, filtering, pagination or every parameter-dependent response. Stop it after recording.
+Use a trusted test network: this mock is reachable on the chosen private interface and its dummy credentials are public. It validates signatures but does not emulate state changes, permission scopes, filtering, pagination, or every parameter-dependent response. Stop it after recording.
 
-Choose an RFC1918 address assigned to this machine (the example below must be replaced if it is not yours). Keep certificates, keys and request logs outside the repository:
+Choose an RFC1918 address assigned to this machine. Replace the example address in these exports **and in setup.tape's URL typing line** when necessary. Keep keys and logs outside the repository:
 
 ```sh
 export DEMO_BIND=192.168.0.111
@@ -40,25 +45,50 @@ sh "$DEMO_WORK/gen-certs.sh"
 PORT=8444 node "$DEMO_WORK/server.mjs"
 ```
 
-Keep this terminal running. In another terminal at the repo root, export the same `DEMO_URL` and **absolute** `DEMO_CA`. The server defaults to loopback when `DEMO_BIND` is absent; do not weaken the production address policy to make that default work. The checked-in mock adds only the configurable bind address and certificate SAN to the supplied scratchpad harness.
+Leave that terminal running. In a second terminal at the repository root, export the same `DEMO_URL` and absolute `DEMO_CA`. Do not weaken the server's address or certificate checks.
 
 ## Record and render
 
-Run recordings **sequentially**, so no two processes write the same cast. `setup.py` selects only OpenCode under its temporary `XDG_CONFIG_HOME`; it does not change installed client configs. The analyst uses `--strict-mcp-config`, disables built-in tools, skips user/project settings and enables only the two read tools. Its answer can vary, and the authenticated client sends synthetic tool results to its provider.
+Run sequentially. The setup tape starts [terminal.sh](terminal.sh), creates an isolated configuration directory, records output only with asciinema, types through the real wizard and exits. Hidden token keystrokes are absent from the cast.
 
 ```sh
-python3 scripts/demo/record.py setup
+vhs scripts/demo/setup.tape
 python3 scripts/demo/record.py analyst
-python3 scripts/demo/record.py approval
+vhs scripts/demo/analyst.tape
+bash scripts/demo/render-approval.sh
 ```
+
+The analyst tape plays the **fresh** cast at speed 1, with idle gaps shortened, and holds the finished answer for reading. If a new answer takes longer than the tape's playback window, increase its final `Sleep` and recheck the 25-second limit. Do not reuse an old cast and claim a fresh client call.
+
+The approval tape waits for the temporary-directory trust prompt before selecting the directory we just created. It then submits the critical-action request and waits for the actual elicitation. It navigates from the unchecked `approved` field to the buttons, then right to **Decline**, and presses Enter. Never check `approved` or select Accept. Keep explicit pauses after the trust prompt: the client can paint before its keyboard handler is ready. Rehearse with `node scripts/demo/approval-client.mjs` if a client update changes the UI. Check the final GIF visually before changing the README captions.
+
+## Verification
 
 ```sh
-agg --theme github-dark --font-size 16 --fps-cap 10 --idle-time-limit 2 --last-frame-duration 5 scripts/demo/setup.cast docs/assets/demo/setup.gif
-agg --theme github-dark --font-size 16 --fps-cap 10 --idle-time-limit 2 --last-frame-duration 7 scripts/demo/analyst.cast docs/assets/demo/analyst.gif
-agg --theme github-dark --font-size 16 --fps-cap 10 --idle-time-limit 2 --last-frame-duration 6 scripts/demo/approval.cast docs/assets/demo/approval.gif
+python3 scripts/demo/verify.py
+node scripts/validate-examples.mjs
+ffprobe -v error -count_frames -show_entries stream=nb_read_frames,duration -show_entries format=size -of json docs/assets/demo/setup.gif
 ```
 
-Check each GIF is below **3,000,000 bytes**, inspect its readable frames and verify the mock's `requests.log` contains the successful GETs. `writes.log` must not grow during the approval recording. A declined action must yield `approval_denied`, not success. Never commit generated `.pem` files, mock logs, client configs or token files. Use `asciinema play scripts/demo/setup.cast` (or the other casts) for a pauseable text alternative.
+[verify.py](verify.py) checks all three GIFs: **at least 100 frames**, **10–25 seconds**, **at most 3,000,000 bytes**, plus local links and heading anchors in both READMEs and this guide. Review early, intermediate and final frames for readable text, progressive typing/output, complete results, and no startup/account/model banner. Check external README links as well. Confirm the mock's `requests.log` contains successful `/status`, `/devices`, and `/modelbreaches` GETs from this run, and that `writes.log` did not grow during approval.
+
+The casts are pauseable text alternatives:
+
+```sh
+asciinema play scripts/demo/setup.cast
+asciinema play scripts/demo/analyst.cast
+```
+
+## Fallbacks
+
+If VHS is unavailable, render the fresh casts with agg:
+
+```sh
+agg --speed 1 --fps-cap 30 --theme github-dark --font-size 18 --idle-time-limit 1.2 --last-frame-duration 5 scripts/demo/setup.cast docs/assets/demo/setup.gif
+agg --speed 1 --fps-cap 30 --theme github-dark --font-size 18 --idle-time-limit 1.2 --last-frame-duration 5 scripts/demo/analyst.cast docs/assets/demo/analyst.gif
+```
+
+The retained [approval.mjs](approval.mjs) and [approval-host.cast](approval-host.cast) are the **legacy demo-host fallback**, not the source of the current approval GIF. `python3 scripts/demo/record.py approval` records that host to `approval-host.cast`. If it becomes necessary to ship that fallback, add progressive typing/output, render at up to 30 fps, pass the same checks, and change **both** README captions to explicitly say “demo MCP host, not a Claude Code screenshot.” Do not relabel a demo host as a native client.
 
 ## README table and badge maintenance
 

@@ -34,9 +34,9 @@ Three recordings against a **synthetic HTTPS mock**, with dummy tokens and no pr
 
 ![Claude Code retrieves synthetic devices and model breaches through MCP, then recommends investigation steps](docs/assets/demo/analyst.gif)
 
-**3 · Keep control of critical actions.** Preview → confirm → server confirmation dialog → decline. This minimal demo host renders the real MCP dialog; it is not a Claude Code screenshot. No action executes.
+**3 · Keep control of critical actions.** Preview → confirm → native Claude Code confirmation dialog → Decline. Startup and waiting time are omitted. No action executes.
 
-![Critical Antigena preview with previewId, confirmation dialog showing exact values, and approval_denied after decline](docs/assets/demo/approval.gif)
+![Animated Claude Code session previewing an Antigena action, selecting Decline in the native MCP input dialog, and reporting the refusal](docs/assets/demo/approval.gif)
 
 ## Install in 60 seconds
 

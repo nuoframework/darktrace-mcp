@@ -15,13 +15,14 @@ root = Path(__file__).resolve().parents[2]
 name = sys.argv[1]
 commands = {'setup': 'python3 scripts/demo/setup.py', 'analyst': 'node scripts/demo/analyst.mjs', 'approval': 'node scripts/demo/approval.mjs'}
 command = commands[name]
+cast_name = 'approval-host' if name == 'approval' else name
 lock = open(Path(tempfile.gettempdir()) / f'darktrace-readme-{name}.lock', 'w')
 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-size = '96x36' if name == 'analyst' else '96x32'
+size = '100x30'
 pid, master = pty.fork()
 if pid == 0:
     os.chdir(root)
-    os.execvp('asciinema', ['asciinema', 'rec', '--overwrite', '--return', '--output-format', 'asciicast-v2', '--window-size', size, '--idle-time-limit', '2', '--title', f'darktrace-mcp / {name} / synthetic mock', '-c', command, f'scripts/demo/{name}.cast'])
+    os.execvp('asciinema', ['asciinema', 'rec', '--overwrite', '--return', '--output-format', 'asciicast-v2', '--window-size', size, '--idle-time-limit', '2', '--title', f'darktrace-mcp / {name} / synthetic mock', '-c', command, f'scripts/demo/{cast_name}.cast'])
 buffer = ''
 try:
     deadline = time.monotonic() + 220

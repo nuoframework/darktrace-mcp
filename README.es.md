@@ -34,9 +34,9 @@ Tres grabaciones con un **mock HTTPS sintético**, tokens de prueba y ningún da
 
 ![Claude Code consulta dispositivos y model breaches sintéticos mediante MCP y recomienda pasos de investigación](docs/assets/demo/analyst.gif)
 
-**3 · Controla las acciones críticas.** Vista previa → confirmación → diálogo del servidor → rechazo. Este host mínimo de demostración muestra el diálogo MCP real; no es una captura de Claude Code. No se ejecuta ninguna acción.
+**3 · Mantén el control de las acciones críticas.** Vista previa → confirmación → diálogo nativo de Claude Code → Decline. Se omiten el arranque y las esperas. No se ejecuta ninguna acción.
 
-![Vista previa de Antigena con previewId, diálogo con los valores exactos y resultado approval_denied al rechazar](docs/assets/demo/approval.gif)
+![Sesión animada de Claude Code que previsualiza una acción de Antigena, selecciona Decline en el diálogo MCP nativo y muestra el rechazo](docs/assets/demo/approval.gif)
 
 ## Instala en 60 segundos
 
