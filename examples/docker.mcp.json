@@ -29,8 +29,6 @@
         "DARKTRACE_PRIVATE_TOKEN_FILE=/run/secrets/private-token",
         "-e",
         "DARKTRACE_PROFILES=read",
-        "-e",
-        "DARKTRACE_SENSITIVE_READ=false",
         "REPLACE_WITH_IMAGE_ID_FROM_DOCKER_INSPECT"
       ]
     }

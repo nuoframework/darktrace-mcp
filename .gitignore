@@ -9,3 +9,4 @@ dist/
 .lab/
 exports/
 docs-src/
+release/
