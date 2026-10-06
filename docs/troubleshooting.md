@@ -27,6 +27,7 @@ darktrace-mcp test
 | Critical action refused with `confirmation_required` or `preview_required` | `confirm:true` or the `previewId` from a `dryRun:true` preview is missing | [Writes and critical actions](#writes-and-critical-actions) |
 | Startup error naming `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` or `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (or `sensitive` + `write`), or `DARKTRACE_CRITICAL_APPROVAL=host`, without its acknowledgement | [Server does not start](#server-does-not-start) |
 | "response too large" | Result exceeds the size limit | [Large results](#large-results) |
+| `FAIL bad_request` (HTTP 400) on `GET /status` from `test`, or `setup` stops with HTTP 400 | The appliance accepts only the other signature date format | Rerun `darktrace-mcp setup` (it probes both), or set `DARKTRACE_DATE_FORMAT=spaced` (or `compact`); see [signature date format](configuration.md#signature-date-format) |
 
 ## Server does not start
 

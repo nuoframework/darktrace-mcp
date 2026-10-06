@@ -27,6 +27,7 @@ darktrace-mcp test
 | Acción crítica rechazada con `confirmation_required` o `preview_required` | Falta `confirm:true` o el `previewId` de una vista previa con `dryRun:true` | [Escrituras y acciones críticas](#escrituras-y-acciones-críticas) |
 | Error de arranque que nombra `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` o `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (o `sensitive` + `write`), o `DARKTRACE_CRITICAL_APPROVAL=host`, sin su confirmación | [El servidor no arranca](#el-servidor-no-arranca) |
 | "response too large" | El resultado supera el límite | [Resultados grandes](#resultados-grandes) |
+| `FAIL bad_request` (HTTP 400) en `GET /status` con `test`, o `setup` se detiene con HTTP 400 | El appliance solo acepta el otro formato de fecha de la firma | Vuelve a ejecutar `darktrace-mcp setup` (prueba ambos) o define `DARKTRACE_DATE_FORMAT=spaced` (o `compact`); ver [formato de fecha de la firma](configuration.md#formato-de-fecha-de-la-firma) |
 
 ## El servidor no arranca
 

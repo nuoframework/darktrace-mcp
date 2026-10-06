@@ -9,6 +9,8 @@ Every client can be set up two ways:
 - **Automatic:** `darktrace-mcp setup` finds the client and writes the entry for you (with a backup).
 - **Manual:** `darktrace-mcp config <client>` prints the snippet with your real paths filled in. Paste it into the file shown below.
 
+`setup` checks the appliance once and records the signature date format it accepts as `DARKTRACE_DATE_FORMAT` in every entry it writes (and `config` reuses it). If you write an entry by hand for an appliance that answers HTTP 400 to `darktrace-mcp test`, add `"DARKTRACE_DATE_FORMAT": "spaced"` to its `env`; see [signature date format](configuration.md#signature-date-format).
+
 | Client | `<client>` name | Config file |
 |---|---|---|
 | [Claude Desktop](#claude-desktop) | `claude-desktop` | macOS `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows `%APPDATA%\Claude\claude_desktop_config.json` |

@@ -41,6 +41,23 @@ chmod 600 ~/.config/darktrace-mcp/public-token ~/.config/darktrace-mcp/private-t
 
 `DARKTRACE_PUBLIC_TOKEN` y `DARKTRACE_PRIVATE_TOKEN` (el token directamente en el entorno) también funcionan, para gestores de secretos que los inyectan. Es preferible usar archivos. Nunca configures el valor y el archivo del mismo token a la vez.
 
+### Formato de fecha de la firma
+
+Cada petición se firma con un HMAC sobre la ruta, el token público y la cabecera `DTAPI-Date`. Los appliances de Darktrace aceptan esa fecha en uno de dos formatos, que se eligen con `DARKTRACE_DATE_FORMAT` (o `auth.dateFormat`):
+
+| Valor | `DTAPI-Date` tiene esta forma |
+|---|---|
+| `compact` (por defecto) | `20261006T081500` (`YYYYMMDDTHHMMSS`) |
+| `spaced` | `2026-10-06 08:15:00` (`YYYY-MM-DD HH:MM:SS`) |
+
+Appliances con la misma versión pueden comportarse distinto. En dos appliances Darktrace 7.1.0, uno aceptó ambos formatos y el otro rechazó `compact` con HTTP 400 (`bad_request`) en `GET /status` y aceptó `spaced`.
+
+El servidor nunca cambia de formato en ejecución: no reintenta con el otro formato tras un 400 o un 401, así que un problema de firma nunca se convierte en un cambio de modo silencioso. La elección se hace al instalar:
+
+- `darktrace-mcp setup` envía un `GET /status` firmado con `compact` y, solo si el appliance responde HTTP 400, una vez más con `spaced`. Escribe el formato aceptado como `DARKTRACE_DATE_FORMAT` en cada entrada de cliente y en `setup.json`. Si ninguno funciona, se detiene sin escribir nada. `--date-format compact|spaced` omite esta comprobación; `--dry-run` y `--offline` la omiten y usan el formato guardado o `compact`.
+- `darktrace-mcp test` (o `doctor --online`) hace el mismo reintento solo si no fijaste un formato, y te indica qué valor configurar. Si el formato está fijado (entorno, archivo de configuración o setup guardado), no reintenta y sugiere el otro valor.
+- `darktrace-mcp config <cliente>` reutiliza el formato guardado.
+
 ## Perfiles
 
 Los perfiles deciden qué herramientas ve y puede usar el modelo. Se configuran con una lista separada por comas:

@@ -10,6 +10,8 @@ import { findOnPath } from './fsutil.js';
 import { installFixedCopy, isTransientInstall } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
 import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
+import { describeProbeFailure, probeDateFormat, probeStatus, type DateFormatProbe } from './online.js';
+import type { DateFormat } from '../config/schema.js';
 
 export interface SetupArgs {
   readonly dryRun: boolean;
@@ -24,6 +26,10 @@ export interface SetupArgs {
   readonly inlineTokens: boolean;
   /** Explicit consent to the sensitive-read + write risk notice; required for such profiles without an interactive yes. */
   readonly acknowledgeSensitiveWrite?: boolean;
+  /** Signature date format chosen by the operator; skips the appliance probe. */
+  readonly dateFormat?: DateFormat;
+  /** Skip the appliance probe (no network at install time); the date format defaults to the saved one or compact. */
+  readonly offline?: boolean;
 }
 
 export interface SetupIo {
@@ -85,6 +91,39 @@ async function readTokens(io: SetupIo, prompter: Prompter | undefined, stdinLine
   const publicToken = validateToken((await prompter.secret('Public token: ')).trim(), 'public token');
   const privateToken = validateToken((await prompter.secret('Private token (hidden): ')).trim(), 'private token');
   return { publicToken, privateToken };
+}
+
+/** Environment for the setup probe: the shell's non-Darktrace variables plus the values collected by the wizard. */
+function probeEnv(ctx: CliContext, url: string, tokenMode: TokenMode, tokens: { publicToken: string; privateToken: string } | undefined): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {};
+  for (const [key, value] of Object.entries(ctx.env)) if (!key.startsWith('DARKTRACE_')) env[key] = value;
+  if (ctx.env.DARKTRACE_TIMEOUT_MS !== undefined) env.DARKTRACE_TIMEOUT_MS = ctx.env.DARKTRACE_TIMEOUT_MS;
+  env.DARKTRACE_URL = url;
+  // The probe only reads /status, so the narrowest profile is enough (and needs no acknowledgement).
+  env.DARKTRACE_PROFILES = 'read';
+  if (tokens !== undefined) {
+    // Values stay in this in-memory object handed to the config loader; they are never printed or written here.
+    env.DARKTRACE_PUBLIC_TOKEN = tokens.publicToken;
+    env.DARKTRACE_PRIVATE_TOKEN = tokens.privateToken;
+  } else if (tokenMode === 'file') {
+    const files = tokenPaths(ctx);
+    env.DARKTRACE_PUBLIC_TOKEN_FILE = files.publicTokenFile;
+    env.DARKTRACE_PRIVATE_TOKEN_FILE = files.privateTokenFile;
+  }
+  return env;
+}
+
+/** Why no date format could be confirmed. Kinds and HTTP status only; never a token or a response body. */
+export function describeFailedProbe(probe: DateFormatProbe): string {
+  const failures = probe.outcomes.filter((o): o is Exclude<typeof o, { ok: true }> => !o.ok);
+  const last = failures[failures.length - 1];
+  const both = failures.length === 2 && failures.every((o) => o.kind === 'bad_request');
+  const reason = both
+    ? 'the appliance rejected signed GET /status with both signature date formats (HTTP 400 for compact and for spaced). ' +
+      'Check the appliance API version and that the tokens belong to this appliance'
+    : `the appliance check (signed GET /status) failed: ${last === undefined ? 'no answer' : describeProbeFailure(last).replace(/\.$/, '')}`;
+  return `${reason}. No settings, tokens or client entries were written. Fix the problem and rerun setup, ` +
+    'or pass --date-format compact|spaced (or --offline) to skip the check';
 }
 
 export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
@@ -193,12 +232,32 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       }
     }
 
+    if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
+
+    // 5c. Signature date format. Appliances differ (some reject compact with HTTP 400), and the server never switches
+    // formats at runtime, so setup records the one this appliance accepts. At most two signed GET /status requests.
+    let dateFormat: DateFormat;
+    if (args.dateFormat !== undefined) {
+      dateFormat = args.dateFormat;
+      write(io, `\nDate format: ${dateFormat} (from --date-format; the appliance was not probed).\n`);
+    } else if (args.dryRun || args.offline === true) {
+      dateFormat = saved?.dateFormat ?? 'compact';
+      write(io, `\nDate format: ${dateFormat} (not probed ${args.dryRun ? 'in a dry run' : 'with --offline'}; ` +
+        'if `darktrace-mcp test` reports bad_request, rerun setup with --date-format spaced).\n');
+    } else {
+      write(io, '\nChecking the appliance with a signed GET /status...\n');
+      const probe = await probeDateFormat(probeEnv(ctx, url, tokenMode, tokens), ctx.probeStatus ?? probeStatus, 'compact');
+      if (probe.chosen === undefined) throw new SetupInputError(describeFailedProbe(probe));
+      dateFormat = probe.chosen;
+      if (probe.outcomes.length > 1) write(io, `The appliance rejected date format ${dateFormat === 'spaced' ? 'compact' : 'spaced'} (HTTP 400) and accepted ${dateFormat}.\n`);
+      write(io, `OK: URL, TLS and tokens work with date format ${dateFormat}. Client entries will set DARKTRACE_DATE_FORMAT=${dateFormat}.\n`);
+    }
+
     const files = tokenPaths(ctx);
     const settings: InstallSettings = {
-      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath, acknowledgeSensitiveWrite,
+      url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath, acknowledgeSensitiveWrite, dateFormat,
       ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid, hostPlatform: ctx.platform } : {}),
     };
-    if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
     const entry = buildServerEntry(settings, tokenMode === 'inline' ? tokens : undefined);
     const displayEntry = buildServerEntry(settings);
 
@@ -208,7 +267,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     } else {
       if (tokens && tokenMode === 'file') writeTokenFiles(ctx, tokens.publicToken, tokens.privateToken);
       writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}),
-        ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}) });
+        ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}), dateFormat });
       write(io, `\nSaved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`);
     }
 

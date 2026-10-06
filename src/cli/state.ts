@@ -3,6 +3,7 @@ import path from 'node:path';
 import { atomicWrite, ensurePrivateDir, lstatOrUndefined, readTextIfExists } from './fsutil.js';
 import { needsSensitiveWriteAck, normalizeProfiles, normalizeUrl, IMAGE_PATTERN, type Runtime, type TokenMode } from './entry.js';
 import type { CliContext } from './clients.js';
+import type { DateFormat } from '../config/schema.js';
 
 /** Installer state: non-secret choices remembered between `setup`, `config`, `remove` and `test`. */
 export interface SavedSetup {
@@ -14,6 +15,8 @@ export interface SavedSetup {
   readonly image?: string;
   /** Recorded only after the operator explicitly accepted the sensitive-read + write risk notice. */
   readonly acknowledgeSensitiveWrite?: true;
+  /** Signature date format the appliance accepted during `setup` (or chosen with --date-format). */
+  readonly dateFormat?: DateFormat;
 }
 
 export function setupDir(ctx: Pick<CliContext, 'home' | 'env'>): string {
@@ -37,7 +40,9 @@ export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetu
     const image = typeof raw.image === 'string' && IMAGE_PATTERN.test(raw.image) ? raw.image : undefined;
     const profiles = normalizeProfiles(raw.profiles);
     const acknowledged = raw.acknowledgeSensitiveWrite === true && needsSensitiveWriteAck(profiles);
-    return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}) };
+    const dateFormat = raw.dateFormat === 'compact' || raw.dateFormat === 'spaced' ? raw.dateFormat : undefined;
+    return { version: 1, url: normalizeUrl(raw.url), profiles, runtime, tokenMode, ...(image ? { image } : {}), ...(acknowledged ? { acknowledgeSensitiveWrite: true as const } : {}),
+      ...(dateFormat ? { dateFormat } : {}) };
   } catch {
     return undefined;
   }

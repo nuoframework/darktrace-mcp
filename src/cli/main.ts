@@ -13,7 +13,8 @@ import { existingFixedCopyEntry, isTransientInstall } from './install.js';
 import { PromptAbortedError } from './prompt.js';
 import { printResults, runSetup } from './setup.js';
 import { purgeSetup, readSavedSetup, tokenPaths } from './state.js';
-import { runOnlineTest } from './online.js';
+import { isDateFormat, runOnlineTest } from './online.js';
+import type { DateFormat } from '../config/schema.js';
 
 export class UsageError extends Error {
   constructor(message: string) { super(message); this.name = 'UsageError'; }
@@ -21,11 +22,12 @@ export class UsageError extends Error {
 
 interface Parsed { readonly command: string; readonly positional: string[]; readonly flags: Map<string, string[]> }
 
-const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image']);
-const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online']);
+const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image', '--date-format']);
+const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online', '--offline']);
 const ALLOWED: Readonly<Record<string, readonly string[]>> = {
-  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write'],
-  config: ['--url', '--profiles', '--runtime', '--image', '--insiders', '--acknowledge-sensitive-write'],
+  setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write',
+    '--date-format', '--offline'],
+  config: ['--url', '--profiles', '--runtime', '--image', '--insiders', '--acknowledge-sensitive-write', '--date-format'],
   remove: ['--client', '--dry-run', '--yes', '-y', '--purge'],
   test: [],
   doctor: ['--online'],
@@ -80,6 +82,13 @@ function runtimeFlag(p: Parsed): Runtime | undefined {
   return value;
 }
 
+function dateFormatFlag(p: Parsed): DateFormat | undefined {
+  const value = one(p, '--date-format');
+  if (value === undefined) return undefined;
+  if (!isDateFormat(value)) throw new UsageError('--date-format must be compact or spaced');
+  return value;
+}
+
 export interface CliIo {
   readonly ctx: CliContext;
   readonly stdin: Readable & { isTTY?: boolean };
@@ -119,6 +128,7 @@ function configCommand(p: Parsed, io: CliIo): number {
   const fixedEntry = transient ? existingFixedCopyEntry(io.entryPath, io.ctx) : undefined;
   const profiles = one(p, '--profiles') !== undefined ? normalizeProfiles(one(p, '--profiles') as string) : saved?.profiles ?? 'read';
   const acknowledged = bool(p, '--acknowledge-sensitive-write') || saved?.acknowledgeSensitiveWrite === true;
+  const dateFormat = dateFormatFlag(p) ?? saved?.dateFormat;
   if (needsSensitiveWriteAck(profiles) && !acknowledged) {
     io.stderr.write(`${SENSITIVE_WRITE_NOTICE}\n`);
     throw new UsageError(`profiles "${profiles}" need --acknowledge-sensitive-write after reading the notice above (or use read-write / read-sensitive)`);
@@ -127,6 +137,8 @@ function configCommand(p: Parsed, io: CliIo): number {
     url: one(p, '--url') !== undefined ? normalizeUrl(one(p, '--url') as string) : saved?.url ?? 'https://darktrace.example.internal',
     profiles,
     acknowledgeSensitiveWrite: acknowledged,
+    // The format `setup` probed travels with every printed entry; without one the server default (compact) applies.
+    ...(dateFormat === undefined ? {} : { dateFormat }),
     runtime,
     tokenMode: io.ctx.platform === 'win32' && runtime === 'node' ? 'inline' : 'file',
     ...tokenPaths(io.ctx),
@@ -188,6 +200,7 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
           profiles: one(p, '--profiles'), runtime: runtimeFlag(p), image: one(p, '--image'),
           tokensFromStdin: bool(p, '--tokens-from-stdin'), inlineTokens: bool(p, '--inline-tokens-windows'),
           acknowledgeSensitiveWrite: bool(p, '--acknowledge-sensitive-write'),
+          dateFormat: dateFormatFlag(p), offline: bool(p, '--offline'),
         }, io);
       }
       case 'config': return configCommand(p, io);
