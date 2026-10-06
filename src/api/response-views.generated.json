@@ -191,40 +191,6 @@
               }
             }
           }
-        },
-        "darktraceChildError": {
-          "kind": "string"
-        },
-        "kibana": {
-          "kind": "object",
-          "fields": {
-            "index": {
-              "kind": "array",
-              "items": {
-                "kind": "summary"
-              }
-            },
-            "per_page": {
-              "kind": "number"
-            },
-            "time": {
-              "kind": "object",
-              "fields": {
-                "from": {
-                  "kind": "string"
-                },
-                "to": {
-                  "kind": "string"
-                }
-              }
-            },
-            "default_fields": {
-              "kind": "array",
-              "items": {
-                "kind": "summary"
-              }
-            }
-          }
         }
       }
     },
@@ -1035,9 +1001,6 @@
               }
             }
           },
-          "sender": {
-            "kind": "string"
-          },
           "breachDevices": {
             "kind": "array",
             "items": {
@@ -1420,154 +1383,6 @@
           },
           "pinned": {
             "kind": "boolean"
-          },
-          "acknowledged": {
-            "kind": "boolean"
-          },
-          "details": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "header": {
-                  "kind": "string"
-                },
-                "contents": {
-                  "kind": "array",
-                  "items": {
-                    "kind": "object",
-                    "fields": {
-                      "type": {
-                        "kind": "string"
-                      },
-                      "key": {
-                        "kind": "string"
-                      },
-                      "values": {
-                        "kind": "array",
-                        "items": {
-                          "kind": "summary"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "summariser": {
-            "kind": "string"
-          },
-          "relatedBreaches": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "timestamp": {
-                  "kind": "number"
-                },
-                "threatScore": {
-                  "kind": "number"
-                },
-                "pbid": {
-                  "kind": "number"
-                },
-                "modelName": {
-                  "kind": "string"
-                }
-              }
-            }
-          },
-          "sender": {
-            "kind": "string"
-          },
-          "breachDevices": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "sid": {
-                  "kind": "number"
-                },
-                "mac": {
-                  "kind": "string"
-                },
-                "ip": {
-                  "kind": "string"
-                },
-                "identifier": {
-                  "kind": "string"
-                },
-                "did": {
-                  "kind": "number"
-                },
-                "hostname": {
-                  "kind": "string"
-                },
-                "subnet": {
-                  "kind": "string"
-                }
-              }
-            }
-          },
-          "periods": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "start": {
-                  "kind": "number"
-                },
-                "end": {
-                  "kind": "number"
-                }
-              }
-            }
-          },
-          "attackPhases": {
-            "kind": "array",
-            "items": {
-              "kind": "summary"
-            }
-          },
-          "mitreTactics": {
-            "kind": "array",
-            "items": {
-              "kind": "summary"
-            }
-          },
-          "groupingIds": {
-            "kind": "array",
-            "items": {
-              "kind": "summary"
-            }
-          },
-          "activityId": {
-            "kind": "string"
-          },
-          "groupByActivity": {
-            "kind": "boolean"
-          },
-          "title": {
-            "kind": "string"
-          },
-          "groupCategory": {
-            "kind": "string"
-          },
-          "groupPreviousGroups": {
-            "kind": "array",
-            "items": {
-              "kind": "summary"
-            }
-          },
-          "groupScore": {
-            "kind": "number"
-          },
-          "userTriggered": {
-            "kind": "boolean"
-          },
-          "externalTriggered": {
-            "kind": "boolean"
           }
         }
       }
@@ -1640,12 +1455,6 @@
           },
           "updated": {
             "kind": "string"
-          },
-          "agemail": {
-            "kind": "boolean"
-          },
-          "aghost": {
-            "kind": "boolean"
           },
           "active": {
             "kind": "boolean"
@@ -2212,19 +2021,6 @@
             },
             "typelabel": {
               "kind": "string"
-            },
-            "customFields": {
-              "kind": "object",
-              "fields": {
-                "DT-MANUAL": {
-                  "kind": "object",
-                  "fields": {
-                    "notes": {
-                      "kind": "string"
-                    }
-                  }
-                }
-              }
             }
           }
         },
@@ -2294,19 +2090,6 @@
               },
               "typelabel": {
                 "kind": "string"
-              },
-              "customFields": {
-                "kind": "object",
-                "fields": {
-                  "DT-MANUAL": {
-                    "kind": "object",
-                    "fields": {
-                      "notes": {
-                        "kind": "string"
-                      }
-                    }
-                  }
-                }
               }
             }
           }
@@ -3300,62 +3083,11 @@
           "modified": {
             "kind": "string"
           },
-          "activeTimes": {
-            "kind": "object",
-            "fields": {
-              "devices": {
-                "kind": "summary"
-              },
-              "tags": {
-                "kind": "summary"
-              },
-              "type": {
-                "kind": "string"
-              },
-              "version": {
-                "kind": "number"
-              }
-            }
-          },
-          "autoUpdatable": {
-            "kind": "boolean"
-          },
-          "autoUpdate": {
-            "kind": "boolean"
-          },
-          "autoSuppress": {
-            "kind": "boolean"
-          },
           "description": {
             "kind": "string"
           },
           "behaviour": {
             "kind": "string"
-          },
-          "defeats": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "arguments": {
-                  "kind": "object",
-                  "fields": {
-                    "value": {
-                      "kind": "string"
-                    }
-                  }
-                },
-                "comparator": {
-                  "kind": "string"
-                },
-                "defeatID": {
-                  "kind": "summary"
-                },
-                "filtertype": {
-                  "kind": "string"
-                }
-              }
-            }
           },
           "created": {
             "kind": "object",
@@ -3375,41 +3107,6 @@
                 "kind": "number"
               }
             }
-          },
-          "history": {
-            "kind": "array",
-            "items": {
-              "kind": "object",
-              "fields": {
-                "modified": {
-                  "kind": "string"
-                },
-                "active": {
-                  "kind": "boolean"
-                },
-                "message": {
-                  "kind": "string"
-                },
-                "by": {
-                  "kind": "string"
-                },
-                "phid": {
-                  "kind": "number"
-                },
-                "defeatsOnly": {
-                  "kind": "boolean"
-                },
-                "accepted": {
-                  "kind": "string"
-                },
-                "acceptedby": {
-                  "kind": "string"
-                }
-              }
-            }
-          },
-          "message": {
-            "kind": "string"
           },
           "mitre": {
             "kind": "object",
@@ -3528,62 +3225,11 @@
         "modified": {
           "kind": "string"
         },
-        "activeTimes": {
-          "kind": "object",
-          "fields": {
-            "devices": {
-              "kind": "summary"
-            },
-            "tags": {
-              "kind": "summary"
-            },
-            "type": {
-              "kind": "string"
-            },
-            "version": {
-              "kind": "number"
-            }
-          }
-        },
-        "autoUpdatable": {
-          "kind": "boolean"
-        },
-        "autoUpdate": {
-          "kind": "boolean"
-        },
-        "autoSuppress": {
-          "kind": "boolean"
-        },
         "description": {
           "kind": "string"
         },
         "behaviour": {
           "kind": "string"
-        },
-        "defeats": {
-          "kind": "array",
-          "items": {
-            "kind": "object",
-            "fields": {
-              "arguments": {
-                "kind": "object",
-                "fields": {
-                  "value": {
-                    "kind": "string"
-                  }
-                }
-              },
-              "comparator": {
-                "kind": "string"
-              },
-              "defeatID": {
-                "kind": "summary"
-              },
-              "filtertype": {
-                "kind": "string"
-              }
-            }
-          }
         },
         "created": {
           "kind": "object",
@@ -3603,41 +3249,6 @@
               "kind": "number"
             }
           }
-        },
-        "history": {
-          "kind": "array",
-          "items": {
-            "kind": "object",
-            "fields": {
-              "modified": {
-                "kind": "string"
-              },
-              "active": {
-                "kind": "boolean"
-              },
-              "message": {
-                "kind": "string"
-              },
-              "by": {
-                "kind": "string"
-              },
-              "phid": {
-                "kind": "number"
-              },
-              "defeatsOnly": {
-                "kind": "boolean"
-              },
-              "accepted": {
-                "kind": "string"
-              },
-              "acceptedby": {
-                "kind": "string"
-              }
-            }
-          }
-        },
-        "message": {
-          "kind": "string"
         },
         "mitre": {
           "kind": "object",
@@ -5272,9 +4883,6 @@
         "installed": {
           "kind": "string"
         },
-        "mobileAppConfigured": {
-          "kind": "boolean"
-        },
         "version": {
           "kind": "string"
         },
@@ -5293,17 +4901,11 @@
         "bundleVersion": {
           "kind": "string"
         },
-        "bundleVariant": {
-          "kind": "string"
-        },
         "bundleDate": {
           "kind": "string"
         },
         "bundleInstalledDate": {
           "kind": "string"
-        },
-        "maximumOSSensors": {
-          "kind": "number"
         },
         "hostname": {
           "kind": "string"
@@ -5311,28 +4913,7 @@
         "uuid": {
           "kind": "string"
         },
-        "inoculation": {
-          "kind": "boolean"
-        },
-        "applianceOSCode": {
-          "kind": "string"
-        },
         "license": {
-          "kind": "string"
-        },
-        "saasConnectorLicense": {
-          "kind": "string"
-        },
-        "antigenaSaasLicense": {
-          "kind": "string"
-        },
-        "cloudSecurityLicense": {
-          "kind": "string"
-        },
-        "syslogTLSSHA1Fingerprint": {
-          "kind": "string"
-        },
-        "syslogTLSSHA256Fingerprint": {
           "kind": "string"
         },
         "antigenaNetworkEnabled": {
@@ -5346,70 +4927,6 @@
         },
         "antigenaNetworkLicense": {
           "kind": "string"
-        },
-        "preventE2ELicense": {
-          "kind": "string"
-        },
-        "logIngestionReplicated": {
-          "kind": "number"
-        },
-        "logIngestionProcessed": {
-          "kind": "number"
-        },
-        "logIngestionTCP": {
-          "kind": "number"
-        },
-        "logIngestionUDP": {
-          "kind": "number"
-        },
-        "logIngestionMatches": {
-          "kind": "object",
-          "fields": {
-            "exampletemplate": {
-              "kind": "number"
-            }
-          }
-        },
-        "logIngestionTypes": {
-          "kind": "object",
-          "fields": {
-            "exampletemplate": {
-              "kind": "number"
-            }
-          }
-        },
-        "licenseCounts": {
-          "kind": "object",
-          "fields": {
-            "saas": {
-              "kind": "object",
-              "fields": {
-                "total": {
-                  "kind": "number"
-                }
-              }
-            },
-            "licenseIPCount": {
-              "kind": "number"
-            },
-            "licenseCloudIPCount": {
-              "kind": "number"
-            }
-          }
-        },
-        "antigenaNetworkBlockedConnections": {
-          "kind": "object",
-          "fields": {
-            "attempted": {
-              "kind": "number"
-            },
-            "failed": {
-              "kind": "number"
-            }
-          }
-        },
-        "diskSpaceUsed_": {
-          "kind": "number"
         },
         "type": {
           "kind": "string"
@@ -5429,136 +4946,14 @@
         "dataQueue": {
           "kind": "number"
         },
-        "darkflowQueue": {
-          "kind": "number"
-        },
-        "flowProcessingTimes": {
-          "kind": "summary"
-        },
-        "networkInterfacesState_eth0": {
-          "kind": "string"
-        },
-        "networkInterfacesAddress_eth0": {
-          "kind": "string"
-        },
-        "networkInterfacesState_eth1": {
-          "kind": "string"
-        },
-        "networkInterfacesState_eth2": {
-          "kind": "string"
-        },
-        "networkInterfacesState_eth3": {
-          "kind": "string"
-        },
-        "networkInterfacesReceived_eth0": {
-          "kind": "number"
-        },
-        "networkInterfacesReceived_eth1": {
-          "kind": "number"
-        },
-        "networkInterfacesReceived_eth2": {
-          "kind": "number"
-        },
-        "networkInterfacesReceived_eth3": {
-          "kind": "number"
-        },
-        "networkInterfacesTransmitted_eth0": {
-          "kind": "number"
-        },
-        "networkInterfacesTransmitted_eth1": {
-          "kind": "number"
-        },
-        "networkInterfacesTransmitted_eth2": {
-          "kind": "number"
-        },
-        "networkInterfacesTransmitted_eth3": {
-          "kind": "number"
-        },
         "bandwidthCurrent": {
           "kind": "number"
-        },
-        "bandwidthCurrentString": {
-          "kind": "string"
         },
         "bandwidthAverage": {
           "kind": "number"
         },
-        "bandwidthAverageString": {
-          "kind": "string"
-        },
         "bandwidth7DayPeak": {
           "kind": "number"
-        },
-        "bandwidth7DayPeakString": {
-          "kind": "string"
-        },
-        "bandwidth2WeekPeak": {
-          "kind": "number"
-        },
-        "bandwidth2WeekPeakString": {
-          "kind": "string"
-        },
-        "processedBandwidthCurrent": {
-          "kind": "number"
-        },
-        "processedBandwidthCurrentString": {
-          "kind": "string"
-        },
-        "processedBandwidthAverage": {
-          "kind": "number"
-        },
-        "processedBandwidthAverageString": {
-          "kind": "string"
-        },
-        "processedBandwidth7DayPeak": {
-          "kind": "number"
-        },
-        "processedBandwidth7DayPeakString": {
-          "kind": "string"
-        },
-        "processedBandwidth2WeekPeak": {
-          "kind": "number"
-        },
-        "processedBandwidth2WeekPeakString": {
-          "kind": "string"
-        },
-        "eventsPerMinuteCurrent": {
-          "kind": "object",
-          "fields": {
-            "cSensorNotices": {
-              "kind": "number"
-            },
-            "cSensorDeviceDetails": {
-              "kind": "number"
-            },
-            "cSensorModelEvents": {
-              "kind": "number"
-            },
-            "networkNotices": {
-              "kind": "number"
-            },
-            "networkDeviceDetails": {
-              "kind": "number"
-            },
-            "networkModelEvents": {
-              "kind": "number"
-            },
-            "logInputNotices": {
-              "kind": "number"
-            },
-            "logInputDeviceDetails": {
-              "kind": "number"
-            },
-            "logInputModelEvents": {
-              "kind": "number"
-            },
-            "saasNotices": {
-              "kind": "number"
-            },
-            "saasModelEvents": {
-              "kind": "number"
-            }
-          }
         },
         "probes": {
           "kind": "object",
@@ -5730,52 +5125,10 @@
             }
           }
         },
-        "connectionsPerMinuteCurrent": {
-          "kind": "number"
-        },
-        "connectionsPerMinuteAverage": {
-          "kind": "number"
-        },
-        "connectionsPerMinute7DayPeak": {
-          "kind": "number"
-        },
-        "connectionsPerMinute2WeekPeak": {
-          "kind": "number"
-        },
-        "operatingSystems": {
-          "kind": "number"
-        },
-        "newDevices4Weeks": {
-          "kind": "number"
-        },
-        "newDevices7Days": {
-          "kind": "number"
-        },
         "newDevices24Hours": {
           "kind": "number"
         },
-        "newDevicesHour": {
-          "kind": "number"
-        },
-        "activeDevices4Weeks": {
-          "kind": "number"
-        },
-        "activeDevices7Days": {
-          "kind": "number"
-        },
         "activeDevices24Hours": {
-          "kind": "number"
-        },
-        "activeDevicesHour": {
-          "kind": "number"
-        },
-        "deviceHostnames": {
-          "kind": "number"
-        },
-        "deviceMACAddresses": {
-          "kind": "number"
-        },
-        "deviceRecentIPChange": {
           "kind": "number"
         },
         "models": {
@@ -5787,128 +5140,7 @@
         "modelsSuppressed": {
           "kind": "number"
         },
-        "recentUnidirectionalConnections": {
-          "kind": "number"
-        },
-        "mostRecentDHCPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentDNSTraffic": {
-          "kind": "string"
-        },
-        "mostRecentDCE_RPCTraffic": {
-          "kind": "string"
-        },
-        "mostRecentHTTPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentHTTPSTraffic": {
-          "kind": "string"
-        },
-        "mostRecentKERBEROSTraffic": {
-          "kind": "string"
-        },
-        "mostRecentLDAPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentNTPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentSMBTraffic": {
-          "kind": "string"
-        },
-        "mostRecentSMTPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentSNMPTraffic": {
-          "kind": "string"
-        },
-        "mostRecentSSHTraffic": {
-          "kind": "string"
-        },
-        "mostRecentSSLTraffic": {
-          "kind": "string"
-        },
-        "VLANs": {
-          "kind": "object",
-          "fields": {
-            "1": {
-              "kind": "number"
-            }
-          }
-        },
-        "internalIPRangeList": {
-          "kind": "array",
-          "items": {
-            "kind": "summary"
-          }
-        },
-        "internalIPRanges": {
-          "kind": "number"
-        },
-        "dnsServers": {
-          "kind": "number"
-        },
-        "internalDomains": {
-          "kind": "number"
-        },
-        "internalAndExternalDomainList": {
-          "kind": "array",
-          "items": {
-            "kind": "summary"
-          }
-        },
-        "internalAndExternalDomains": {
-          "kind": "number"
-        },
-        "proxyServers": {
-          "kind": "number"
-        },
-        "proxyServerIPs": {
-          "kind": "array",
-          "items": {
-            "kind": "summary"
-          }
-        },
-        "subnets": {
-          "kind": "number"
-        },
-        "subnetData": {
-          "kind": "array",
-          "items": {
-            "kind": "object",
-            "fields": {
-              "sid": {
-                "kind": "number"
-              },
-              "network": {
-                "kind": "string"
-              },
-              "devices": {
-                "kind": "number"
-              },
-              "clientDevices": {
-                "kind": "number"
-              },
-              "mostRecentTraffic": {
-                "kind": "string"
-              },
-              "mostRecentDHCP": {
-                "kind": "string"
-              },
-              "dhcpQuality": {
-                "kind": "number"
-              },
-              "kerberosQuality": {
-                "kind": "number"
-              }
-            }
-          }
-        },
         "uptime": {
-          "kind": "string"
-        },
-        "systemuptime": {
           "kind": "string"
         }
       }
@@ -5963,25 +5195,10 @@
           "dhcpCount": {
             "kind": "number"
           },
-          "kerberosCount": {
-            "kind": "number"
-          },
-          "dhcpQuality": {
-            "kind": "number"
-          },
-          "kerberosQuality": {
-            "kind": "number"
-          },
-          "recentTrafficPercent": {
-            "kind": "number"
-          },
           "clientDevices": {
             "kind": "number"
           },
           "serverDevices": {
-            "kind": "number"
-          },
-          "icsDevices": {
             "kind": "number"
           },
           "mostRecentTraffic": {

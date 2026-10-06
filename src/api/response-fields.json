@@ -54,7 +54,15 @@
     "userTriggered",
     "externalTriggered",
     "previousIds",
-    "incidentEvents"
+    "incidentEvents",
+    "mitreTactics",
+    "devices",
+    "initialDevices",
+    "category",
+    "groupScore",
+    "start",
+    "end",
+    "edges"
   ],
   "get_aianalyst_incident_comments": [
     "comments"
@@ -67,7 +75,24 @@
     "createdAt",
     "attackPhases",
     "title",
-    "id"
+    "id",
+    "children",
+    "category",
+    "currentGroup",
+    "groupCategory",
+    "groupScore",
+    "groupPreviousGroups",
+    "activityId",
+    "groupingIds",
+    "groupByActivity",
+    "userTriggered",
+    "externalTriggered",
+    "aiaScore",
+    "summary",
+    "periods",
+    "breachDevices",
+    "relatedBreaches",
+    "details"
   ],
   "get_aianalyst_incidents": [
     "aiaScore",
@@ -87,7 +112,11 @@
     "version",
     "status",
     "createdBy",
-    "noticeUid"
+    "noticeUid",
+    "pbid",
+    "incidentId",
+    "summarizer",
+    "incidents"
   ],
   "get_aianalyst_stats": [
     "equivalentHumanTime",
@@ -106,7 +135,17 @@
     "manual",
     "triggerer",
     "label",
-    "detail"
+    "detail",
+    "score",
+    "pbid",
+    "model",
+    "modeluuid",
+    "start",
+    "expires",
+    "blocked",
+    "updated",
+    "active",
+    "cleared"
   ],
   "get_antigena_summary": [
     "pendingCount",
@@ -145,7 +184,20 @@
     "uid",
     "status",
     "proxyPort",
-    "sdid"
+    "sdid",
+    "ddid",
+    "port",
+    "sourcePort",
+    "destinationPort",
+    "direction",
+    "applicationprotocol",
+    "protocol",
+    "sourceDevice",
+    "destinationDevice",
+    "proxyDevice",
+    "source",
+    "destination",
+    "proxy"
   ],
   "get_deviceinfo": [
     "deviceInfo"
@@ -158,7 +210,14 @@
     "ips",
     "did",
     "sid",
-    "hostname"
+    "hostname",
+    "quarantine",
+    "time",
+    "endtime",
+    "os",
+    "devicelabel",
+    "typename",
+    "typelabel"
   ],
   "get_devicesearch": [
     "totalCount",
@@ -175,7 +234,13 @@
     "city",
     "region",
     "name",
-    "longitude"
+    "longitude",
+    "latitude",
+    "devices",
+    "hostname",
+    "subnetlabel",
+    "subnetid",
+    "subnetnetwork"
   ],
   "get_enums": [
     "Country",
@@ -185,7 +250,16 @@
     "Trusted hostname",
     "Day of the week",
     "System message",
-    "Internal source device type"
+    "Internal source device type",
+    "Internal destination device type",
+    "Protocol",
+    "Application protocol",
+    "Malformed traffic type",
+    "Vendor",
+    "Destination Resource Type",
+    "Access Method",
+    "Resource Type",
+    "Action Direction"
   ],
   "get_filtertypes": [
     "filtertype",
@@ -238,7 +312,8 @@
     "model",
     "triggeredComponents",
     "score",
-    "percentscore"
+    "percentscore",
+    "device"
   ],
   "get_modelbreaches_pbid": [
     "creationTime",
@@ -248,7 +323,8 @@
     "model",
     "triggeredComponents",
     "score",
-    "percentscore"
+    "percentscore",
+    "device"
   ],
   "get_modelbreaches_pbid_comments": [
     "message",
@@ -264,7 +340,22 @@
     "logic",
     "throttle",
     "sharedEndpoints",
-    "actions"
+    "actions",
+    "tags",
+    "interval",
+    "delay",
+    "sequenced",
+    "active",
+    "modified",
+    "description",
+    "behaviour",
+    "created",
+    "edited",
+    "mitre",
+    "version",
+    "priority",
+    "category",
+    "compliance"
   ],
   "get_models_pid": [
     "name",
@@ -274,7 +365,22 @@
     "logic",
     "throttle",
     "sharedEndpoints",
-    "actions"
+    "actions",
+    "tags",
+    "interval",
+    "delay",
+    "sequenced",
+    "active",
+    "modified",
+    "description",
+    "behaviour",
+    "created",
+    "edited",
+    "mitre",
+    "version",
+    "priority",
+    "category",
+    "compliance"
   ],
   "get_network": [
     "statistics",
@@ -291,7 +397,12 @@
     "index",
     "l3proto",
     "ip1",
-    "port1"
+    "port1",
+    "ip2",
+    "port2",
+    "start",
+    "end",
+    "state"
   ],
   "get_pcaps_filename": [],
   "get_similardevices": [
@@ -302,7 +413,10 @@
     "sid",
     "hostname",
     "firstSeen",
-    "lastSeen"
+    "lastSeen",
+    "os",
+    "typename",
+    "typelabel"
   ],
   "get_status": [
     "version",
@@ -312,7 +426,33 @@
     "ipAddress",
     "installed",
     "excessTraffic",
-    "cpu"
+    "cpu",
+    "modelsUpdated",
+    "modelPackageVersion",
+    "bundleVersion",
+    "bundleDate",
+    "bundleInstalledDate",
+    "uuid",
+    "license",
+    "antigenaNetworkEnabled",
+    "antigenaNetworkRunning",
+    "antigenaNetworkConfirmationMode",
+    "antigenaNetworkLicense",
+    "type",
+    "diskUtilization",
+    "load",
+    "memoryUsed",
+    "dataQueue",
+    "bandwidthCurrent",
+    "bandwidthAverage",
+    "bandwidth7DayPeak",
+    "probes",
+    "newDevices24Hours",
+    "activeDevices24Hours",
+    "models",
+    "modelsBreached",
+    "modelsSuppressed",
+    "uptime"
   ],
   "get_subnets": [
     "sid",
@@ -322,7 +462,17 @@
     "label",
     "lastSeen",
     "latitude",
-    "longitude"
+    "longitude",
+    "network",
+    "shid",
+    "uniqueHostnames",
+    "uniqueUsernames",
+    "confidence",
+    "lastDHCP",
+    "dhcpCount",
+    "clientDevices",
+    "serverDevices",
+    "mostRecentTraffic"
   ],
   "get_summarystatistics": [
     "subnets",
@@ -349,7 +499,11 @@
     "entityValue",
     "valid",
     "expiry",
-    "thid"
+    "thid",
+    "name",
+    "restricted",
+    "data",
+    "isReferenced"
   ],
   "get_tags_tid": [
     "tid",
@@ -368,12 +522,17 @@
     "entityValue",
     "valid",
     "expiry",
-    "thid"
+    "thid",
+    "name",
+    "restricted",
+    "data",
+    "isReferenced"
   ],
   "post_advancedsearch_api_search": [
     "took",
     "timed_out",
-    "hits"
+    "hits",
+    "_shards"
   ],
   "post_agemail_api_ep_api_v1_0_emails_search": [],
   "post_agemail_api_ep_api_v1_0_emails_uuid_action": [],
@@ -425,7 +584,12 @@
     "index",
     "l3proto",
     "ip1",
-    "port1"
+    "port1",
+    "ip2",
+    "port2",
+    "start",
+    "end",
+    "state"
   ],
   "post_subnets": [
     "response"

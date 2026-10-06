@@ -16,7 +16,7 @@ const CANARY='SYNTHETIC_OVERRIDE_CANARY',KEY_CANARY='SYNTHETIC_KEY_CANARY';
 function compiled():Record<string,ResponseView> {
   const out:Record<string,ResponseView>={};
   for(const item of Object.values(spec.paths) as any[])for(const method of ['get','post','delete'])if(item[method])
-    out[item[method].operationId]=compileResponseView(item[method].responses?.['200']?.content?.['application/json']?.schema,schemas);void fields;
+    out[item[method].operationId]=compileResponseView(item[method].responses?.['200']?.content?.['application/json']?.schema,schemas,fields[item[method].operationId]);
   return out;
 }
 // Harness verdict, extracted verbatim so projection and live acceptance cannot drift.

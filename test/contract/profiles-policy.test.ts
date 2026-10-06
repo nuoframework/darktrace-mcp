@@ -11,10 +11,11 @@ import { loadConfig, parseProfilesVariable } from '../../src/config/load.js';
 import { RELEASE_CAPABILITY, releaseAllowsOperation } from '../../src/policy/release-capability.js';
 import { authorize, isEligible } from '../../src/policy/guard.js';
 import { requiredProfiles } from '../../src/policy/profiles.js';
-import { operations, type Operation } from '../../src/api/operations.js';
-import { allTools, callTool, eligibleTools } from '../../src/tools/index.js';
+import { operations, BINARY_OPERATIONS, type Operation } from '../../src/api/operations.js';
+import { allTools, callTool, eligibleTools, unreviewedPassthroughAllowed } from '../../src/tools/index.js';
 import { productionOperationDescriptors } from '../../src/server/stdio.js';
 import { generateCoverage } from '../../src/coverage/report.js';
+import { CODE_OWNED_VIEWS, projectResponse, type ResponseView } from '../../src/api/response-view.js';
 
 const base={instance:{baseUrl:'https://appliance.example'},auth:{publicToken:'PUBLIC_CANARY',privateToken:'PRIVATE_CANARY'}};
 const config=(profiles:Record<string,boolean>={})=>parseConfig({...base,profiles});
@@ -180,7 +181,7 @@ test('email reads pass untyped JSON through bounded, redacted and neutralized; e
   assert.equal(eligibleTools(config()).some(t=>t.name.startsWith('darktrace_email')),false);
   const r=await callTool('darktrace_email_dashboard',{operation:'get_agemail_api_ep_api_v1_0_dash_dash_stats',query:{days:7,limit:2}},h.ctx);
   assert.equal(r.isError,undefined);const out=r.structuredContent as any;
-  assert.equal(out.unreviewedSchema,true);assert.equal(out.data.items[0].password,'[REDACTED]');assert.equal(out.data.items[0].n,1);assert.equal(out.controlCharsNeutralized,true);
+  assert.equal(out.unreviewedView,true);assert.equal(out.data.items[0].password,'[REDACTED]');assert.equal(out.data.items[0].n,1);assert.equal(out.controlCharsNeutralized,true);
   assert.deepEqual(h.state.requests[0].query,[['days','7'],['limit','2']]);
   for(const days of [0,366,'7']) assert.equal((await callTool('darktrace_email_dashboard',{operation:'get_agemail_api_ep_api_v1_0_dash_dash_stats',query:{days}},h.ctx)).isError,true);
   const search=await callTool('darktrace_email_search',{body:{criteriaList:[{apiFilter:'from',operator:'is',value:'a@example.com'}],mode:'and'}},h.ctx);
@@ -256,4 +257,32 @@ test('separate write rate limit: maxWritesPerMinute (default 10, ceiling 60) and
     assert.equal(r.structuredContent?.errorCode,i<3?undefined:'rate_limited');
   }
   assert.equal(c.state.requests.length,3);
+});
+
+test('every enabled operation has a reviewed view, or is a low-sensitivity read, a sensitive-profile read, or a bounded file',async()=>{
+  const views=(await import('../../src/api/response-views.generated.json',{with:{type:'json'}})).default.views as Record<string,{kind:string}>;
+  for(const op of all.filter(o=>o.status==='implemented')){
+    const reviewed=Object.hasOwn(CODE_OWNED_VIEWS,op.operationId)||(views[op.operationId]!==undefined&&views[op.operationId].kind!=='summary');
+    const ok=reviewed||BINARY_OPERATIONS.has(op.operationId)||unreviewedPassthroughAllowed(op);
+    assert.ok(ok,op.operationId);
+    if(!reviewed&&!BINARY_OPERATIONS.has(op.operationId)) assert.ok(requiredProfiles(op).includes('sensitive')||op.sensitivity==='low',op.operationId);
+  }
+  // A high-sensitivity write without a view never passes upstream data through.
+  const h=harness(config({write:true,writeCritical:true}),{json:{secretish:'UPSTREAM_CANARY'}});h.ctx.approve=async()=>'accept' as const;
+  const p=(await callTool('darktrace_email_action',{path:{uuid:'u1'},body:{action:'release'}},h.ctx)).structuredContent as any;
+  const r=await callTool('darktrace_email_action',{path:{uuid:'u1'},body:{action:'release'},confirm:true,previewId:p.previewId},h.ctx);
+  assert.equal(r.isError,undefined);assert.doesNotMatch(JSON.stringify(r),/UPSTREAM_CANARY/);assert.equal((r.structuredContent as any).unreviewedView,undefined);
+});
+
+test('untyped nested schema nodes: scalar lists always pass; free-form maps only where passthrough is allowed; credential keys never',()=>{
+  const view:ResponseView={kind:'object',fields:{names:{kind:'array',items:{kind:'summary'}},meta:{kind:'summary'}}};
+  const input={names:['a','b',3],meta:{label:'x',password:'p',nested:{token:'t',ok:1}},unknown:'U'};
+  const strict=JSON.parse(JSON.stringify(projectResponse(view,input).value));
+  assert.deepEqual(strict.names,['a','b',3]);assert.match(JSON.stringify(strict.meta),/no reviewed output view/);assert.equal(strict.unknown,undefined);
+  const open=JSON.parse(JSON.stringify(projectResponse(view,input,{untypedObjects:true}).value));
+  assert.deepEqual(open.meta,{label:'x',nested:{ok:1}});
+  // Advanced Search: undocumented aggregation shapes under a documented key are kept bounded.
+  const agg:ResponseView={kind:'object',fields:{aggregations:{kind:'object',fields:{stats:{kind:'object',fields:{count:{kind:'number'}}}}}}};
+  const out=JSON.parse(JSON.stringify(projectResponse(agg,{aggregations:{terms:{buckets:[{key:'443',doc_count:5}]}}},{untypedFallback:true}).value));
+  assert.deepEqual(out.aggregations,{terms:{buckets:[{key:'443',doc_count:5}]}});
 });
