@@ -70,7 +70,7 @@ jobs:
           # Totals for the full-API release; recompute after merging branches that add tests.
           node --input-type=commonjs <<'NODE'
           const assert=require('node:assert/strict'),fs=require('node:fs');
-          for(const [name,count] of [['functional',213],['security',1150]]){
+          for(const [name,count] of [['functional',224],['security',1150]]){
             const text=fs.readFileSync(`${process.env.RUNNER_TEMP}/vendor-results/${name}.log`,'utf8');
             const lines=text.split(String.fromCharCode(10)).map(l=>l.trim());
             for(const [key,value] of [['tests',count],['pass',count],['fail',0],['skipped',0]])
@@ -295,11 +295,11 @@ jobs:
           const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
-          a.equal(r.sourceTreeSha256,'5b1208f1c0994996f698803a0468f7b25a3b256fe033bbe20ad50ad50fdc503e');
+          a.equal(r.sourceTreeSha256,'b384f88aa4a63ed9a3009dbc43245328d69e9ca4d627a3233e4e1f4b5084674e');
           a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,1150);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
           a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,91);
-          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'3bd374dcf7225557ba56d4737e381698a0e0a4bccf03cc00d62f00ced84c7284');
+          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'cc156c03262043a38b4a85e7da8140d0d40f3306c998338fdfbe433de3fec850');
           a.equal(r.fixtureHashes['mcp-tool-contracts-full-api.json'],'df8ca493e50a9f8eef2dd883c8e7a4f3b36b2effa0cba72cf36ed07ab488ded5');
           a.equal(r.fixtureHashes['mcp-tool-contracts-first-stable.json'],'6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c');
           f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:91,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-full-api.json'],historicalFirstStableFixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));

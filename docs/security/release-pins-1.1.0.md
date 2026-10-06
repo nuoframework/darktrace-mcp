@@ -98,3 +98,17 @@ Image ID (`docker image inspect --format '{{.Id}}' darktrace-mcp:1.1.0-rc`): `sh
 CI's local checks passed: configuration inventory (nonroot user, entrypoint, no ports/secrets), help/version, vendor Node/shared OpenSSL, root-owned runtime inventory, protected synthetic-token `--check-config`, SDK initialize/tools/list for every fixture entry, doctor/config checks per profile and approval channel, and critical-without-write startup refusals. Runtime checks used `--network none`, a read-only filesystem and dropped capabilities. The native `vendor-checks` stage passed typecheck and both suites; the workflow's final byte-binding assertion matched the Linux receipt to the actual image's runtime hashes and every updated pin.
 
 Local raw Docker logs/results: `/private/tmp/release-pins-docker-runtime.log`, `/private/tmp/release-pins-docker-build.log`, `/private/tmp/release-pins-vendor-build.log`, `/private/tmp/release-pins-image-checks.log`, `/private/tmp/release-pins-byte-binding.log`, and `/private/tmp/release-pins-image-results/vendor-results/`. This checks Linux arm64 locally; amd64 and the Node 22 matrix remain for CI.
+
+## Update after blockers B4–B6 and B5/B7/B9 (2026-10-06, later)
+
+The installer acknowledgement flow added CLI tests and changed `src/`, so the pins moved again:
+
+| Pin | Previous | Final |
+|---|---|---|
+| Functional tests (`ci.yml`) | 213 | 224 |
+| Security subcases | 1150 | 1150 (unchanged) |
+| Production source tree SHA-256 | `5b1208f1…503e` | `b384f88aa4a63ed9a3009dbc43245328d69e9ca4d627a3233e4e1f4b5084674e` |
+| Runtime files / aggregate | 91 / `3bd374dc…` | 91 / `cc156c03262043a38b4a85e7da8140d0d40f3306c998338fdfbe433de3fec850` |
+| Full-API contract fixture | `df8ca493…ded5` | unchanged |
+
+Receipt: `test/security/evidence/2026-10-06T13-37-08-463Z.json` (macOS arm64: 1150 tests, 1147 pass, 3 platform skips).
