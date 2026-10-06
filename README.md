@@ -34,21 +34,21 @@ You need: the HTTPS address of your Darktrace appliance, a **public** and a **pr
 ### 1. Setup wizard (macOS, Linux, Windows)
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-The wizard asks for the URL and tokens (typed hidden), saves the tokens to files only you can read, copies the package to `~/.local/share/darktrace-mcp/1.1.0/` and configures the clients it finds with absolute paths, so clients never start the server through `npx`. Windows cannot protect token files: prefer the `.mcpb` extension, Docker or WSL ([details](docs/getting-started.md#windows)).
+The wizard asks for the URL and tokens (typed hidden), saves the tokens to files only you can read, copies the package to `~/.local/share/darktrace-mcp/1.1.1/` and configures the clients it finds with absolute paths, so clients never start the server through `npx`. Windows cannot protect token files: prefer the `.mcpb` extension, Docker or WSL ([details](docs/getting-started.md#windows)).
 
 ### 2. Claude Desktop extension (.mcpb)
 
-Download `darktrace-mcp-1.1.0.mcpb` from the [v1.1.0 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) and double-click it. Claude Desktop asks for the URL and tokens and keeps the tokens in your OS keychain.
+Download `darktrace-mcp-1.1.1.mcpb` from the [v1.1.1 release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) and double-click it. Claude Desktop asks for the URL and tokens and keeps the tokens in your OS keychain.
 
 ### 3. Docker (ghcr.io)
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
 The image is built for linux/amd64 and linux/arm64. Pin the digest, never the tag. For 1.1.0, the arm64 image passed the local Docker gates; amd64 is verified by CI on the release commit ([status](docs/docker.md#110-image-verification-status)).
@@ -69,7 +69,7 @@ darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-`--check-config` checks your settings offline. `test` makes one real call (`GET /status`) to your appliance. Without a global install, run these as `npx -y @nuoframework/darktrace-mcp@1.1.0 test`.
+`--check-config` checks your settings offline. `test` makes one real call (`GET /status`) to your appliance. Without a global install, run these as `npx -y @nuoframework/darktrace-mcp@1.1.1 test`.
 
 ## Supported clients
 
@@ -150,7 +150,7 @@ More: [security overview](docs/security.md) · [security policy](SECURITY.md).
 
 ## Project status
 
-Public repository. From v1.1.0 the release workflow publishes [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance) and `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry; the server is described for the MCP Registry as `io.github.nuoframework/darktrace-mcp`. Each channel is live only once the v1.1.0 release is published ([releases](docs/releases.md)). Known limitations: [changelog](CHANGELOG.md#known-limitations-in-110). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
+Public repository. From v1.1.0 the release workflow publishes [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) on npm (trusted publishing with provenance) and `ghcr.io/nuoframework/darktrace-mcp` on GitHub Container Registry; the server is described for the MCP Registry as `io.github.nuoframework/darktrace-mcp`. Each channel is live only once the v1.1.0 release is published ([releases](docs/releases.md)). Known limitations: [changelog](CHANGELOG.md#known-limitations-in-111). Licensed under [Apache-2.0](LICENSE). Contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Trademarks, logo and contact
 

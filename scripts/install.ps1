@@ -1,5 +1,5 @@
 # darktrace-mcp source installer for Windows (PowerShell 5+). Fallback path.
-# The primary install is the published package:  npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+# The primary install is the published package:  npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 # Usage: powershell -ExecutionPolicy Bypass -File scripts\install.ps1 [setup options]
 # Windows cannot enforce owner-only token files, so the server rejects token files there.
 # Setup will ask for explicit consent before writing token VALUES into client configs

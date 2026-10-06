@@ -34,21 +34,21 @@ Necesitas: la dirección HTTPS de tu appliance Darktrace, un token de API **púb
 ### 1. Asistente de configuración (macOS, Linux, Windows)
 
 ```sh
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup
 ```
 
-El asistente pide la URL y los tokens (sin mostrarlos), guarda los tokens en archivos que solo tú puedes leer, copia el paquete a `~/.local/share/darktrace-mcp/1.1.0/` y configura los clientes que encuentra con rutas absolutas, de modo que los clientes nunca arrancan el servidor a través de `npx`. Windows no puede proteger los archivos de token: prefiere la extensión `.mcpb`, Docker o WSL ([detalles](docs/es/getting-started.md#windows)).
+El asistente pide la URL y los tokens (sin mostrarlos), guarda los tokens en archivos que solo tú puedes leer, copia el paquete a `~/.local/share/darktrace-mcp/1.1.1/` y configura los clientes que encuentra con rutas absolutas, de modo que los clientes nunca arrancan el servidor a través de `npx`. Windows no puede proteger los archivos de token: prefiere la extensión `.mcpb`, Docker o WSL ([detalles](docs/es/getting-started.md#windows)).
 
 ### 2. Extensión de Claude Desktop (.mcpb)
 
-Descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y haz doble clic. Claude Desktop pide la URL y los tokens y guarda los tokens en el llavero del sistema.
+Descarga `darktrace-mcp-1.1.1.mcpb` de la [release v1.1.1](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.1) y haz doble clic. Claude Desktop pide la URL y los tokens y guarda los tokens en el llavero del sistema.
 
 ### 3. Docker (ghcr.io)
 
 ```sh
-docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.0
-docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.0
-npx -y @nuoframework/darktrace-mcp@1.1.0 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
+docker pull ghcr.io/nuoframework/darktrace-mcp:1.1.1
+docker image inspect --format '{{index .RepoDigests 0}}' ghcr.io/nuoframework/darktrace-mcp:1.1.1
+npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker --image ghcr.io/nuoframework/darktrace-mcp@sha256:<digest>
 ```
 
 La imagen se publica para linux/amd64 y linux/arm64. Fija el digest, nunca la etiqueta. En 1.1.0, la imagen arm64 superó las comprobaciones Docker locales; la amd64 se verifica en CI sobre el commit de la release ([estado](docs/docker.md#110-image-verification-status), inglés).
@@ -69,7 +69,7 @@ darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-`--check-config` revisa la configuración sin conexión. `test` hace una llamada real (`GET /status`) a tu appliance. Sin instalación global, ejecútalos como `npx -y @nuoframework/darktrace-mcp@1.1.0 test`.
+`--check-config` revisa la configuración sin conexión. `test` hace una llamada real (`GET /status`) a tu appliance. Sin instalación global, ejecútalos como `npx -y @nuoframework/darktrace-mcp@1.1.1 test`.
 
 ## Clientes compatibles
 
@@ -150,7 +150,7 @@ Más: [resumen de seguridad](docs/security.md) (inglés) · [política de seguri
 
 ## Estado del proyecto
 
-Repositorio público. Desde v1.1.0, el flujo de release publica [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia) y `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry; el servidor se describe para el MCP Registry como `io.github.nuoframework/darktrace-mcp`. Cada canal solo está disponible cuando se publica la release v1.1.0 ([releases](docs/releases.md), inglés). Limitaciones conocidas: [changelog](CHANGELOG.md#known-limitations-in-110) (inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
+Repositorio público. Desde v1.1.0, el flujo de release publica [`@nuoframework/darktrace-mcp`](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) en npm (publicación de confianza con procedencia) y `ghcr.io/nuoframework/darktrace-mcp` en GitHub Container Registry; el servidor se describe para el MCP Registry como `io.github.nuoframework/darktrace-mcp`. Cada canal solo está disponible cuando se publica la release v1.1.0 ([releases](docs/releases.md), inglés). Limitaciones conocidas: [changelog](CHANGELOG.md#known-limitations-in-111) (inglés). Licencia [Apache-2.0](LICENSE). Contribuciones: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Marcas, logotipo y contacto
 
