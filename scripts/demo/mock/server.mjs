@@ -10,6 +10,7 @@ if (!['encoded', 'decoded'].includes(encoding)) throw new Error('MOCK_QUERY_SIGN
 const rfc3986 = s => encodeURIComponent(s).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 const routes = JSON.parse(readFileSync(file('routes.json'), 'utf8')).map(r => ({
   ...r,
+  // eslint-disable-next-line security/detect-non-literal-regexp -- route patterns come from the bundled catalogue, escaped above; demo-only mock
   regex: new RegExp('^' + r.path.split('/').map(s => s.startsWith('{') ? '[^/]+' : s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('/') + '$'),
 })).sort((a,b) => (a.path.match(/\{/g)?.length ?? 0) - (b.path.match(/\{/g)?.length ?? 0));
 
