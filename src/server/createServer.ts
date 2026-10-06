@@ -1,7 +1,7 @@
 import { McpServer, ProtocolError, ProtocolErrorCode } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { callTool, eligibleTools, type ToolContext } from '../tools/index.js';
-export const VERSION='0.1.0-alpha.0';
+export const VERSION='1.0.0';
 export function createServer(ctx:ToolContext):McpServer {
   const server=new McpServer({name:'darktrace-mcp',version:VERSION},{capabilities:{tools:{listChanged:false}},maxToolInputElements:Math.min(ctx.cfg.limits.maxToolInputElements,5000)});
   let initialized=false;

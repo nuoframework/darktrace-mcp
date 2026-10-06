@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — prepared 2026-10-06
 
 - Reviewed lab harness now requires schema-2 source/runtime and complete installed host SDK/Zod tree binding before SDK import; bounded deterministic hashing rejects symlinks and special files. Docker preflight/session use init, PID and memory limits. This is offline readiness, not final lab or image approval.
 
-These changes are candidate preparation only. Package version remains `0.1.0-alpha.0`; they do not replace the immutable published alpha assets or approve a stable release.
+Private stable artifact preparation: package/server metadata is now `1.0.0`, with `private: true`, unchanged dependencies and immutable false write capability. Historical alpha assets remain unchanged; publication approval is separate.
 
 - Added a private local Docker build recipe and hardened stdio setup with explicit nonroot identity, read-only token mounts, disabled daemon logging, no ports/TTY, restricted privileges/resources and immutable image selection for operator use. Final candidate image, appliance and provider gates remain separate.
 - Corrected object-first response unions so device arrays keep their reviewed projection; unmodeled fields still use bounded safe output. Output projection and text neutralization are not universal compatibility or sensitive-data-removal guarantees.

@@ -257,11 +257,11 @@ jobs:
           const names=f.readdirSync(`${p}/security-evidence`).filter(n=>n.endsWith('.json'));
           a.equal(names.length,1,'Exactly one fresh security receipt is required');
           const r=JSON.parse(f.readFileSync(`${p}/security-evidence/${names[0]}`));
-          a.equal(r.sourceTreeSha256,'9e7c7070298ef592a1a10cdcb7ca481420a377e25e4a93c863ca33c31921d7f2');
+          a.equal(r.sourceTreeSha256,'582a12121e7e9bb3844d527556ad62dfc5c0ed8f8c6ba57f64aad0ccee07f72c');
           a.equal(r.receiptComplete,true);a.equal(r.tests.status,0);a.equal(r.subcases.length,325);
           const actual=JSON.parse(f.readFileSync(`${p}/final-runtime-hashes.json`));
           a.deepEqual(actual,r.runtimeHashes);a.equal(Object.keys(actual).length,49);
-          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'e7cbb509d54909fa10276ffeaec11cab22bb201f1f81635fa8c988abcb3653fb');
+          a.equal(c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),'054a25fa1ff349a8ad7a84dd03e2f891ddf6f762b4472bdcec0f36f22d52d16f');
           f.writeFileSync(`${p}/byte-binding.json`,JSON.stringify({sourceTreeSha256:r.sourceTreeSha256,runtimeTreeSha256:c.createHash('sha256').update(JSON.stringify(actual)).digest('hex'),runtimeFiles:49,fixtureSha256:r.fixtureHashes['mcp-tool-contracts-first-stable.json']},null,2));
           NODE
       - name: Archive signed inputs and complete native gate receipts
