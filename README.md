@@ -50,7 +50,7 @@ npx -y @nuoframework/darktrace-mcp@1.1.1 setup --runtime docker \
   --image ghcr.io/nuoframework/darktrace-mcp@sha256:a1e3944426eddae0e1fa13db0f58a380ae601562dcd4dd93f1767fa42a98a1e1
 ```
 
-Multi-arch image (linux/amd64, linux/arm64), pinned by its index digest. Use the digest, not the mutable `1.1.0` tag, in client configuration. [Docker guide](docs/docker.md).
+Multi-arch image (linux/amd64, linux/arm64), pinned by its index digest. Use the digest, not the mutable `1.1.1` tag, in client configuration. [Docker guide](docs/docker.md).
 
 ## See it work
 
