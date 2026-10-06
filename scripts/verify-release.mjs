@@ -196,7 +196,7 @@ const components=[];
 for(const [path,p] of wanted){const key=actual[path]?path:'node_modules/'+pkg.name+'/'+path;const a=actual[key];assert(a);for(const field of ['version','integrity','resolved'])assert.equal(a[field],p[field]);const location=join(install,key),manifest=JSON.parse(readFileSync(join(location,'package.json')));assert.equal(manifest.version,p.version);assert.equal(manifest.license,p.license);
  const depDir=join(work,'dependency-'+components.length);mkdirSync(depDir);const [packedDep]=JSON.parse(run('npm',['pack','--ignore-scripts','--json','--pack-destination',depDir,p.resolved],depDir));const bytes=readFileSync(join(depDir,packedDep.filename));assert.equal('sha512-'+hash(bytes,'sha512','base64'),p.integrity,'dependency SRI');
  inventories[manifest.name]=files(location);
- components.push({type:'library','bom-ref':manifest.name,name:manifest.name,version:manifest.version,purl:`pkg:npm/${manifest.name.replace('@','%40')}@${manifest.version}`,licenses:[{license:{id:manifest.license}}],hashes:[{alg:'SHA-256',content:hash(bytes)},{alg:'SHA-512',content:hash(bytes,'sha512')}],externalReferences:[{type:'distribution',url:p.resolved}],properties:[{name:'npm:integrity',value:p.integrity}]});
+ components.push({type:'library','bom-ref':manifest.name,name:manifest.name,version:manifest.version,purl:`pkg:npm/${manifest.name.replaceAll('@','%40')}@${manifest.version}`,licenses:[{license:{id:manifest.license}}],hashes:[{alg:'SHA-256',content:hash(bytes)},{alg:'SHA-512',content:hash(bytes,'sha512')}],externalReferences:[{type:'distribution',url:p.resolved}],properties:[{name:'npm:integrity',value:p.integrity}]});
 }
 const entry=join(root,'dist/src/index.js');
 const cliEnv={PATH:process.env.PATH};
