@@ -50,7 +50,7 @@ Every request is signed with an HMAC over the path, the public token and a `DTAP
 | `compact` (default) | `20261006T081500` (`YYYYMMDDTHHMMSS`) |
 | `spaced` | `2026-10-06 08:15:00` (`YYYY-MM-DD HH:MM:SS`) |
 
-Appliances on the same version can differ. On two Darktrace 7.1.0 appliances, one accepted both formats and the other rejected `compact` with HTTP 400 (`bad_request`) on `GET /status` and accepted `spaced`.
+Appliances on the same version can differ, and the same appliance can change over time: on 2026-10-06 one Darktrace 7.1.0 appliance accepted both formats, while a second, freshly provisioned one answered HTTP 400 (`bad_request`) to `compact` on `GET /status` for several minutes while accepting `spaced`, then accepted both. Treat a 400 on `/status` as a reason to run `darktrace-mcp test`, which tries the other format once and tells you what to set.
 
 The server never switches format at runtime: it does not retry with the other format after a 400 or 401, so a signing problem can never turn into a silent mode change. The choice is made at install time:
 
