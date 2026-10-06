@@ -198,8 +198,8 @@ Estas valoraciones se basan en el binario, las bibliotecas que enlaza, sus impor
 
 | ID | Sev | Owner | Hallazgo | Propuesta |
 |---|---|---|---|---|
-| DF-01 | Bajo | Docker (Luna) | Trivy, Grype y el SBOM CycloneDX **no inventarían `/nodejs/bin/node`** (22.23.3) ni lo que lleva empaquetado (OpenSSL 3.5.8, zlib, c-ares 1.34.8, ICU 78.3), que es el componente más expuesto. El "0 hallazgos Node" se refiere solo a los 3 paquetes npm. | Añadir el componente Node.js 22.23.3 (y lo que empaqueta) al SBOM o al registro, y contrastarlo con los avisos de seguridad de Node en cada reconstrucción. Hoy es la última 22.x. |
-| DF-02 | Info | Docker (Luna), `docs/docker.md` | El registro dice "0 high, 0 critical" sin indicar la fuente de severidad; Grype califica como High 11 de los mismos hallazgos. | Indicar el escáner y la fuente, por ejemplo "Trivy 0.74.0: 23 medium, 8 low; Grype 0.118.0: 11 high…; 0 corregibles". |
+| DF-01 | Bajo | Docker (segundo worker) | Trivy, Grype y el SBOM CycloneDX **no inventarían `/nodejs/bin/node`** (22.23.3) ni lo que lleva empaquetado (OpenSSL 3.5.8, zlib, c-ares 1.34.8, ICU 78.3), que es el componente más expuesto. El "0 hallazgos Node" se refiere solo a los 3 paquetes npm. | Añadir el componente Node.js 22.23.3 (y lo que empaqueta) al SBOM o al registro, y contrastarlo con los avisos de seguridad de Node en cada reconstrucción. Hoy es la última 22.x. |
+| DF-02 | Info | Docker (segundo worker), `docs/docker.md` | El registro dice "0 high, 0 critical" sin indicar la fuente de severidad; Grype califica como High 11 de los mismos hallazgos. | Indicar el escáner y la fuente, por ejemplo "Trivy 0.74.0: 23 medium, 8 low; Grype 0.118.0: 11 high…; 0 corregibles". |
 | DF-03 | Info | — | `libz.so.1` y `libssl.so.3` vienen con la base distroless `cc` pero `node` no los usa. | Sin acción: retirarlos exigiría mantener un rootfs propio y no hay corrección pendiente. |
 | DF-04 | Corregido | README (yo) | Los README EN y ES decían que el escaneo, el SBOM y la revisión de licencias estaban pendientes. | Corregidos (§5) |
 

@@ -3,7 +3,7 @@
 **Estado:** fase de diseño documental. Fecha: 2026-10-05. Autor: trabajador despachado (tarea `task_f7b1ce0625cb`).
 
 **Qué no hice:**
-- No edité código, pruebas, el harness, el Dockerfile, las guías de Luna ni `README.md`/`README.es.md`. Los README los leí solo para preparar la integración.
+- No edité código, pruebas, el harness, el Dockerfile, las guías del segundo worker ni `README.md`/`README.es.md`. Los README los leí solo para preparar la integración.
 - No hice commits ni push, no cambié versiones y no publiqué assets externos.
 - No accedí al laboratorio ni a la API real, y no leí credenciales ni configuraciones.
 
@@ -49,7 +49,7 @@ No se afirma ningún escaneo limpio, ninguna certificación ni la validación de
 
 | ID | Sev | Owner | Hallazgo | Propuesta |
 |---|---|---|---|---|
-| VD-01 | Bajo | Luna (`docs/docker.md`) | En *Local build and scan record*, las filas *Final image* e *Inventory/SBOM and vulnerability scan* dicen que el ID y el escaneo están "recorded below", pero el documento no contiene ese registro. | Al cerrar la remediación (distroless o trixie), añadir el ID de la imagen, la versión y la fecha de la base de datos de Trivy, y los recuentos por severidad. Hasta entonces, decir explícitamente "remediación en curso; sin escaneo aceptado". |
+| VD-01 | Bajo | el segundo worker (`docs/docker.md`) | En *Local build and scan record*, las filas *Final image* e *Inventory/SBOM and vulnerability scan* dicen que el ID y el escaneo están "recorded below", pero el documento no contiene ese registro. | Al cerrar la remediación (distroless o trixie), añadir el ID de la imagen, la versión y la fecha de la base de datos de Trivy, y los recuentos por severidad. Hasta entonces, decir explícitamente "remediación en curso; sin escaneo aceptado". |
 | VD-02 | Info | Integración del README (task27) | El README describe el build local como verificado, pero no menciona que el escaneo de la base sigue pendiente. | En la integración, añadir una frase: "remediación del escaneo de la imagen base en curso" y no usar ningún badge de escaneo. |
 | VD-03 | Info | `architecture.md` (yo, sin cambiar) | La línea de estado ("implementation IN PROGRESS; not security validated") es anterior a la evidencia del 2026-10-05. | Mantenerla mientras el proyecto sea alfa. La §3 ya enlaza la evidencia con fecha y su alcance. |
 
@@ -85,7 +85,7 @@ En `docs/architecture.md`:
 
 ### 6.2 Cambios preparados para el README (EN/ES)
 
-**Aplicados** el 2026-10-05, tras el ACK de Luna (`msg_2d78a9149144`, transmitido por el root):
+**Aplicados** el 2026-10-05, tras el ACK del segundo worker (`msg_2d78a9149144`, transmitido por el root):
 1. **Badges:** la línea de texto "Private GitHub prereleases · Node.js 22+ · stdio · Apache-2.0" se sustituye por los 6 badges locales del idioma correspondiente, colocados **debajo** del aviso no oficial y del lema, cada uno con su enlace a evidencia.
 2. **Fila de seguridad:** pasa a dar la evidencia con fecha (fuente `eadfe117…`; Linux Node 22 324/324; macOS Node 24 321 superadas, 3 bloqueadas por plataforma, 0 fallos). Enlaza a `mcp-corrections-acceptance.md` y a la evidencia de release, y advierte de que "no es una certificación".
 3. **Herramientas:** una frase con las 27 herramientas del perfil `read` por defecto y enlace a la §1.1.

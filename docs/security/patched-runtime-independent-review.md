@@ -47,7 +47,7 @@ My checker (`ci-verify.py`, in the external receipts) found **17/17 PASS on each
 - CI built its own images (amd64 `sha256:ac504030…`, arm64 `sha256:2d90bbad…`). Their runtime bytes are bound to the same 49-file aggregate. The accepted local review images are still `64d16616…` and `65985236…`.
 
 - Reviewer: worker `task_e22e7c4daefa`, dispatch `ctx_ca8518283203`, 2026-10-06 Europe/Madrid.
-- Implementation owner: Sol, `task_7bc20d4178f8` / `ctx_eee95805dccf`.
+- Implementation owner: implementation worker, `task_7bc20d4178f8` / `ctx_eee95805dccf`.
 - The research input `/private/tmp/darktrace-runtime-alternatives-research.md` was used as research only.
 - Constraints of this review: no API credentials or appliance calls, no source, test, fixture, Dockerfile, workflow or helper edits, and no tag, release or registry action.
 - External receipts: `/private/tmp/darktrace-patched-runtime-review-ctx_ca8518283203/`, indexed in `SHA256SUMS` there.
@@ -203,11 +203,11 @@ F5 is a source recommendation for root, and F6 is informational.
 
 | ID | Severity | Item | Owner |
 |---|---|---|---|
-| F7 | Low | In v2, the helper's streaming download (mode 0600) shipped `/licenses/MPL-2.0.txt` as root-owned 0600, so uid 1000 could not read it. | Sol |
-| F1 | Medium | `COPY --from=runtime-apks /licenses/` copies the whole named context, but `sha256sum -c` checks only listed files, so extra files, symlinks or special files would enter the image unreviewed. Fail closed on any non-regular entry and on any path outside the 84 pins. The current images comply. | Sol |
-| F2 | Low | The Dockerfile removes `scripts.tar`, but apk writes `scripts.tar.gz`. Stale busybox, ca-certificates, icu and nodejs install scripts remain. `/var/log/apk.log` is also left behind and is the only non-reproducible file. | Sol |
-| F3 | Low | CI checks only internal consistency. Also assert source `9e7c…`, the runtime aggregate `e7cbb509…`, and exactly one new security evidence JSON. | Sol |
-| F4 | Low | Helper hardening (an operator tool, not part of the MCP attack surface): add a fetch timeout and size cap; refuse a symlinked or foreign output directory; note that the fetch container leaves root-owned files on Linux, which breaks reruns. | Sol |
+| F7 | Low | In v2, the helper's streaming download (mode 0600) shipped `/licenses/MPL-2.0.txt` as root-owned 0600, so uid 1000 could not read it. | Implementation worker |
+| F1 | Medium | `COPY --from=runtime-apks /licenses/` copies the whole named context, but `sha256sum -c` checks only listed files, so extra files, symlinks or special files would enter the image unreviewed. Fail closed on any non-regular entry and on any path outside the 84 pins. The current images comply. | Implementation worker |
+| F2 | Low | The Dockerfile removes `scripts.tar`, but apk writes `scripts.tar.gz`. Stale busybox, ca-certificates, icu and nodejs install scripts remain. `/var/log/apk.log` is also left behind and is the only non-reproducible file. | Implementation worker |
+| F3 | Low | CI checks only internal consistency. Also assert source `9e7c…`, the runtime aggregate `e7cbb509…`, and exactly one new security evidence JSON. | Implementation worker |
+| F4 | Low | Helper hardening (an operator tool, not part of the MCP attack surface): add a fetch timeout and size cap; refuse a symlinked or foreign output directory; note that the fetch container leaves root-owned files on Linux, which breaks reruns. | Implementation worker |
 | F5 | Low (recommendation) | Shared OpenSSL makes `LD_LIBRARY_PATH`, `LD_PRELOAD`, `OPENSSL_MODULES` and `OPENSSL_ENGINES` relevant to which crypto library loads. The app guard does not reject them (I confirmed this against the image). Only the operator can set them, so this is not a blocker. Consider adding them to `assertSafeNetworkEnvironment` in a future source change; the source is frozen now. | root |
 | F6 | Info | CI runs no scanner, so Trivy and Grype remain manual evidence bound to the image IDs above. | — |
 
@@ -244,7 +244,7 @@ F5 is a source recommendation for root, and F6 is informational.
 | Functional 130 / security 325 under vendor Node | PASS / PASS (native CI 37423283298) | PASS / PASS (native CI 37423283298) |
 | Scanner reconciliation | R1 accepted by root 2026-10-06 (raw High retained, not in execute path) | same |
 | Lab-execution readiness (functional only) | **Accepted**. Root's campaign: 19/19 selectors PASS, 25 requests, verified TLS through default (Alpine) trust (root checkpoint `e13cf132…`) | — |
-| Native CI run 37391270956 (`b0717a9`) | **FAILED** before building: helper licence extraction denied (`--cap-drop ALL` root cannot write the runner-owned mount). The APKs CI fetched match the pins. Fix routed to Sol; needs a new commit and a rerun. | same |
+| Native CI run 37391270956 (`b0717a9`) | **FAILED** before building: helper licence extraction denied (`--cap-drop ALL` root cannot write the runner-owned mount). The APKs CI fetched match the pins. Fix routed to the implementation worker; needs a new commit and a rerun. | same |
 | Final independent acceptance | **PASS** | **PASS** |
 
 ## Final stable 1.0.0 native evidence (run 37423665585, commit `2adb84b6a076cf6018fb5723659aac57c8070e4e`)
@@ -288,4 +288,4 @@ Reviewed on 2026-10-06 by dispatch `ctx_4b210a8c95fe`. **Result: PASS.**
 - Each image's `dist/src` map equals the CI-tested `054a…` map.
 - The config is unchanged: `1000:1000`, the exact entrypoint, `PATH` only, and no ports or volumes.
 
-**Scope of this addendum.** It covers native CI evidence and the source/image byte binding. I did not separately re-audit Sol's npm package archive (`3abf8b7a…`) or the publication staging. R1 is accepted by root (2026-10-06): the raw zlib High stays disclosed and there is no fixed-library claim. No lab rerun is required.
+**Scope of this addendum.** It covers native CI evidence and the source/image byte binding. I did not separately re-audit the implementation worker's npm package archive (`3abf8b7a…`) or the publication staging. R1 is accepted by root (2026-10-06): the raw zlib High stays disclosed and there is no fixed-library claim. No lab rerun is required.

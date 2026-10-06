@@ -149,5 +149,3 @@ Drawn from `openapi/DIFF-sdk-vs-docs.md` (read, not executed):
 - The S5 device assignment was removed and confirmed gone by a follow-up read before the tag
   was deleted.
 - Final `GET /tags` sweep: **probe tags remaining = 0**.
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1,6 +1,6 @@
 # Validated Consultations Platform Gates
 
-Date: 2026-10-06. The frozen Linux gates pass on Node 22 and Node 24. Results remain provisional while the independent Opus review is ongoing; stable publication remains blocked by OpenSSL 3.5.8.
+Date: 2026-10-06. The frozen Linux gates pass on Node 22 and Node 24. Results remain provisional while the independent review is ongoing; stable publication remains blocked by OpenSSL 3.5.8.
 
 ## Frozen input binding
 
@@ -48,4 +48,4 @@ Per-command combined logs, exit files, npm debug logs, and security receipts are
 
 The first Node 22 extraction exited `97` because read-only source directory modes prevented the non-root tmpfs extraction; no gates ran. A separate earlier stopped tmpfs attempt reported npm ci, typecheck and functional exits 0 and security exit 1, but its logs and receipt disappeared before `docker cp`; that attempt remains unverified and its cause is not inferred from the later preserved AppleDouble diagnostic. The coordinator observed and retained those status and copy-failure records in the orchestration transcript. A retry exposed macOS libarchive `._*` AppleDouble metadata entries generated from xattrs in the tar stream: the contaminated security run reported 332 tests, 324 passed, 8 failed, and 0 skipped (seven metadata pseudo-test files plus a distribution-scanner parse failure). That diagnostic receipt (`2026-10-05T22-59-11-251Z.json`, SHA-256 `3fdd59c603f46d77701caba5164d5fe1c25ecaa9de8d33c42a48d209680ddace`) and logs are preserved under `/private/tmp/darktrace-validated19-platform-gates.UC5K3S/results/diagnostic/node22-appledouble-attempt/`. Final runs excluded only those generated `._*` entries at unpack, without changing source file bytes; both generated receipts then reported the pinned source tree hash and full passing totals above.
 
-This dispatched worker modified only the two report files in the workspace. The gate runs made no production source, test, helper, fixture, package/version, shared `dist`, or Git edits. Stable publication remains blocked by the OpenSSL 3.5.8 finding; the gate results are provisional pending the independent Opus review.
+This dispatched worker modified only the two report files in the workspace. The gate runs made no production source, test, helper, fixture, package/version, shared `dist`, or Git edits. Stable publication remains blocked by the OpenSSL 3.5.8 finding; the gate results are provisional pending the independent review.

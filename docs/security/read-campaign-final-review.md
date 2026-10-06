@@ -10,21 +10,21 @@
 **Veredicto:**
 - La fuente `4f6ef96c82b8c3bff7628fbad18aea6eb694819a2e001dc0e30086d1daefd834` queda **aceptada** para el agregado `loginput` y para el `errorCode` seguro.
 - Las dos recetas de inventario quedan implementadas y congeladas, a falta de revisión del root y de un manifiesto nuevo.
-- La revisión del contrato estable de `tools/list` y de la capacidad de solo lectura de Sol queda **pendiente**: aún no se ha entregado.
+- La revisión del contrato estable de `tools/list` y de la capacidad de solo lectura del worker de implementación queda **pendiente**: aún no se ha entregado.
 
 ## 1. Procedencia
 
 - **Diff revisado:** `eadfe117…` → `4f6ef96c…`, en `api/validation.ts`, `api/operations.ts`, `api/response-view.ts`, `tools/index.ts`, `coverage/report.ts` y `coverage/report.generated.json`.
-- **Construcción usada para todas las pruebas:** desde el snapshot de Sol `/private/tmp/darktrace-read-compatibility-h4074cxh`. Su agregado de fuente es exactamente `4f6ef96c…` antes y después de construir, y sus lockfiles son idénticos a los del snapshot limpio del piloto.
-- **Corrección de procedimiento:** mi primera copia se tomó del workspace mientras Sol seguía editando la fuente. Incluía `policy/release-capability.ts` y cambios de configuración, así que no era `4f6ef96`. Descarté esos resultados y repetí todo sobre la construcción exacta.
-- **Deriva de la fuente:** el workspace actual es `7104f8c4…` por el trabajo en curso de Sol. Este informe **no** cubre esa versión.
+- **Construcción usada para todas las pruebas:** desde el snapshot del worker de implementación `/private/tmp/darktrace-read-compatibility-h4074cxh`. Su agregado de fuente es exactamente `4f6ef96c…` antes y después de construir, y sus lockfiles son idénticos a los del snapshot limpio del piloto.
+- **Corrección de procedimiento:** mi primera copia se tomó del workspace mientras el worker de implementación seguía editando la fuente. Incluía `policy/release-capability.ts` y cambios de configuración, así que no era `4f6ef96`. Descarté esos resultados y repetí todo sobre la construcción exacta.
+- **Deriva de la fuente:** el workspace actual es `7104f8c4…` por el trabajo en curso del worker de implementación. Este informe **no** cubre esa versión.
 
 ## 2. Revisión de la fuente `4f6ef96`
 
 | Área | Hallazgo | Pruebas (exactas, bajo `diagnostic-guard`) |
 |---|---|---|
 | Excepción de validación | Solo `get_summarystatistics` con `eventtype==='loginput'` exacto, `hours` entero seguro entre 1 y 168 y **un único** ancla: `endtime` en milisegundos según el descriptor y entero mayor o igual que 0, o `to` en formato `YYYY-MM-DD HH:MM:SS` con fecha válida en UTC. Los modos `eventtype`, `csensor` y `mitreTactics` son mutuamente excluyentes. La regla de rangos emparejados se omite **solo** para ese extremo de esa operación; las llamadas de body siguen sin `operationId`, así que no se ven afectadas. | **Aceptados:** `hours` 1 y 168, `endtime=0`, `to` válido, `loginput` sin ancla y `{}`. **Rechazados (23 casos):** `hours` 0, 169, 1,5 o `"1"`; ancla sin `hours`; `endtime` negativo, fraccionario o como texto; `endtime` y `to` a la vez; `to` con fecha imposible, con `T`, con `Z` o con 24:00; `LOGINPUT`; `loginput ` con espacio; otro `eventtype`; `csensor` o `mitreTactics` junto a `eventtype`; `{hours:1}` o `{endtime}` sin `eventtype`; `starttime`, `from` o un parámetro desconocido añadidos. **Sin regresión en otras operaciones:** un `endtime` o `starttime` suelto en `get_modelbreaches`, `get_details`, `get_aianalyst_groups` y `get_network` sigue rechazado. **Petición construida:** exactamente `eventtype`, `endtime` y `hours`, sin inventar `starttime`. |
-| Vista de respuesta | `selectResponseView` devuelve `SUMMARY_LOGINPUT_VIEW` solo si la **consulta validada** tiene `eventtype==='loginput'`. En cualquier otro caso, incluidas las variantes `Loginput` o `['loginput']` y cualquier otra operación, usa la vista base. Las claves de la respuesta no influyen. | Los canarios de campos desconocidos, `hostname` e IP se descartan en la proyección. Los 23 tests dirigidos de Sol pasan (23/23). |
+| Vista de respuesta | `selectResponseView` devuelve `SUMMARY_LOGINPUT_VIEW` solo si la **consulta validada** tiene `eventtype==='loginput'`. En cualquier otro caso, incluidas las variantes `Loginput` o `['loginput']` y cualquier otra operación, usa la vista base. Las claves de la respuesta no influyen. | Los canarios de campos desconocidos, `hostname` e IP se descartan en la proyección. Los 23 tests dirigidos del worker de implementación pasan (23/23). |
 | `errorCode` seguro | Solo para `instanceof DarktraceApiError` y solo un miembro de la lista congelada de 14 códigos, **idéntica** a `ApiErrorKind`. El valor emitido es la constante de la lista. Mensaje, estado, `requestId`, URL, stack y configuración nunca se reflejan. El `try/catch` cubre los getters que lanzan excepciones. | Los 14 códigos salen exactos, sin `REQID` ni estado. Un prototipo falsificado con getter que lanza, un `kind` de tipo objeto, un `kind` desconocido, un `Error` normal con `kind:'auth'`, un Proxy, un string, `null` o `{kind:'auth'}` producen **sin `errorCode`** y sin canarios. Un getter que cambia de valor solo puede producir un miembro constante de la lista ("server"), nunca un valor externo. |
 
 **Observaciones informativas (sin bloqueo):**
@@ -64,4 +64,4 @@
 3. Crear el volumen y ejecutar el piloto `inventory` acotado.
 4. Destruir el volumen.
 
-La revisión del contrato estable de `tools/list` y de la capacidad inmutable de solo lectura de Sol se hará cuando se entregue, sin fijar automáticamente ningún fixture.
+La revisión del contrato estable de `tools/list` y de la capacidad inmutable de solo lectura del worker de implementación se hará cuando se entregue, sin fijar automáticamente ningún fixture.

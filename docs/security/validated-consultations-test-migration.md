@@ -45,4 +45,4 @@ Historical archive file digests equal their pre-migration originals:
 | `test/security/mcp-defense.test.mjs` | `7a76844072b679c429ebcc5288355691fb844198c1b87d8e31803ce90e548725` |
 | `test/security/policy-sinks.test.mjs` | `14ba5a0756fd3f886d1e15bf3d52b7c75e8d3a1b15460ce53105e2da0efc9420` |
 
-Stable publication remains blocked by the OpenSSL 3.5.8 finding documented in the release plan. The validated-19 pins are approved; the new Linux gate results remain provisional while the independent Opus review is ongoing.
+Stable publication remains blocked by the OpenSSL 3.5.8 finding documented in the release plan. The validated-19 pins are approved; the new Linux gate results remain provisional while the independent review is ongoing.

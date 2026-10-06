@@ -98,7 +98,7 @@ Candidate complete stable contract: `/private/tmp/darktrace-read-only-0mbihxf6/m
 
 Full functional/security suites have not yet run on this capability checkpoint: coordinator explicitly ordered targeted/candidate first, independent MR04 acceptance second, then full gates. Counts 113/324 belong to the prior source, not this new checkpoint. No claim of final stable readiness, Linux, Docker, package or live compatibility is made.
 
-Attempted review/packaging notifications to the supplied Opus/Luna dispatches were rejected because those dispatches were completed; the coordinator was informed to create new follow-ups. Awaiting independent candidate acceptance and subsequent full-gate authorization. No commit, push or publication.
+Attempted review/packaging notifications to the supplied reviewer/worker dispatches were rejected because those dispatches were completed; the coordinator was informed to create new follow-ups. Awaiting independent candidate acceptance and subsequent full-gate authorization. No commit, push or publication.
 
 
 ### Accepted description/fixture and full local gate checkpoint — 2026-10-05

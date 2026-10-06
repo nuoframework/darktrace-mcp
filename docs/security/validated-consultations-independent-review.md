@@ -85,7 +85,7 @@ get_endpointdetails,get_antigena,get_antigena_summary
   - MR-04 read and read+sensitive: the exact-contract snapshot is still pinned to the historical ea31 27/28 contract.
   - ST-09 SENSITIVE and MINIMIZATION: these expect Advanced Search dispatch.
 
-  These are not claimed as PASS. They belong to the Luna migration (`ctx_713964029b89`) and the helper/test-migration follow-up reviews.
+  These are not claimed as PASS. They belong to the second-worker migration (`ctx_713964029b89`) and the helper/test-migration follow-up reviews.
 
 ## Historical evidence preserved
 
