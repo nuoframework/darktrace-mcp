@@ -53,7 +53,7 @@ Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`. Tras el arranqu
 | Claude Desktop | `.mcpb` de la release (abajo) |
 | Windsurf, OpenCode | Fragmentos JSON de abajo (sin CLI) |
 
-Nunca pongas `npx` en la configuración de un cliente: cada arranque dependería del registro y recogería código nuevo sin avisar. El asistente siempre escribe rutas absolutas. El [plugin](../plugin-distribution.md) para Claude Code sigue la misma regla: Claude Code instala el paquete desde el lockfile del plugin, fijado a `1.1.1`, al instalar el plugin, y arranca `node` sobre el archivo de entrada instalado. Solo la copia para Codex arranca `npx -y @nuoframework/darktrace-mcp@1.1.1`, fijado a la misma versión, porque Codex no instala lockfiles.
+Nunca pongas `npx` en la configuración de un cliente: cada arranque dependería del registro y recogería código nuevo sin avisar. El asistente siempre escribe rutas absolutas. El [plugin](../plugin-distribution.md) para Claude Code sigue la misma regla: Claude Code instala el paquete desde el lockfile del plugin, fijado a `1.1.2`, al instalar el plugin, y arranca `node` sobre el archivo de entrada instalado. Solo la copia para Codex arranca `npx -y @nuoframework/darktrace-mcp@1.1.2`, fijado a la misma versión, porque Codex no instala lockfiles.
 
 ## Claude Desktop
 
@@ -92,7 +92,7 @@ claude plugin marketplace add nuoframework/darktrace-mcp
 claude plugin install darktrace-mcp@darktrace-mcp
 ```
 
-El plugin instala el paquete npm fijado a `1.1.1` desde su lockfile y añade la skill `darktrace-investigation`. Los tokens van al almacén de credenciales del sistema; el perfil se cambia después en `/config`. También funciona en sesiones de Cowork en tu máquina, pero no en el chat de claude.ai. Detalles, ficha en el Claude Directory y limitaciones: [distribución del plugin (EN)](../plugin-distribution.md).
+El plugin instala el paquete npm fijado a `1.1.2` desde su lockfile y añade la skill `darktrace-investigation`. Los tokens van al almacén de credenciales del sistema; el perfil se cambia después en `/config`. También funciona en sesiones de Cowork en tu máquina, pero no en el chat de claude.ai. Detalles, ficha en el Claude Directory y limitaciones: [distribución del plugin (EN)](../plugin-distribution.md).
 
 **Manual.**
 

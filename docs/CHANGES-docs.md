@@ -2,7 +2,7 @@
 
 Record of documentation changes that the release reviewers check against the code. Owner: documentation.
 
-> Publication update (2026-10-06): 1.1.0 and 1.1.1 are published on npm, ghcr and GitHub Release; the 1.1.2 release is in progress. See [current release status](releases.md#release-status-2026-10-06). The tables below preserve the wording at their original review checkpoints, including superseded pre-publication labels.
+> Publication update (2026-10-06): 1.1.0, 1.1.1 and 1.1.2 are published on npm, ghcr and GitHub Release. See [current release status](releases.md#release-status-2026-10-06). The tables below preserve the wording at their original review checkpoints, including superseded pre-publication labels.
 
 ## 1. Final gate blockers B4 and B6 (2026-10-06)
 

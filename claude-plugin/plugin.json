@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "darktrace-mcp",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Investigate alerts, devices and incidents on your own Darktrace Threat Visualizer appliance through a local MCP server: read-only by default, previews for every change and human approval for critical actions.",
   "author": {
     "name": "Pablo Arrabal",
