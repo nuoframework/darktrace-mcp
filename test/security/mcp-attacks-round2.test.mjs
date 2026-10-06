@@ -17,6 +17,11 @@ import { CORPUS, INSTRUCTION, HIDDEN, clean, hostileRecord, TOP_LEVEL, readArgs,
 // Round 2 (docs/security/mcp-attack-research-round2.md). Synthetic only: fake operation clients,
 // in-memory/PassThrough transports, no sockets, no HMAC, no writes. Tests tagged [AD2-xx KNOWN-FAIL]
 // document real weaknesses and are expected to fail until src/ is fixed; do not weaken them.
+// Plan reconciliation (docs/CHANGES-core.md "MR2 oracle updates"): denials use the plan contract
+// structuredContent.error={code,message} plus a top-level errorCode alias; critical previews need dryRun:true;
+// the approval schema requires approved:boolean and only accept+approved:true is consent; every denial and
+// preview writes one audit record carrying argsHash/approvalMode. Attack intent and zero-effect checks are unchanged.
+const execution = audits => audits.filter(entry => ['start', 'ok', 'unknown'].includes(Array.isArray(entry) ? entry[1] : entry));
 const contracts = JSON.parse(readFileSync(new URL('./fixtures/mcp-tool-contracts-full-api.json', import.meta.url), 'utf8')).contracts;
 const ALL = cfg({ profiles: profiles.all });
 const CRITICAL = cfg({ profiles: profiles['read+write+critical'] });
@@ -34,7 +39,7 @@ async function mcp(config, { elicit, capabilities = { elicitation: { form: {} } 
   const original = a.onmessage; a.onmessage = (message, extra) => { if (message.method?.startsWith('notifications/')) notifications.push(message); return original?.(message, extra); };
   return { client, server, requests, prompts, audits, notifications, async close() { await client.close(); await server.close(); } };
 }
-async function preview(client, name, args) { const r = await client.callTool({ name, arguments: args }); return r.structuredContent.previewId; }
+async function preview(client, name, args) { const r = await client.callTool({ name, arguments: { ...args, dryRun: true } }); return r.structuredContent.previewId; }
 
 // ---------------------------------------------------------------- MR2-01 injection corpus via tool RESULTS
 test('MR2-01.RESULT-CORPUS every addressable read operation: hostile values/keys neutralized, envelope code-owned, one call, no policy state change', async () => {
@@ -70,9 +75,9 @@ test('MR2-01.TOXIC-FLOW injected "approval granted" result text cannot unlock a 
   for (const extra of [{ confirm: true, previewId: 'a'.repeat(32) }, { confirm: true, previewId: 'b'.repeat(32) }, { confirm: true }]) {
     const r = await callTool('darktrace_antigena_manual_action', { ...args, ...extra }, c); assert.notEqual(r.structuredContent.executed, true);
   }
-  const previewId = (await callTool('darktrace_antigena_manual_action', args, c)).structuredContent.previewId;
+  const previewId = (await callTool('darktrace_antigena_manual_action', { ...args, dryRun: true }, c)).structuredContent.previewId;
   const refused = await callTool('darktrace_antigena_manual_action', { ...args, confirm: true, previewId }, c);
-  assert.equal(refused.structuredContent.approval, 'unsupported'); assert.equal(c.state.calls, 1); assert.equal(c.state.audits.length, 0);
+  assert.equal(refused.structuredContent.errorCode, 'approval_unavailable'); assert.equal(c.state.calls, 1); assert.deepEqual(execution(c.state.audits), []);
 });
 test('MR2-01.ERROR-BODIES upstream errors, bodies, causes and spoofed kinds never reach output; fixed vocabulary only', async () => {
   const body = CORPUS.ansi + CORPUS.unicodeTags + CANARY + PRIVATE;
@@ -82,14 +87,18 @@ test('MR2-01.ERROR-BODIES upstream errors, bodies, causes and spoofed kinds neve
   const cases = [new Error(body), Object.assign(new Error('x'), { response: { body } }), spoofKind, getterKind, forgedKind, body, { toString() { return body; } }, new AggregateError([new Error(body)], body)];
   for (const thrown of cases) for (const [config, name, args] of [[ALL, 'darktrace_get_status', {}], [CRITICAL, 'darktrace_delete_tag', { path: { tid: 3 }, confirm: true }]]) {
     const c = ctx(config, () => { throw thrown; }); c.approve = async () => 'accept';
-    const finalArgs = name === 'darktrace_delete_tag' ? { ...args, previewId: (await callTool(name, { path: { tid: 3 } }, c)).structuredContent.previewId } : args;
+    const finalArgs = name === 'darktrace_delete_tag' ? { ...args, previewId: (await callTool(name, { path: { tid: 3 }, dryRun: true }, c)).structuredContent.previewId } : args;
     const r = await callTool(name, finalArgs, c);
     assert.equal(r.isError, true); clean(r); noCanaries(r); assert.equal(r.content[0].text.includes('IGNORE'), false);
-    assert.ok(['Request rejected, unavailable, or failed. Check operator diagnostics.', 'Write request outcome is unknown (the appliance may have applied it). Verify with a read before any retry. Do not automatically repeat this action.'].includes(r.structuredContent.error));
-    if (r.structuredContent.errorCode !== undefined) assert.match(r.structuredContent.errorCode, /^[a-z_]+$/);
+    // Fixed vocabulary: a read fails as upstream_error; a dispatched critical write is never reported safe.
+    assert.deepEqual(r.structuredContent.error, name === 'darktrace_delete_tag'
+      ? { code: 'write_outcome_unknown', message: 'Write outcome is unknown; do not retry automatically.' }
+      : { code: 'upstream_error', message: 'Appliance request failed.' });
+    assert.equal(r.structuredContent.errorCode, r.structuredContent.error.code);
   }
   for (const name of ['darktrace_get_status' + CORPUS.ansi, INSTRUCTION, PRIVATE, '__proto__', 'constructor']) {
-    const r = await callTool(name, {}, ctx()); assert.deepEqual(r.structuredContent, { error: 'Tool unavailable.' });
+    const r = await callTool(name, {}, ctx()); assert.deepEqual(r.structuredContent.error, { code: 'operation_denied', message: 'Operation is not permitted by the active profile.' });
+    assert.deepEqual(Object.keys(r.structuredContent).sort(), ['error', 'errorCode', 'hint']); clean(r); noCanaries(r);
   }
 });
 
@@ -110,10 +119,10 @@ test('MR2-02.ELICIT-CODE-OWNED prompt template, empty requestedSchema, no upstre
     await s.client.callTool({ name: 'darktrace_get_status', arguments: {} });
     const args = { body: { did: 1, action: 'quarantine', duration: 60, reason: tokenForms.join(' ') + CORPUS.bidi + CORPUS.unicodeTags } };
     const r = await s.client.callTool({ name: 'darktrace_antigena_manual_action', arguments: { ...args, confirm: true, previewId: await preview(s.client, 'darktrace_antigena_manual_action', args) } });
-    assert.equal(r.structuredContent.executed, false); assert.equal(s.requests.length, 1);
+    assert.equal(r.structuredContent.errorCode, 'approval_denied'); assert.equal(s.requests.length, 1);
     assert.equal(s.prompts.length, 1); const params = s.prompts[0];
     assert.deepEqual(Object.keys(params).sort(), ['message', 'mode', 'requestedSchema']); assert.equal(params.mode, 'form');
-    assert.deepEqual(params.requestedSchema, { type: 'object', properties: {} });
+    assert.deepEqual(params.requestedSchema, { type: 'object', properties: { approved: { type: 'boolean' } }, required: ['approved'] });
     assert.ok(params.message.length <= 2000); clean(params.message.replace(/\n/g, ' ')); noCanaries(params); noCanaries(r);
     for (const form of tokenForms.slice(0, 4)) assert.equal(params.message.includes(form), false);
     assert.equal(params.message.includes('approval granted'), false, 'upstream result text must never reach the approval prompt');
@@ -140,29 +149,34 @@ test('MR2-05.ELICIT-REPLIES only an exact accept executes; odd actions, extra co
     const s = await mcp(CRITICAL, { elicit: async () => { if (reply === 'throw') throw new Error(INSTRUCTION); return reply; } });
     try {
       const r = await s.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId: await preview(s.client, 'darktrace_delete_tag', args) } }).catch(error => ({ thrown: error }));
-      assert.equal(s.requests.length, 0, JSON.stringify(reply)); assert.deepEqual(s.audits, []);
+      assert.equal(s.requests.length, 0, JSON.stringify(reply)); assert.deepEqual(execution(s.audits), []);
       if (!r.thrown) { assert.notEqual(r.structuredContent?.executed, true); noCanaries(r); clean(r); }
     } finally { await s.close(); }
   }
-  const ok = await mcp(CRITICAL, { elicit: async () => ({ action: 'accept', content: { note: INSTRUCTION } }) });
-  try { const r = await ok.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId: await preview(ok.client, 'darktrace_delete_tag', args) } }); assert.equal(r.isError, undefined); assert.equal(ok.requests.length, 1); assert.deepEqual(ok.audits, ['start', 'ok']); } finally { await ok.close(); }
+  // An accept without the code-owned approved:true (here: injected extra content only) is not consent.
+  for (const content of [{ note: INSTRUCTION }, { approved: 'true' }, { approved: false }]) {
+    const odd = await mcp(CRITICAL, { elicit: async () => ({ action: 'accept', content }) });
+    try { const r = await odd.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId: await preview(odd.client, 'darktrace_delete_tag', args) } }); assert.equal(r.structuredContent.errorCode, 'approval_denied'); assert.equal(odd.requests.length, 0); assert.deepEqual(execution(odd.audits), []); } finally { await odd.close(); }
+  }
+  const ok = await mcp(CRITICAL, { elicit: async () => ({ action: 'accept', content: { approved: true } }) });
+  try { const r = await ok.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId: await preview(ok.client, 'darktrace_delete_tag', args) } }); assert.equal(r.isError, undefined); assert.equal(ok.requests.length, 1); assert.deepEqual(ok.audits, ['preview', 'start', 'ok']); } finally { await ok.close(); }
 });
 test('MR2-06.APPROVAL-FATIGUE [AD2-03 KNOWN-FAIL] concurrent critical confirms must not open more dialogs than can execute', async () => {
   let release; const gate = new Promise(r => { release = r; });
-  const s = await mcp(CRITICAL, { elicit: async () => { await gate; return { action: 'accept' }; } });
+  const s = await mcp(CRITICAL, { elicit: async () => { await gate; return { action: 'accept', content: { approved: true } }; } });
   try {
     const pending = [];
     for (let i = 0; i < 12; i++) { const args = { path: { tid: 100 + i } }; pending.push(s.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId: await preview(s.client, 'darktrace_delete_tag', args) } })); }
     await new Promise(r => setTimeout(r, 100));
     const opened = s.prompts.length; release(); const results = await Promise.all(pending);
     assert.ok(s.requests.length <= CRITICAL_WRITES_PER_MINUTE); // the rate limit itself holds
-    const approvedThenRefused = results.filter(r => r.structuredContent.errorCode === 'rate_limited').length;
+    const approvedThenRefused = results.filter(r => ['write_rate_limited', 'critical_rate_limited'].includes(r.structuredContent.errorCode)).length;
     assert.equal(approvedThenRefused, 0, 'human approved actions that were then refused by the rate limit');
     assert.ok(opened <= 1, 'simultaneous approval dialogs: ' + opened);
   } finally { release(); await s.close(); }
 });
 test('MR2-07.PREVIEW-RACE same previewId confirmed concurrently executes at most once; cancelled approval never executes late', async () => {
-  const s = await mcp(CRITICAL, { elicit: async () => ({ action: 'accept' }) });
+  const s = await mcp(CRITICAL, { elicit: async () => ({ action: 'accept', content: { approved: true } }) });
   try {
     const args = { path: { tid: 7 } }, previewId = await preview(s.client, 'darktrace_delete_tag', args);
     const results = await Promise.all(Array.from({ length: 8 }, () => s.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId } })));
@@ -175,18 +189,18 @@ test('MR2-07.PREVIEW-RACE same previewId confirmed concurrently executes at most
     const pending = c.client.callTool({ name: 'darktrace_delete_tag', arguments: { ...args, confirm: true, previewId } }, { signal: abort.signal, timeout: 5000 }).catch(error => ({ aborted: error }));
     while (!c.prompts.length) await new Promise(r => setTimeout(r, 5));
     abort.abort('synthetic user cancel'); assert.ok((await pending).aborted);
-    answer({ action: 'accept' }); await new Promise(r => setTimeout(r, 50));
-    assert.equal(c.requests.length, 0); assert.deepEqual(c.audits, []);
-  } finally { answer({ action: 'accept' }); await c.close(); }
+    answer({ action: 'accept', content: { approved: true } }); await new Promise(r => setTimeout(r, 50));
+    assert.equal(c.requests.length, 0); assert.deepEqual(execution(c.audits), []);
+  } finally { answer({ action: 'accept', content: { approved: true } }); await c.close(); }
 });
 test('MR2-08.UNICODE-BINDING NFC/NFD, homoglyph and confusable variants never satisfy a preview or select a tool/operation', async () => {
   const c = ctx(CRITICAL); c.approve = async () => 'accept';
   const nfc = 'caf\u{E9}', nfd = 'cafe\u{301}';
   const base = { body: { removeall: false, addentry: nfc + '.test' } };
-  const previewId = (await callTool('darktrace_update_intel_feed', base, c)).structuredContent.previewId; assert.match(previewId, /^[a-f0-9]{32}$/);
+  const previewId = (await callTool('darktrace_update_intel_feed', { ...base, dryRun: true }, c)).structuredContent.previewId; assert.match(previewId, /^[a-f0-9]{32}$/);
   const swapped = await callTool('darktrace_update_intel_feed', { body: { ...base.body, addentry: nfd + '.test' }, confirm: true, previewId }, c);
-  assert.equal(swapped.structuredContent.confirmationRequired, true); assert.equal(c.state.calls, 0);
-  for (const name of ['darktrace_get_statu\u{455}', '\u{FF44}arktrace_get_status', 'darktrace_get_status\u{200B}', 'DARKTRACE_GET_STATUS', 'darktrace_get_status '.trim() + '\u0000']) assert.deepEqual((await callTool(name, {}, c)).structuredContent, { error: 'Tool unavailable.' });
+  assert.equal(swapped.structuredContent.errorCode, 'preview_invalid'); assert.equal(c.state.calls, 0);
+  for (const name of ['darktrace_get_statu\u{455}', '\u{FF44}arktrace_get_status', 'darktrace_get_status\u{200B}', 'DARKTRACE_GET_STATUS', 'darktrace_get_status '.trim() + '\u0000']) assert.equal((await callTool(name, {}, c)).structuredContent.errorCode, 'operation_denied');
   for (const operation of ['get_\u{455}tatus', 'get_status\u{200B}', 'GET_STATUS', 'get_tags_tid\u{301}']) assert.equal((await callTool('darktrace_list_tags', { operation }, c)).isError, true);
   assert.equal(c.state.calls, 0);
 });
@@ -194,7 +208,7 @@ test('MR2-08.UNICODE-BINDING NFC/NFD, homoglyph and confusable variants never sa
 // ---------------------------------------------------------------- MR2-09..10 tools/list integrity (rug pull, line jumping, shadowing, annotations)
 test('MR2-09.LIST-STABILITY per profile tools/list is byte-stable across calls, errors and executed writes; no list_changed, no extra capabilities', async () => {
   for (const [name, profile] of Object.entries(profiles)) {
-    const s = await mcp(cfg({ profiles: profile }), { elicit: async () => ({ action: 'accept' }) });
+    const s = await mcp(cfg({ profiles: profile }), { elicit: async () => ({ action: 'accept', content: { approved: true } }) });
     try {
       assert.deepEqual(s.client.getServerCapabilities(), { tools: { listChanged: false } });
       assert.deepEqual(s.client.getServerVersion(), { name: 'darktrace-mcp', version: VERSION });
@@ -348,30 +362,30 @@ test('MR2-13.RESULT-CAPS 10k arrays, 5k keys, 1 MiB strings and 100k-deep nestin
 });
 test('MR2-13.PREVIEW-FLOOD flooding previews evicts old handles fail-closed and never executes; preview map stays bounded', async () => {
   const c = ctx(CRITICAL); c.approve = async () => 'accept';
-  const first = (await callTool('darktrace_delete_tag', { path: { tid: 1 } }, c)).structuredContent.previewId;
-  for (let i = 0; i < 400; i++) await callTool('darktrace_delete_tag', { path: { tid: 1000 + i } }, c);
+  const first = (await callTool('darktrace_delete_tag', { path: { tid: 1 }, dryRun: true }, c)).structuredContent.previewId;
+  for (let i = 0; i < 400; i++) await callTool('darktrace_delete_tag', { path: { tid: 1000 + i }, dryRun: true }, c);
   const stale = await callTool('darktrace_delete_tag', { path: { tid: 1 }, confirm: true, previewId: first }, c);
-  assert.equal(stale.structuredContent.confirmationRequired, true); assert.equal(c.state.calls, 0);
+  assert.equal(stale.structuredContent.errorCode, 'preview_invalid'); assert.equal(c.state.calls, 0);
 });
 
 // ---------------------------------------------------------------- MR2-14 secrets across every sink (results, errors, elicitation, audit, stdio)
 test('MR2-14.SECRETS-ALL-SINKS token literals/encodings in upstream values+keys, args and errors never reach stdout frames, prompts or audit lines', async t => {
   const auditLines = [], audit = createAudit([PUBLIC, PRIVATE], line => { auditLines.push(line); });
   const hostile = { version: tokenForms.join('|'), [PRIVATE]: PUBLIC, nested: [{ [Buffer.from(PRIVATE).toString('base64')]: encodeURIComponent(PUBLIC) }] };
-  const s = rawSession(t, { config: CRITICAL, upstream: request => request.operationId === 'get_status' ? { json: hostile } : { json: hostile }, elicit: async () => ({ action: 'accept' }) });
+  const s = rawSession(t, { config: CRITICAL, upstream: request => request.operationId === 'get_status' ? { json: hostile } : { json: hostile }, elicit: async () => ({ action: 'accept', content: { approved: true } }) });
   await s.ready({ elicitation: { form: {} } });
   await s.request(call(2, 'darktrace_get_status'));
   const args = { body: { did: 1, action: 'quarantine', duration: 60, reason: tokenForms.slice(0, 4).join(' ') } };
-  const p = await s.request(call(3, 'darktrace_antigena_manual_action', args));
+  const p = await s.request(call(3, 'darktrace_antigena_manual_action', { ...args, dryRun: true }));
   const done = await s.request(call(4, 'darktrace_antigena_manual_action', { ...args, confirm: true, previewId: p.result.structuredContent.previewId }));
   assert.equal(done.result.isError, undefined); assert.equal(s.elicitations.length, 1);
   noCanaries(s.frames); noCanaries(s.elicitations);
   for (const form of tokenForms.slice(0, 4)) assert.equal(JSON.stringify(s.frames).includes(form), false);
   const c = { ...ctx(CRITICAL, () => { throw new Error(PRIVATE); }), audit }; c.approve = async () => 'accept';
-  const id = (await callTool('darktrace_delete_tag', { path: { tid: 2 } }, c)).structuredContent.previewId;
+  const id = (await callTool('darktrace_delete_tag', { path: { tid: 2 }, dryRun: true }, c)).structuredContent.previewId;
   noCanaries(await callTool('darktrace_delete_tag', { path: { tid: 2 }, confirm: true, previewId: id }, c));
   assert.ok(auditLines.length >= 2); noCanaries(auditLines.join('')); assert.equal(verifyAuditChain(auditLines.map(l => JSON.parse(l))), -1);
-  for (const line of auditLines) assert.deepEqual(Object.keys(JSON.parse(line)).sort(), ['audit', 'hash', 'operationId', 'outcome', 'prevHash', 'requestId', 'seq', 'ts']);
+  for (const line of auditLines) assert.deepEqual(Object.keys(JSON.parse(line)).sort(), ['approvalMode', 'argsHash', 'audit', 'hash', 'operationId', 'outcome', 'prevHash', 'requestId', 'seq', 'ts']);
 });
 
 // ---------------------------------------------------------------- MR2-15 neutralizer coverage of invisible format characters

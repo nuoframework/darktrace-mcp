@@ -36,7 +36,8 @@ test('lowered argument depth/elements are enforced before SDK and direct tool di
 test('audit exact allowlist generates a correlation ID and awaits sink failure',async()=>{
   const records:any[]=[];const audit=createAudit([],line=>{records.push(JSON.parse(line));});
   await audit.record('get_status','error');await audit.record('get_status','ok','correlation_123');
-  assert.deepEqual(Object.keys(records[0]).sort(),['audit','ts','requestId','operationId','outcome','seq','prevHash','hash'].sort());
+  assert.deepEqual(Object.keys(records[0]).sort(),['audit','ts','requestId','operationId','outcome','argsHash','approvalMode','seq','prevHash','hash'].sort());
+  assert.equal(records[0].argsHash,null);assert.equal(records[0].approvalMode,'none');
   assert.deepEqual(records.map(r=>r.seq),[1,2]);assert.equal(records[0].prevHash,'0'.repeat(64));assert.equal(records[1].prevHash,records[0].hash);
   assert.equal(verifyAuditChain(records),-1);
   const tampered=records.map(r=>({...r}));tampered[0].outcome='ok';assert.equal(verifyAuditChain(tampered),0);
@@ -47,11 +48,13 @@ test('audit exact allowlist generates a correlation ID and awaits sink failure',
   await assert.rejects(audit.record('get_status','ok',''));
 });
 test('write denial without the write profile occurs before every audit sink and client; forged critical-without-write stays denied',async()=>{
+ // A denial records only its own `error` audit (plan contract); never a preview or execution record.
  let requests=0,audits=0;const client={async request(){requests++;return {};}};
+ const count=(outcome:string)=>{if(outcome!=='error')audits++;};
  for(const profiles of [cfg.profiles,{...cfg.profiles,writeCritical:true},{...cfg.profiles,sensitiveRead:true}]) for(const dryRun of [undefined,true,false]){
-  const result=await callTool('darktrace_update_device',{body:{did:1,label:'test'},...(dryRun===undefined?{}:{dryRun})},{cfg:{...cfg,profiles},client,audit:{async record(){audits++;throw new Error('fail');}}});
-  assert.equal(result.isError,true);assert.equal(result.structuredContent?.outcome,undefined);assert.equal(result.structuredContent?.dryRun,undefined);
-  const critical=await callTool('darktrace_update_subnet',{body:{sid:1,label:'x'},confirm:true},{cfg:{...cfg,profiles},client,audit:{async record(){audits++;}}});
+  const result=await callTool('darktrace_update_device',{body:{did:1,label:'test'},...(dryRun===undefined?{}:{dryRun})},{cfg:{...cfg,profiles},client,audit:{async record(_id:string,outcome:string){count(outcome);throw new Error('fail');}}});
+  assert.equal(result.isError,true);assert.equal((result.structuredContent as any)?.errorCode,'operation_denied');assert.equal(result.structuredContent?.outcome,undefined);assert.equal(result.structuredContent?.dryRun,undefined);
+  const critical=await callTool('darktrace_update_subnet',{body:{sid:1,label:'x'},confirm:true},{cfg:{...cfg,profiles},client,audit:{async record(_id:string,outcome:string){count(outcome);}}});
   assert.equal(critical.isError,true);
  }
  assert.equal(requests,0);assert.equal(audits,0);
