@@ -2,6 +2,8 @@
 
 Record of documentation changes that the release reviewers check against the code. Owner: documentation.
 
+> Publication update (2026-10-06): 1.1.0 is published on npm, ghcr and GitHub Release; the 1.1.1 release is in progress. See [current release status](releases.md#release-status-2026-10-06). The tables below preserve the wording at their original review checkpoints, including superseded pre-publication labels.
+
 ## 1. Final gate blockers B4 and B6 (2026-10-06)
 
 Source: [1.1.0 final gate review](security/final-gate-review-1.1.0.md) §2, §3.1 and §4. Documentation only: no `src/`, test, workflow, `manifest.json` or `server.json` change, and nothing was re-tested. The `--help` text in `src/index.ts:16-17` still mentions email actions and the old preview contract; changing it is a `src/` edit that reopens B1/B2, so it is left to the core owner.

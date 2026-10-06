@@ -6,7 +6,22 @@ MCP no oficial. Desarrollado por un tercero ajeno a Darktrace, sin afiliación n
 
 Logo use does not imply authorization or official status. Complaints, trademark or branding claims: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com).
 
-## References inspected
+## Selected hero: variant B (2026-10-06)
+
+On **2026-10-06**, the owner selected **B — Network / Red** from the [banner alternatives](assets/banner-variants/README.md). The light title panel preserves the current editorial hierarchy while the subtle Blurple node-link pattern and radar rings suggest investigation. The graph is original decorative artwork, not an appliance topology or the official Trace. This replaces the previous flowing Trace illustration; it adds no endorsement or compatibility claim.
+
+- Desktop: [English](assets/banner-variants/b/readme-banner-en.svg) and [Spanish](assets/banner-variants/b/readme-banner-es.svg), **1280 × 600**.
+- Mobile: [English](assets/banner-variants/b/readme-banner-en-mobile.svg) and [Spanish](assets/banner-variants/b/readme-banner-es-mobile.svg), **640 × 900**; the existing `max-width: 600px` picture breakpoint is unchanged.
+- [Mobile PNG at 600 px](assets/banner-variants/preview/b-en-mobile.png), rendered for this revision. The 343 px renders were also inspected for readable title, body copy and independence captions.
+- The original four [desktop](assets/readme-banner-en.svg) / [mobile](assets/readme-banner-en-mobile.svg) banners remain unchanged, with their [Spanish desktop](assets/readme-banner-es.svg) / [Spanish mobile](assets/readme-banner-es-mobile.svg) equivalents, indexed as **0 — previous hero**.
+
+The white official wordmark path elements remain byte-for-byte identical to `Darktrace-white.svg`, uniformly scaled by `0.48` to 288 canvas units on a solid DT Dark footer. One D width is 30.24 units; that clear space is preserved on every side. The mark renders at 135 px at the 601 px desktop breakpoint, 154 px at a 343 px mobile width, and 270 px at 600 px mobile width, above the 127 px minimum. The project title remains separate from the wordmark, and the independence caption stays directly above it.
+
+The palette remains DT Dark (`#030D11`), white, DT Orange (`#FF6B00`), DT M Gray (`#B6B6B6`) and Blurple (`#4B00D7`). The graph introduces no new brand colors. Typography retains the system stacks, regular weight and tight headline/body tracking described below. SVGs have no external fonts or image references. The selected SVGs are under 35 KB each; the PNG previews are palette-optimized derivatives. Full unofficial-status alt text, the notice below each README title, and the trademark/contact sections are unchanged.
+
+The following reference comparisons document the **previous hero** and its original brand review. They remain as historical design evidence, rather than describing the newly selected graph artwork.
+
+## References inspected for the previous hero
 
 Public Brand Hub pages were fetched live on 2026-10-05 and the **actual linked reference images were viewed**, not only their text or color values. Official reference artwork was downloaded to a temporary review directory and is not redistributed; the only official files kept in the repository are the two unmodified logo files documented in [docs/assets/brand/darktrace/README.md](assets/brand/darktrace/README.md).
 
@@ -18,7 +33,7 @@ Public Brand Hub pages were fetched live on 2026-10-05 and the **actual linked r
 | [Trace](https://brandhub.darktrace.com/visual-identity/trace) | [Gestural applications](https://cdn.prod.website-files.com/62e3de3c93a3f82e39b780db/669115e65fccc42668a9f9dc_trace_gestural.jpg) and [learning context](https://cdn.prod.website-files.com/62e3de3c93a3f82e39b780db/669115e504fb327130875614_trace_context-1.jpg) | Unchanged original 17-path fan with glow and square endpoint pixels; decorative only. |
 | [Illustrations](https://brandhub.darktrace.com/visual-identity/illustrations) | [Three gestural compositions](https://cdn.prod.website-files.com/62e3de3c93a3f82e39b780db/6697e3ea40fe5643dd60a4a0_illustrations_gestural.jpg) (viewed in the previous pass) | Unchanged. |
 
-## Comparison against the official examples and changes made
+## Previous hero: comparison against the official examples
 
 | Aspect | Previous cover (commit `5b535e4`) | Official reference | Change and concrete reason |
 |---|---|---|---|
@@ -32,7 +47,7 @@ Public Brand Hub pages were fetched live on 2026-10-05 and the **actual linked r
 
 The exact full notices remain native Markdown immediately below the cover and project heading in both languages, so they do not depend on the image.
 
-## Composition and checks
+## Previous hero: composition and checks
 
 Desktop cover 1280 × 600; mobile cover 640 × 900 (taller than before to hold the caption and logo with full clear space). The SVGs contain only local content: original artwork, text with system font stacks, and the official logo `path` elements copied byte-for-byte from `Darktrace-white.svg` under a uniform `scale(0.453333)`. No scripts, external references or embedded fonts. XML validity was checked with `xmllint`.
 

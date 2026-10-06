@@ -1,0 +1,2506 @@
+[
+  {
+    "method": "DELETE",
+    "path": "/tags/entities"
+  },
+  {
+    "method": "DELETE",
+    "path": "/tags/{tid}"
+  },
+  {
+    "method": "DELETE",
+    "path": "/tags/{tid}/entities/{teid}"
+  },
+  {
+    "method": "GET",
+    "path": "/advancedsearch/api/analyze/{field}/{analysis}/{query}",
+    "fixture": {
+      "took": 406,
+      "timed_out": false,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": 20573,
+        "max_score": 0,
+        "hits": [
+          "mock-value"
+        ]
+      },
+      "aggregations": {
+        "stats": {
+          "count": 10355,
+          "min": 0,
+          "max": 14651,
+          "avg": 310.263351,
+          "sum": 3212777
+        }
+      },
+      "darktraceChildError": "FactoryProbe_1",
+      "kibana": {
+        "index": "logstash-darktrace-2020.03.02",
+        "per_page": 50,
+        "time": {
+          "from": "2020-03-02T00:00:00.000Z",
+          "to": "2020-03-02T23:59:59.000Z"
+        }
+      }
+    },
+    "schema": "AdvancedsearchApiAnalyzeMean"
+  },
+  {
+    "method": "GET",
+    "path": "/advancedsearch/api/graph/{graphmode}/{interval}/{query}",
+    "fixture": {
+      "took": 8,
+      "timed_out": false,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": 20573,
+        "max_score": 0,
+        "hits": [
+          "mock-value"
+        ]
+      },
+      "aggregations": {
+        "mean": {
+          "buckets": [
+            {
+              "key_as_string": "2020-03-02T00:00:00.000Z",
+              "key": 1586937600000,
+              "doc_count": 131,
+              "mean_stats": {
+                "count": 131,
+                "min": 0,
+                "max": 2448,
+                "avg": 219.6946565,
+                "sum": 28780
+              }
+            }
+          ]
+        }
+      },
+      "darktraceChildError": "FactoryProbe_1",
+      "kibana": {
+        "index": [
+          "mock-value"
+        ],
+        "per_page": 50
+      }
+    },
+    "schema": "AdvancedsearchApiGraphGraphMean"
+  },
+  {
+    "method": "GET",
+    "path": "/advancedsearch/api/search/{query}",
+    "fixture": {
+      "took": 22,
+      "timed_out": false,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": 13123,
+        "max_score": "mock-value",
+        "hits": [
+          {
+            "_index": "logstash-dt-01-2020.03.23",
+            "_type": "doc",
+            "_id": "K18S2Iqiu7Wz1jaN",
+            "_score": "mock-value",
+            "_source": {
+              "@fields": {},
+              "@type": "conn",
+              "@timestamp": "2020-03-23T11:59:09",
+              "@message": "1584964749.0817  CT6zqD1olMlncAp00  104.20.203.23  54250  172.217.169.36443  tcp  -  2\\  64  Midstream traffic  OTH  true  0  0  1584964749.0817  0  104  A  true  0"
+            },
+            "sort": [
+              "mock-value"
+            ]
+          }
+        ]
+      },
+      "darktraceChildError": "Factory Probe 1",
+      "kibana": {
+        "index": [
+          "mock-value"
+        ],
+        "per_page": 50,
+        "time": {
+          "from": "2020-03-23T00:09:24.980Z",
+          "to": "2020-03-23T12:09:24.980Z"
+        },
+        "default_fields": [
+          "mock-value"
+        ]
+      }
+    },
+    "schema": "AdvancedsearchApiSearch"
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/admin/decode_link",
+    "fixture": {
+      "url": "https://example.test/invoice",
+      "decoded": true
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/dash/action_summary",
+    "fixture": {
+      "total": 120,
+      "anomalous": 4,
+      "held": 3,
+      "blocked": 1,
+      "data": [
+        {
+          "time": 1791280800000,
+          "count": 4
+        }
+      ],
+      "users": [
+        {
+          "email": "analyst@example.test",
+          "score": 87
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/dash/dash_stats",
+    "fixture": {
+      "total": 120,
+      "anomalous": 4,
+      "held": 3,
+      "blocked": 1,
+      "data": [
+        {
+          "time": 1791280800000,
+          "count": 4
+        }
+      ],
+      "users": [
+        {
+          "email": "analyst@example.test",
+          "score": 87
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/dash/data_loss",
+    "fixture": {
+      "total": 120,
+      "anomalous": 4,
+      "held": 3,
+      "blocked": 1,
+      "data": [
+        {
+          "time": 1791280800000,
+          "count": 4
+        }
+      ],
+      "users": [
+        {
+          "email": "analyst@example.test",
+          "score": 87
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/dash/user_anomaly",
+    "fixture": {
+      "total": 120,
+      "anomalous": 4,
+      "held": 3,
+      "blocked": 1,
+      "data": [
+        {
+          "time": 1791280800000,
+          "count": 4
+        }
+      ],
+      "users": [
+        {
+          "email": "analyst@example.test",
+          "score": 87
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/emails/{uuid}",
+    "fixture": {
+      "uuid": "mock-email-001",
+      "subject": "Suspicious invoice attachment",
+      "sender": "sender@example.test",
+      "recipients": [
+        "analyst@example.test"
+      ],
+      "timestamp": 1791280800000,
+      "score": 87,
+      "action": "hold",
+      "status": "quarantined"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/emails/{uuid}/download",
+    "fixture": {
+      "uuid": "mock-email-001",
+      "subject": "Suspicious invoice attachment",
+      "sender": "sender@example.test",
+      "recipients": [
+        "analyst@example.test"
+      ],
+      "timestamp": 1791280800000,
+      "score": 87,
+      "action": "hold",
+      "status": "quarantined",
+      "content": "From: sender@example.test\r\nSubject: Suspicious invoice attachment\r\n\r\nSynthetic test email."
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/resources/actions",
+    "fixture": [
+      {
+        "id": 1,
+        "name": "hold",
+        "description": "Hold message for review"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/resources/filters",
+    "fixture": [
+      {
+        "id": 1,
+        "name": "Suspicious",
+        "query": "score > 70"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/resources/tags",
+    "fixture": [
+      {
+        "id": 1,
+        "name": "Phishing"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/system/audit/events",
+    "fixture": {
+      "events": [
+        {
+          "id": 1,
+          "time": 1791280800000,
+          "type": "email_held",
+          "uuid": "mock-email-001"
+        }
+      ],
+      "total": 1
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/agemail/api/ep/api/v1.0/system/audit/eventTypes",
+    "fixture": [
+      {
+        "id": 1,
+        "name": "email_held"
+      }
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/groups",
+    "fixture": [
+      {
+        "id": "g04a3f36e-4u8w-v9dh-x6lb-894778cf9633",
+        "active": true,
+        "acknowledged": false,
+        "pinned": false,
+        "userTriggered": false,
+        "externalTriggered": false,
+        "previousIds": [
+          "mock-value"
+        ],
+        "incidentEvents": [
+          {
+            "uuid": "04a3f36e-4u8w-v9dh-x6lb-894778cf9633",
+            "start": 1702392635000,
+            "title": "Unusual Internal Upload",
+            "triggerDid": 1044,
+            "sender": "example@example.com",
+            "visible": true,
+            "acknowledged": true
+          }
+        ],
+        "mitreTactics": [
+          "mock-value"
+        ],
+        "devices": [
+          "mock-value"
+        ],
+        "initialDevices": [
+          "mock-value"
+        ],
+        "category": "critical",
+        "groupScore": 99.93292997,
+        "start": 1702392635000,
+        "end": 1702392719930,
+        "edges": [
+          {
+            "isAction": false,
+            "source": {
+              "nodeType": "device",
+              "value": 1044
+            },
+            "target": {
+              "nodeType": "internalIp",
+              "value": "10.1.1.2"
+            },
+            "start": 1,
+            "incidentEvent": "04a3f36e-4u8w-v9dh-x6lb-894778cf9633",
+            "description": "Internal Upload",
+            "details": [
+              "mock-value"
+            ]
+          }
+        ]
+      }
+    ],
+    "schema": "AianalystGroups"
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/incident/comments",
+    "fixture": {
+      "comments": [
+        {
+          "username": "ecarr",
+          "time": 1595501000000,
+          "incident_id": "7d0c1dec-593e-4559-8a71-49847c3e53f5",
+          "message": "Concerning behavior. Investigating possible compromise."
+        }
+      ]
+    },
+    "schema": "AianalystIncidentComments"
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/incidentevents",
+    "fixture": [
+      {
+        "summariser": "AdminConnSummary",
+        "mitreTactics": [
+          "mock-value"
+        ],
+        "acknowledged": false,
+        "pinned": true,
+        "createdAt": 1702392635000,
+        "attackPhases": [
+          "mock-value"
+        ],
+        "title": "Extensive Unusual SSH Connections",
+        "id": "04a3f36e-4u8w-v9dh-x6lb-894778cf9633",
+        "children": [
+          "mock-value"
+        ],
+        "category": "critical",
+        "currentGroup": "g04a3f36e-4u8w-v9dh-x6lb-894778cf9633",
+        "groupCategory": "critical",
+        "groupScore": 72.9174234,
+        "groupPreviousGroups": "mock-value",
+        "activityId": "da39a3ee",
+        "groupingIds": [
+          "mock-value"
+        ],
+        "groupByActivity": false,
+        "userTriggered": false,
+        "externalTriggered": false,
+        "aiaScore": 98,
+        "summary": "The device 10.1.2.3 was observed making unusual internal SSH connections to a wide range of devices...",
+        "periods": [
+          {
+            "start": 1702392635000,
+            "end": 1702392719930
+          }
+        ],
+        "sender": "example@example.com",
+        "breachDevices": [
+          {
+            "identifier": "ws192.holdingsinc.com",
+            "hostname": "ws192.holdingsinc.com",
+            "ip": "10.1.2.3",
+            "mac": "mock-value",
+            "subnet": "VPN",
+            "did": 10,
+            "sid": 12
+          }
+        ],
+        "relatedBreaches": [
+          {
+            "modelName": "Unusual Activity / Unusual Activity from Re-Activated Device",
+            "pbid": 1234,
+            "threatScore": 37,
+            "timestamp": 1628002089240
+          }
+        ],
+        "details": [
+          {
+            "header": "First Hop",
+            "contents": [
+              {
+                "key": "mock-value",
+                "type": "Source device",
+                "values": [
+                  "mock-value"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "schema": "AianalystIncidentevents"
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/incidents",
+    "fixture": [
+      {
+        "aiaScore": 100,
+        "children": [
+          "mock-value"
+        ],
+        "createdAt": 1646389417644,
+        "category": "suspicious",
+        "currentGroup": "gc0ec5c71-b4fb-429b-82a7-4d6a73cbcaed",
+        "summary": "A chain of administrative connections were observed between multiple devices, which occurred around the same time, and included workstation-local-82.",
+        "id": "c0ec5c71-b4fb-429b-82a7-4d6a73cbcaed",
+        "pinned": true,
+        "acknowledged": false,
+        "details": [
+          {
+            "header": "First Hop",
+            "contents": [
+              {
+                "type": "device",
+                "key": "Source device",
+                "values": [
+                  "mock-value"
+                ]
+              }
+            ]
+          }
+        ],
+        "summariser": "LateralMovementCrawler",
+        "relatedBreaches": [
+          {
+            "timestamp": 1579710173000,
+            "threatScore": 19,
+            "pbid": 252317,
+            "modelName": "Anomalous Connection / Active SSH Tunnel"
+          }
+        ],
+        "sender": "example@example.com",
+        "breachDevices": [
+          {
+            "sid": 10,
+            "mac": "93:gb:28:g1:fc:g1",
+            "ip": "10.15.3.39",
+            "identifier": "workstation-local-82",
+            "did": 561,
+            "hostname": "workstation-local-82",
+            "subnet": "Finance Subnet"
+          }
+        ],
+        "periods": [
+          {
+            "start": 1579708374972,
+            "end": 1579711920166
+          }
+        ],
+        "attackPhases": [
+          "mock-value"
+        ],
+        "mitreTactics": [
+          "mock-value"
+        ],
+        "groupingIds": [
+          "mock-value"
+        ],
+        "activityId": "ae463dc8",
+        "groupByActivity": false,
+        "title": "Suspicious Chain of Administrative Connections",
+        "groupCategory": "suspicious",
+        "groupPreviousGroups": [
+          "mock-value"
+        ],
+        "groupScore": 27.72702944,
+        "userTriggered": false,
+        "externalTriggered": false
+      }
+    ],
+    "schema": "AianalystIncidentsSingleEvent"
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/investigations",
+    "fixture": [
+      {
+        "investigationId": "52c75821-7c17-4a69-b07f-1c74789a9452",
+        "time": 1702310487,
+        "investigationTime": 1701864000,
+        "did": 12345,
+        "version": 2,
+        "status": "finished",
+        "createdBy": "i_west",
+        "noticeUid": "NvUIJpg9MfXywYtc",
+        "pbid": 9182907,
+        "incidentId": "af763617-2626-4e4c-84fc-e03d5cd8e6c8",
+        "summarizer": "SaasHijackSummary",
+        "incidents": [
+          {
+            "uuid": "af763617-2626-4e4c-84fc-e03d5cd8e6c8",
+            "related": [
+              "mock-value"
+            ],
+            "summariser": "SaasHijackSummary"
+          }
+        ]
+      }
+    ],
+    "schema": "AianalystInvestigations"
+  },
+  {
+    "method": "GET",
+    "path": "/aianalyst/stats",
+    "fixture": {
+      "equivalentHumanTime": 9684480000,
+      "positiveInvestigations": 191,
+      "negativeInvestigations": 2583,
+      "graphData": {
+        "breachTime": [
+          "mock-value"
+        ],
+        "endTime": [
+          "mock-value"
+        ],
+        "equivalentHumanTime": [
+          "mock-value"
+        ],
+        "isPositive": [
+          "mock-value"
+        ],
+        "aiaScore": [
+          "mock-value"
+        ]
+      },
+      "attackPhases": [
+        {
+          "phases": [
+            "mock-value"
+          ],
+          "count": 124
+        }
+      ],
+      "groupStats": {
+        "total": 120,
+        "compliance": 2,
+        "suspicious": 70,
+        "critical": 48,
+        "mitreTactics": {
+          "total": {
+            "discovery": 5
+          },
+          "compliance": {
+            "discovery": 2
+          },
+          "suspicious": {
+            "discovery": 5
+          },
+          "critical": {
+            "exfiltration": 45
+          }
+        }
+      },
+      "metadata": {
+        "estimatedQueries": 0,
+        "estimatedQueryMs": 0,
+        "ratioEstimated": 0
+      }
+    },
+    "schema": "AianalystStats"
+  },
+  {
+    "method": "GET",
+    "path": "/antigena",
+    "fixture": [
+      {
+        "codeid": 4894,
+        "did": 532,
+        "ip": "10.0.18.224",
+        "action": "quarantine",
+        "manual": false,
+        "triggerer": {
+          "username": "b.ash",
+          "reason": "mock-value"
+        },
+        "label": "Quarantine device",
+        "detail": "mock-value",
+        "score": 0.3,
+        "pbid": 449854,
+        "model": "Anomalous File::Masqueraded File Transfer",
+        "modeluuid": "ee88d329-6cdd-8dd3-5baa-2e323g3fa833",
+        "start": 1586190000000,
+        "expires": 1586190000000,
+        "blocked": false,
+        "updated": "1585910000000",
+        "agemail": false,
+        "aghost": false,
+        "active": false,
+        "cleared": false
+      }
+    ],
+    "schema": "AntigenaFulldevicedetailsFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/antigena/summary",
+    "fixture": {
+      "pendingCount": 4,
+      "activeCount": 3,
+      "pendingActionDevices": [
+        "mock-value"
+      ],
+      "activeActionDevices": [
+        "mock-value"
+      ]
+    },
+    "schema": "AntigenaSummary"
+  },
+  {
+    "method": "GET",
+    "path": "/components",
+    "fixture": [
+      {
+        "cid": 4650,
+        "chid": 6664,
+        "mlid": 232,
+        "threshold": 1,
+        "interval": 7200,
+        "logic": {
+          "data": {
+            "left": {},
+            "operator": "OR",
+            "right": {}
+          },
+          "version": "v0.1"
+        },
+        "filters": [
+          {
+            "id": "A",
+            "cfid": 34019,
+            "cfhid": 46783,
+            "filtertype": "Message",
+            "comparator": "matches regular expression",
+            "arguments": {
+              "value": "(Anomalous"
+            }
+          }
+        ],
+        "active": true
+      }
+    ],
+    "schema": "Components"
+  },
+  {
+    "method": "GET",
+    "path": "/components/{cid}",
+    "fixture": {
+      "cid": 4650,
+      "chid": 6664,
+      "mlid": 232,
+      "threshold": 1,
+      "interval": 7200,
+      "logic": {
+        "data": {
+          "left": {},
+          "operator": "OR",
+          "right": {}
+        },
+        "version": "v0.1"
+      },
+      "filters": [
+        {
+          "id": "A",
+          "cfid": 34019,
+          "cfhid": 46783,
+          "filtertype": "Message",
+          "comparator": "matches regular expression",
+          "arguments": {
+            "value": "(Anomalous"
+          }
+        }
+      ],
+      "active": true
+    },
+    "schema": "Components"
+  },
+  {
+    "method": "GET",
+    "path": "/cves",
+    "fixture": {
+      "results": [
+        {
+          "did": 186,
+          "platform mappings (CPEs)": [
+            {
+              "vendor": "rockwellautomation",
+              "product": "compactlogix_1769-l16er-bb1b",
+              "version": "All",
+              "patch": "To mitigate, update to a version greater than 2.2",
+              "cves": [
+                {
+                  "LAST_MODIFIED_DATE": "09/10/2019",
+                  "CVE_ID": "CVE-2016-2279",
+                  "BASE_SEVERITY": "Medium",
+                  "DESCRIPTION": "Cross-site scripting (XSS) vulnerability in the web server in Rockwell Automation Allen-Bradley CompactLogix 1769-L* before 28.011+ allows remote attackers to inject arbitrary web script or HTML via unspecified vectors."
+                }
+              ],
+              "applies to": [
+                "mock-value"
+              ]
+            }
+          ],
+          "cves": [
+            {
+              "LAST_MODIFIED_DATE": "2019-10-09",
+              "CVE_ID": "CVE-2016-2279",
+              "BASE_SEVERITY": "Medium",
+              "DESCRIPTION": "Cross-site scripting (XSS) vulnerability in the web server in Rockwell Automation Allen-Bradley CompactLogix 1769-L* before 28.011+ allows remote attackers to inject arbitrary web script or HTML via unspecified vectors."
+            }
+          ]
+        }
+      ]
+    },
+    "schema": "Cves"
+  },
+  {
+    "method": "GET",
+    "path": "/details",
+    "fixture": [
+      {
+        "time": "2020-04-15 08:00:00",
+        "timems": 1586937600000,
+        "action": "connection",
+        "eventType": "connection",
+        "uid": "VGBIDXXfTVFPww1d",
+        "status": "ongoing",
+        "proxyPort": 3128,
+        "sdid": 29,
+        "ddid": 3765,
+        "port": 443,
+        "sourcePort": 22,
+        "destinationPort": 443,
+        "direction": "out",
+        "applicationprotocol": "HTTPS",
+        "protocol": "TCP",
+        "sourceDevice": {},
+        "destinationDevice": {},
+        "proxyDevice": {
+          "ip": "10.0.18.224"
+        },
+        "source": "ws173",
+        "destination": "google.com",
+        "proxy": "192.168.72.4"
+      }
+    ],
+    "schema": "DetailsEventtypeConnection"
+  },
+  {
+    "method": "GET",
+    "path": "/deviceinfo",
+    "fixture": {
+      "deviceInfo": [
+        {
+          "did": 225,
+          "similarityScore": 100,
+          "graphData": [
+            {
+              "time": 1580000000000,
+              "count": 355
+            }
+          ],
+          "info": {
+            "totalUsed": 374112,
+            "totalServed": 45,
+            "totalDevicesAndPorts": 374157,
+            "devicesAndPorts": [
+              {
+                "deviceAndPort": {
+                  "direction": "out",
+                  "device": -6,
+                  "port": 443
+                },
+                "size": 27
+              }
+            ],
+            "portsUsed": [
+              {
+                "port": 443,
+                "size": 44,
+                "firstTime": 1530000000000
+              }
+            ],
+            "portsServed": [
+              {
+                "port": 22,
+                "size": 53,
+                "firstTime": 1530000000000
+              }
+            ],
+            "devicesUsed": [
+              {
+                "did": -6,
+                "size": 72,
+                "firstTime": 1530000000000
+              }
+            ],
+            "devicesServed": [
+              {
+                "did": 354,
+                "size": 53
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "schema": "DeviceinfoFulldevicedetailsFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/devices",
+    "fixture": [
+      {
+        "id": 227,
+        "macaddress": "56:2d:4b:9c:18:42",
+        "vendor": "Apple",
+        "ip": "10.0.18.224",
+        "ips": [
+          {
+            "ip": "10.0.18.224",
+            "timems": 1586937881000,
+            "time": "2020-04-15 08:04:41",
+            "sid": 10
+          }
+        ],
+        "did": 230,
+        "sid": 10,
+        "hostname": "sarah-desktop-12",
+        "quarantine": 1528810000000,
+        "time": 1528810000000,
+        "endtime": 1585310000000,
+        "os": "Linux 3.11 and newer",
+        "devicelabel": "Sarah Development",
+        "typename": "desktop",
+        "typelabel": "Desktop",
+        "customFields": {
+          "DT-MANUAL": {
+            "notes": "Test Note"
+          }
+        }
+      }
+    ],
+    "schema": "DevicesNetworkDevice"
+  },
+  {
+    "method": "GET",
+    "path": "/devicesearch",
+    "fixture": [
+      {
+        "totalCount": 2191,
+        "devices": [
+          {
+            "did": 227,
+            "macaddress": "56:2d:4b:9c:18:42",
+            "vendor": "Apple",
+            "ip": "10.0.18.224",
+            "ips": [
+              {
+                "ip": "10.0.18.224",
+                "timems": 1586937881000,
+                "time": "2020-04-15 08:04:41",
+                "sid": 10
+              }
+            ],
+            "sid": 10,
+            "hostname": "sarah-desktop-12",
+            "firstSeen": 1528810000000,
+            "lastSeen": 1585310000000,
+            "os": "Linux 3.11 and newer",
+            "devicelabel": "Sarah Development",
+            "typename": "desktop",
+            "typelabel": "Desktop",
+            "tags": [
+              {
+                "tid": 73,
+                "expiry": 0,
+                "thid": 78,
+                "name": "Test Tag",
+                "restricted": false,
+                "data": {
+                  "auto": false,
+                  "color": 134,
+                  "description": "Testing the use of tags.",
+                  "visibility": "Public"
+                },
+                "isReferenced": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "schema": "DevicesearchNetworkDevice"
+  },
+  {
+    "method": "GET",
+    "path": "/devicesummary",
+    "fixture": {
+      "data": {
+        "devices": {},
+        "similardevices": {},
+        "details": {},
+        "deviceinfo": {},
+        "modelbreaches": {}
+      }
+    },
+    "schema": "Devicesummary"
+  },
+  {
+    "method": "GET",
+    "path": "/endpointdetails",
+    "fixture": {
+      "ip": "8.8.8.8",
+      "firsttime": 1528810000000,
+      "country": "United States",
+      "asn": "AS15169 Google LLC",
+      "city": "mock-value",
+      "region": "North America",
+      "name": "mock-value",
+      "longitude": -97.822,
+      "latitude": 37.751
+    },
+    "schema": "EndpointdetailsIpExternalIPDevicesFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/enums",
+    "fixture": {
+      "Country": [
+        {
+          "code": "AD",
+          "name": "Andorra"
+        }
+      ],
+      "Matching metrics": [
+        {
+          "code": "activeconnections",
+          "name": "Active Connections"
+        }
+      ],
+      "DNS response code": [
+        {
+          "code": "NOERROR",
+          "name": "NOERROR"
+        }
+      ],
+      "Proxied connection": [
+        {
+          "code": "TRUE",
+          "name": "TRUE"
+        }
+      ],
+      "Trusted hostname": [
+        {
+          "code": "TRUE",
+          "name": "TRUE"
+        }
+      ],
+      "Day of the week": [
+        {
+          "code": "Sunday",
+          "name": "Sunday"
+        }
+      ],
+      "System message": [
+        {
+          "code": "IP range excluded",
+          "name": "IP range excluded"
+        }
+      ],
+      "Internal source device type": [
+        {
+          "code": "2",
+          "name": "Laptop"
+        }
+      ],
+      "Internal destination device type": [
+        {
+          "code": "2",
+          "name": "Laptop"
+        }
+      ],
+      "Protocol": [
+        {
+          "code": "1",
+          "name": "ICMP"
+        }
+      ],
+      "Application protocol": [
+        {
+          "code": "1053",
+          "name": "BITTORRENT"
+        }
+      ],
+      "Malformed traffic type": [
+        {
+          "code": "bad_HTTP_reply",
+          "name": "Bad HTTP reply"
+        }
+      ],
+      "Vendor": [
+        {
+          "code": "-16579579",
+          "name": "Cisco Systems, Inc"
+        }
+      ],
+      "Destination Resource Type": [
+        {
+          "name": "File",
+          "code": "File"
+        }
+      ],
+      "Access Method": [
+        {
+          "name": "API",
+          "code": "API"
+        }
+      ],
+      "Resource Type": [
+        {
+          "name": "File",
+          "code": "File"
+        }
+      ],
+      "Action Direction": [
+        {
+          "name": "Outbound",
+          "code": "Outbound"
+        }
+      ]
+    },
+    "schema": "Enums"
+  },
+  {
+    "method": "GET",
+    "path": "/filtertypes",
+    "fixture": [
+      {
+        "filtertype": "Destination IP",
+        "valuetype": "ipv4",
+        "graphable": true,
+        "comparators": [
+          "mock-value"
+        ]
+      }
+    ],
+    "schema": "Filtertypes"
+  },
+  {
+    "method": "GET",
+    "path": "/intelfeed",
+    "fixture": {
+      "name": "example1.com",
+      "description": "Example description.",
+      "expiry": "2020-12-31T12:00:00",
+      "strength": 100,
+      "iagn": true
+    },
+    "schema": "IntelfeedFulldetailsTrue"
+  },
+  {
+    "method": "GET",
+    "path": "/mbcomments",
+    "fixture": [
+      {
+        "time": 1597837975000,
+        "pbid": 1432,
+        "username": "lryan",
+        "message": "Investigation completed.",
+        "pid": 17,
+        "name": "Compliance::Messaging::Facebook Messenger"
+      }
+    ],
+    "schema": "Mbcomments"
+  },
+  {
+    "method": "GET",
+    "path": "/metricdata",
+    "fixture": [
+      {
+        "metric": "connections",
+        "data": [
+          {
+            "time": "2019-03-24 00:00:00",
+            "timems": 1550000000000,
+            "size": 12,
+            "in": 1,
+            "out": 11
+          }
+        ]
+      }
+    ],
+    "schema": "Metricdata"
+  },
+  {
+    "method": "GET",
+    "path": "/metrics",
+    "fixture": [
+      {
+        "mlid": 1,
+        "name": "externalconnections",
+        "label": "External Connections",
+        "units": "mock-value",
+        "filtertypes": [
+          "mock-value"
+        ],
+        "unitsinterval": 3600,
+        "lengthscale": 9999960
+      }
+    ],
+    "schema": "Metrics"
+  },
+  {
+    "method": "GET",
+    "path": "/metrics/{mlid}",
+    "fixture": {
+      "mlid": 1,
+      "name": "externalconnections",
+      "label": "External Connections",
+      "units": "mock-value",
+      "filtertypes": [
+        "mock-value"
+      ],
+      "unitsinterval": 3600,
+      "lengthscale": 9999960
+    },
+    "schema": "Metrics"
+  },
+  {
+    "method": "GET",
+    "path": "/modelbreaches",
+    "fixture": [
+      {
+        "creationTime": 1528810000000,
+        "commentCount": 2,
+        "pbid": 123,
+        "time": 1528810000000,
+        "model": {
+          "then": {
+            "name": "Anomalous Connection::1 GiB Outbound",
+            "pid": 1,
+            "phid": 1,
+            "uuid": "80010119-6d7f-0000-0305-5e0000000215",
+            "mitre": {
+              "tactics": [
+                "mock-value"
+              ],
+              "techniques": [
+                "mock-value"
+              ]
+            },
+            "logic": {
+              "data": [
+                "mock-value"
+              ],
+              "type": "componentList",
+              "version": 1
+            },
+            "throttle": 3600,
+            "sharedEndpoints": false,
+            "actions": {
+              "alert": true,
+              "antigena": {},
+              "breach": true,
+              "model": true,
+              "setPriority": false,
+              "setTag": false,
+              "setType": false
+            },
+            "tags": [
+              "mock-value"
+            ],
+            "interval": 0,
+            "delay": 0,
+            "sequenced": false,
+            "active": true,
+            "modified": "2020-02-12 12:00:00",
+            "activeTimes": {
+              "devices": {},
+              "tags": {},
+              "type": "exclusions",
+              "version": 2
+            },
+            "priority": 5,
+            "category": "Critical",
+            "compliance": false,
+            "autoUpdatable": true,
+            "autoUpdate": true,
+            "autoSuppress": true,
+            "description": "A device is moving large volumes of data (1GiB+) out of the network...",
+            "behaviour": "decreasing",
+            "defeats": [
+              {
+                "arguments": {
+                  "value": "www.example.com"
+                },
+                "comparator": "does not match",
+                "defeatID": 1,
+                "filtertype": "Connection hostname"
+              }
+            ],
+            "created": {
+              "by": "System"
+            },
+            "edited": {
+              "by": "smartinez_admin"
+            },
+            "version": 16
+          },
+          "now": {
+            "name": "Anomalous Connection::1 GiB Outbound",
+            "pid": 1,
+            "phid": 3343,
+            "uuid": "80010119-6d7f-0000-0305-5e0000000215",
+            "mitre": {
+              "tactics": [
+                "mock-value"
+              ],
+              "techniques": [
+                "mock-value"
+              ]
+            },
+            "logic": {
+              "data": [
+                "mock-value"
+              ],
+              "type": "componentList",
+              "version": 1
+            },
+            "throttle": 3600,
+            "sharedEndpoints": false,
+            "actions": {
+              "alert": false,
+              "antigena": {},
+              "breach": true,
+              "model": true,
+              "setPriority": false,
+              "setTag": false,
+              "setType": false
+            },
+            "tags": [
+              "mock-value"
+            ],
+            "interval": 0,
+            "delay": 0,
+            "sequenced": false,
+            "active": true,
+            "modified": "2020-02-12 12:00:00",
+            "activeTimes": {
+              "devices": {},
+              "tags": {},
+              "type": "exclusions",
+              "version": 2
+            },
+            "priority": 5,
+            "category": "Critical",
+            "compliance": false,
+            "autoUpdatable": false,
+            "autoUpdate": true,
+            "autoSuppress": true,
+            "description": "A device is moving large volumes of data (1GiB+) out of the network...",
+            "behaviour": "decreasing",
+            "defeats": [
+              {
+                "arguments": {
+                  "value": "www.example.com"
+                },
+                "comparator": "does not match",
+                "defeatID": 1,
+                "filtertype": "Connection hostname"
+              }
+            ],
+            "created": {
+              "by": "System"
+            },
+            "edited": {
+              "by": "smartinez_admin",
+              "userID": 24
+            },
+            "message": "updated display filters to simplify output",
+            "version": 24
+          }
+        },
+        "triggeredComponents": [
+          {
+            "time": 1528810000000,
+            "cbid": 1729,
+            "cid": 1,
+            "chid": 1,
+            "size": 1155203452,
+            "threshold": 1073741824,
+            "interval": 3600,
+            "logic": {
+              "data": {
+                "left": "A",
+                "operator": "AND",
+                "right": {}
+              },
+              "version": "v0.1"
+            },
+            "metric": {
+              "mlid": 33,
+              "name": "externalclientdatatransfervolume",
+              "label": "External Data Volume as a Client"
+            },
+            "triggeredFilters": [
+              {
+                "cfid": 1,
+                "id": "A",
+                "filterType": "Direction",
+                "arguments": {
+                  "value": 1
+                },
+                "comparatorType": "is",
+                "trigger": {
+                  "value": "out"
+                }
+              }
+            ]
+          }
+        ],
+        "score": 0.443,
+        "percentscore": 44,
+        "device": {
+          "did": 96,
+          "ip": "10.0.18.224",
+          "ips": [
+            {
+              "ip": "10.0.18.224",
+              "timems": 1528812000000,
+              "time": "2020-02-12 12:00:00",
+              "sid": 34
+            }
+          ],
+          "sid": 34,
+          "hostname": "fs182",
+          "firstSeen": 1528810000000,
+          "lastSeen": 1528810000000,
+          "typename": "server",
+          "typelabel": "Server"
+        }
+      }
+    ],
+    "schema": "ModelbreachesNoParameters"
+  },
+  {
+    "method": "GET",
+    "path": "/modelbreaches/{pbid}",
+    "fixture": {
+      "creationTime": 1528810000000,
+      "commentCount": 2,
+      "pbid": 123,
+      "time": 1528810000000,
+      "model": {
+        "then": {
+          "name": "Anomalous Connection::1 GiB Outbound",
+          "pid": 1,
+          "phid": 1,
+          "uuid": "80010119-6d7f-0000-0305-5e0000000215",
+          "mitre": {
+            "tactics": [
+              "mock-value"
+            ],
+            "techniques": [
+              "mock-value"
+            ]
+          },
+          "logic": {
+            "data": [
+              "mock-value"
+            ],
+            "type": "componentList",
+            "version": 1
+          },
+          "throttle": 3600,
+          "sharedEndpoints": false,
+          "actions": {
+            "alert": true,
+            "antigena": {},
+            "breach": true,
+            "model": true,
+            "setPriority": false,
+            "setTag": false,
+            "setType": false
+          },
+          "tags": [
+            "mock-value"
+          ],
+          "interval": 0,
+          "delay": 0,
+          "sequenced": false,
+          "active": true,
+          "modified": "2020-02-12 12:00:00",
+          "activeTimes": {
+            "devices": {},
+            "tags": {},
+            "type": "exclusions",
+            "version": 2
+          },
+          "priority": 5,
+          "category": "Critical",
+          "compliance": false,
+          "autoUpdatable": true,
+          "autoUpdate": true,
+          "autoSuppress": true,
+          "description": "A device is moving large volumes of data (1GiB+) out of the network...",
+          "behaviour": "decreasing",
+          "defeats": [
+            {
+              "arguments": {
+                "value": "www.example.com"
+              },
+              "comparator": "does not match",
+              "defeatID": 1,
+              "filtertype": "Connection hostname"
+            }
+          ],
+          "created": {
+            "by": "System"
+          },
+          "edited": {
+            "by": "smartinez_admin"
+          },
+          "version": 16
+        },
+        "now": {
+          "name": "Anomalous Connection::1 GiB Outbound",
+          "pid": 1,
+          "phid": 3343,
+          "uuid": "80010119-6d7f-0000-0305-5e0000000215",
+          "mitre": {
+            "tactics": [
+              "mock-value"
+            ],
+            "techniques": [
+              "mock-value"
+            ]
+          },
+          "logic": {
+            "data": [
+              "mock-value"
+            ],
+            "type": "componentList",
+            "version": 1
+          },
+          "throttle": 3600,
+          "sharedEndpoints": false,
+          "actions": {
+            "alert": false,
+            "antigena": {},
+            "breach": true,
+            "model": true,
+            "setPriority": false,
+            "setTag": false,
+            "setType": false
+          },
+          "tags": [
+            "mock-value"
+          ],
+          "interval": 0,
+          "delay": 0,
+          "sequenced": false,
+          "active": true,
+          "modified": "2020-02-12 12:00:00",
+          "activeTimes": {
+            "devices": {},
+            "tags": {},
+            "type": "exclusions",
+            "version": 2
+          },
+          "priority": 5,
+          "category": "Critical",
+          "compliance": false,
+          "autoUpdatable": false,
+          "autoUpdate": true,
+          "autoSuppress": true,
+          "description": "A device is moving large volumes of data (1GiB+) out of the network...",
+          "behaviour": "decreasing",
+          "defeats": [
+            {
+              "arguments": {
+                "value": "www.example.com"
+              },
+              "comparator": "does not match",
+              "defeatID": 1,
+              "filtertype": "Connection hostname"
+            }
+          ],
+          "created": {
+            "by": "System"
+          },
+          "edited": {
+            "by": "smartinez_admin",
+            "userID": 24
+          },
+          "message": "updated display filters to simplify output",
+          "version": 24
+        }
+      },
+      "triggeredComponents": [
+        {
+          "time": 1528810000000,
+          "cbid": 1729,
+          "cid": 1,
+          "chid": 1,
+          "size": 1155203452,
+          "threshold": 1073741824,
+          "interval": 3600,
+          "logic": {
+            "data": {
+              "left": "A",
+              "operator": "AND",
+              "right": {}
+            },
+            "version": "v0.1"
+          },
+          "metric": {
+            "mlid": 33,
+            "name": "externalclientdatatransfervolume",
+            "label": "External Data Volume as a Client"
+          },
+          "triggeredFilters": [
+            {
+              "cfid": 1,
+              "id": "A",
+              "filterType": "Direction",
+              "arguments": {
+                "value": 1
+              },
+              "comparatorType": "is",
+              "trigger": {
+                "value": "out"
+              }
+            }
+          ]
+        }
+      ],
+      "score": 0.443,
+      "percentscore": 44,
+      "device": {
+        "did": 96,
+        "ip": "10.0.18.224",
+        "ips": [
+          {
+            "ip": "10.0.18.224",
+            "timems": 1528812000000,
+            "time": "2020-02-12 12:00:00",
+            "sid": 34
+          }
+        ],
+        "sid": 34,
+        "hostname": "fs182",
+        "firstSeen": 1528810000000,
+        "lastSeen": 1528810000000,
+        "typename": "server",
+        "typelabel": "Server"
+      }
+    },
+    "schema": "ModelbreachesNoParameters"
+  },
+  {
+    "method": "GET",
+    "path": "/modelbreaches/{pbid}/comments",
+    "fixture": [
+      {
+        "message": "Assigned to Aidan Johnston for investigation.",
+        "username": "ecarr",
+        "time": 1580000000000,
+        "pid": 806
+      }
+    ],
+    "schema": "ModelbreachesPbidComments"
+  },
+  {
+    "method": "GET",
+    "path": "/models",
+    "fixture": [
+      {
+        "name": "Anomalous File::Anomalous Octet Stream",
+        "pid": 12,
+        "phid": 2842,
+        "uuid": "80010119-6d7f-0000-0305-5e0000000420",
+        "logic": {
+          "data": [
+            "mock-value"
+          ],
+          "type": "componentList",
+          "version": 1
+        },
+        "throttle": 3600,
+        "sharedEndpoints": false,
+        "actions": {
+          "alert": true,
+          "antigena": {},
+          "breach": true,
+          "model": true,
+          "setPriority": false,
+          "setTag": false,
+          "setType": false
+        },
+        "tags": [
+          "mock-value"
+        ],
+        "interval": 0,
+        "delay": 0,
+        "sequenced": false,
+        "active": true,
+        "modified": "2023-08-15 12:27:32",
+        "activeTimes": {
+          "devices": {},
+          "tags": {},
+          "type": "exclusions",
+          "version": 2
+        },
+        "autoUpdatable": false,
+        "autoUpdate": true,
+        "autoSuppress": true,
+        "description": "A device has downloaded a rare data stream which is not specifying a specific data type.\\n\\nAction: Investigate the endpoint the data is being sent from and consider downloading a PCAP or reviewing the hash if you believe the endpoint to be untrustworthy.",
+        "behaviour": "decreasing",
+        "defeats": [
+          {
+            "arguments": {
+              "value": "6"
+            },
+            "comparator": "is",
+            "defeatID": "mock-value",
+            "filtertype": "Internal source device type"
+          }
+        ],
+        "created": {
+          "by": "smartinez_admin"
+        },
+        "edited": {
+          "by": "ajohnston",
+          "userID": 24
+        },
+        "history": [
+          {
+            "modified": "2019-11-15 11:42:00",
+            "active": true,
+            "message": "Improved rarity filters",
+            "by": "ajohnston",
+            "phid": 2842,
+            "defeatsOnly": true,
+            "accepted": "1686578003000",
+            "acceptedby": "ajohnston"
+          }
+        ],
+        "message": "Altered priority value.",
+        "mitre": {
+          "tactics": [
+            "mock-value"
+          ],
+          "techniques": [
+            "mock-value"
+          ]
+        },
+        "version": 40,
+        "priority": 40,
+        "category": "Critical",
+        "compliance": false
+      }
+    ],
+    "schema": "Models"
+  },
+  {
+    "method": "GET",
+    "path": "/models/{pid}",
+    "fixture": {
+      "name": "Anomalous File::Anomalous Octet Stream",
+      "pid": 12,
+      "phid": 2842,
+      "uuid": "80010119-6d7f-0000-0305-5e0000000420",
+      "logic": {
+        "data": [
+          "mock-value"
+        ],
+        "type": "componentList",
+        "version": 1
+      },
+      "throttle": 3600,
+      "sharedEndpoints": false,
+      "actions": {
+        "alert": true,
+        "antigena": {},
+        "breach": true,
+        "model": true,
+        "setPriority": false,
+        "setTag": false,
+        "setType": false
+      },
+      "tags": [
+        "mock-value"
+      ],
+      "interval": 0,
+      "delay": 0,
+      "sequenced": false,
+      "active": true,
+      "modified": "2023-08-15 12:27:32",
+      "activeTimes": {
+        "devices": {},
+        "tags": {},
+        "type": "exclusions",
+        "version": 2
+      },
+      "autoUpdatable": false,
+      "autoUpdate": true,
+      "autoSuppress": true,
+      "description": "A device has downloaded a rare data stream which is not specifying a specific data type.\\n\\nAction: Investigate the endpoint the data is being sent from and consider downloading a PCAP or reviewing the hash if you believe the endpoint to be untrustworthy.",
+      "behaviour": "decreasing",
+      "defeats": [
+        {
+          "arguments": {
+            "value": "6"
+          },
+          "comparator": "is",
+          "defeatID": "mock-value",
+          "filtertype": "Internal source device type"
+        }
+      ],
+      "created": {
+        "by": "smartinez_admin"
+      },
+      "edited": {
+        "by": "ajohnston",
+        "userID": 24
+      },
+      "history": [
+        {
+          "modified": "2019-11-15 11:42:00",
+          "active": true,
+          "message": "Improved rarity filters",
+          "by": "ajohnston",
+          "phid": 2842,
+          "defeatsOnly": true,
+          "accepted": "1686578003000",
+          "acceptedby": "ajohnston"
+        }
+      ],
+      "message": "Altered priority value.",
+      "mitre": {
+        "tactics": [
+          "mock-value"
+        ],
+        "techniques": [
+          "mock-value"
+        ]
+      },
+      "version": 40,
+      "priority": 40,
+      "category": "Critical",
+      "compliance": false
+    },
+    "schema": "Models"
+  },
+  {
+    "method": "GET",
+    "path": "/network",
+    "fixture": {
+      "statistics": [
+        {
+          "Views": [
+            {
+              "View": "Single device",
+              "in": false,
+              "out": false
+            }
+          ],
+          "Connection Status": [
+            {
+              "Connections": "Normal",
+              "in": 95567,
+              "out": 36964662
+            }
+          ],
+          "Remote Ports": [
+            {
+              "rport": 51728,
+              "in": 41813,
+              "out": 36939077
+            }
+          ],
+          "Local Ports": [
+            {
+              "lport": 22,
+              "in": 41813,
+              "out": 36939225
+            }
+          ],
+          "devices": [
+            {
+              "device": "10.0.18.224",
+              "ip": "10.0.18.224",
+              "in": 41813,
+              "out": 36939225
+            }
+          ],
+          "Subnets": [
+            "mock-value"
+          ],
+          "intext": [
+            {
+              "intext": "Internal",
+              "in": 95567,
+              "out": 36964662
+            }
+          ],
+          "protocols": [
+            {
+              "protocol": "TCP",
+              "in": 41813,
+              "out": 36939225
+            }
+          ],
+          "applicationprotocols": [
+            {
+              "applicationprotocol": "SSH",
+              "in": 41813,
+              "out": 36939225
+            }
+          ]
+        }
+      ],
+      "subnets": [
+        "mock-value"
+      ],
+      "devices": [
+        {
+          "did": 174,
+          "size": 37060229,
+          "timems": 1586270000000,
+          "ips": [
+            "mock-value"
+          ],
+          "sid": 82,
+          "ip": "10.15.3.39",
+          "network": "10.15.3.0/24"
+        }
+      ],
+      "metric": {
+        "mlid": 17,
+        "name": "datatransfervolume",
+        "label": "Data Transfer",
+        "units": "bytes",
+        "filtertypes": [
+          "mock-value"
+        ],
+        "unitsinterval": 3600,
+        "lengthscale": 599997600
+      },
+      "connections": [
+        {
+          "source": {
+            "id": -6,
+            "ip": "10.15.3.39",
+            "type": "subnet"
+          },
+          "target": {
+            "id": 174,
+            "ip": "10.15.3.39",
+            "type": "device"
+          },
+          "timems": 1586270000000,
+          "size": 36000000
+        }
+      ]
+    },
+    "schema": "NetworkDidFulldevicedetailsFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/pcaps",
+    "fixture": [
+      {
+        "tmqid": 119,
+        "startTime": 1613122702,
+        "endTime": 1613122715,
+        "filename": "/tm/DCIP_20210209121522_20210209122523_192_168_0_4_60527_10_10_10_22_443_tcp_qnXkZE_m.pcap",
+        "index": "connection4",
+        "l3proto": "tcp",
+        "ip1": "192.168.0.4",
+        "port1": 60527,
+        "ip2": "10.10.10.22",
+        "port2": 443,
+        "start": 1612872922,
+        "end": 1612873523,
+        "state": "finished"
+      }
+    ],
+    "schema": "Pcaps"
+  },
+  {
+    "method": "GET",
+    "path": "/pcaps/{filename}",
+    "fixture": {
+      "error": "mock-value",
+      "response": "INPUT ERROR"
+    },
+    "schema": "ErrorResponse"
+  },
+  {
+    "method": "GET",
+    "path": "/similardevices",
+    "fixture": [
+      {
+        "did": 112,
+        "score": 99,
+        "ip": "10.15.3.39",
+        "ips": [
+          {
+            "ip": "10.15.3.39",
+            "timems": 1586937881000,
+            "time": "2020-04-15 08:04:41",
+            "sid": 29
+          }
+        ],
+        "sid": 29,
+        "hostname": "workstation-local-82",
+        "firstSeen": 1,
+        "lastSeen": 1,
+        "os": "Linux 3.11 and newer",
+        "typename": "desktop",
+        "typelabel": "Desktop"
+      }
+    ],
+    "schema": "SimilardevicesFulldevicedetailsFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/status",
+    "fixture": {
+      "excessTraffic": false,
+      "time": "2023-12-31 14:41:00",
+      "installed": "10/22/18",
+      "mobileAppConfigured": true,
+      "version": "6.1.23 (f35936c6)",
+      "ipAddress": "10.0.18.224",
+      "label": "holdingsinc-master",
+      "modelsUpdated": "2023-12-26 11:20:00",
+      "modelPackageVersion": "4.0-8515~20230322143408~g300d5d",
+      "bundleVersion": "61016",
+      "bundleVariant": "rc",
+      "bundleDate": "2023-12-24 18:33:00",
+      "bundleInstalledDate": "2023-12-24 20:20:00",
+      "maximumOSSensors": 255,
+      "hostname": "example-darktrace-01",
+      "uuid": "07dcf0e5-217b-4e98-96b9-549b3dd87706",
+      "inoculation": false,
+      "applianceOSCode": "x",
+      "license": "2024-12-30 00:00:00",
+      "saasConnectorLicense": "2029-06-01 00:00:00",
+      "antigenaSaasLicense": "2029-06-01 00:00:00",
+      "cloudSecurityLicense": "2023-10-02 00:00:00",
+      "syslogTLSSHA1Fingerprint": "2D:JY:LP:YT:TF:P3:BJ:21:Q6:D9:OT:JZ:LQ:8A:X0:KG:N6:9P:XC:DI",
+      "syslogTLSSHA256Fingerprint": "C6:9U:6N:D5:QU:HQ:78:3P...",
+      "antigenaNetworkEnabled": true,
+      "antigenaNetworkRunning": true,
+      "antigenaNetworkConfirmationMode": true,
+      "antigenaNetworkLicense": "2025-12-31 00:00:00",
+      "preventE2ELicense": "2025-12-31 00:00:00",
+      "logIngestionReplicated": 321,
+      "logIngestionProcessed": 422406,
+      "logIngestionTCP": 2,
+      "logIngestionUDP": 329999225,
+      "logIngestionMatches": {
+        "exampletemplate": 214509
+      },
+      "logIngestionTypes": {
+        "exampletemplate": 213587
+      },
+      "licenseCounts": {
+        "saas": {
+          "total": 0
+        },
+        "licenseIPCount": 249,
+        "licenseCloudIPCount": 12
+      },
+      "antigenaNetworkBlockedConnections": {
+        "attempted": 277149,
+        "failed": 1333
+      },
+      "diskSpaceUsed_": 98,
+      "type": "master",
+      "diskUtilization": 1,
+      "load": 12,
+      "cpu": 8,
+      "memoryUsed": 87,
+      "dataQueue": 0,
+      "darkflowQueue": 0,
+      "flowProcessingTimes": {},
+      "networkInterfacesState_eth0": "up",
+      "networkInterfacesAddress_eth0": "10.0.18.224",
+      "networkInterfacesState_eth1": "up",
+      "networkInterfacesState_eth2": "up",
+      "networkInterfacesState_eth3": "up",
+      "networkInterfacesReceived_eth0": 37117054830,
+      "networkInterfacesReceived_eth1": 51298800000000,
+      "networkInterfacesReceived_eth2": 1887340000000,
+      "networkInterfacesReceived_eth3": 6176370000000,
+      "networkInterfacesTransmitted_eth0": 112970000000,
+      "networkInterfacesTransmitted_eth1": 0,
+      "networkInterfacesTransmitted_eth2": 0,
+      "networkInterfacesTransmitted_eth3": 0,
+      "bandwidthCurrent": 386703428,
+      "bandwidthCurrentString": "386.70 Mbps",
+      "bandwidthAverage": 391631000,
+      "bandwidthAverageString": "391.63 Mbps",
+      "bandwidth7DayPeak": 1230235696,
+      "bandwidth7DayPeakString": "1.23 Gbps",
+      "bandwidth2WeekPeak": 1645876703,
+      "bandwidth2WeekPeakString": "1.65 Gbps",
+      "processedBandwidthCurrent": 59938652,
+      "processedBandwidthCurrentString": "59.94 Mbps",
+      "processedBandwidthAverage": 142568480,
+      "processedBandwidthAverageString": "142.57 Mbps",
+      "processedBandwidth7DayPeak": 1139496509,
+      "processedBandwidth7DayPeakString": "1.14 Gbps",
+      "processedBandwidth2WeekPeak": 1223451790,
+      "processedBandwidth2WeekPeakString": "1.22 Gbps",
+      "eventsPerMinuteCurrent": {
+        "cSensorNotices": 0,
+        "cSensorDeviceDetails": 0,
+        "cSensorModelEvents": 1464,
+        "networkNotices": 69,
+        "networkDeviceDetails": 4,
+        "networkModelEvents": 131305,
+        "logInputNotices": 13,
+        "logInputDeviceDetails": 0,
+        "logInputModelEvents": 0,
+        "saasNotices": 0,
+        "saasModelEvents": 0
+      },
+      "probes": {
+        "12": {
+          "id": 12,
+          "uuid": "6b3ed6f4-1823-4028-b9a5-9ea9ec3ec70b",
+          "version": "6.1.23 (f35936c6))",
+          "bundleVersion": "6.1.7",
+          "bundleDate": "2023-12-13 12:23:25",
+          "bundleInstalledDate": "2023-12-14 06:24:46",
+          "configuredServer": "example-vsensor-2.example.com",
+          "ipAddress": "10.10.12.12",
+          "label": "Testing 2019",
+          "hostname": "testprobe1",
+          "time": "2024-01-05 14:44",
+          "metadata": {},
+          "type": "vSensor",
+          "load": 14,
+          "cpu": 0,
+          "memoryUsed": 16,
+          "osSensors": [
+            "mock-value"
+          ],
+          "antigenaNetworkBlockedConnections": {
+            "attempted": 1335,
+            "failed": 12
+          },
+          "osPacketsProcessed": "377634",
+          "networkInterfacesState_eth0": "up",
+          "networkInterfacesAddress_eth0": "10.10.12.12",
+          "networkInterfacesReceived_eth0": 559588000000,
+          "networkInterfacesTransmitted_eth0": 39866733296,
+          "bandwidthCurrent": 1720840,
+          "bandwidthCurrentString": "1.72 Mbps",
+          "bandwidthAverage": 0,
+          "bandwidthAverageString": "0 kbps",
+          "bandwidth7DayPeak": 0,
+          "bandwidth7DayPeakString": "0 kbps",
+          "bandwidth2WeekPeak": 0,
+          "bandwidth2WeekPeakString": "0 kbps",
+          "processedBandwidthCurrent": 1720840,
+          "processedBandwidthCurrentString": "1.72 Mbps",
+          "processedBandwidthAverage": 1041910,
+          "processedBandwidthAverageString": "1.04 Mbps",
+          "processedBandwidth7DayPeak": 32829661,
+          "processedBandwidth7DayPeakString": "32.83 Mbps",
+          "processedBandwidth2WeekPeak": 32829661,
+          "processedBandwidth2WeekPeakString": "32.83 Mbps",
+          "connectionsPerMinuteCurrent": 331,
+          "connectionsPerMinuteAverage": 326,
+          "connectionsPerMinute7DayPeak": 752,
+          "connectionsPerMinute2WeekPeak": 752
+        },
+        "13": {
+          "configuredServer": "10.15.3.39",
+          "ipAddress": "10.15.3.39",
+          "label": "Testing 2020",
+          "error": true,
+          "lastContact": "2023-02-06 02:30:00"
+        }
+      },
+      "connectionsPerMinuteCurrent": 7430,
+      "connectionsPerMinuteAverage": 8768,
+      "connectionsPerMinute7DayPeak": 20975,
+      "connectionsPerMinute2WeekPeak": 20975,
+      "credentials": 86,
+      "credentials7Days": 55,
+      "credentialSources": {
+        "NTLM": {
+          "4weeks": 6,
+          "7days": 4
+        },
+        "Saas": {
+          "4weeks": 80,
+          "7days": 51
+        }
+      },
+      "operatingSystems": 16,
+      "newDevices4Weeks": 289,
+      "newDevices7Days": 50,
+      "newDevices24Hours": 8,
+      "newDevicesHour": 1,
+      "activeDevices4Weeks": 2856,
+      "activeDevices7Days": 1590,
+      "activeDevices24Hours": 800,
+      "activeDevicesHour": 461,
+      "deviceHostnames": 348,
+      "deviceMACAddresses": 417,
+      "deviceRecentIPChange": 21,
+      "models": 692,
+      "modelsBreached": 401834,
+      "modelsSuppressed": 1869280,
+      "recentUnidirectionalConnections": 0,
+      "mostRecentDHCPTraffic": "2023-12-31 14:52:00",
+      "mostRecentDNSTraffic": "2023-12-31 14:49:00",
+      "mostRecentDCE_RPCTraffic": "2023-12-31 14:50:00",
+      "mostRecentHTTPTraffic": "2023-12-31 14:52:00",
+      "mostRecentHTTPSTraffic": "2023-12-31 14:51:00",
+      "mostRecentKERBEROSTraffic": "2023-12-31 14:50:00",
+      "mostRecentLDAPTraffic": "2023-12-31 14:50:00",
+      "mostRecentNTPTraffic": "2023-12-31 14:51:00",
+      "mostRecentSMBTraffic": "2023-12-31 14:51:00",
+      "mostRecentSMTPTraffic": "2023-12-31 14:52:00",
+      "mostRecentSNMPTraffic": "2023-12-31 14:50:00",
+      "mostRecentSSHTraffic": "2023-12-31 14:51:00",
+      "mostRecentSSLTraffic": "2023-12-31 14:51:00",
+      "VLANs": {
+        "1": 0
+      },
+      "internalIPRangeList": [
+        "mock-value"
+      ],
+      "internalIPRanges": 2,
+      "dnsServers": 38,
+      "internalDomains": 0,
+      "internalAndExternalDomainList": [
+        "mock-value"
+      ],
+      "internalAndExternalDomains": 2,
+      "proxyServers": 1,
+      "proxyServerIPs": [
+        "mock-value"
+      ],
+      "subnets": 97,
+      "subnetData": [
+        {
+          "sid": 87,
+          "network": "10.12.14.0/24",
+          "devices": 235,
+          "clientDevices": 231,
+          "mostRecentTraffic": "2023-12-31 14:00:00",
+          "mostRecentDHCP": "Never",
+          "dhcpQuality": 50,
+          "kerberosQuality": 100
+        }
+      ],
+      "uptime": "04:55:54",
+      "systemuptime": "1894:29:43"
+    },
+    "schema": "StatusNoParametersFastFalse"
+  },
+  {
+    "method": "GET",
+    "path": "/subnets",
+    "fixture": [
+      {
+        "sid": 12,
+        "auto": false,
+        "dhcp": true,
+        "firstSeen": 1528812000000,
+        "label": "Finance",
+        "lastSeen": 1584265931000,
+        "latitude": 0.01,
+        "longitude": -0.01,
+        "network": "10.12.14.0/24",
+        "shid": 104,
+        "uniqueHostnames": true,
+        "uniqueUsernames": false,
+        "confidence": -1,
+        "lastDHCP": 1584265931000,
+        "dhcpCount": 7,
+        "kerberosCount": 0,
+        "dhcpQuality": 7,
+        "kerberosQuality": 0,
+        "recentTrafficPercent": 100,
+        "clientDevices": 89,
+        "serverDevices": 12,
+        "icsDevices": 0,
+        "mostRecentTraffic": 1584265931000
+      }
+    ],
+    "schema": "Subnets"
+  },
+  {
+    "method": "GET",
+    "path": "/summarystatistics",
+    "fixture": {
+      "usercredentialcount": 448,
+      "subnets": 8,
+      "patterns": 3278640,
+      "bandwidth": [
+        {
+          "timems": 1699962000000,
+          "time": "2023-11-14 11:40:00",
+          "kb": 109426603
+        }
+      ],
+      "antigenaDevices": 4,
+      "antigenaActions": 5,
+      "devicecount": {
+        "unknown": 6,
+        "laptop": 14,
+        "mobile": 8,
+        "tablet": 2,
+        "desktop": 84,
+        "server": 71,
+        "router": 1,
+        "keyasset": 2,
+        "dnsserver": 1,
+        "proxyserver": 3,
+        "logserver": 2,
+        "tv": 3,
+        "camera": 2,
+        "fileserver": 4,
+        "ipphone": 2,
+        "iot": 1,
+        "saas": {
+          "Amazon": 3,
+          "AzureActiveDirectory": 39,
+          "total": 135
+        },
+        "licenseIPCount": 249,
+        "licenseCloudIPCount": 12,
+        "totalClient": 106,
+        "totalServer": 20,
+        "totalOther": 6,
+        "total": 204
+      }
+    },
+    "schema": "SummarystatisticsNoParameters"
+  },
+  {
+    "method": "GET",
+    "path": "/tags",
+    "fixture": [
+      {
+        "tid": 5,
+        "expiry": 0,
+        "thid": 5,
+        "name": "Active Threat",
+        "restricted": false,
+        "data": {
+          "auto": false,
+          "color": 200,
+          "description": "A tag indicating the device is behaving anomalously and potentially compromised.",
+          "visibility": "Public"
+        },
+        "isReferenced": true
+      }
+    ],
+    "schema": "Tags"
+  },
+  {
+    "method": "GET",
+    "path": "/tags/entities",
+    "fixture": [
+      {
+        "teid": 325684,
+        "tehid": 325684,
+        "tid": 12,
+        "entityType": "Credential",
+        "entityValue": "b.ash@holdingsinc.com",
+        "valid": true,
+        "expiry": 1702038492000
+      }
+    ],
+    "schema": "TagsEntitiesAndTagsTidEntitiesTagHigh20Risk"
+  },
+  {
+    "method": "GET",
+    "path": "/tags/{tid}",
+    "fixture": {
+      "tid": 5,
+      "expiry": 0,
+      "thid": 5,
+      "name": "Active Threat",
+      "restricted": false,
+      "data": {
+        "auto": false,
+        "color": 200,
+        "description": "A tag indicating the device is behaving anomalously and potentially compromised.",
+        "visibility": "Public"
+      },
+      "isReferenced": true
+    },
+    "schema": "Tags"
+  },
+  {
+    "method": "GET",
+    "path": "/tags/{tid}/entities",
+    "fixture": [
+      {
+        "teid": 325684,
+        "tehid": 325684,
+        "tid": 12,
+        "entityType": "Credential",
+        "entityValue": "b.ash@holdingsinc.com",
+        "valid": true,
+        "expiry": 1702038492000
+      }
+    ],
+    "schema": "TagsEntitiesAndTagsTidEntitiesTagHigh20Risk"
+  },
+  {
+    "method": "POST",
+    "path": "/advancedsearch/api/search"
+  },
+  {
+    "method": "POST",
+    "path": "/agemail/api/ep/api/v1.0/emails/search"
+  },
+  {
+    "method": "POST",
+    "path": "/agemail/api/ep/api/v1.0/emails/{uuid}/action"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/acknowledge"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/incident/comments"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/investigations"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/pin"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/unacknowledge"
+  },
+  {
+    "method": "POST",
+    "path": "/aianalyst/unpin"
+  },
+  {
+    "method": "POST",
+    "path": "/antigena"
+  },
+  {
+    "method": "POST",
+    "path": "/antigena/manual"
+  },
+  {
+    "method": "POST",
+    "path": "/devices"
+  },
+  {
+    "method": "POST",
+    "path": "/intelfeed"
+  },
+  {
+    "method": "POST",
+    "path": "/modelbreaches/{pbid}/acknowledge"
+  },
+  {
+    "method": "POST",
+    "path": "/modelbreaches/{pbid}/comments"
+  },
+  {
+    "method": "POST",
+    "path": "/modelbreaches/{pbid}/unacknowledge"
+  },
+  {
+    "method": "POST",
+    "path": "/pcaps"
+  },
+  {
+    "method": "POST",
+    "path": "/subnets"
+  },
+  {
+    "method": "POST",
+    "path": "/tags"
+  },
+  {
+    "method": "POST",
+    "path": "/tags/entities"
+  },
+  {
+    "method": "POST",
+    "path": "/tags/{tid}/entities"
+  }
+]
