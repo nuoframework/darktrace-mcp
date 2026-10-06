@@ -1,53 +1,53 @@
-**English** · [Español](es/clients.md)
+[English](../clients.md) · **Español**
 
-# Client setup
+# Configurar clientes
 
-[README](../README.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Troubleshooting](troubleshooting.md)
+[README](../../README.es.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Solución de problemas](troubleshooting.md)
 
-Every client can be set up two ways:
+Cada cliente se puede configurar de dos formas:
 
-- **Automatic:** `darktrace-mcp setup` finds the client and writes the entry for you (with a backup).
-- **Manual:** `darktrace-mcp config <client>` prints the snippet with your real paths filled in. Paste it into the file shown below.
+- **Automática:** `darktrace-mcp setup` encuentra el cliente y escribe la entrada por ti (con copia de seguridad).
+- **Manual:** `darktrace-mcp config <cliente>` muestra la configuración con tus rutas reales. Pégala en el archivo indicado abajo.
 
-| Client | `<client>` name | Config file |
+| Cliente | Nombre `<cliente>` | Archivo de configuración |
 |---|---|---|
 | [Claude Desktop](#claude-desktop) | `claude-desktop` | macOS `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows `%APPDATA%\Claude\claude_desktop_config.json` |
-| [Claude Code](#claude-code) | `claude-code` | `~/.claude.json` (via `claude mcp add`) |
+| [Claude Code](#claude-code) | `claude-code` | `~/.claude.json` (con `claude mcp add`) |
 | [Codex](#codex) | `codex` | `~/.codex/config.toml` |
 | [Cursor](#cursor) | `cursor` | `~/.cursor/mcp.json` |
-| [VS Code](#vs-code) | `vscode` | User `mcp.json` (**MCP: Open User Configuration**) |
+| [VS Code](#vs-code) | `vscode` | `mcp.json` de usuario (**MCP: Open User Configuration**) |
 | [Windsurf](#windsurf) | `windsurf` | `~/.codeium/windsurf/mcp_config.json` |
 | [OpenCode](#opencode) | `opencode` | `~/.config/opencode/opencode.json` |
 | [Gemini CLI](#gemini-cli) | `gemini` | `~/.gemini/settings.json` |
-| [Docker](#docker) | — | Any of the above |
+| [Docker](#docker) | — | Cualquiera de los anteriores |
 
-## Rules for every manual snippet
+## Reglas para toda configuración manual
 
-- Use **absolute paths** for Node, for `dist/src/index.js` and for the token files. `~` and `$HOME` are not expanded by most clients.
-- Put token **file paths** in the config, never token values.
-- The snippets below use the default `read` profile. To allow more, change `DARKTRACE_PROFILES` (see [profiles](configuration.md#profiles)).
-- Restart the client after editing its config.
+- Usa **rutas absolutas** para Node, para `dist/src/index.js` y para los archivos de token. La mayoría de clientes no expanden `~` ni `$HOME`.
+- Pon en la configuración las **rutas** de los archivos de token, nunca los tokens.
+- Los ejemplos usan el perfil por defecto `read`. Para permitir más, cambia `DARKTRACE_PROFILES` (consulta [perfiles](configuration.md#perfiles)).
+- Reinicia el cliente después de editar su configuración.
 
-Find your paths:
+Obtén tus rutas:
 
 ```sh
 node -p 'process.execPath'
 node -p 'require("node:path").resolve("dist/src/index.js")'
 ```
 
-Run the second command inside the `darktrace-mcp` folder.
+Ejecuta el segundo comando dentro de la carpeta `darktrace-mcp`.
 
 ## Claude Desktop
 
-**Automatic.** Either run `darktrace-mcp setup`, or install the extension:
+**Automática.** Ejecuta `darktrace-mcp setup` o instala la extensión:
 
 ```sh
 npm run pack:mcpb
 ```
 
-Double-click the generated `.mcpb` file. Claude Desktop asks for the URL, tokens and profile. It stores the tokens in your OS keychain.
+Haz doble clic en el archivo `.mcpb` generado. Claude Desktop pide la URL, los tokens y el perfil, y guarda los tokens en el llavero del sistema.
 
-**Manual.** Settings → Developer → Edit Config. Merge this into `mcpServers`, keeping your other servers:
+**Manual.** Settings → Developer → Edit Config. Añade esto dentro de `mcpServers`, sin borrar tus otros servidores:
 
 ```json
 {
@@ -67,11 +67,11 @@ Double-click the generated `.mcpb` file. Claude Desktop asks for the URL, tokens
 }
 ```
 
-Quit Claude Desktop completely and open it again.
+Cierra Claude Desktop por completo y vuelve a abrirlo.
 
 ## Claude Code
 
-**Automatic.** `darktrace-mcp setup` adds a user-scoped server.
+**Automática.** `darktrace-mcp setup` añade un servidor con ámbito de usuario.
 
 **Manual.**
 
@@ -86,13 +86,13 @@ claude mcp add --scope user \
 claude mcp get darktrace
 ```
 
-Use `/mcp` inside Claude Code to see the server. Prefer `--scope user`. A project `.mcp.json` runs for everyone who trusts the repository, so only use one after you review every command and variable in it.
+Usa `/mcp` dentro de Claude Code para ver el servidor. Prefiere `--scope user`. Un `.mcp.json` de proyecto se ejecuta para todo el que confíe en el repositorio: úsalo solo después de revisar cada comando y variable.
 
 ## Codex
 
-**Automatic.** `darktrace-mcp setup`.
+**Automática.** `darktrace-mcp setup`.
 
-**Manual.** Add to `~/.codex/config.toml`. The Codex CLI and IDE extension share this file.
+**Manual.** Añade a `~/.codex/config.toml`. La CLI de Codex y la extensión del IDE comparten este archivo.
 
 ```toml
 [mcp_servers.darktrace]
@@ -106,19 +106,19 @@ DARKTRACE_PRIVATE_TOKEN_FILE = "/absolute/private/darktrace/private-token"
 DARKTRACE_PROFILES = "read"
 ```
 
-Check it with `codex mcp list`.
+Compruébalo con `codex mcp list`.
 
 ## Cursor
 
-**Automatic.** `darktrace-mcp setup`, or get a one-click install link:
+**Automática.** `darktrace-mcp setup`, o genera un enlace de instalación de un clic:
 
 ```sh
 darktrace-mcp config cursor
 ```
 
-Open the printed `cursor://` link and confirm in Cursor.
+Abre el enlace `cursor://` que aparece y confirma en Cursor.
 
-**Manual.** Add to `~/.cursor/mcp.json`:
+**Manual.** Añade a `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -138,19 +138,19 @@ Open the printed `cursor://` link and confirm in Cursor.
 }
 ```
 
-Check it under Cursor Settings → MCP.
+Compruébalo en Cursor Settings → MCP.
 
 ## VS Code
 
-**Automatic.** `darktrace-mcp setup`, or get a one-click install link:
+**Automática.** `darktrace-mcp setup`, o genera un enlace de instalación de un clic:
 
 ```sh
 darktrace-mcp config vscode
 ```
 
-Open the printed link and confirm in VS Code.
+Abre el enlace que aparece y confirma en VS Code.
 
-**Manual.** Run **MCP: Open User Configuration** and add:
+**Manual.** Ejecuta **MCP: Open User Configuration** y añade:
 
 ```json
 {
@@ -171,13 +171,13 @@ Open the printed link and confirm in VS Code.
 }
 ```
 
-Use **MCP: List Servers** to start or inspect it. Prefer the user configuration over a workspace `.vscode/mcp.json`.
+Usa **MCP: List Servers** para iniciarlo o revisarlo. Prefiere la configuración de usuario a un `.vscode/mcp.json` del espacio de trabajo.
 
 ## Windsurf
 
-**Automatic.** `darktrace-mcp setup`.
+**Automática.** `darktrace-mcp setup`.
 
-**Manual.** Add to `~/.codeium/windsurf/mcp_config.json`:
+**Manual.** Añade a `~/.codeium/windsurf/mcp_config.json`:
 
 ```json
 {
@@ -197,13 +197,13 @@ Use **MCP: List Servers** to start or inspect it. Prefer the user configuration 
 }
 ```
 
-Refresh the MCP list in Windsurf's Cascade panel.
+Actualiza la lista de MCP en el panel Cascade de Windsurf.
 
 ## OpenCode
 
-**Automatic.** `darktrace-mcp setup`.
+**Automática.** `darktrace-mcp setup`.
 
-**Manual.** Add to `~/.config/opencode/opencode.json`:
+**Manual.** Añade a `~/.config/opencode/opencode.json`:
 
 ```json
 {
@@ -226,9 +226,9 @@ Refresh the MCP list in Windsurf's Cascade panel.
 
 ## Gemini CLI
 
-**Automatic.** `darktrace-mcp setup`.
+**Automática.** `darktrace-mcp setup`.
 
-**Manual.** Either use the CLI:
+**Manual.** Usa la CLI:
 
 ```sh
 gemini mcp add --scope user \
@@ -240,7 +240,7 @@ gemini mcp add --scope user \
 gemini mcp list
 ```
 
-or add to `~/.gemini/settings.json`:
+o añade a `~/.gemini/settings.json`:
 
 ```json
 {
@@ -260,18 +260,18 @@ or add to `~/.gemini/settings.json`:
 }
 ```
 
-Do not set `"trust": true`: keep Gemini's confirmation prompt for every tool call.
+No pongas `"trust": true`: mantén la confirmación de Gemini en cada llamada.
 
 ## Docker
 
-Use this with any client that accepts `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Load or build the image first ([Docker guide](docker.md)), then get its ID:
+Sirve para cualquier cliente que acepte `command` + `args` (Claude Desktop, Cursor, Windsurf, Gemini CLI, VS Code). Carga o construye la imagen primero ([guía de Docker](../docker.md), en inglés) y obtén su ID:
 
 ```sh
 docker image inspect --format '{{.Id}}' darktrace-mcp:local
 command -v docker
 ```
 
-Replace the last argument with that `sha256:…` ID and `command` with the full Docker path:
+Sustituye el último argumento por ese ID `sha256:…` y `command` por la ruta completa de Docker:
 
 ```json
 {
@@ -296,8 +296,8 @@ Replace the last argument with that `sha256:…` ID and `command` with the full 
 }
 ```
 
-The token files must be owned by UID 1000 (or change `--user` to match their owner) and have mode `0600`. Keep `-i`, never add `-t`. Do not publish ports or use `--network host`.
+Los archivos de token deben pertenecer al UID 1000 (o cambia `--user` para que coincida con su dueño) y tener permisos `0600`. Mantén `-i` y nunca añadas `-t`. No publiques puertos ni uses `--network host`.
 
-## Several clients, one setup
+## Varios clientes, una configuración
 
-All clients can share the same token files and URL. Only the client config differs. To change permissions for one client, edit `DARKTRACE_PROFILES` in that client's entry.
+Todos los clientes pueden compartir los mismos archivos de token y la misma URL. Solo cambia la configuración del cliente. Para cambiar los permisos de un cliente, edita `DARKTRACE_PROFILES` en su entrada.

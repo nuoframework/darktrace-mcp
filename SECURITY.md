@@ -1,6 +1,13 @@
 # Security policy
 
-This private release candidate (version `1.0.0`, distributed only as private GitHub Release assets) exposes 15 read-only tools covering 19 validated GET selectors. On 2026-10-06 the arm64 Docker image passed 19/19 bounded queries on a Darktrace 7.1.0 lab. That is not full API compatibility, production security or acceptance of residual risk. Open scanner findings and remaining gates are listed in the [Docker guide](docs/docker.md#current-candidate-at-a-glance).
+This policy covers the private `nuoframework/darktrace-mcp` repository. For how the server protects your appliance and data, read the [security overview](docs/security.md).
+
+| Version | Scope |
+|---|---|
+| Unreleased (main) | Full API surface: 78 of 79 operations behind operator-chosen profiles (`read`, `sensitive`, `write`, `critical`). 19 read operations are lab-validated on Darktrace 7.1.0; the rest are marked not lab-validated |
+| 1.0.0 | 15 read-only tools covering 19 lab-validated GET operations |
+
+Lab results are not full API compatibility, production security or acceptance of residual risk. Open scanner findings are listed in the [Docker guide](docs/docker.md#current-candidate-at-a-glance).
 
 ## Report a vulnerability privately
 
@@ -12,13 +19,17 @@ Include the affected commit/version, runtime, minimal reproduction with syntheti
 
 Complaints, trademark or branding claims about this unofficial, unaffiliated project, including requests concerning the Darktrace logo shown in the README: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com). Do not send vulnerability details, credentials or appliance data to this address. Reclamaciones y reivindicaciones sobre marcas o imagen corporativa: la misma dirección; no es un canal para vulnerabilidades. This project never sends mail on its own.
 
-## Baseline boundaries
+## Security boundaries
 
-Stdio only; one HTTPS origin and credential pair per process. Read enabled by default; sensitive reads disabled by default and unable to widen the 19-selector ceiling. Writes, write previews, critical execution, email, PCAP export and HTTP transport are unavailable in this release. Model approval cannot authorize an appliance action. Unknown mutation outcomes require investigation, never automatic retries.
+- **Transport:** stdio only; one HTTPS origin and one credential pair per process. No listening port.
+- **Profiles:** `read` is the default. `sensitive`, `write` and `critical` must be enabled by the operator at startup; the model cannot enable them. Model or client approval is not authorization: appliance token permissions remain authoritative.
+- **Changes:** `write` operations accept `dryRun:true` previews. `critical` operations (Antigena/RESPOND, intel feed, subnets, email actions, tag deletion) return a preview unless the call carries `confirm:true`. Every write is audited. POST/DELETE are never retried; an interrupted write has an unknown outcome and must be checked on the appliance.
+- **Not available:** HTTP transport, export to disk and the deprecated `GET /aianalyst/incidents`.
+- **Token files:** regular files, at most 4,096 bytes, owned by the runtime user, mode `0600` or stricter, opened without following symlinks.
+- **TLS:** verification is mandatory; a private CA is added with `NODE_EXTRA_CA_CERTS`. Proxy variables and TLS bypass settings stop startup.
+- **Data egress:** results reach the MCP host and its model provider. Operators must assess provider processing, retention, residency and host forwarding, with extra care for the `sensitive` profile.
 
-Token files must be regular, bounded to 4,096 bytes, owned by the runtime user, mode 0600 or stricter and opened without following symlinks. TLS verification is mandatory; private CA trust uses NODE_EXTRA_CA_CERTS. Operators must assess provider processing, retention, residency and host forwarding for any deployment, plus extra eligibility for Advanced Search.
-
-See the [threat model](docs/security/threat-model.md), [design decisions](docs/security/design-decisions.md) and [security test plan](docs/security/security-test-plan.md) for assumptions, pending evidence and activation gates. Same-user hostile OS/operator compromise is outside process isolation.
+Assumptions and test evidence: [threat model](docs/security/threat-model.md), [design decisions](docs/security/design-decisions.md), [security test plan](docs/security/security-test-plan.md). A hostile process running as the same OS user is out of scope.
 
 ## Distribution
 

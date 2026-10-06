@@ -82,7 +82,7 @@ Local SVG files in [`docs/assets/badges/`](assets/badges/), in English (`*-en.sv
 | license: Apache-2.0 / licencia: Apache-2.0 | [`LICENSE`](../LICENSE) | Package manifest and image label agree |
 | docker: local build · pinned ID / docker: build local · ID fijado | [Docker guide](docker.md) | Local image only, run by inspected image ID with `--pull=never` |
 | security tests: offline · 2026-10-05 / pruebas seguridad: offline · 2026-10-05 | [Corrections acceptance](security/mcp-corrections-acceptance.md) | Synthetic offline suite on source `eadfe117…`: Linux Node 22 324/324, macOS Node 24 321 passed + 3 platform-blocked, 0 failed; standard suite 106/106 |
-| status: private alpha / estado: alfa privada | [Stable readiness](stable-readiness.md) | Version `0.1.0-alpha.0`; stable gates still open |
+| status: private alpha / estado: alfa privada | [Stable readiness](history/stable-readiness.md) | Version `0.1.0-alpha.0`; stable gates still open |
 
 **Not proposed, on purpose:** OpenSSF Scorecard or Best Practices, "OWASP certified", "0 CVE" or "scan passed", Docker Hardened Images, npm version, downloads or coverage percentages. None is true or measured for this project today. The Docker badge must not say "scanned" until the base-image remediation is accepted and its scan is recorded in the Docker guide.
 

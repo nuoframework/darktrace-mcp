@@ -1,5 +1,9 @@
 # Versioned private GitHub Releases
 
+[README](../README.md) · [Getting started](getting-started.md) · [Changelog](../CHANGELOG.md)
+
+> Most users should install with the [setup wizard](getting-started.md). This page is for installing or preparing a specific versioned release. The v1.0.0 release contains the earlier read-only build (15 tools); the full API surface and profiles described in the README arrive in a later release.
+
 ## Current private stable: v1.0.0
 
 Use the [v1.0.0 private release](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.0.0). Docker is recommended: download your architecture's image archive and `SHA256SUMS`, verify it, then run `docker load`. See [the Docker installation guide](docker.md#install-options). The release also includes the native package, security/provenance evidence, complete native CI receipts and a package-evidence archive preserving the original verifier sidecars. The release-level checksum file covers every downloadable archive.
@@ -11,7 +15,7 @@ The first stable provides 15 read-only tools covering 19 lab-validated GET selec
 The following procedure describes the immutable earlier alpha release, not the current stable. For v1.0.0, use the installation above.
 
 
-The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](release-preparation-docker-mcp.md).
+The published `v0.1.0-alpha.0` assets are immutable historical evidence. At this historical checkpoint the candidate version was `0.1.0-alpha.0` and `0.1.0` was proposed; these are superseded by the separately reviewed v1.0.0 preparation. The proposed first stable scope is supported read-only queries, with write operations reviewed for a later delivery. See [current preparation evidence](history/release-preparation.md#historical-release-direction-and-docker-smoke) and the earlier [Docker preparation record](history/release-preparation-docker-mcp.md).
 
 This is the distribution procedure for private releases of `nuoframework/darktrace-mcp`. Version `0.1.0-alpha.0` uses tag `v0.1.0-alpha.0`. No release is created by the preparation scripts or workflows. The owner publishes only after independent source review and artifact review. `package.private:true` remains set; neither npm publication nor container publication is used.
 

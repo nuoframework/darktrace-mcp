@@ -1,6 +1,6 @@
 # Current release preparation
 
-The current versioned private-release procedure and execution record are in [release preparation](release-preparation.md) and [releases](releases.md). The preliminary archive/hash and partial-build notes below are historical evidence, superseded for final delivery; do not use them as release checksums. No release has been published by the preparation task.
+The current versioned private-release procedure and execution record are in [release preparation](release-preparation.md) and [releases](../releases.md). The preliminary archive/hash and partial-build notes below are historical evidence, superseded for final delivery; do not use them as release checksums. No release has been published by the preparation task.
 
 # Documentation and private packaging acceptance report
 

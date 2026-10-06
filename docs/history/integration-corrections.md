@@ -1,6 +1,6 @@
 # Correcciones de auditoría del servidor
 
-Fecha: 2026-10-05. Se implementaron SA-01 a SA-06, la defensa de ejecución G4 y la ampliación AD-03 de minimización de salida de [la auditoría independiente](security/code-audit-server.md). Typecheck pasa; la suite completa de la instantánea aislada pasa **101/101** y las nuevas pruebas de corrección pasan **12/12**, sin fallos, cancelaciones, skips ni todos. Dos builds reproducen exactamente catalogue, mapping, listas/vistas de respuesta y coverage.
+Fecha: 2026-10-05. Se implementaron SA-01 a SA-06, la defensa de ejecución G4 y la ampliación AD-03 de minimización de salida de [la auditoría independiente](../security/code-audit-server.md). Typecheck pasa; la suite completa de la instantánea aislada pasa **101/101** y las nuevas pruebas de corrección pasan **12/12**, sin fallos, cancelaciones, skips ni todos. Dos builds reproducen exactamente catalogue, mapping, listas/vistas de respuesta y coverage.
 
 Este informe supera las afirmaciones afectadas de [integration-report.md](integration-report.md), que se conserva sin editar. Los resultados son evidencia de implementación offline; no aprueban ST, laboratorio 7.1 ni publicación.
 

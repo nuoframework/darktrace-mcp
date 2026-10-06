@@ -2,11 +2,11 @@
 
 **Scope:** operator guidance only; no source, manifests, security-review histories, commits or lab calls.
 
-Read [round-five review R5-01](security/design-review-round5.md) and reviewed all env-file, file-permission and size-limit references in README, configuration, English/Spanish quickstarts, troubleshooting, client guides, examples and `.env.example`.
+Read [round-five review R5-01](../security/design-review-round5.md) and reviewed all env-file, file-permission and size-limit references in README, configuration, English/Spanish quickstarts, troubleshooting, client guides, examples and `.env.example`.
 
 ## Correction
 
-[Configuration](configuration.md) now states that Node reads `--env-file` before server startup. The server receives trusted host environment values and cannot verify the env file's owner, permissions, type, symlinks or size; the server's JSON/token controls and 64 KiB/4 KiB ceilings do not cover it. The operator must protect and verify any such file externally, with operator ownership, mode 0600 and a trusted non-symlink location, and include only non-secret settings/token-file paths, never token values. Protected JSON and separate token files remain the preferred server-validated file inputs.
+[Configuration](../configuration.md) now states that Node reads `--env-file` before server startup. The server receives trusted host environment values and cannot verify the env file's owner, permissions, type, symlinks or size; the server's JSON/token controls and 64 KiB/4 KiB ceilings do not cover it. The operator must protect and verify any such file externally, with operator ownership, mode 0600 and a trusted non-symlink location, and include only non-secret settings/token-file paths, never token values. Protected JSON and separate token files remain the preferred server-validated file inputs.
 
 English/Spanish quickstarts, troubleshooting and `.env.example` repeat this boundary. Container guidance also clarifies that Docker reads its env file outside the server and no server file-metadata/size validation applies. `--check-config` validates resulting settings and referenced server-read files, not the env file. The English quickstart now says local checks do not establish **appliance token ACLs**, avoiding confusion with local file-mode validation.
 

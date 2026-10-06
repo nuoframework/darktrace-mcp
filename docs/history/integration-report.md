@@ -1,6 +1,6 @@
 # Server integration and offline verification
 
-On 2026-10-05 the final server integration passed TypeScript checking and the complete offline suite: **84 tests passed, zero failures, cancellations, skips or todos**. The dedicated integration and coverage suite passed **15 tests**. This report records implementation evidence against [architecture](architecture.md) and [design decisions](security/design-decisions.md); it does not declare an ST acceptance gate, security approval, appliance compatibility or release approval complete.
+On 2026-10-05 the final server integration passed TypeScript checking and the complete offline suite: **84 tests passed, zero failures, cancellations, skips or todos**. The dedicated integration and coverage suite passed **15 tests**. This report records implementation evidence against [architecture](../architecture.md) and [design decisions](../security/design-decisions.md); it does not declare an ST acceptance gate, security approval, appliance compatibility or release approval complete.
 
 ## Implemented behavior
 
@@ -14,7 +14,7 @@ Operation validation now uses documented milliseconds for `starttime/endtime`, i
 
 ## Effective coverage
 
-[Generated coverage](../src/coverage/report.generated.json) is built by [the runtime coverage generator](../src/coverage/report.ts) from the same Zod schemas and policy descriptors used by execution. There are exactly **79 operation rows**: 59 catalogue `implemented`, 19 `blocked`, and one `excluded`. These status labels preserve catalogue accounting; they are not counts of executable or published tools. Critical remains preview-only and profiles still restrict publication/execution. The independent `delete_tags_entities` row remains blocked (S5).
+[Generated coverage](../../src/coverage/report.generated.json) is built by [the runtime coverage generator](../../src/coverage/report.ts) from the same Zod schemas and policy descriptors used by execution. There are exactly **79 operation rows**: 59 catalogue `implemented`, 19 `blocked`, and one `excluded`. These status labels preserve catalogue accounting; they are not counts of executable or published tools. Critical remains preview-only and profiles still restrict publication/execution. The independent `delete_tags_entities` row remains blocked (S5).
 
 Coverage contains **418 parameter records** (383 accepted, 35 blocked), including body containers, nested properties, media-type variants and decoded Advanced Search fields. Each record states location, units, effective schema bounds, required/omitted/default behavior, provenance and enforcement; non-schema refinements are stated separately. This is schema/policy traceability, not exhaustive per-field live compatibility evidence.
 
