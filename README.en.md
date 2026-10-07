@@ -2,21 +2,15 @@
 
 [Español](README.md) · **English**
 
-<picture><source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-en-mobile.svg">
-  <img src="docs/assets/banner-variants/b/readme-banner-en.svg" width="1280" alt="Darktrace MCP server for SOC teams — with a decorative network graph. Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace. The footer shows the official Darktrace logo, labeled as an independent third-party project; logo use does not imply authorization or official status."></picture>
+<picture><source media="(max-width: 600px)" srcset="docs/assets/banner-variants/b/readme-banner-en-mobile.svg"><img src="docs/assets/banner-variants/b/readme-banner-en.svg" width="1280" alt="Darktrace MCP server for SOC teams — with a decorative network graph. Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace. The footer shows the official Darktrace logo, labeled as an independent third-party project; logo use does not imply authorization or official status."></picture>
 
-An unofficial Darktrace MCP server connecting the **Darktrace Threat Visualizer API** to Claude, Cursor, Codex and VS Code through **Model Context Protocol**. It helps your SOC with incident response: investigation, Antigena / RESPOND and still-unvalidated Darktrace/Email queries. It is not an official product and is not affiliated with Darktrace.
+An unofficial Darktrace MCP server connecting the **Darktrace Threat Visualizer API** to Claude, Cursor, Codex and VS Code through **Model Context Protocol**. It helps your SOC with incident response: investigation, Antigena / RESPOND and still-unvalidated Darktrace/Email queries.
+
+**Unofficial MCP. Developed by an independent third party, unaffiliated with Darktrace and without authorization from Darktrace.**
 
 **Investigate in natural language, with explicit permissions and human approval for critical actions.**
 
-[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2563EB)](LICENSE)
-[![Node.js 22+](https://img.shields.io/badge/node-22%2B-339933?logo=nodedotjs&logoColor=white)](docs/en/getting-started.md)
-[![MCP 2026-07-28](https://img.shields.io/badge/MCP-2026--07--28-7C3AED)](docs/en/configuration.md#human-approval)
-[![CI](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15261/badge)](https://www.bestpractices.dev/projects/15261)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/nuoframework/darktrace-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/nuoframework/darktrace-mcp)
-[![npm version](https://img.shields.io/npm/v/@nuoframework/darktrace-mcp)](docs/en/releases.md)
-[![Release](https://img.shields.io/github/v/release/nuoframework/darktrace-mcp?display_name=tag)](https://github.com/nuoframework/darktrace-mcp/releases)
+[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-2563EB)](LICENSE) [![Node.js 22+](https://img.shields.io/badge/node-22%2B-339933?logo=nodedotjs&logoColor=white)](docs/en/getting-started.md) [![MCP 2026-07-28](https://img.shields.io/badge/MCP-2026--07--28-7C3AED)](docs/en/configuration.md#human-approval) [![CI](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/nuoframework/darktrace-mcp/actions/workflows/ci.yml) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15261/badge)](https://www.bestpractices.dev/projects/15261) [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/nuoframework/darktrace-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/nuoframework/darktrace-mcp) [![npm version](https://img.shields.io/npm/v/@nuoframework/darktrace-mcp)](docs/en/releases.md) [![Release](https://img.shields.io/github/v/release/nuoframework/darktrace-mcp?display_name=tag)](https://github.com/nuoframework/darktrace-mcp/releases)
 
 [Get started](docs/en/getting-started.md) · [Tools](docs/en/tools.md) · [Configuration](docs/en/configuration.md) · [Security](docs/en/security.md) · [Troubleshooting](docs/en/troubleshooting.md)
 
@@ -52,8 +46,7 @@ An unofficial Darktrace MCP server connecting the **Darktrace Threat Visualizer 
 <a href="https://vscode.dev/redirect/mcp/install?name=darktrace&amp;config=%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D&amp;inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D"><img src="docs/assets/install/en-vscode.svg" height="36" alt="Install in VS Code"></a>
 <a href="https://insiders.vscode.dev/redirect/mcp/install?name=darktrace&amp;config=%7B%22name%22%3A%22darktrace%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40nuoframework%2Fdarktrace-mcp%401.1.2%22%5D%2C%22env%22%3A%7B%22DARKTRACE_URL%22%3A%22%24%7Binput%3Adarktrace-url%7D%22%2C%22DARKTRACE_PUBLIC_TOKEN%22%3A%22%24%7Binput%3Adarktrace-public-token%7D%22%2C%22DARKTRACE_PRIVATE_TOKEN%22%3A%22%24%7Binput%3Adarktrace-private-token%7D%22%2C%22DARKTRACE_PROFILES%22%3A%22read%22%7D%2C%22inputs%22%3A%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D%7D&amp;inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-url%22%2C%22description%22%3A%22Darktrace%20appliance%20URL%20(https%3A%2F%2F...)%22%2C%22password%22%3Afalse%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-public-token%22%2C%22description%22%3A%22Darktrace%20API%20public%20token%22%2C%22password%22%3Atrue%7D%2C%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22darktrace-private-token%22%2C%22description%22%3A%22Darktrace%20API%20private%20token%22%2C%22password%22%3Atrue%7D%5D&amp;quality=insiders"><img src="docs/assets/install/en-insiders.svg" height="36" alt="Install in VS Code Insiders"></a></p>
 
-**Cursor:** adds the entry ([complete setup](docs/en/install.md#what-the-badge-does)). **VS Code / Insiders:** prompt for details.
-
+**Cursor:** the button adds the entry; with 1.1.2, then run `npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor` to complete it. **VS Code and Insiders:** prompt for the address and tokens.
 </details>
 
 To uninstall: `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`. It shows the plan and asks for confirmation; `--dry-run` only displays it and `--docker` includes the pinned image.
@@ -61,7 +54,12 @@ To uninstall: `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`. It shows the
 ## How it works
 
 ```mermaid
-flowchart LR; C["AI client"] <-->|stdio| S["Local MCP server"]; T["Token files · 0600"] --> S; S <--> P{"Profiles and policy"}; P <-->|"HMAC-signed HTTPS · verified TLS"| D["Darktrace appliance"]; S --> A["Write audit on stderr"]
+flowchart LR
+    C["AI client"] <-->|stdio| S["Local MCP server"]
+    T["Token files · 0600"] --> S
+    S <--> P{"Profiles and policy"}
+    P <-->|"HMAC-signed HTTPS · verified TLS"| D["Darktrace appliance"]
+    S --> A["Write audit on stderr"]
 ```
 
 The server opens no ports. It pins one HTTPS destination, rejects proxies and redirects, and never exceeds token permissions. Results reach the client and its provider: review provider eligibility, data processing, retention and residency before production use.
@@ -91,7 +89,12 @@ sequenceDiagram
 A preview lasts **5 minutes** and can be used once. Declining, cancelling or being unable to display the dialog prevents execution. Reversal depends on the operation: **there is no automatic rollback**, comments cannot be deleted, and an unknown outcome requires checking the appliance before retrying.
 
 ```mermaid
-flowchart LR; R["read · queries"] --> S["sensitive · sensitive data"]; R --> W["write · changes"]; W --> C["critical · high impact (requires write)"]; S -.-> A["sensitive + write or all: explicit acknowledgement"]; W -.-> A
+flowchart LR
+    R["read · queries"] --> S["sensitive · sensitive data"]
+    R --> W["write · changes"]
+    W --> C["critical · high impact (requires write)"]
+    S -.-> A["sensitive + write or all: explicit acknowledgement"]
+    W -.-> A
 ```
 
 This is a risk ladder, not automatic inheritance: choose comma-separated profiles. `critical` requires `write`; `all` or `sensitive` + `write` requires `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. There is no data isolation between sensitive reads and writes. [Profiles and approval](docs/en/configuration.md#profiles).
@@ -101,11 +104,8 @@ This is a risk ladder, not automatic inheritance: choose comma-separated profile
 Recordings use an HTTPS mock and synthetic data; they show the flow, not appliance validation. [Sources and transcripts](scripts/demo/README.md).
 
 <p><img src="docs/assets/demo/setup.gif" alt="Darktrace MCP server setup with synthetic data for a SOC"><br><strong>Connect once.</strong> The wizard verifies the connection and configures the client.</p>
-
 <p><img src="docs/assets/demo/analyst.gif" alt="AI-assisted SOC investigation of Darktrace model breaches using synthetic data"><br><strong>Investigate.</strong> Query devices and model breaches and decide what to examine next.</p>
-
 <p><img src="docs/assets/demo/approval.gif" alt="Human approval for Antigena RESPOND through Darktrace MCP in Claude Code"><br><strong>Stay in control.</strong> The demo declines the critical dialog; no write is sent.</p>
-
 </details>
 
 ## What you can do
@@ -136,7 +136,7 @@ Recordings use an HTTPS mock and synthetic data; they show the flow, not applian
 - **System, models and metrics:** `models`, `components` and `enums` only with `responsedata`; CVEs returned 500 on the non-OT lab and `filtertypes` returned a rejected 302 redirect.
 - **Response, intel feed and subnets:** partial parameter coverage; see the [1.1.1 campaign](docs/security/lab-gap-campaign-1.1.1.md).
 - **Tags:** three deletions applied but returned 502: reported as `write_outcome_unknown`, not success.
-- **Darktrace/Email in 1.1.1:** **14 inventoried operations: 13 reads available behind `sensitive` and one action excluded from every profile**. None is validated against a live appliance. All 13 `/agemail` API routes tested with tokens returned 403; later the service returned 503 with “Darktrace Labs” HTML, preventing validation. The console uses a separate host and session authentication; opening it does not prove API access. Email download returns size and SHA-256 only, never content.
+- **Darktrace/Email in 1.1.2 (unchanged since 1.1.1):** **14 inventoried operations: 13 reads available behind `sensitive` and one action excluded from every profile**. None is validated against a live appliance. All 13 `/agemail` API routes tested with tokens returned 403; later the service returned 503 with “Darktrace Labs” HTML, preventing validation. The console uses a separate host and session authentication; opening it does not prove API access. Email download returns size and SHA-256 only, never content.
 
 Validating Email requires an enabled deployment, a token with **Email Logs** permissions, a reviewed and pinned instance OpenAPI schema, and tests of the 13 reads through MCP with lab data. The action additionally needs a restrictive schema, signing and effect/reversal evidence, and a new design review; releasing an email creates irreversible exposure. [403-blocked test](docs/security/lab-email-validation.md) · [Console-observed API and open work](docs/security/email-api-observed.md).
 
@@ -186,7 +186,7 @@ npm package: **`@nuoframework/darktrace-mcp`**; the unscoped name is not this pr
 Query alerts, comments and device context to prioritize a SOC investigation.
 Start with `read` and the [tool reference](docs/en/tools.md#model-breaches).
 
-### Isolate a device with Antigena from Claude with human approval
+### Block a connection with Antigena from Claude with human approval
 
 In Claude Code, preview an Antigena / RESPOND connection block; full device isolation is not validated.
 Use `write,critical` and review [human approval](docs/en/configuration.md#human-approval).
@@ -217,4 +217,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md). For questions or bugs, open an [issue](
 
 Darktrace and its logo belong to Darktrace; their use identifies the integrated product and implies neither endorsement nor authorization. [Logo provenance](docs/assets/brand/darktrace/README.md). Trademark or removal requests: [contacto@pabloarrabal.com](mailto:contacto@pabloarrabal.com).
 
-**Related:** [npm](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) · [GHCR image](https://github.com/nuoframework/darktrace-mcp/pkgs/container/darktrace-mcp) · [MCP Registry](https://registry.modelcontextprotocol.io/) · [Official Darktrace API docs (portal access required)](https://customerportal.darktrace.com/guides/api-tokens).
+**Related:** [npm](https://www.npmjs.com/package/@nuoframework/darktrace-mcp) · [GHCR image](https://github.com/nuoframework/darktrace-mcp/pkgs/container/darktrace-mcp) · [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.nuoframework%2Fdarktrace-mcp/versions/latest) · [Official Darktrace API docs (portal access required)](https://customerportal.darktrace.com/guides/api-tokens).
