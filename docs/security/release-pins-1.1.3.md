@@ -28,7 +28,7 @@ Local checks on macOS arm64 at `f09a94e`: `npm run lint`, `npm run typecheck`, `
 
 ## Branch `feat/update-command` (update lifecycle)
 
-This section covers branch `feat/update-command`: the `update` command (`--check`, `--rollback`, `--version`, `--allow-downgrade`, `--dry-run`, `--yes`, `--json`), the `setup` update-mode step (`--update-mode pinned|npx-latest`), the `Update available` line in `test` / `doctor --online`, and `uninstall` removing the copies and the previous image kept by `update`. Production source changed only under `src/cli/`; tests and documentation changed too. The package version literal stays `1.1.2`; no tag, publication or release was performed. This branch does not edit `.github/workflows/*`: the release orchestrator moves the pins below, which supersede the PR #18 values above.
+This section covers branch `feat/update-command`: the `update` command (`--check`, `--rollback`, `--version`, `--allow-downgrade`, `--dry-run`, `--yes`, `--json`), the `setup` update-mode step (`--update-mode pinned|npx-latest`), the `Update available` line in `test` / `doctor --online`, and `uninstall` removing the copies and the previous image kept by `update`. Production source changed only under `src/cli/`; tests and documentation changed too. The package version literal stays `1.1.2`; no tag, publication or release was performed. The pins below are applied in `.github/workflows/ci.yml` by this branch and supersede the PR #18 values above.
 
 ### Pin recomputation
 
