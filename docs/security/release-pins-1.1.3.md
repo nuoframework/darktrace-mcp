@@ -57,8 +57,9 @@ Tool contracts, profile `tools/list` hashes and profile tool/operation counts ar
 | Environment | Functional total / pass / fail / skip | Security total / pass / fail / skip |
 |---|---|---|
 | macOS arm64 (Node 24.14.1, npm 11.11.0) | 311 / 311 / 0 / 0 | 1150 / 1147 / 0 / 3 |
+| Linux arm64, local replay of the `ci.yml` docker job (vendor Node 24.18.1, OpenSSL 3.5.9 shared) | 311 / 311 / 0 / 0 | 1150 / 1150 / 0 / 0 |
 
-The three security skips are the existing macOS setgid-mode cases; Linux CI still requires 1150 passes and zero skips. Local checks do not establish a Linux or Docker CI result.
+The three macOS security skips are the existing setgid-mode cases. The Linux row is the `docker (arm64)` job replayed locally step by step from the workflow with the pins above (every step passed, including the final byte binding: source tree `05e326f5…`, runtime aggregate `5493a69a…`, 105 files); the GitHub Actions run on PR #23 is the authoritative result.
 
 - `npm run lint`, `npm run typecheck`, `npm test` and `npm run test:security`: passed.
 - `node scripts/validate-examples.mjs`: passed (9 JSON examples, 1 TOML example, 8 documents).
