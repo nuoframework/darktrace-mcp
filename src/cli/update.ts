@@ -1,14 +1,14 @@
-import { readdirSync } from 'node:fs';
+import { constants, closeSync, fsyncSync, openSync, readFileSync, readdirSync, unlinkSync, writeSync } from 'node:fs';
 import path from 'node:path';
 import type { Readable, Writable } from 'node:stream';
-import { CLIENT_IDS, clientLabel, hasClientEntry, installClient, type CliContext, type ClientId, type ClientResult } from './clients.js';
+import { CLIENT_IDS, clientLabel, hasClientEntry, installClient, isClientId, type CliContext, type ClientId, type ClientResult } from './clients.js';
 import { IMAGE_REPOSITORY, checkDockerDaemon, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ResolvedImage } from './docker.js';
 import { SetupInputError, buildServerEntry, type InstallSettings } from './entry.js';
-import { findOnPath, lstatOrUndefined } from './fsutil.js';
+import { atomicWrite, ensurePrivateDir, findOnPath, lstatOrUndefined } from './fsutil.js';
 import { PACKAGE_NAME, describeEntry, fixedCopyDir, fixedCopyEntry, installFixedCopy } from './install.js';
 import { containerCheckConfig, describeProbeFailure, onlineTestEnv, probeStatus, recordedVersion, type ProbeOutcome } from './online.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
-import { compareVersions, downloadPackage, releaseNotes, releaseUrl, removeDownload, resolveVersion, verifySignatures, type Download, type SignatureReport } from './registry.js';
+import { compareVersions, downloadPackage, releaseImageDigest, releaseNotes, releaseUrl, removeDownload, resolveVersion, verifyRepositoryProvenance, verifySignatures, type Download, type SignatureReport } from './registry.js';
 import { readSavedSetup, setupDir, tokenPaths, writeSavedSetup, type SavedSetup } from './state.js';
 import { createUi, type Ui } from './ui.js';
 import { VERSION } from '../server/createServer.js';
@@ -17,11 +17,10 @@ import { VERSION } from '../server/createServer.js';
  * `darktrace-mcp update`: move every client entry to a newer published release, verified end to end, keeping the
  * previous copy (or image) for `--rollback`. Installer only: the MCP server never checks for updates.
  *
- * Order of operations for the node runtime: query registry.npmjs.org, refuse downgrades, download the exact version
- * with npm (locked dependencies, no scripts), `npm audit signatures` (registry signatures and provenance), copy to the
- * per-version fixed directory, run the new copy's offline `--check-config` with the stored settings, one signed
- * GET /status, and only then rewrite the client entries (backups kept) and record the previous version.
- * Docker runtime: pull the release tag, resolve the image ID and digest, container `--check-config`, probe, rewrite.
+ * Node runtime: query registry.npmjs.org, refuse unsafe downgrades, bind the packed tarball to registry SRI, install
+ * locked dependencies without scripts, verify npm signatures and pinned GitHub provenance, then check the fixed copy
+ * and appliance before a journaled client rewrite. Docker runtime: force-pull the release tag, compare its digest with
+ * the matching GitHub release record, check the container and appliance, then journal the client rewrite.
  */
 export interface UpdateArgs {
   readonly check: boolean;
@@ -68,7 +67,11 @@ export function listFixedCopies(ctx: CliContext): Array<{ version: string; dir: 
     const s = lstatOrUndefined(dir);
     if (s === undefined || s.isSymbolicLink() || !s.isDirectory()) continue;
     const entryPath = fixedCopyEntry(dir);
+    const entryStat = lstatOrUndefined(entryPath);
+    if (entryStat?.isFile() !== true || entryStat.isSymbolicLink()) continue;
     const layout = describeEntry(entryPath);
+    const manifest = layout === undefined ? undefined : lstatOrUndefined(path.join(layout.packageRoot, 'package.json'));
+    if (manifest?.isFile() !== true || manifest.isSymbolicLink()) continue;
     if (layout?.name === PACKAGE_NAME && layout.version === name) copies.push({ version: name, dir, entryPath });
   }
   return copies.sort((a, b) => compareVersions(b.version, a.version));
@@ -139,6 +142,17 @@ function nodeCheckConfig(io: UpdateIo, entryPath: string): { ok: boolean; detail
 }
 
 export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number> {
+  if (args.check || args.dryRun) return runUpdateUnlocked(args, io);
+  const releaseLock = acquireUpdateLock(io.ctx);
+  try {
+    recoverInterruptedUpdate(io);
+    return await runUpdateUnlocked(args, io);
+  } finally {
+    releaseLock();
+  }
+}
+
+async function runUpdateUnlocked(args: UpdateArgs, io: UpdateIo): Promise<number> {
   const { ctx } = io;
   // --json keeps stdout for the one JSON document: plain UI, no spinner frames.
   const ui = args.json ? createUi() : io.ui ?? createUi();
@@ -175,17 +189,42 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
   try { target = resolveVersion(ctx, args.version ?? 'latest'); } finally { spinner.stop(); }
   report.target = { version: target.version, provenance: target.provenance };
   say(`Latest:    ${target.version} (registry.npmjs.org${args.version ? `, requested with --version` : ''}; provenance ${target.provenance ? 'published' : 'not published'})\n`);
+  const legacyReleaseWithoutProvenance = compareVersions(target.version, '1.1.0') < 0 && !target.provenance;
+  const targetNeedsProvenance = current.kind === 'fixed-copy' && (target.provenance || !legacyReleaseWithoutProvenance || !args.allowDowngrade);
+  if (targetNeedsProvenance && !target.provenance) say(ui.warn(legacyReleaseWithoutProvenance
+    ? `Release ${target.version} predates provenance and needs --allow-downgrade to run unverified.\n`
+    : `Release ${target.version} is expected to publish provenance; a pinned node update will be refused until registry metadata announces it.\n`));
+  if (target.deprecated !== undefined) say(ui.warn(`This version is deprecated by its publisher: ${target.deprecated}\n`));
   const installed = 'version' in current ? current.version : undefined;
   const direction = installed === undefined ? undefined : compareVersions(target.version, installed);
+
+  if (args.check && current.kind === 'npx-latest') {
+    report.status = 'up-to-date';
+    const notes = await releaseNotes(ctx, target.version);
+    if (notes !== undefined) { report.releaseNotes = notes; say(`\nRelease notes (${releaseUrl(target.version)}):\n${notes.split('\n').map((l) => `  ${l}`).join('\n')}\n\n`); }
+    else say(`Release notes: ${releaseUrl(target.version)}\n`);
+    say(`Clients resolve @latest when they start; registry latest is ${target.version}, so no update command is needed.\n`);
+    return finish(0);
+  }
 
   if (args.check) {
     if (direction === 0) { say(ui.ok('Up to date.\n')); report.status = 'up-to-date'; return finish(0); }
     if (direction !== undefined && direction < 0) { say(ui.ok(`Up to date (installed ${installed} is newer than ${target.version}).\n`)); report.status = 'up-to-date'; return finish(0); }
     report.status = 'update-available';
+    if (targetNeedsProvenance && !target.provenance) {
+      const notes = await releaseNotes(ctx, target.version);
+      if (notes !== undefined) { report.releaseNotes = notes; say(`\nRelease notes (${releaseUrl(target.version)}):\n${notes.split('\n').map((l) => `  ${l}`).join('\n')}\n\n`); }
+      else say(`Release notes: ${releaseUrl(target.version)}\n`);
+      report.next = legacyReleaseWithoutProvenance
+        ? `npx -y ${PACKAGE_NAME}@${target.version} update --allow-downgrade`
+        : 'wait until the registry publishes provenance for this release';
+      say(`Update available: ${installed ?? 'unknown'} -> ${target.version}, but this pinned update cannot proceed without provenance. ${report.next}\n`);
+      return finish(1);
+    }
     const notes = await releaseNotes(ctx, target.version);
     if (notes !== undefined) { report.releaseNotes = notes; say(`\nRelease notes (${releaseUrl(target.version)}):\n${notes.split('\n').map((l) => `  ${l}`).join('\n')}\n\n`); }
     else say(`Release notes: ${releaseUrl(target.version)}\n`);
-    report.next = `npx -y ${PACKAGE_NAME}@${target.version} update`;
+    report.next = `npx -y ${PACKAGE_NAME}@${target.version} update${legacyReleaseWithoutProvenance ? ' --allow-downgrade' : ''}`;
     say(`Update available: ${installed ?? 'unknown'} -> ${target.version}. Run: ${report.next}\n`);
     return finish(current.kind === 'npx-latest' ? 0 : 1);
   }
@@ -198,6 +237,11 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
   if (direction !== undefined && direction < 0 && !args.allowDowngrade) {
     throw new SetupInputError(`${target.version} is older than the installed ${installed}; downgrades are refused unless you pass --allow-downgrade ` +
       '(a downgrade reintroduces fixed issues). Nothing was changed');
+  }
+  if (targetNeedsProvenance && !target.provenance) {
+    throw new SetupInputError(legacyReleaseWithoutProvenance
+      ? `release ${target.version} predates the provenance requirement and has no provenance; pass --allow-downgrade only if you accept that unverified legacy code. Nothing was changed`
+      : `release ${target.version} must have npm provenance metadata; registry.npmjs.org did not announce it. Nothing was changed`);
   }
   if (current.kind === 'checkout') {
     throw new SetupInputError(`the client entries start a source checkout (${current.entryPath}); update it with \`git pull --ff-only\` and \`npm run build\` ` +
@@ -240,7 +284,7 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
   let signatures: SignatureReport | undefined;
   report.verification = {};
   if (current.kind === 'docker') {
-    newImage = acquireImage(io, ui, say, target.version);
+    newImage = await acquireImage(io, ui, say, target.version);
     report.target.image = newImage.id;
     if (newImage.digest) report.target.digest = newImage.digest;
     const dockerPath = findOnPath('docker', ctx.env, ctx.platform) as string;
@@ -253,10 +297,14 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
     let download: Download | undefined;
     try {
       const downloading = ui.spinner(io.stdout, `Downloading ${PACKAGE_NAME}@${target.version} with npm`);
-      try { download = downloadPackage(ctx, target.version); } finally { downloading.stop(); }
+      try {
+        if (target.integrity === undefined) throw new SetupInputError('the registry did not provide a usable sha512 tarball integrity. Nothing was changed');
+        download = downloadPackage(ctx, target.version, target.integrity);
+      } finally { downloading.stop(); }
       say(ui.ok(`Downloaded ${PACKAGE_NAME}@${target.version} (locked dependencies, no lifecycle scripts).\n`));
       const verifying = ui.spinner(io.stdout, 'npm audit signatures');
-      try { signatures = verifySignatures(ctx, download, target.provenance); } finally { verifying.stop(); }
+      try { signatures = verifySignatures(ctx, download, target.provenance || targetNeedsProvenance); } finally { verifying.stop(); }
+      if (target.provenance || targetNeedsProvenance) verifyRepositoryProvenance(ctx, download);
       report.verification.registrySignatures = signatures.signatures;
       report.verification.attestations = signatures.attestations;
       say(ui.ok(`Verified: registry signatures for ${signatures.signatures} package${signatures.signatures === 1 ? '' : 's'}, provenance attestations for ${signatures.attestations}.\n`));
@@ -285,19 +333,23 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
   }
   say(ui.ok(`Appliance answered signed GET /status (HTTP ${outcome.status}); URL, TLS and tokens are valid.\n`));
 
-  // Rewrite the entries, then record the switch. Writers back every file up before replacing it atomically.
-  const results = rewriteClients(io, saved, clients,
-    current.kind === 'docker' ? { kind: 'docker', image: (newImage as ResolvedImage).id } : { kind: 'node', entryPath: newEntryPath as string },
-    current.kind === 'docker' ? { kind: 'docker', image: current.image } : { kind: 'node', entryPath: (current as Extract<CurrentInstall, { kind: 'fixed-copy' }>).entryPath });
+  // Journal the prior launch before touching any client so a killed process can restore the full set on its next run.
+  const restoreLaunch: Launch = current.kind === 'docker' ? { kind: 'docker', image: current.image }
+    : { kind: 'node', entryPath: (current as Extract<CurrentInstall, { kind: 'fixed-copy' }>).entryPath };
+  const targetLaunch: Launch = current.kind === 'docker' ? { kind: 'docker', image: (newImage as ResolvedImage).id }
+    : { kind: 'node', entryPath: newEntryPath as string };
+  const journal = beginJournal(ctx, saved, clients, restoreLaunch);
+  const results = rewriteClients(io, saved, clients, targetLaunch);
   report.clients = results.map(row);
   const incomplete = results.filter((r) => !rewritten(r));
   if (incomplete.length > 0) {
-    // Not every client moved: keep setup.json on the previous version so the next `update` repairs the rest
-    // (it reuses the verified copy and reports the moved clients as unchanged) instead of saying "up to date".
+    const recovered = restoreJournal(io, journal);
+    const finalResults = recoveryResults(recovered.results, incomplete);
+    if (finalResults.length > 0) report.clients = finalResults.map(row);
     report.status = 'partial';
-    report.next = 'fix the clients listed above and rerun update';
-    printSummary(io, ui, say, [[ui.marker('warn'), 'Settings', 'not written', `${setupDir(ctx)}/setup.json still records ${installed ?? 'the previous version'}; rerun update after fixing the clients below`]], results);
-    say('\n' + ui.fail(`${incomplete.map((r) => clientLabel(r.client)).join(', ')}: entry not rewritten (see above). Fix it and rerun \`darktrace-mcp update\`; the verified ${current.kind === 'docker' ? 'image' : 'copy'} is kept.\n`));
+    report.next = recovered.ok ? 'fix the listed client and rerun update' : 'fix the listed clients and rerun update to resume recovery';
+    printSummary(io, ui, say, [[ui.marker(recovered.ok ? 'ok' : 'warn'), 'Settings', recovered.ok ? 'unchanged' : 'recovery pending', `${setupDir(ctx)}/setup.json records ${installed ?? 'the previous version'}`]], finalResults);
+    say('\n' + ui.fail(`${incomplete.map((r) => clientLabel(r.client)).join(', ')}: entry not rewritten (see above). ${recovered.ok ? 'The previous launch was restored where possible.' : 'Recovery is pending; fix the listed clients and rerun `darktrace-mcp update`.'} The verified ${current.kind === 'docker' ? 'image' : 'copy'} is kept.\n`));
     return finish(1);
   }
   const previous: Partial<SavedSetup> = installed === undefined ? {} : { previousVersion: installed };
@@ -309,6 +361,7 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
     writeSavedSetup(ctx, { ...withoutPrevious(saved), ...previous, previousEntryPath: (current as Extract<CurrentInstall, { kind: 'fixed-copy' }>).entryPath,
       entryPath: newEntryPath as string, installedVersion: target.version });
   }
+  commitJournal(ctx, journal);
   report.status = 'updated';
   report.next = 'restart your AI clients';
   printSummary(io, ui, say, [
@@ -322,25 +375,166 @@ export async function runUpdate(args: UpdateArgs, io: UpdateIo): Promise<number>
   return finish(0);
 }
 
-/** Pull (when absent) and resolve the release image for `version`; never writes any client entry. */
-function acquireImage(io: UpdateIo, ui: Ui, say: (text: string) => void, version: string): ResolvedImage {
+/** Force-pull the release tag and compare its repository digest with the corresponding GitHub release record. */
+async function acquireImage(io: UpdateIo, ui: Ui, say: (text: string) => void, version: string): Promise<ResolvedImage> {
   const { ctx } = io;
   const dockerPath = findOnPath('docker', ctx.env, ctx.platform);
   if (dockerPath === undefined) throw new SetupInputError(dockerInstallHelp(ctx.platform).replace(/rerun setup/, 'rerun update').replace(/Nothing was written$/, 'Nothing was changed'));
   checkDockerDaemon(ctx, dockerPath);
   const ref = parseImageReference(`${IMAGE_REPOSITORY}:${version}`);
-  let resolved = inspectImage(ctx, dockerPath, ref);
-  if (resolved === undefined) {
-    say(`Pulling ${ref.value}...\n`);
-    pullImage(ctx, dockerPath, ref);
-    resolved = inspectImage(ctx, dockerPath, ref);
-    if (resolved === undefined) throw new SetupInputError(`docker pull finished but ${ref.value} is still not present locally. Nothing was changed`);
-  }
+  const expectedDigest = await releaseImageDigest(ctx, version, IMAGE_REPOSITORY);
+  if (expectedDigest === undefined) throw new SetupInputError(`the GitHub release ${version} has no single usable ${IMAGE_REPOSITORY} digest. Client entries were not changed`);
+  say(`Pulling ${ref.value}...\n`);
+  pullImage(ctx, dockerPath, ref);
+  const resolved = inspectImage(ctx, dockerPath, ref);
+  if (resolved === undefined) throw new SetupInputError(`docker pull finished but ${ref.value} is still not present locally. Nothing was changed`);
+  if (resolved.digest !== expectedDigest) throw new SetupInputError(`the pulled image digest for ${ref.value} does not match the GitHub release record. Client entries were not changed`);
   say(ui.ok(`Image ${ref.value}: ID ${resolved.id}${resolved.digest ? `, digest ${resolved.digest}` : ', no registry digest'}.\n`));
-  return resolved;
+  return { ...resolved, reference: ref.value, digest: expectedDigest };
 }
 
 type Launch = { readonly kind: 'node'; readonly entryPath: string } | { readonly kind: 'docker'; readonly image: string };
+
+interface UpdateJournal {
+  readonly version: 1;
+  readonly stage: 'switching' | 'committed';
+  readonly saved: SavedSetup;
+  readonly clients: readonly ClientId[];
+  readonly restore: Launch;
+}
+
+const lockPath = (ctx: CliContext): string => path.join(setupDir(ctx), '.update.lock');
+const journalPath = (ctx: CliContext): string => path.join(setupDir(ctx), '.update-transaction.json');
+
+function clearStaleLock(file: string): boolean {
+  const before = lstatOrUndefined(file);
+  if (before === undefined || !before.isFile() || before.isSymbolicLink()) return false;
+  let pid: number;
+  try { pid = Number(readFileSync(file, 'utf8').trim()); } catch { return false; }
+  if (!Number.isSafeInteger(pid) || pid < 1) return false;
+  try { process.kill(pid, 0); return false; } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') return false;
+  }
+  const after = lstatOrUndefined(file);
+  if (after === undefined || after.dev !== before.dev || after.ino !== before.ino || after.isSymbolicLink()) return false;
+  try { unlinkSync(file); return true; } catch { return false; }
+}
+
+/** Prevent concurrent update and rollback processes from interleaving client and state writes. */
+function acquireUpdateLock(ctx: CliContext): () => void {
+  ensurePrivateDir(setupDir(ctx));
+  const file = lockPath(ctx);
+  const flags = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | (Object.hasOwn(constants, 'O_NOFOLLOW') ? constants.O_NOFOLLOW : 0);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let fd: number | undefined;
+    try {
+      fd = openSync(file, flags, 0o600);
+      writeSync(fd, `${process.pid}\n`);
+      fsyncSync(fd);
+      closeSync(fd);
+      fd = undefined;
+      const owned = lstatOrUndefined(file);
+      if (owned === undefined) throw new SetupInputError('could not retain the update lock. Nothing was changed');
+      return () => {
+        const current = lstatOrUndefined(file);
+        if (current?.dev === owned.dev && current.ino === owned.ino && current.isFile() && !current.isSymbolicLink()) unlinkSync(file);
+      };
+    } catch (error) {
+      if (fd !== undefined) { try { closeSync(fd); } catch { /* preserve the original failure */ } }
+      if (attempt === 0 && (error as NodeJS.ErrnoException).code === 'EEXIST' && clearStaleLock(file)) continue;
+      if ((error as NodeJS.ErrnoException).code === 'EEXIST') throw new SetupInputError('another update or rollback is already running. Wait for it to finish and retry');
+      throw error;
+    }
+  }
+  throw new SetupInputError('another update or rollback is already running. Wait for it to finish and retry');
+}
+
+function persistJournal(ctx: CliContext, journal: UpdateJournal): void {
+  atomicWrite(journalPath(ctx), JSON.stringify(journal) + '\n', 0o600);
+}
+
+function removeJournal(ctx: CliContext): void {
+  const file = journalPath(ctx);
+  const stat = lstatOrUndefined(file);
+  if (stat === undefined) return;
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new SetupInputError('the update recovery record is not a regular file; inspect it before retrying');
+  unlinkSync(file);
+}
+
+function readJournal(ctx: CliContext): UpdateJournal | undefined {
+  const file = journalPath(ctx);
+  const stat = lstatOrUndefined(file);
+  if (stat === undefined) return undefined;
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new SetupInputError('the update recovery record is not a regular file; inspect it before retrying');
+  if (process.platform !== 'win32' && ((stat.mode & 0o077) !== 0 || (typeof process.getuid === 'function' && stat.uid !== process.getuid()))) {
+    throw new SetupInputError('the update recovery record has unsafe ownership or permissions; inspect it before retrying');
+  }
+  let raw: unknown;
+  try { raw = JSON.parse(readFileSync(file, 'utf8')); } catch { throw new SetupInputError('the update recovery record is unreadable; inspect it before retrying'); }
+  if (raw === null || typeof raw !== 'object') throw new SetupInputError('the update recovery record is invalid; inspect it before retrying');
+  const value = raw as Record<string, unknown>;
+  const saved = value.saved as SavedSetup | undefined;
+  const clients = value.clients;
+  const restore = value.restore as Launch | undefined;
+  if (value.version !== 1 || (value.stage !== 'switching' && value.stage !== 'committed') || saved?.version !== 1 ||
+      typeof saved.url !== 'string' || typeof saved.profiles !== 'string' || !Array.isArray(clients) || !clients.every(isClientId) ||
+      restore === undefined || (restore.kind !== 'node' && restore.kind !== 'docker')) {
+    throw new SetupInputError('the update recovery record is invalid; inspect it before retrying');
+  }
+  if (restore.kind === 'node') {
+    const layout = describeEntry(restore.entryPath);
+    const expected = layout === undefined ? undefined : fixedCopyEntry(fixedCopyDir(ctx, layout.version));
+    if (!path.isAbsolute(restore.entryPath) || layout?.name !== PACKAGE_NAME || expected !== restore.entryPath ||
+        !listFixedCopies(ctx).some((copy) => copy.entryPath === restore.entryPath && copy.version === layout.version)) {
+      throw new SetupInputError('the update recovery record points outside a verified fixed copy; inspect it before retrying');
+    }
+  } else if (!/^sha256:[a-f0-9]{64}$/.test(restore.image)) {
+    throw new SetupInputError('the update recovery record has an invalid image ID; inspect it before retrying');
+  }
+  return { version: 1, stage: value.stage, saved, clients, restore };
+}
+
+function restoreJournal(io: UpdateIo, journal: UpdateJournal): { readonly ok: boolean; readonly results: ClientResult[] } {
+  const results: ClientResult[] = [];
+  const entry = entryFor(io, journal.saved, journal.restore);
+  for (const id of journal.clients) {
+    try { results.push(installClient(id, entry, io.ctx, { dryRun: false, inlineTokens: false })); }
+    catch (error) { results.push({ client: id, status: 'failed', detail: error instanceof Error ? error.message : 'failed' }); }
+  }
+  const ok = results.every(rewritten);
+  // Keep setup.json conservative during recovery even if a prior process had written the target state already.
+  writeSavedSetup(io.ctx, journal.saved);
+  if (ok) removeJournal(io.ctx);
+  return { ok, results };
+}
+
+function recoveryResults(restored: readonly ClientResult[], original: readonly ClientResult[]): ClientResult[] {
+  return restored.map((result) => {
+    const failed = original.find((row) => row.client === result.client && !rewritten(row));
+    if (failed === undefined) return result;
+    return { ...result, status: failed.status === 'manual' ? 'manual' : 'failed', detail: `${failed.detail}; ${rewritten(result) ? 'the previous entry was restored' : 'the previous entry could not be restored'}` };
+  });
+}
+
+/** Recover a process interrupted while switching client entries; a committed switch only needs journal cleanup. */
+function recoverInterruptedUpdate(io: UpdateIo): void {
+  const journal = readJournal(io.ctx);
+  if (journal === undefined) return;
+  if (journal.stage === 'committed') { removeJournal(io.ctx); return; }
+  const recovered = restoreJournal(io, journal);
+  if (!recovered.ok) throw new SetupInputError('a previous update was interrupted and its client entries could not all be restored. Fix the listed client configurations and retry');
+}
+
+function beginJournal(ctx: CliContext, saved: SavedSetup, clients: readonly ClientId[], restore: Launch): UpdateJournal {
+  const journal: UpdateJournal = { version: 1, stage: 'switching', saved, clients, restore };
+  persistJournal(ctx, journal);
+  return journal;
+}
+
+function commitJournal(ctx: CliContext, journal: UpdateJournal): void {
+  persistJournal(ctx, { ...journal, stage: 'committed' });
+  removeJournal(ctx);
+}
 
 const rewritten = (r: ClientResult): boolean => r.status === 'written' || r.status === 'unchanged' || r.status === 'command';
 
@@ -356,11 +550,10 @@ function entryFor(io: UpdateIo, saved: SavedSetup, launch: Launch): ReturnType<t
 }
 
 /**
- * Rewrite the darktrace entry of the listed clients with the stored settings and the new launch target. CLI-managed
- * clients (Claude Code, Codex through its CLI) are removed and re-added; when the add fails, the previous launch is
- * registered again so the client never ends up without an entry.
+ * Rewrite the darktrace entry of the listed clients with the stored settings and the new launch target. The caller's
+ * recovery journal restores the previous launch if any writer fails or the process is interrupted.
  */
-function rewriteClients(io: UpdateIo, saved: SavedSetup, clients: readonly ClientId[], launch: Launch, previous?: Launch): ClientResult[] {
+function rewriteClients(io: UpdateIo, saved: SavedSetup, clients: readonly ClientId[], launch: Launch): ClientResult[] {
   const { ctx } = io;
   const entry = entryFor(io, saved, launch);
   const results: ClientResult[] = [];
@@ -368,11 +561,6 @@ function rewriteClients(io: UpdateIo, saved: SavedSetup, clients: readonly Clien
     let result: ClientResult;
     try { result = installClient(id, entry, ctx, { dryRun: false, inlineTokens: false }); }
     catch (error) { result = { client: id, status: 'failed', detail: error instanceof Error ? error.message : 'failed' }; }
-    if (result.status === 'failed' && previous !== undefined && (id === 'claude-code' || id === 'codex')) {
-      let restored: boolean;
-      try { restored = rewritten(installClient(id, entryFor(io, saved, previous), ctx, { dryRun: false, inlineTokens: false })); } catch { restored = false; }
-      result = { ...result, detail: `${result.detail}; ${restored ? 'the previous entry was registered again' : 'the previous entry could not be registered again: run the command below'}` };
-    }
     results.push(result);
   }
   return results;
@@ -401,15 +589,19 @@ async function rollback(args: UpdateArgs, io: UpdateIo, saved: SavedSetup, curre
   } else {
     const entryPath = saved.previousEntryPath;
     const layout = entryPath === undefined ? undefined : describeEntry(entryPath);
-    if (entryPath === undefined || layout?.name !== PACKAGE_NAME || layout.version !== previous) {
-      throw new SetupInputError(`the previous copy of ${previous} is no longer present${entryPath ? ` at ${path.dirname(path.dirname(path.dirname(entryPath)))}` : ''}; ` +
+    const expectedEntry = fixedCopyEntry(fixedCopyDir(ctx, previous));
+    const trustedCopy = entryPath === expectedEntry && layout?.name === PACKAGE_NAME && layout.version === previous &&
+      listFixedCopies(ctx).some((copy) => copy.version === previous && copy.entryPath === expectedEntry);
+    if (!trustedCopy) {
+      throw new SetupInputError(`the previous copy of ${previous} is no longer present in the verified fixed-copy store; ` +
         `rerun \`npx -y ${PACKAGE_NAME}@${previous} setup\` to install it again. Nothing was changed`);
     }
-    launch = { kind: 'node', entryPath };
+    launch = { kind: 'node', entryPath: expectedEntry };
     where = `fixed copy ${fixedCopyDir(ctx, previous)}`;
     report.target.entryPath = entryPath;
   }
   say(`Previous:  ${previous} (${where})\n`);
+  say(ui.warn('Rollback restarts the previously recorded code, which may restore security issues fixed in newer releases. Verify the selected version before continuing.\n'));
   const clients = CLIENT_IDS.filter((id) => hasClientEntry(id, ctx));
   say(`Clients with a darktrace entry: ${clients.length === 0 ? 'none found' : clients.map(clientLabel).join(', ')}\n`);
   if (args.dryRun) {
@@ -436,12 +628,18 @@ async function rollback(args: UpdateArgs, io: UpdateIo, saved: SavedSetup, curre
   }
   say(ui.ok('Check-config passed with the stored settings (no network).\n'));
   const nowLaunch: Launch | undefined = current.kind === 'docker' ? { kind: 'docker', image: current.image } : current.kind === 'fixed-copy' ? { kind: 'node', entryPath: current.entryPath } : undefined;
-  const results = rewriteClients(io, saved, clients, launch, nowLaunch);
+  if (nowLaunch === undefined) throw new SetupInputError('the current launch target is not a pinned copy or image, so rollback cannot be made safely. Nothing was changed');
+  const journal = beginJournal(ctx, saved, clients, nowLaunch);
+  const results = rewriteClients(io, saved, clients, launch);
   report.clients = results.map(row);
-  if (results.some((r) => !rewritten(r))) {
+  const incomplete = results.filter((r) => !rewritten(r));
+  if (incomplete.length > 0) {
+    const recovered = restoreJournal(io, journal);
+    const finalResults = recoveryResults(recovered.results, incomplete);
+    if (finalResults.length > 0) report.clients = finalResults.map(row);
     report.status = 'partial';
-    printSummary(io, ui, say, [[ui.marker('warn'), 'Settings', 'not written', `${setupDir(ctx)}/setup.json unchanged; fix the clients below and rerun update --rollback`]], results);
-    say('\n' + ui.fail('Some client entries were not rewritten (see above). Fix them and rerun `darktrace-mcp update --rollback`.\n'));
+    printSummary(io, ui, say, [[ui.marker(recovered.ok ? 'ok' : 'warn'), 'Settings', recovered.ok ? 'unchanged' : 'recovery pending', `${setupDir(ctx)}/setup.json`]], finalResults);
+    say('\n' + ui.fail(`${recovered.ok ? 'Rollback was cancelled and the current launch was restored where possible.' : 'Recovery is pending.'} Fix the listed clients and rerun \`darktrace-mcp update --rollback\`.\n`));
     return 1;
   }
   const nowCurrent = 'version' in current ? current.version : undefined;
@@ -455,6 +653,7 @@ async function rollback(args: UpdateArgs, io: UpdateIo, saved: SavedSetup, curre
     writeSavedSetup(ctx, { ...withoutPrevious(saved), entryPath: launch.entryPath, installedVersion: previous,
       ...(nowCurrent && current.kind === 'fixed-copy' ? { previousVersion: nowCurrent, previousEntryPath: current.entryPath } : {}) });
   }
+  commitJournal(ctx, journal);
   report.status = 'rolled-back';
   report.next = 'restart your AI clients';
   printSummary(io, ui, say, [

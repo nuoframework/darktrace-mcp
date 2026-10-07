@@ -56,9 +56,11 @@ export function fakeDockerRunner(state: FakeDocker): NonNullable<CliContext['run
       return { status: 0, stdout: `${image.id} ${JSON.stringify(image.repoDigests)}\n`, stderr: '' };
     }
     if (args[0] === 'pull') {
-      const image = state.registry.find((i) => matches(i, String(args[1])));
+      const reference = String(args[1]);
+      const image = state.registry.find((i) => matches(i, reference));
       if (image === undefined) return { status: 1, stdout: '', stderr: 'Error response from daemon: manifest unknown\n' };
-      if (!state.local.includes(image)) state.local.push(image);
+      state.local = state.local.filter((i) => !i.tags.includes(reference) && i.id !== image.id);
+      state.local.push(image);
       return { status: 0, stdout: '', stderr: '' };
     }
     if (args[0] === 'run') return { ...state.checkConfig };

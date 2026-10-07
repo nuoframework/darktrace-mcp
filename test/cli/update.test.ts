@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runSetup } from '../../src/cli/setup.js';
 import { runUpdate, currentInstall, listFixedCopies, type UpdateArgs } from '../../src/cli/update.js';
 import { runCli, parseCliArgs, UsageError } from '../../src/cli/main.js';
 import { runOnlineTest, updateAvailableLine } from '../../src/cli/online.js';
 import { runUninstall } from '../../src/cli/uninstall.js';
-import { compareVersions, resolveVersion } from '../../src/cli/registry.js';
+import { IMAGE_REPOSITORY } from '../../src/cli/docker.js';
+import { compareVersions, fetchTextBounded, resolveVersion } from '../../src/cli/registry.js';
 import { readSavedSetup } from '../../src/cli/state.js';
 import { createLinePrompter } from '../../src/cli/prompt.js';
 import { PACKAGE_NAME } from '../../src/cli/install.js';
@@ -22,18 +24,30 @@ const REGISTRY_FLAGS = ['--registry=https://registry.npmjs.org/', '--@nuoframewo
 /** Fake registry, npm CLI and `node --check-config` for one test: every call is recorded with its working directory. */
 interface FakeRegistry {
   latest: string;
-  versions: Record<string, { provenance: boolean }>;
+  versions: Record<string, { provenance: boolean; deprecated?: string }>;
   install: 'ok' | 'fail';
   signatures: 'ok' | 'invalid' | 'no-attestation';
+  attestation: 'ok' | 'invalid' | 'mismatched-digest' | 'missing-rekor';
+  corruptPackedTarball: boolean;
+  installedTreeIntegrityMatches: boolean;
   checkConfig: 'ok' | 'fail';
   releases: Record<string, string>;
   calls: Array<{ command: string; args: string[]; cwd?: string; env?: NodeJS.ProcessEnv }>;
   fetched: string[];
 }
 function fakeRegistry(): FakeRegistry {
-  return { latest: NEW, versions: { '1.0.0': { provenance: false }, [OLD]: { provenance: true }, [NEW]: { provenance: true } }, install: 'ok', signatures: 'ok', checkConfig: 'ok',
+  return { latest: NEW, versions: { '1.0.0': { provenance: false }, [OLD]: { provenance: true }, [NEW]: { provenance: true } }, install: 'ok', signatures: 'ok', attestation: 'ok', corruptPackedTarball: false, installedTreeIntegrityMatches: true, checkConfig: 'ok',
     releases: { [NEW]: `# Darktrace MCP v${NEW}\n\n- **Update command.** Verified updates with rollback.\n` }, calls: [], fetched: [] };
 }
+
+const fakeReleaseFetch = (reg: FakeRegistry) => async (url: string): Promise<string | undefined> => {
+  const version = /\/tags\/v([^/]+)$/.exec(url)?.[1];
+  return version && reg.releases[version] !== undefined ? JSON.stringify({ tag_name: `v${version}`, body: reg.releases[version] }) : undefined;
+};
+const dockerReleaseBody = (version: string, digest: string): string => `### ${IMAGE_REPOSITORY}\n\n\`\`\`\n${IMAGE_REPOSITORY}:${version}\n${digest}\nlinux/amd64 sha256:${'a'.repeat(64)}\nlinux/arm64 sha256:${'b'.repeat(64)}\n\`\`\`\nPin clients to the digest: darktrace-mcp setup --runtime docker --image ${digest}\n`;
+
+const tarballBytes = (version: string): Buffer => Buffer.from(`${PACKAGE_NAME}@${version}`);
+const integrityFor = (version: string): string => `sha512-${createHash('sha512').update(tarballBytes(version)).digest('base64')}`;
 
 /** Package tree the way npm lays it out: our package plus locked dependencies under one node_modules. */
 function writeTree(root: string, version: string): string {
@@ -55,28 +69,59 @@ function fakeExec(reg: FakeRegistry): NonNullable<CliContext['exec']> {
     const fail = (stderr: string): RunResult => ({ status: 1, stdout: '', stderr });
     if (command.endsWith('/npm')) {
       if (!REGISTRY_FLAGS.every((flag) => args.includes(flag))) return fail('npm error registry not fixed');
+      if (options?.cwd === undefined || !existsSync(join(options.cwd, '.npmrc')) || readFileSync(join(options.cwd, '.npmrc'), 'utf8') !== '') return fail('npm error project config not isolated');
       if (args[0] === 'view') {
         const spec = String(args[1]).slice(PACKAGE_NAME.length + 1);
         const version = reg.versions[spec === 'latest' ? reg.latest : spec] ? (spec === 'latest' ? reg.latest : spec) : undefined;
         if (version === undefined) return fail(`npm error code E404\nnpm error 404 No match found for version ${spec}`);
-        const record: Record<string, string> = { version, 'dist.integrity': `sha512-${'A'.repeat(86)}==` };
+        const record: Record<string, string> = { version, 'dist.integrity': integrityFor(version) };
         if (reg.versions[version].provenance) record['dist.attestations.url'] = `https://registry.npmjs.org/-/npm/v1/attestations/${encodeURIComponent(PACKAGE_NAME)}@${version}`;
+        if (reg.versions[version].deprecated) record.deprecated = reg.versions[version].deprecated;
         return { status: 0, stdout: JSON.stringify(record, null, 2) + '\n', stderr: '' };
+      }
+      if (args[0] === 'pack') {
+        const spec = args.find((arg) => arg.startsWith(`${PACKAGE_NAME}@`));
+        const version = spec?.slice(PACKAGE_NAME.length + 1);
+        const destination = args.find((arg) => arg.startsWith('--pack-destination='))?.slice('--pack-destination='.length);
+        if (version === undefined || destination === undefined || reg.versions[version] === undefined) return fail('npm error invalid pack request');
+        const name = `darktrace-mcp-${version}.tgz`;
+        writeFileSync(join(destination, name), reg.corruptPackedTarball ? Buffer.from('wrong tarball') : tarballBytes(version));
+        return { status: 0, stdout: JSON.stringify([{ filename: name }]), stderr: '' };
       }
       if (args[0] === 'install') {
         if (reg.install === 'fail' || options?.cwd === undefined) return fail('npm error network request to https://registry.npmjs.org failed');
-        const version = String(args.at(-1)).slice(PACKAGE_NAME.length + 1);
+        const spec = args.find((arg) => arg.startsWith(`${PACKAGE_NAME}@`));
+        const version = spec?.slice(PACKAGE_NAME.length + 1);
+        if (version === undefined) return fail('npm error package spec missing');
         if (reg.versions[version] === undefined) return fail('npm error code E404');
         assert.ok(args.includes('--ignore-scripts') && args.includes('--omit=dev') && args.includes('--no-bin-links'), 'download flags');
         writeTree(options.cwd, version);
-        writeFileSync(join(options.cwd, 'package-lock.json'), '{}');
+        writeFileSync(join(options.cwd, 'package-lock.json'), JSON.stringify({ packages: { [`node_modules/${PACKAGE_NAME}`]: { integrity: reg.installedTreeIntegrityMatches ? integrityFor(version) : `sha512-${'A'.repeat(86)}==` } } }));
         return { status: 0, stdout: '\nadded 4 packages in 1s\n', stderr: '' };
       }
       if (args[0] === 'audit' && args[1] === 'signatures') {
         if (reg.signatures === 'invalid') return fail('npm error 1 package has an invalid registry signature:\nnpm error @nuoframework/darktrace-mcp@1.1.3');
-        return { status: 0, stdout: `audited 4 packages in 1s\n\n4 packages have verified registry signatures\n${reg.signatures === 'ok' ? '\n1 package has verified attestations\n' : ''}`, stderr: '' };
+        return { status: 0, stdout: `audited 4 packages in 1s\n\n4 packages have verified registry signatures\n${reg.signatures === 'ok' ? '\n1 package has a verified attestation\n' : ''}`, stderr: '' };
       }
       return fail('npm error unexpected npm call');
+    }
+    if (command.endsWith('/gh') && args[0] === 'attestation' && args[1] === 'verify') {
+      if (!args.includes('--repo') || args[args.indexOf('--repo') + 1] !== 'nuoframework/darktrace-mcp' ||
+          !args.includes('--signer-workflow') || args[args.indexOf('--signer-workflow') + 1] !== 'nuoframework/darktrace-mcp/.github/workflows/release.yml' ||
+          !args.includes('--cert-oidc-issuer') || args[args.indexOf('--cert-oidc-issuer') + 1] !== 'https://token.actions.githubusercontent.com' ||
+          !args.includes('--predicate-type') || args[args.indexOf('--predicate-type') + 1] !== 'https://slsa.dev/provenance/v1' ||
+          !args.includes('--digest-alg') || args[args.indexOf('--digest-alg') + 1] !== 'sha256' || !args.includes('--format=json') ||
+          !args.includes(`https://github.com/nuoframework/darktrace-mcp/.github/workflows/release.yml@refs/tags/v${NEW}`)) return fail('wrong provenance identity');
+      if (reg.attestation === 'invalid') return fail('no matching attestations found for the artifact digest');
+      const digest = createHash('sha256').update(readFileSync(String(args[2]))).digest('hex');
+      const result = {
+        verificationResult: {
+          statement: { subject: [{ digest: { sha256: reg.attestation === 'mismatched-digest' ? '0'.repeat(64) : digest } }] },
+          verifiedTimestamps: reg.attestation === 'missing-rekor' ? [{ type: 'RFC3161', uri: 'https://tsa.example.test' }]
+            : [{ type: 'Tlog', uri: 'https://rekor.sigstore.dev', timestamp: '2026-10-07T00:00:00Z' }],
+        },
+      };
+      return { status: 0, stdout: JSON.stringify([result]), stderr: '' };
     }
     if (command === NODE && args[1] === '--check-config') {
       return reg.checkConfig === 'ok' ? { status: 0, stdout: '{"ok":true,"transport":"stdio","registeredTools":15}\n', stderr: '' } : fail('{"event":"startup_error","reason":"token file unreadable"}');
@@ -92,7 +137,7 @@ interface Installed { box: Sandbox; ctx: CliContext; reg: FakeRegistry; oldEntry
  * (CLI; `claude mcp get darktrace` answers 0 once added), plus a fake registry that publishes NEW.
  */
 async function installed(options: { appliance?: Parameters<typeof sandbox>[2]; dateFormat?: 'compact' } = {}): Promise<Installed> {
-  const box = sandbox('linux', ['claude', 'npm', 'npx'], options.appliance);
+  const box = sandbox('linux', ['claude', 'npm', 'npx', 'gh'], options.appliance);
   const reg = fakeRegistry();
   let claudeRegistered = false;
   const knobs: Installed['knobs'] = {};
@@ -108,7 +153,7 @@ async function installed(options: { appliance?: Parameters<typeof sandbox>[2]; d
       return box.ctx.run(command, args);
     },
     exec: fakeExec(reg),
-    fetchText: async (url) => { reg.fetched.push(url); const version = /\/tags\/v([^/]+)$/.exec(url)?.[1]; return version && reg.releases[version] ? JSON.stringify({ tag_name: `v${version}`, body: reg.releases[version] }) : undefined; },
+    fetchText: async (url) => { reg.fetched.push(url); return fakeReleaseFetch(reg)(url); },
   };
   const npx = join(box.home, '.npm', '_npx', 'a1b2c3d4e5f60718');
   const transientEntry = writeTree(npx, OLD);
@@ -145,6 +190,7 @@ test('compareVersions orders releases and pre-releases', () => {
   assert.ok(compareVersions('1.1.3-rc.1', '1.1.3') < 0);
   assert.ok(compareVersions('1.1.3-rc.2', '1.1.3-rc.10') < 0);
   assert.ok(compareVersions('1.1.3-alpha', '1.1.3-alpha.1') < 0);
+  assert.ok(compareVersions('1.999999999999999999999999999999999.0', '1.1000000000000000000000000000000000.0') < 0);
   assert.throws(() => compareVersions('1.1', '1.1.3'), /exact/);
 });
 
@@ -154,15 +200,15 @@ test('update --yes downloads, verifies, installs a new fixed copy, rewrites ever
   const before = snapshot(inst);
   assert.equal(await runUpdate(ARGS, io), 0, out.text());
   const newEntry = join(inst.data, NEW, 'node_modules/@nuoframework/darktrace-mcp/dist/src/index.js');
-  // Order: registry query, download, signatures, then the new copy's --check-config; the download directory is gone afterwards.
-  const kinds = inst.reg.calls.map((c) => (c.command === NODE ? 'check-config' : c.args[0]));
-  assert.deepEqual(kinds, ['view', 'install', 'audit', 'check-config']);
-  const download = inst.reg.calls[1].cwd as string;
-  assert.equal(inst.reg.calls[2].cwd, download);
+  // Order: registry query, tarball, install, signatures, repository attestation, then the new copy's --check-config.
+  const kinds = inst.reg.calls.map((c) => (c.command === NODE ? 'check-config' : c.command.endsWith('/gh') ? 'attestation' : c.args[0]));
+  assert.deepEqual(kinds, ['view', 'pack', 'install', 'audit', 'attestation', 'check-config']);
+  const download = inst.reg.calls[2].cwd as string;
+  assert.equal(inst.reg.calls[3].cwd, download);
   assert.equal(existsSync(download), false, 'temporary download removed');
-  assert.deepEqual(inst.reg.calls[3].args, [newEntry, '--check-config']);
-  assert.equal(inst.reg.calls[3].env?.DARKTRACE_URL, 'https://dt.example.com');
-  assert.equal(inst.reg.calls[3].env?.DARKTRACE_PUBLIC_TOKEN_FILE, join(inst.box.home, '.config/darktrace-mcp/public-token'));
+  assert.deepEqual(inst.reg.calls[5].args, [newEntry, '--check-config']);
+  assert.equal(inst.reg.calls[5].env?.DARKTRACE_URL, 'https://dt.example.com');
+  assert.equal(inst.reg.calls[5].env?.DARKTRACE_PUBLIC_TOKEN_FILE, join(inst.box.home, '.config/darktrace-mcp/public-token'));
   assert.equal(inst.box.probes.length, 1, 'one signed GET /status');
   // Fixed copies: both versions present, no .bin shims.
   assert.ok(existsSync(join(inst.data, NEW, 'node_modules/zod/package.json')));
@@ -191,6 +237,13 @@ test('update --yes downloads, verifies, installs a new fixed copy, rewrites ever
   assert.match(out.text(), /Summary/);
   assert.match(out.text(), /update --rollback/);
   assert.equal(out.text().includes(PUBLIC) || out.text().includes(PRIVATE), false);
+  for (const call of inst.reg.calls.filter((c) => c.command.endsWith('/npm'))) {
+    assert.ok(call.args.includes('--strict-ssl=true'));
+    assert.ok(call.args.some((arg) => arg.startsWith('--userconfig=')) && call.args.some((arg) => arg.startsWith('--globalconfig=')));
+    assert.equal(call.env?.NODE_TLS_REJECT_UNAUTHORIZED, undefined);
+    assert.equal(call.env?.npm_config_registry, undefined);
+    assert.equal(call.env?.NPM_CONFIG_STRICT_SSL, undefined);
+  }
 
   // Running it again: already up to date, nothing downloaded.
   const again = uio(inst);
@@ -227,6 +280,52 @@ test('a failed appliance probe, signature check or --check-config leaves every c
   assert.deepEqual(snapshot(probe), before);
   assert.ok(existsSync(join(probe.data, NEW)), 'verified copy kept for a rerun');
   assert.equal(probe.box.calls.some((c) => c.command.endsWith('/claude') && c.args[1] === 'add'), false);
+
+  const provenanceStripped = await installed();
+  provenanceStripped.reg.versions[NEW].provenance = false;
+  ({ out, io } = cliIo(provenanceStripped));
+  assert.equal(await runCli(['update', '--yes'], io), 1);
+  assert.match(out.text(), /must have npm provenance metadata/);
+  assert.equal(provenanceStripped.reg.calls.some((c) => c.args[0] === 'pack' || c.args[0] === 'install'), false);
+  const checkWithoutProvenance = cliIo(provenanceStripped);
+  assert.equal(await runCli(['update', '--check'], checkWithoutProvenance.io), 1);
+  assert.match(checkWithoutProvenance.out.text(), /wait until the registry publishes provenance for this release/);
+  assert.doesNotMatch(checkWithoutProvenance.out.text(), /Run: npx -y/);
+
+  // Registry metadata integrity is checked against the downloaded tarball before npm installs it.
+  const mismatch = await installed();
+  mismatch.reg.corruptPackedTarball = true;
+  ({ out, io } = cliIo(mismatch));
+  assert.equal(await runCli(['update', '--yes'], io), 1);
+  assert.match(out.text(), /downloaded tarball does not match registry metadata integrity/);
+  assert.equal(mismatch.reg.calls.some((c) => c.args[0] === 'install'), false);
+  assert.equal(existsSync(join(mismatch.data, NEW)), false);
+
+  const installedIntegrityMismatch = await installed();
+  installedIntegrityMismatch.reg.installedTreeIntegrityMatches = false;
+  ({ out, io } = cliIo(installedIntegrityMismatch));
+  assert.equal(await runCli(['update', '--yes'], io), 1);
+  assert.match(out.text(), /installed package integrity does not match registry metadata/);
+  assert.equal(installedIntegrityMismatch.reg.calls.some((c) => c.args[0] === 'audit'), false);
+  assert.equal(existsSync(join(installedIntegrityMismatch.data, NEW)), false);
+
+  // npm may verify an attestation signature, but the exact artifact still needs the repository/workflow identity.
+  const wrongRepository = await installed();
+  wrongRepository.reg.attestation = 'invalid';
+  ({ out, io } = cliIo(wrongRepository));
+  assert.equal(await runCli(['update', '--yes'], io), 1);
+  assert.match(out.text(), /GitHub could not verify the tarball for repository nuoframework\/darktrace-mcp and workflow release.yml/);
+  assert.equal(existsSync(join(wrongRepository.data, NEW)), false);
+  assert.equal(existsSync(wrongRepository.reg.calls[2].cwd as string), false, 'temporary tree removed on failed provenance');
+
+  for (const invalid of ['mismatched-digest', 'missing-rekor'] as const) {
+    const tamperedAttestation = await installed();
+    tamperedAttestation.reg.attestation = invalid;
+    ({ out, io } = cliIo(tamperedAttestation));
+    assert.equal(await runCli(['update', '--yes'], io), 1);
+    assert.match(out.text(), /did not return a verified matching tarball digest and transparency-log timestamp/);
+    assert.equal(existsSync(join(tamperedAttestation.data, NEW)), false);
+  }
 
   // Invalid registry signature: nothing installed at all.
   const bad = await installed();
@@ -270,6 +369,7 @@ test('update --rollback returns to the previous copy and swaps the pointers; a m
   inst.box.probes.length = 0;
   const { out, io } = uio(inst);
   assert.equal(await runUpdate({ ...ARGS, rollback: true }, io), 0, out.text());
+  assert.match(out.text(), /Rollback restarts the previously recorded code, which may restore security issues fixed in newer releases/);
   assert.deepEqual(readJson(inst.cursorFile).mcpServers.darktrace.args, [inst.oldEntry]);
   assert.ok(readFileSync(inst.codexFile, 'utf8').includes(inst.oldEntry));
   assert.deepEqual(inst.reg.calls.map((c) => c.args[1]), ['--check-config'], 'offline check of the previous copy, no registry');
@@ -295,6 +395,33 @@ test('update --rollback returns to the previous copy and swaps the pointers; a m
   writeFileSync(join(inst.box.home, '.config/darktrace-mcp/setup.json'), JSON.stringify({ ...readJson(join(inst.box.home, '.config/darktrace-mcp/setup.json')), previousVersion: undefined }));
   assert.equal(await runCli(['update', '--rollback', '--yes'], none.io), 1);
   assert.match(none.out.text(), /nothing to roll back to/);
+});
+
+test('saved rollback state rejects writable files and symlinks, and rollback only accepts the recorded fixed-copy path', async () => {
+  const inst = await installed();
+  const stateFile = join(inst.box.home, '.config/darktrace-mcp/setup.json');
+  const original = readFileSync(stateFile, 'utf8');
+  chmodSync(stateFile, 0o666);
+  assert.equal(readSavedSetup(inst.ctx), undefined, 'group or other writable state is not trusted');
+  chmodSync(stateFile, 0o600);
+  const linkedState = join(inst.box.home, 'outside-setup.json');
+  writeFileSync(linkedState, original, { mode: 0o600 });
+  rmSync(stateFile);
+  symlinkSync(linkedState, stateFile);
+  assert.equal(readSavedSetup(inst.ctx), undefined, 'setup.json symlinks are not followed');
+  rmSync(stateFile);
+  writeFileSync(stateFile, original, { mode: 0o600 });
+
+  assert.equal(await runUpdate(ARGS, uio(inst).io), 0);
+  const outsideEntry = writeTree(join(inst.box.home, 'untrusted-copy'), OLD);
+  const tampered = readJson(stateFile);
+  tampered.previousEntryPath = outsideEntry;
+  writeFileSync(stateFile, JSON.stringify(tampered));
+  chmodSync(stateFile, 0o600);
+  const rollback = cliIo(inst);
+  assert.equal(await runCli(['update', '--rollback', '--yes'], rollback.io), 1);
+  assert.match(rollback.out.text(), /no longer present in the verified fixed-copy store/);
+  assert.deepEqual(readJson(inst.cursorFile).mcpServers.darktrace.args, [join(inst.data, NEW, 'node_modules/@nuoframework/darktrace-mcp/dist/src/index.js')]);
 });
 
 test('update --dry-run prints the plan and downloads nothing; without --yes a "n" cancels', async () => {
@@ -353,6 +480,21 @@ test('update --check compares versions, prints the release notes and exits 1 onl
   assert.match(offline.out.text(), /is not published on registry\.npmjs\.org/);
 });
 
+test('release notes strip terminal and bidirectional controls, cap output, and deprecated versions are called out', async () => {
+  const inst = await installed();
+  inst.reg.releases[NEW] = `visible\u001b]0;spoofed title\u0007\u202e\n${'x'.repeat(7000)}`;
+  const notes = cliIo(inst);
+  assert.equal(await runCli(['update', '--check'], notes.io), 1);
+  assert.equal(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u202a-\u202e]/u.test(notes.out.text()), false);
+  assert.ok(notes.out.text().length < 8000, 'release note output is capped');
+
+  inst.reg.versions[NEW].deprecated = 'contains a retired\u001b[31m vulnerable release\u202e';
+  const deprecated = cliIo(inst);
+  assert.equal(await runCli(['update', '--dry-run', '--version', NEW], deprecated.io), 0, deprecated.out.text());
+  assert.match(deprecated.out.text(), /This version is deprecated by its publisher: contains a retired vulnerable release/);
+  assert.equal(deprecated.out.text().includes('\u202e') || deprecated.out.text().includes('\u001b'), false);
+});
+
 test('test and doctor --online print one "Update available" line only when a newer version is published', async () => {
   const inst = await installed();
   const out = collector();
@@ -402,7 +544,15 @@ test('setup --update-mode npx-latest writes npx launchers with the same env, ins
   assert.equal(await runCli(['update', '--yes'], { ...io, stdout: upd.stream, stderr: upd.stream }), 0, upd.text());
   assert.match(upd.text(), /nothing to pin or move/);
   assert.equal(reg.calls.length, 0, 'no registry query in npx-latest mode');
+  const check = collector();
+  assert.equal(await runCli(['update', '--check'], { ...io, stdout: check.stream, stderr: check.stream }), 0, check.text());
+  assert.match(check.text(), /Clients resolve @latest when they start; registry latest is 1\.1\.3, so no update command is needed/);
+  assert.doesNotMatch(check.text(), /Update available:/);
+  assert.deepEqual(reg.calls.map((call) => call.args[0]), ['view']);
   assert.equal(updateAvailableLine(ctx), undefined);
+  const doctor = collector();
+  assert.equal(await runOnlineTest(ctx, doctor.stream, { uid: 501, gid: 20 }), 0, doctor.text());
+  assert.doesNotMatch(doctor.text(), /Update available/);
   const rb = collector();
   assert.equal(await runCli(['update', '--rollback', '--yes'], { ...io, stdout: rb.stream, stderr: rb.stream }), 1);
   assert.match(rb.text(), /no previous version to return to/);
@@ -449,7 +599,8 @@ test('docker runtime: update pulls the release tag, checks the container, rewrit
   const NEW_ID = 'sha256:' + '3'.repeat(64);
   const NEW_DIGEST = 'ghcr.io/nuoframework/darktrace-mcp@sha256:' + '4'.repeat(64);
   box.docker.registry.push({ id: NEW_ID, tags: ['ghcr.io/nuoframework/darktrace-mcp:9.9.0'], repoDigests: [NEW_DIGEST] });
-  const ctx: CliContext = { ...box.ctx, exec: fakeExec(reg) };
+  reg.releases['9.9.0'] = dockerReleaseBody('9.9.0', NEW_DIGEST);
+  const ctx: CliContext = { ...box.ctx, exec: fakeExec(reg), fetchText: fakeReleaseFetch(reg) };
   mkdirSync(join(box.home, '.cursor'));
   const out = collector();
   const io = { ctx, stdin: stdinFrom(`${PUBLIC}\n${PRIVATE}\n`), stdout: out.stream, stderr: out.stream, execPath: NODE, entryPath: '/opt/darktrace-mcp/dist/src/index.js', uid: 501, gid: 20 };
@@ -460,7 +611,17 @@ test('docker runtime: update pulls the release tag, checks the container, rewrit
   const cursorFile = join(box.home, '.cursor/mcp.json');
   assert.equal(readJson(cursorFile).mcpServers.darktrace.args.at(-1), FAKE_ID);
   box.docker.calls.length = 0;
+  const STALE_TAG_ID = 'sha256:' + '6'.repeat(64);
+  box.docker.local.push({ id: STALE_TAG_ID, tags: ['ghcr.io/nuoframework/darktrace-mcp:9.9.0'], repoDigests: ['ghcr.io/nuoframework/darktrace-mcp@sha256:' + '7'.repeat(64)] });
 
+  reg.releases['9.9.0'] = dockerReleaseBody('9.9.0', 'ghcr.io/nuoframework/darktrace-mcp@sha256:' + '9'.repeat(64));
+  const mismatch = collector();
+  assert.equal(await runCli(['update', '--yes'], { ...io, stdin: stdinFrom(''), stdout: mismatch.stream, stderr: mismatch.stream }), 1);
+  assert.match(mismatch.text(), /does not match the GitHub release record/);
+  assert.equal(readJson(cursorFile).mcpServers.darktrace.args.at(-1), FAKE_ID);
+  assert.equal(readSavedSetup(ctx)?.image, FAKE_ID);
+  reg.releases['9.9.0'] = dockerReleaseBody('9.9.0', NEW_DIGEST);
+  box.docker.calls.length = 0;
   const upd = collector();
   assert.equal(await runCli(['update', '--yes'], { ...io, stdin: stdinFrom(''), stdout: upd.stream, stderr: upd.stream }), 0, upd.text());
   const dockerCalls = box.docker.calls.map((c) => c.args.slice(0, 2).join(' '));
@@ -558,15 +719,44 @@ test('older setups without an entry path: a single fixed copy is used, several a
 test('registry answers are validated and the registry is never configurable', () => {
   const box = sandbox('linux', ['npm']);
   const reg = fakeRegistry();
-  const ctx = { ...box.ctx, exec: fakeExec(reg), env: { ...box.ctx.env, npm_config_registry: 'https://evil.example/' } };
-  assert.deepEqual(resolveVersion(ctx, 'latest'), { version: NEW, provenance: true, integrity: `sha512-${'A'.repeat(86)}==` });
-  assert.ok(reg.calls[0].args.includes('--registry=https://registry.npmjs.org/') && reg.calls[0].args.includes('--@nuoframework:registry=https://registry.npmjs.org/'));
+  const ctx = { ...box.ctx, exec: fakeExec(reg), env: { ...box.ctx.env, npm_config_registry: 'https://evil.example/', NPM_CONFIG_REGISTRY: 'https://evil.example/scoped',
+    NPM_CONFIG_USERCONFIG: '/tmp/attacker.npmrc', npm_config_strict_ssl: 'false', NODE_TLS_REJECT_UNAUTHORIZED: '0', NODE_OPTIONS: '--require=/tmp/attacker.js' } };
+  assert.deepEqual(resolveVersion(ctx, 'latest'), { version: NEW, provenance: true, integrity: integrityFor(NEW) });
+  const view = reg.calls[0];
+  assert.ok(view.args.includes('--registry=https://registry.npmjs.org/') && view.args.includes('--@nuoframework:registry=https://registry.npmjs.org/'));
+  assert.ok(view.args.includes('--strict-ssl=true') && view.args.some((arg) => arg.startsWith('--userconfig=')) && view.args.some((arg) => arg.startsWith('--globalconfig=')));
+  assert.equal(view.env?.npm_config_registry, undefined);
+  assert.equal(view.env?.NPM_CONFIG_REGISTRY, undefined);
+  assert.equal(view.env?.NPM_CONFIG_USERCONFIG, undefined);
+  assert.equal(view.env?.npm_config_strict_ssl, undefined);
+  assert.equal(view.env?.NODE_TLS_REJECT_UNAUTHORIZED, undefined);
+  assert.equal(view.env?.NODE_OPTIONS, undefined);
   assert.throws(() => resolveVersion(ctx, '^1'), /exact published version/);
   assert.throws(() => resolveVersion(ctx, '9.9.9'), /is not published/);
   const garbage = { ...ctx, exec: ((): RunResult => ({ status: 0, stdout: '{"version":"../../x"}', stderr: '' })) as CliContext['exec'] };
   assert.throws(() => resolveVersion(garbage, 'latest'), /no usable version/);
+  const mismatched = { ...ctx, exec: ((): RunResult => ({ status: 0, stdout: JSON.stringify({ version: '1.2.4', 'dist.integrity': integrityFor('1.2.4') }), stderr: '' })) as CliContext['exec'] };
+  assert.throws(() => resolveVersion(mismatched, '1.2.3'), /different version than requested/);
+  const oversized = { ...ctx, exec: ((): RunResult => ({ status: 0, stdout: 'x'.repeat(1024 * 1024 + 1), stderr: '' })) as CliContext['exec'] };
+  assert.throws(() => resolveVersion(oversized, 'latest'), /exceeded the 1 MiB limit/);
   const noNpm = { ...ctx, env: { PATH: '/nonexistent' } };
   assert.throws(() => resolveVersion(noNpm, 'latest'), /npm is not on PATH/);
+});
+
+test('GitHub release fetches stop before network when the Node TLS verification bypass is inherited', async () => {
+  const original = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  globalThis.fetch = (async () => { calls++; throw new Error('must not open a socket'); }) as typeof fetch;
+  try {
+    assert.equal(await fetchTextBounded('https://api.github.com/repos/example/repo', 'test'), undefined);
+    assert.equal(calls, 0);
+  } finally {
+    if (original === undefined) delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    else process.env.NODE_TLS_REJECT_UNAUTHORIZED = original;
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('update flags are strict', () => {
@@ -589,27 +779,48 @@ test('update rejects exclusive or malformed combinations with a usage error', as
   assert.match(out.text(), /--update-mode must be pinned or npx-latest/);
 });
 
-test('a client that cannot be rewritten keeps setup.json on the previous version; the next update repairs it', async () => {
+test('a client write failure restores the full launch set; the next update resumes after the bad client is fixed', async () => {
   const inst = await installed();
   writeFileSync(inst.cursorFile, '// my comment\n' + readFileSync(inst.cursorFile, 'utf8'));
   const first = cliIo(inst);
   assert.equal(await runCli(['update', '--yes'], first.io), 1);
-  assert.match(first.out.text(), /Settings\s+not written/);
+  assert.match(first.out.text(), /Settings\s+recovery pending/);
   assert.match(first.out.text(), /Cursor: entry not rewritten/);
   const saved = readSavedSetup(inst.ctx);
   assert.equal(saved?.installedVersion, OLD, 'state still says the previous version');
   assert.equal(saved?.previousVersion, undefined);
   const newEntry = join(inst.data, NEW, 'node_modules/@nuoframework/darktrace-mcp/dist/src/index.js');
-  assert.ok(readFileSync(inst.codexFile, 'utf8').includes(newEntry), 'codex was moved');
+  assert.ok(readFileSync(inst.codexFile, 'utf8').includes(inst.oldEntry), 'codex was restored to the previous version');
   assert.ok(readFileSync(inst.cursorFile, 'utf8').includes(inst.oldEntry), 'cursor untouched (JSONC)');
-  // Fix the file, rerun: the verified copy is reinstalled, codex is unchanged, cursor moves, state is written.
+  // Fix the file, rerun: the recovery record is cleared and the verified copy moves every client.
   writeFileSync(inst.cursorFile, readFileSync(inst.cursorFile, 'utf8').replace('// my comment\n', ''));
   const second = cliIo(inst);
   assert.equal(await runCli(['update', '--yes'], second.io), 0, second.out.text());
-  assert.match(second.out.text(), /Codex\s+unchanged/);
+  assert.match(second.out.text(), /Codex\s+written/);
   assert.deepEqual(readJson(inst.cursorFile).mcpServers.darktrace.args, [newEntry]);
   assert.equal(readSavedSetup(inst.ctx)?.installedVersion, NEW);
   assert.equal(readSavedSetup(inst.ctx)?.previousVersion, OLD);
+});
+
+test('a concurrent update is refused while the first one holds the per-HOME lock', async () => {
+  const inst = await installed();
+  let entered!: () => void;
+  let release!: () => void;
+  const probeEntered = new Promise<void>((resolve) => { entered = resolve; });
+  const gate = new Promise<void>((resolve) => { release = resolve; });
+  inst.ctx = { ...inst.ctx, probeStatus: async () => {
+    entered();
+    await gate;
+    return { ok: true, baseUrl: 'https://dt.example.com', dateFormat: 'compact', status: 200, elapsedMs: 1 };
+  } };
+  const first = cliIo(inst);
+  const firstRun = runCli(['update', '--yes'], first.io);
+  await probeEntered;
+  const second = cliIo(inst);
+  assert.equal(await runCli(['update', '--yes'], second.io), 1);
+  assert.match(second.out.text(), /another update or rollback is already running/);
+  release();
+  assert.equal(await firstRun, 0, first.out.text());
 });
 
 test('when claude mcp add fails after the remove, the previous entry is registered again', async () => {
@@ -618,7 +829,7 @@ test('when claude mcp add fails after the remove, the previous entry is register
   inst.knobs.failClaudeAddContaining = newEntry;
   const { out, io } = cliIo(inst);
   assert.equal(await runCli(['update', '--yes'], io), 1);
-  assert.match(out.text(), /Claude Code\s+failed\s+claude exited with status 1; the previous entry was registered again/);
+  assert.match(out.text(), /Claude Code\s+failed\s+claude exited with status 1; the previous entry was restored/);
   const adds = inst.box.calls.filter((c) => c.command.endsWith('/claude') && c.args[1] === 'add').map((c) => c.args.at(-1));
   assert.deepEqual(adds, [inst.oldEntry], 'the failing add is not recorded; the restoring add carries the previous entry');
   assert.ok(inst.claude(), 'Claude Code still has an entry');
@@ -672,8 +883,10 @@ test('docker setups pinned by digest (unknown version) warn instead of skipping 
   reg.latest = '9.9.0';
   reg.versions['9.9.0'] = { provenance: true };
   const NEW_ID = 'sha256:' + '3'.repeat(64);
-  box.docker.registry.push({ id: NEW_ID, tags: ['ghcr.io/nuoframework/darktrace-mcp:9.9.0'], repoDigests: [] });
-  const ctx: CliContext = { ...box.ctx, exec: fakeExec(reg) };
+  const NEW_DIGEST = 'ghcr.io/nuoframework/darktrace-mcp@sha256:' + '8'.repeat(64);
+  box.docker.registry.push({ id: NEW_ID, tags: ['ghcr.io/nuoframework/darktrace-mcp:9.9.0'], repoDigests: [NEW_DIGEST] });
+  reg.releases['9.9.0'] = dockerReleaseBody('9.9.0', NEW_DIGEST);
+  const ctx: CliContext = { ...box.ctx, exec: fakeExec(reg), fetchText: fakeReleaseFetch(reg) };
   mkdirSync(join(box.home, '.cursor'));
   const out = collector();
   const io = { ctx, stdin: stdinFrom(`${PUBLIC}\n${PRIVATE}\n`), stdout: out.stream, stderr: out.stream, execPath: NODE, entryPath: '/opt/darktrace-mcp/dist/src/index.js', uid: 501, gid: 20 };

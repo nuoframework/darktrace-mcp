@@ -38,7 +38,7 @@ export interface CliContext {
   /** Signed GET /status used by `test` and the `setup` date-format probe. Defaults to the production client. */
   readonly probeStatus?: StatusProber;
 }
-export interface ExecOptions { readonly cwd?: string; readonly env?: NodeJS.ProcessEnv; readonly timeoutMs?: number }
+export interface ExecOptions { readonly cwd?: string; readonly env?: NodeJS.ProcessEnv; readonly timeoutMs?: number; readonly maxBufferBytes?: number }
 
 export type ResultStatus = 'written' | 'unchanged' | 'command' | 'manual' | 'dry-run' | 'failed' | 'absent';
 export interface ClientResult {

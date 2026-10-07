@@ -60,7 +60,14 @@ function validReference(value: string): boolean {
 
 export function readSavedSetup(ctx: Pick<CliContext, 'home' | 'env'>): SavedSetup | undefined {
   const file = setupFile(ctx);
-  if (lstatOrUndefined(file)?.isFile() !== true) return undefined;
+  const directory = lstatOrUndefined(setupDir(ctx));
+  const state = lstatOrUndefined(file);
+  if (directory?.isDirectory() !== true || directory.isSymbolicLink() || state?.isFile() !== true || state.isSymbolicLink()) return undefined;
+  if (process.platform !== 'win32') {
+    const uid = typeof process.getuid === 'function' ? process.getuid() : undefined;
+    if ((uid !== undefined && (directory.uid !== uid || state.uid !== uid)) ||
+        (directory.mode & 0o022) !== 0 || (state.mode & 0o022) !== 0) return undefined;
+  }
   try {
     const raw = JSON.parse(readTextIfExists(file) ?? '') as Record<string, unknown>;
     if (raw.version !== 1 || typeof raw.url !== 'string' || typeof raw.profiles !== 'string') return undefined;
