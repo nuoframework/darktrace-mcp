@@ -1,82 +1,101 @@
-**English** · Spanish version maintained by the documentation track
+# Instalar
 
-# Install
+**Español** · [English](en/install.md)
 
-[README](../README.md) · [Clients (details)](clients.md) · [Install matrix (audit)](install-matrix.md) · [Getting started](getting-started.md) · [Docker](docker.md) · [Troubleshooting](troubleshooting.md)
+[README](../README.md) · [Clientes](clients.md) · [Matriz de instalación](install-matrix.md) · [Primeros pasos](getting-started.md) · [Docker](docker.md) · [Problemas](troubleshooting.md)
 
-One command works everywhere. It asks five questions, checks the appliance with a signed request, stores the tokens in owner-only files and writes the entry into the clients it finds:
+Instala el servidor con un comando y elige la vía adecuada para tu cliente.
+
+> **Alcance por versión.** 1.1.2 incluye los ocho clientes originales, `uninstall` y el asistente Docker. Los 13 adaptadores adicionales, `darktrace_setup_status` y la nueva ruta Windsurf están **disponibles en `main` y llegan en 1.1.3**. No están en npm 1.1.2: usa los fragmentos manuales para esos clientes.
+
+Un comando inicia el proceso. Pide los datos, comprueba el appliance con una petición firmada, guarda tokens en archivos privados y configura los clientes detectados:
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 setup
 ```
 
-Then restart the client and ask it: **"list my Darktrace devices"**.
+Reinicia el cliente y pide: **«lista mis dispositivos Darktrace»**.
 
-You need Node.js 22+, the appliance address (`https://…`) and an API token pair (Darktrace: **System Config → Settings → API Token**). Nothing is written before the appliance check passes; `--dry-run` shows the plan without writing.
+Necesitas Node.js 22+, la dirección `https://<tu-appliance>` y el par de tokens API (Darktrace: **System Config → Settings → API Token**). No se escriben ajustes, tokens ni entradas de cliente antes de superar la comprobación del appliance; `--dry-run` muestra el plan sin escribir.
 
-## Pick your client
+## Elige tu cliente
 
-Each line is the shortest path. `darktrace-mcp` means `npx -y @nuoframework/darktrace-mcp@1.1.2` unless you installed the package globally. `config <client>` prints the exact snippet with your real paths and no secrets.
+Cada fila indica la vía más corta. `darktrace-mcp` equivale a `npx -y @nuoframework/darktrace-mcp@1.1.2` salvo instalación global; los identificadores nuevos necesitan la versión futura indicada arriba. `config <cliente>` muestra el fragmento con tus rutas reales y sin secretos.
 
-| Client | Shortest path | Where the entry lives |
+| Cliente | Vía más corta | Dónde se guarda |
 |---|---|---|
-| **Claude Desktop** | `setup --client claude-desktop`, or download the `.mcpb` from the [release](https://github.com/nuoframework/darktrace-mcp/releases) and open it (tokens go to the OS keychain) | `claude_desktop_config.json` ([details](clients.md#claude-desktop)) |
-| **Claude Code** | `setup --client claude-code` (runs `claude mcp add --scope user …`), or the [plugin](#other-paths) | `~/.claude.json` ([details](clients.md#claude-code)) |
-| **Codex CLI / Codex app** | `setup --client codex` (runs `codex mcp add …`, or edits the file) | `~/.codex/config.toml` ([details](clients.md#codex)) |
-| **Cursor** | click the Cursor badge in the [README](../README.md#install), then run `setup`; or `setup --client cursor` | `~/.cursor/mcp.json` ([details](clients.md#cursor)) |
-| **VS Code (Copilot agent mode)** | click the VS Code badge (it prompts for the URL and tokens and keeps the tokens in its secret storage); or `setup --client vscode` | user `mcp.json` ([details](clients.md#vs-code)) |
-| **VS Code Insiders** | the Insiders badge, same prompts | user `mcp.json` |
-| **Windsurf (Devin Desktop)** | `setup --client windsurf` | `~/.config/devin/mcp_config.json` ([details](clients.md#windsurf)) |
-| **OpenCode** | `setup --client opencode` | `~/.config/opencode/opencode.json` ([details](clients.md#opencode)) |
-| **Gemini CLI** | `setup --client gemini` | `~/.gemini/settings.json` ([details](clients.md#gemini-cli)) |
-| **Zed** | `setup --client zed` (a settings file with comments gets a paste snippet instead) | `~/.config/zed/settings.json` → `context_servers` ([details](clients.md#zed)) |
-| **Cline** | `setup --client cline` | Cline's `cline_mcp_settings.json` in VS Code storage ([details](clients.md#cline)) |
-| **Roo Code** | `setup --client roo` | Roo's `mcp_settings.json` in VS Code storage ([details](clients.md#roo-code)) |
-| **Continue** | `setup --client continue` (adds a marked item to `mcpServers`) | `~/.continue/config.yaml` ([details](clients.md#continue)) |
-| **Kiro** | `setup --client kiro`; `config kiro` also prints a `kiro.dev/launch` link | `~/.kiro/settings/mcp.json` ([details](clients.md#kiro)) |
-| **Amp** | `setup --client amp` | `~/.config/amp/settings.json` → `amp.mcpServers` ([details](clients.md#amp)) |
-| **GitHub Copilot CLI** | `setup --client copilot-cli` | `~/.copilot/mcp-config.json` ([details](clients.md#github-copilot-cli)) |
-| **Warp** | `setup --client warp` | `~/.warp/.mcp.json` ([details](clients.md#warp)) |
-| **Goose** | `setup --client goose` (adds a marked entry to `extensions`) | `~/.config/goose/config.yaml` ([details](clients.md#goose)) |
-| **LM Studio** | `setup --client lmstudio`; `config lmstudio` also prints an `lmstudio://add_mcp` link | `~/.lmstudio/mcp.json` ([details](clients.md#lm-studio)) |
-| **Antigravity** | `setup --client antigravity` | `~/.gemini/config/mcp_config.json` ([details](clients.md#antigravity)) |
-| **JetBrains Junie** | `setup --client junie` | `~/.junie/mcp/mcp.json` ([details](clients.md#jetbrains-junie)) |
-| **JetBrains AI Assistant** | `config jetbrains`, paste into Settings \| Tools \| AI Assistant \| MCP \| Add (or "Import from Claude" after a Claude Desktop setup) | no file ([details](clients.md#jetbrains-ai-assistant)) |
+| **Claude Desktop** | `setup --client claude-desktop`, o abre el `.mcpb` de la [release](https://github.com/nuoframework/darktrace-mcp/releases) (tokens al llavero) | `claude_desktop_config.json` ([detalles](clients.md#claude-desktop)) |
+| **Claude Code** | `setup --client claude-code` (ejecuta `claude mcp add --scope user …`), o el [plugin](plugin-distribution.md) | `~/.claude.json` ([detalles](clients.md#claude-code)) |
+| **Codex CLI / aplicación** | `setup --client codex` (ejecuta `codex mcp add …` o edita el archivo) | `~/.codex/config.toml` ([detalles](clients.md#codex)) |
+| **Cursor** | Botón del [README](../README.md#instalación-en-1-minuto), después `setup`; o `setup --client cursor` | `~/.cursor/mcp.json` ([detalles](clients.md#cursor)) |
+| **VS Code (modo agente Copilot)** | Botón de VS Code (pide dirección y tokens y los guarda en su almacén secreto); o `setup --client vscode` | `mcp.json` de usuario ([detalles](clients.md#vs-code)) |
+| **VS Code Insiders** | Botón Insiders, con las mismas preguntas | `mcp.json` de usuario |
+| **Windsurf (Devin Desktop)** | `setup --client windsurf` | Próxima ruta `~/.config/devin/mcp_config.json`; ruta anterior en 1.1.2 ([detalles](clients.md#windsurf)) |
+| **OpenCode** | `setup --client opencode` | `~/.config/opencode/opencode.json` ([detalles](clients.md#opencode)) |
+| **Gemini CLI** | `setup --client gemini` | `~/.gemini/settings.json` ([detalles](clients.md#gemini-cli)) |
+| **Zed** (1.1.3) | `setup --client zed` (si hay comentarios, muestra un fragmento para pegar) | `~/.config/zed/settings.json` → `context_servers` ([detalles](clients.md#zed)) |
+| **Cline** (1.1.3) | `setup --client cline` | `cline_mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#cline)) |
+| **Roo Code** (1.1.3) | `setup --client roo` | `mcp_settings.json` del almacenamiento VS Code ([detalles](clients.md#roo-code)) |
+| **Continue** (1.1.3) | `setup --client continue` (añade un elemento marcado a `mcpServers`) | `~/.continue/config.yaml` ([detalles](clients.md#continue)) |
+| **Kiro** (1.1.3) | `setup --client kiro`; `config kiro` muestra también un enlace `kiro.dev/launch` | `~/.kiro/settings/mcp.json` ([detalles](clients.md#kiro)) |
+| **Amp** (1.1.3) | `setup --client amp` | `~/.config/amp/settings.json` → `amp.mcpServers` ([detalles](clients.md#amp)) |
+| **GitHub Copilot CLI** (1.1.3) | `setup --client copilot-cli` | `~/.copilot/mcp-config.json` ([detalles](clients.md#github-copilot-cli)) |
+| **Warp** (1.1.3) | `setup --client warp` | `~/.warp/.mcp.json` ([detalles](clients.md#warp)) |
+| **Goose** (1.1.3) | `setup --client goose` (añade una entrada marcada a `extensions`) | `~/.config/goose/config.yaml` ([detalles](clients.md#goose)) |
+| **LM Studio** (1.1.3) | `setup --client lmstudio`; `config lmstudio` muestra `lmstudio://add_mcp` | `~/.lmstudio/mcp.json` ([detalles](clients.md#lm-studio)) |
+| **Antigravity** (1.1.3) | `setup --client antigravity` | `~/.gemini/config/mcp_config.json` ([detalles](clients.md#antigravity)) |
+| **JetBrains Junie** (1.1.3) | `setup --client junie` | `~/.junie/mcp/mcp.json` ([detalles](clients.md#jetbrains-junie)) |
+| **JetBrains AI Assistant** (1.1.3) | `config jetbrains`, pega en Settings \| Tools \| AI Assistant \| MCP \| Add (o «Import from Claude» tras configurar Desktop) | Sin archivo documentado ([detalles](clients.md#jetbrains-ai-assistant)) |
 
-Several clients at once: `setup` lists the ones it detects and preselects them; `setup --client all` configures every client that has a file. All of them share the same token files.
+Varios clientes: `setup` lista los detectados y los preselecciona en la nueva presentación; `setup --client all` configura los que tienen archivo. Comparten los mismos archivos de token.
 
-## What the badge does
+El asistente usa `npx` solo al instalar; los clientes arrancan rutas absolutas o una imagen local fijada con `--pull=never`. Los botones y el plugin tienen sus propios métodos de arranque.
 
-A README badge cannot know your paths or tokens, so it adds a `darktrace` entry that starts the pinned package through `npx` with the `read` profile and nothing else. The button only adds the entry; complete it with the wizard:
+## Qué hace el botón
+
+GitHub elimina los esquemas no HTTP: los botones usan los envoltorios HTTPS oficiales de [Cursor](https://cursor.com/en/install-mcp) y [VS Code](https://github.com/github/github-mcp-server#installation), conservando exactamente el JSON codificado y sus campos de entrada; Insiders añade `quality=insiders`.
+
+Un botón del README no conoce tus rutas ni tokens: añade `darktrace` con la versión npm fijada, `npx`, perfil `read` y nada más. En `main`, para 1.1.3, un servidor sin conexión expone solo `darktrace_setup_status`, que indica qué falta y el comando:
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 ```
 
-`setup` rewrites the entry with an absolute Node path, a fixed copy of the package and the token file paths, and the Darktrace tools appear after a restart. Until then the entry has no appliance to talk to: with the published 1.1.1 and 1.1.2 the server exits with `startup_error`; from the first version that ships setup mode (this branch, planned for 1.1.3) it starts anyway and exposes exactly one tool, `darktrace_setup_status`, whose description and result repeat the command above. The VS Code badges are different: VS Code prompts for the URL and both tokens itself, so they work without `setup`. Every other client entry must never run `npx`: each launch would depend on the registry and could silently pick up new code, which is why the wizard registers absolute paths.
+Con el botón Cursor que instala la versión 1.1.2, ejecuta `setup` antes de arrancar: esa versión no incluye el modo de configuración. El asistente reescribe la entrada con Node absoluto, copia fija y archivos de token; las herramientas aparecen tras reiniciar. Los botones VS Code piden dirección y tokens en el propio cliente y funcionan sin `setup`. Los botones con versión fijada son excepciones explícitas de arranque inicial. Las entradas normales del asistente usan rutas absolutas para evitar depender del registro en cada arranque. Si se borra la caché npm, una entrada creada por botón vuelve a necesitar el registro.
 
-## Pinning the version
+## Fijar la versión
 
-`npx -y @nuoframework/darktrace-mcp setup` (no version) installs the latest published version; it was checked against the registry on 2026-10-06, when it resolved to 1.1.1; after the 1.1.2 publication it resolves to 1.1.2. Pin an exact version when you want the same bytes on every machine, in scripts, in the badges and in anything a client entry launches. The wizard itself never writes `npx` into a client. The version pinned in the badges comes from `package.json`: `node scripts/install-badges.mjs --write` rewrites the badge rows of every README after a version bump, and a test fails when they drift.
+Omitir la versión en `npx -y @nuoframework/darktrace-mcp setup` descarga la última publicada; consulta el [estado por canal](releases.md#release-status-2026-10-06) antes de instalar. Fija siempre una versión exacta para reproducir los mismos bytes entre máquinas, en scripts, botones y entradas de cliente. El asistente nunca escribe `npx` en la configuración.
 
-## Other paths
+La versión de los botones procede de `package.json`: después de compilar, `node scripts/install-badges.mjs --write` actualiza las filas de ambos README al cambiar la versión. La prueba correspondiente detecta cualquier desajuste.
 
-- **Docker.** `setup --runtime docker` checks that the daemon answers, proposes `ghcr.io/nuoframework/darktrace-mcp:1.1.2` (published index digest `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`; pass it as `--image ghcr.io/nuoframework/darktrace-mcp@sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee` to pin it yourself), pulls it on request and writes a hardened entry that starts the immutable image ID with `--pull=never`. [Docker guide](docker.md#install).
-- **Claude Desktop extension.** `darktrace-mcp-1.1.2.mcpb` from the GitHub release, or `npm run pack:mcpb` from a checkout. [Details](clients.md#claude-desktop).
-- **Claude Code plugin.** `claude plugin marketplace add nuoframework/darktrace-mcp`, then `claude plugin install darktrace-mcp@darktrace-mcp`; Claude Code asks for the URL, tokens and profile and keeps the tokens in the OS credential store. Codex: `codex plugin marketplace add nuoframework/darktrace-mcp`, `codex plugin add darktrace-mcp@darktrace-mcp`, then `setup` once for the connection. [Plugin guide](plugin-distribution.md).
-- **Manual.** `darktrace-mcp config <client>` prints the snippet with real paths; every client's file and shape is listed in [Clients](clients.md).
-- **Build from source.** [Fallback](getting-started.md#fallback-build-from-source).
+## Otras vías
+
+- **Docker.** `setup --runtime docker` comprueba el daemon, propone `ghcr.io/nuoframework/darktrace-mcp:1.1.2`, descarga con permiso y escribe una entrada protegida con ID inmutable y `--pull=never`. [Guía](docker.md#install).
+- **Extensión Claude Desktop.** `darktrace-mcp-1.1.2.mcpb` de GitHub Release o `npm run pack:mcpb` desde el checkout. [Detalles](clients.md#claude-desktop).
+- **Plugin y marketplace Codex.** Consulta la [guía de instalación y distribución](plugin-distribution.md).
+- **Manual.** `darktrace-mcp config <cliente>` muestra rutas reales; [Clientes](clients.md) detalla archivos y formatos.
+- **Desde fuentes.** [Alternativa](getting-started.md#fallback-build-from-source).
 
 ## Windows
 
-Native Windows cannot prove that a token file is owner-only (Node has no file-ACL API), so the server refuses token files there. These paths work natively without that trade-off: the Claude Desktop `.mcpb` (OS keychain), the VS Code badge or `config vscode` link (secret storage), Docker Desktop, or WSL with the Linux command. For any other client, `setup --inline-tokens-windows` writes the token values into that client's file after an explicit consent notice. The analysis and the follow-up are in the [install matrix](install-matrix.md#windows-native).
+Windows nativo no permite demostrar que un token sea privado mediante la API de archivos de Node; el servidor rechaza esos archivos. Alternativas nativas sin ese compromiso: `.mcpb` de Claude Desktop (llavero), botón VS Code o enlace `config vscode` (almacén secreto), Docker Desktop, o WSL con el comando Linux. En otros clientes, `setup --inline-tokens-windows` escribe los valores en su configuración solo tras aceptación explícita. [Análisis y seguimiento](install-matrix.md#windows-native).
 
-## Check, update and remove
+<a id="comprobar-y-desinstalar"></a>
+
+## Comprobar, actualizar y desinstalar
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 test
-npx -y @nuoframework/darktrace-mcp@1.1.2 update
 npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
-`test` performs one signed `GET /status` and says exactly what to fix (and mentions a newer version when one exists). `update` verifies the newest release (registry signatures and provenance, the new copy's `--check-config`, one signed request) and only then moves every client entry to it, keeping the previous version for `update --rollback`; `update --check` only reports. `uninstall` shows a plan, asks once, removes the `darktrace` entry from every client (backups kept), the stored tokens and every fixed copy. [Update guide](update.md) · [Troubleshooting](troubleshooting.md).
+**Actualización en `main`, prevista para 1.1.3.** npm 1.1.2 no incluye `update` ni los avisos de actualización. Desde el [checkout compilado](update.md), ejecuta:
+
+```sh
+node dist/src/index.js update
+```
+
+`test` hace un `GET /status` firmado e indica qué corregir; en 1.1.3 también avisa si hay una versión más nueva. `update` verifica la última release (firmas del registro y procedencia cuando se anuncie, el `--check-config` de la nueva copia y una petición firmada) y solo entonces mueve todas las entradas, conservando la versión anterior para `update --rollback`; `update --check` solo informa. `uninstall` muestra un plan, pregunta una vez y borra entradas `darktrace` de los clientes admitidos por la versión instalada (con copias de seguridad), tokens y todas las copias fijas. [Guía de actualización](update.md) · [Solución de problemas](troubleshooting.md).
+
+El asistente usa ámbito de usuario. Antes de confiar en un archivo `.mcp.json` de proyecto, revisa sus comandos y variables: se ejecutan para quienes confían en ese repositorio.

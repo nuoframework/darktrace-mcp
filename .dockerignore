@@ -23,7 +23,7 @@ test/security/evidence/**
 !docs/**
 !scripts/**
 !README.md
-!README.es.md
+!README.en.md
 !SECURITY.md
 !manifest.json
 !server.json

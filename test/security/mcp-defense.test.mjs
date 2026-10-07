@@ -303,11 +303,11 @@ test('MR-03.DISTRIBUTION only the scoped published package, pinned exactly, and 
   for (const line of ['npx -y @nuoframework/darktrace-mcp@1.1.0', 'npm exec --package=@nuoframework/darktrace-mcp@1.1.0 darktrace-mcp']) assert.equal(forbiddenCommand(line, true), true, line);
   assert.deepEqual(distributionIssues(resolve('.')), []);
   const directory = mkdtempSync(join(tmpdir(), 'synthetic-mr03-')); mkdirSync(join(directory, 'docs')); mkdirSync(join(directory, 'examples'));
-  writeFileSync(join(directory, 'README.es.md'), 'No ejecutar paquetes no verificados.\n');
-  writeFileSync(join(directory, 'README.md'), 'Do not run npx darktrace-mcp.\n```sh\nnpm ci --ignore-scripts\nnpm install ./darktrace-mcp-0.1.tgz\n```\n'); assert.deepEqual(distributionIssues(directory), []);
+  writeFileSync(join(directory, 'README.md'), 'No ejecutar paquetes no verificados.\n');
+  writeFileSync(join(directory, 'README.en.md'), 'Do not run npx darktrace-mcp.\n```sh\nnpm ci --ignore-scripts\nnpm install ./darktrace-mcp-0.1.tgz\n```\n'); assert.deepEqual(distributionIssues(directory), []);
   writeFileSync(join(directory, 'docs/unsafe.md'), '```sh\nnpx -y darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 1);
   writeFileSync(join(directory, 'examples/unsafe.json'), JSON.stringify({ mcpServers: { unsafe: { command: 'npx', args: ['-y', 'darktrace-mcp'] } } })); assert.equal(distributionIssues(directory).length, 2);
-  writeFileSync(join(directory, 'README.es.md'), '```sh\nnpm install darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 3);
+  writeFileSync(join(directory, 'README.md'), '```sh\nnpm install darktrace-mcp\n```\n'); assert.equal(distributionIssues(directory).length, 3);
   writeFileSync(join(directory, 'examples/pinned-launcher.json'), JSON.stringify({ mcpServers: { darktrace: { command: '/usr/local/bin/npx', args: ['-y', '@nuoframework/darktrace-mcp@1.1.0'] } } })); assert.equal(distributionIssues(directory).length, 4);
   writeFileSync(join(directory, 'docs/bootstrap.md'), '```sh\nnpx -y @nuoframework/darktrace-mcp@1.1.0 setup\n```\n'); assert.equal(distributionIssues(directory).length, 4);
 });

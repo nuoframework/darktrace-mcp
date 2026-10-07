@@ -14,7 +14,7 @@ mkdirSync(out,{recursive:true,mode:0o700});
 assert.equal(readdirSync(out).length,0,'use a new empty external artifact directory');
 const snapshot=mkdtempSync(join(tmpdir(),'darktrace-release-source-'));
 for(const name of ['src','scripts','openapi','docs','test','examples'])cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')&&!/\/docs\/assets\/.*\.(png|jpe?g|webp)$/i.test(p)});
-const rootInputs=['package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.es.md','LICENSE','SECURITY.md','CHANGELOG.md','Dockerfile','.dockerignore','manifest.json','server.json'];
+const rootInputs=['package.json','package-lock.json','npm-shrinkwrap.json','tsconfig.json','tsconfig.generate.json','README.md','README.en.md','LICENSE','SECURITY.md','CHANGELOG.md','Dockerfile','.dockerignore','manifest.json','server.json'];
 for(const name of rootInputs)cpSync(join(root,name),join(snapshot,name));
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 function hashes(dir,prefix=''){const result={};for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))){const p=join(dir,e.name),n=prefix+e.name;if(e.isDirectory())Object.assign(result,hashes(p,n+'/'));else if(e.isFile())result[n]=digest(readFileSync(p));else throw Error('unexpected symlink '+n);}return result;}
@@ -24,7 +24,7 @@ Object.assign(sourceHashes,hashes(join(snapshot,'docs/assets'),'docs/assets/'));
 sourceHashes['docs/operation-inventory.json']=digest(readFileSync(join(snapshot,'docs/operation-inventory.json')));
 for(const name of rootInputs)sourceHashes[name]=digest(readFileSync(join(snapshot,name)));
 // Example/doc validation also binds the exact guide versions inspected.
-for(const name of ['docs/clients.md','docs/configuration.md','docs/docker.md','docs/getting-started.md','docs/es/getting-started.md','docs/releases.md'])sourceHashes[name]=digest(readFileSync(join(snapshot,name)));
+for(const guide of ['clients','configuration','docker','getting-started','releases','plugin-distribution','troubleshooting','install','install-matrix'])for(const name of [`docs/${guide}.md`,`docs/en/${guide}.md`])sourceHashes[name]=digest(readFileSync(join(snapshot,name)));
 const productionSourceHashes=hashes(join(snapshot,'src'));
 const historicalAlphaTests=verifyHistoricalArchive(snapshot);
 const historicalValidatedPredecessors=verifyValidatedPredecessorArchives(snapshot);

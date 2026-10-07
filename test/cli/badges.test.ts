@@ -43,13 +43,21 @@ test('VS Code badges prompt for URL and both tokens through inputs; tokens are p
 });
 
 test('both README languages carry the badge rows generated for the current package version', async () => {
-  const { BADGE_LABELS } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { BADGE_LABELS: Record<'en' | 'es', { cursor: string; vscode: string; insiders: string }> };
-  // The English and Spanish READMEs may be named README.md / README.es.md or README.en.md / README.md; one file per language must carry its rows.
-  const candidates = ['README.md', 'README.en.md', 'README.es.md'].filter((f) => existsSync(join(root, f))).map((f) => [f, readFileSync(join(root, f), 'utf8')] as const);
+  const { BADGE_LABELS, readmeBadgesHtml } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { BADGE_LABELS: Record<'en' | 'es', { cursor: string; vscode: string; insiders: string }>; readmeBadgesHtml: (version: string, labels: { cursor: string; vscode: string; insiders: string }) => string };
+  // README.md is Spanish and README.en.md is English; both must carry their language rows.
+  const candidates = ['README.md', 'README.en.md'].filter((f) => existsSync(join(root, f))).map((f) => [f, readFileSync(join(root, f), 'utf8')] as const);
   for (const [lang, labels] of Object.entries(BADGE_LABELS)) {
-    const rows = installBadgesMarkdown(version, labels).split('\n');
+    const rows = readmeBadgesHtml(version, labels).split('\n');
     const carrier = candidates.find(([, text]) => rows.every((line) => text.includes(line)));
     assert.ok(carrier, `no README carries the ${lang} badge rows for ${version} (run: node scripts/install-badges.mjs and paste them)`);
+    const hrefs = [...carrier[1].matchAll(/<a href="([^"]+)">/g)].map((match) => match[1].replaceAll('&amp;', '&')).filter((href) => /^https:\/\/(?:cursor\.com\/en\/install-mcp|(?:insiders\.)?vscode\.dev\/redirect\/mcp\/install)\?/.test(href));
+    assert.equal(hrefs.length, 3, 'exactly three official HTTPS installation buttons');
+    const encodedConfig = (href: string) => href.split('config=')[1].split('&')[0];
+    assert.equal(encodedConfig(hrefs[0]), encodedConfig(cursorBadgeLink(version)), 'Cursor encoded JSON is unchanged');
+    assert.equal(encodedConfig(hrefs[1]), vscodeBadgeLink(version).split('?')[1], 'VS Code encoded JSON is unchanged');
+    assert.equal(encodedConfig(hrefs[2]), vscodeBadgeLink(version, true).split('?')[1], 'Insiders encoded JSON is unchanged');
+    assert.equal(new URL(hrefs[2]).searchParams.get('quality'), 'insiders');
+    for (const href of hrefs.slice(1)) assert.deepEqual(JSON.parse(new URL(href).searchParams.get('inputs') as string), (vscodeBadgePayload(version) as { inputs: unknown }).inputs, 'HTTPS redirect preserves all input prompts');
   }
 });
 
@@ -57,11 +65,11 @@ test('install-badges --write replaces stale badge rows in place and keeps indent
   const { rewriteBadges } = await import(new URL('../../../scripts/install-badges.mjs', import.meta.url).href) as { rewriteBadges(file: string, text: string): { changed: boolean; text: string } };
   const stale = installBadgesMarkdown('0.0.1', { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n').map((l) => '    ' + l).join('\n');
   const before = `## Install\n\n2. Run it.\n\n${stale}\n\n3. Restart.\n`;
-  const { changed, text } = rewriteBadges('README.md', before);
+  const { changed, text } = rewriteBadges('README.en.md', before);
   assert.equal(changed, true);
   assert.equal(text.includes('0.0.1'), false);
   for (const line of installBadgesMarkdown(version, { cursor: 'Install in Cursor', vscode: 'Install in VS Code', insiders: 'Install in VS Code Insiders' }).split('\n')) assert.ok(text.includes('    ' + line));
-  assert.equal(rewriteBadges('README.md', text).changed, false);
-  assert.throws(() => rewriteBadges('README.md', '## Install\n'), /expected 3 badge rows/);
+  assert.equal(rewriteBadges('README.en.md', text).changed, false);
+  assert.throws(() => rewriteBadges('README.en.md', '## Install\n'), /expected 3 badge rows/);
 });
 

@@ -937,7 +937,7 @@ test('ST-29.TOOL_CAP plus-one stream abort returns response_limit_exceeded [AD-W
   assert.equal(h.state.wires.length, 1); assert.equal(stream.state.cancelled, 1); assert.deepEqual(writes, []); denial(result, 'response_limit_exceeded');
 });
 test('ST-29.NOTICE base64 appliance data is forwarded to host/provider [AD-W-21]', () => {
-  const notice = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
+  const notice = readFileSync(new URL('../../README.en.md', import.meta.url), 'utf8');
   assert.equal(/base64/i.test(notice), true, 'README lacks explicit Base64 data-egress notice');
   assert.equal(/provider/i.test(notice), true, 'README lacks provider notice');
 });

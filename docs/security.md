@@ -1,68 +1,88 @@
-# Security overview
+# Resumen de seguridad
 
-[README](../README.md) · [Security policy](../SECURITY.md) · [Configuration](configuration.md) · [Architecture](architecture.md)
+**Español** · [English](en/security.md)
 
-This page explains, in plain terms, how the server protects your appliance and your data, and where the limits are. Detailed reviews and test records are in [docs/security/](#detailed-records).
+[README](../README.md) · [Política de seguridad](../SECURITY.md) · [Configuración](configuration.md) · [Arquitectura](architecture.md)
 
-## What the server does for you
+Cómo protege el servidor tu appliance y tus datos, y cuáles son sus límites.
 
-| Protection | What it means |
+<a id="security-overview"></a>
+
+Esta página explica las protecciones en términos prácticos. Las revisiones y los registros detallados están en [docs/security/](#registros-detallados).
+
+<a id="what-the-server-does-for-you"></a>
+
+## Qué hace el servidor por ti
+
+| Protección | Qué significa |
 |---|---|
-| You choose the permissions | Profiles (`read`, `sensitive`, `write`, `critical`) are set by you at startup. The model cannot change them. `sensitive` and `write` together (including `all`) start only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
-| Previews and approval for changes | Writes accept `dryRun:true` for a preview. Critical actions need a `dryRun:true` preview, then `confirm:true` with its single-use `previewId`, and by default an accepted server dialog. A critical call without `confirm:true` is refused (`confirmation_required`). Skipping the server dialog (`DARKTRACE_CRITICAL_APPROVAL=host`) needs `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` |
-| Audit | Every write, preview and refusal writes a hash-chained JSON audit line to stderr. Sensitive reads are not audited |
-| No automatic retry of changes | A write that times out is reported as unknown, never replayed. Writes are rate-limited, and three failed or unknown writes in a row stop all writes until restart |
-| Token files locked down | Token files must be private (`0600`), owned by you, not symlinks |
-| One destination | The server only talks to the configured appliance URL, over verified TLS. Proxies and TLS bypasses stop startup |
-| Bounded input and output | Size, depth and rate limits on every call. Responses are trimmed to known fields, secrets are redacted and hidden Unicode characters are escaped |
-| Local only | stdio transport. No network port is opened |
+| Tú eliges los permisos | Configuras los perfiles (`read`, `sensitive`, `write`, `critical`) al arrancar. El modelo no puede cambiarlos. La combinación `sensitive` y `write` (incluido `all`) solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true` |
+| Vistas previas y aprobación de cambios | Las escrituras aceptan `dryRun:true`. Las acciones críticas necesitan esa vista previa, después `confirm:true` con su `previewId` de un solo uso y, por defecto, aceptar un diálogo del servidor. Una llamada crítica sin `confirm:true` se rechaza (`confirmation_required`). Omitir el diálogo (`DARKTRACE_CRITICAL_APPROVAL=host`) requiere `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true` |
+| Auditoría | Cada escritura, vista previa y rechazo escribe una línea JSON con cadena de hashes en stderr. Las lecturas sensibles no se auditan |
+| Sin reintentos automáticos de cambios | Una escritura que agota el tiempo se declara de resultado desconocido y nunca se repite automáticamente. Las escrituras tienen límites de frecuencia; tres fallidas o desconocidas consecutivas bloquean todas las escrituras hasta reiniciar |
+| Archivos de token protegidos | Deben ser privados (`0600`), pertenecer a tu usuario y no ser enlaces simbólicos |
+| Un destino | Solo se conecta al appliance configurado, con TLS verificado. Los proxies y la desactivación de TLS impiden el arranque |
+| Entrada y salida acotadas | Límites de tamaño, profundidad y frecuencia por llamada. Las respuestas se reducen a campos conocidos, se ocultan secretos y se escapan caracteres Unicode invisibles |
+| Solo local | Transporte stdio. No abre ningún puerto de red |
 
-## What it cannot do
+<a id="what-it-cannot-do"></a>
 
-- **It cannot stop data reaching your model provider.** Every result goes to your MCP client and its model. Check provider eligibility, retention and residency before connecting a production appliance.
-- **It cannot confirm a human approved.** Ordinary writes rely on your client's permission prompt by default. In `host` mode, or with "always allow" rules or auto-answering clients, no human may see the call.
-- **It cannot stop data moving between profiles.** With `sensitive` and `write` both on, the model can copy sensitive results into comments, tag descriptions or labels. There is no taint control; comments cannot be deleted.
-- **It cannot make the model trustworthy.** Appliance data can contain attacker-controlled text (hostnames, email subjects). The server marks results as data, but the model may still be influenced. Keep `critical` off unless you need it, and read previews before confirming.
-- **It cannot exceed your token.** Darktrace token permissions are the final authority. Give the token only the rights you want to delegate.
-- **It does not protect against a compromised machine.** Anyone who can run code as your user can read the token files.
+## Qué no puede hacer
 
-## Lab validation
+- **No impide que los datos lleguen al proveedor del modelo.** Cada resultado llega al cliente MCP y a su modelo. Revisa la idoneidad del proveedor, la retención y la residencia antes de conectar producción.
+- **No puede confirmar que haya aprobado una persona.** Por defecto, las escrituras ordinarias dependen del aviso de permisos del cliente. Con `host`, reglas de «permitir siempre» o clientes que responden automáticamente, puede que ninguna persona vea la llamada.
+- **No impide el traslado de datos entre perfiles.** Con `sensitive` y `write` activos, el modelo puede copiar datos sensibles a comentarios, descripciones de etiquetas o nombres. No hay seguimiento de contaminación de datos; los comentarios no se pueden borrar.
+- **No convierte al modelo en fiable.** Los datos del appliance pueden incluir texto de un atacante (nombres de host, asuntos de correo). El servidor los marca como datos, pero pueden influir en el modelo. Mantén `critical` desactivado salvo que lo necesites y lee las vistas previas.
+- **No supera los permisos del token.** Darktrace tiene la última palabra. Da al token solo los derechos que quieras delegar.
+- **No protege una máquina comprometida.** Quien pueda ejecutar código como tu usuario puede leer los archivos de token.
 
-59 operations have evidence from two Darktrace 7.1.0 lab appliances (2026-10-06); for 6 of them the evidence is partial (for example, manual Antigena `connection` blocks only, subnet `label` and `uniqueHostnames` only). The rest, including every Darktrace/Email read and the three tag DELETE operations (applied, but the lab gateway answers HTTP 502), are marked **not lab-validated**. Some write evidence predates the final write controls; the [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows under them. The [tool reference](tools.md) shows the status of each operation, and the [known limitations](../CHANGELOG.md#known-limitations-in-110) list what is not covered. Test writes on a non-production appliance first.
+<a id="lab-validation"></a>
 
-## Runtime notes
+## Validación de laboratorio
 
-- The Docker image uses Alpine's Node.js 24 with OpenSSL 3.5.9.
-- Some official Node.js builds still bundle OpenSSL 3.5.8 (CVE-2026-35189, TLS certificate processing). For native installs, check `node -p 'process.versions.openssl'` and prefer 3.5.9 or later.
-- Image scans and their review for v1.0.0 are recorded in the [Docker guide](docker.md#v100-image-at-a-glance-previous-release). The 1.1.0 image has no scan record yet ([status](docker.md#110-image-verification-status)).
+59 operaciones tienen evidencia de dos appliances distintos Darktrace 7.1.0 (2026-10-06): lab A en 1.1.0 y lab B en la campaña de huecos 1.1.1; en 6 es parcial (por ejemplo, Antigena manual solo con bloqueos `connection`, subredes solo con `label` y `uniqueHostnames`). El resto, incluidas todas las lecturas Darktrace/Email y las tres operaciones DELETE de etiquetas (se aplicaron, pero el gateway devolvió HTTP 502), figura como **sin validar en laboratorio**. Parte de la evidencia de escritura es anterior a los controles finales; la [campaña de cobertura](security/lab-gap-campaign-1.1.1.md) repitió los flujos críticos con ellos. La [referencia](tools.md) detalla cada operación y las [limitaciones conocidas](../CHANGELOG.md#known-limitations-in-110) explican qué no está cubierto. Prueba primero las escrituras en un appliance no productivo.
 
-## Supply-chain checks
+<a id="runtime-notes"></a>
 
-CodeQL, ESLint with security rules, Dependabot and OpenSSF Scorecard run on the repository. What each one checks and how to read its results: [supply-chain checks](security/supply-chain-checks.md).
+## Notas sobre el runtime
 
-## Report a vulnerability
+- La imagen Docker usa Node.js 24 de Alpine con OpenSSL 3.5.9.
+- Algunos binarios oficiales de Node.js examinados aún incluían OpenSSL 3.5.8 (CVE-2026-35189, procesamiento de certificados TLS). En instalaciones nativas comprueba `node -p 'process.versions.openssl'` y prefiere 3.5.9 o posterior.
+- Los escaneos y su revisión de v1.0.0 están en la [guía Docker](docker.md#v100-image-at-a-glance-previous-release). No consta aún un escaneo de la imagen 1.1.0 ([estado](docker.md#110-image-verification-status)).
 
-Use GitHub private vulnerability reporting, as described in [SECURITY.md](../SECURITY.md). Do not post tokens, appliance data or exploit details in issues.
+<a id="supply-chain-checks"></a>
 
-## Detailed records
+## Comprobaciones de la cadena de suministro
 
-Design and threat analysis:
+El repositorio ejecuta CodeQL, ESLint con reglas de seguridad, Dependabot y OpenSSF Scorecard. Qué revisa cada uno y cómo interpretar los resultados: [comprobaciones de suministro](security/supply-chain-checks.md).
 
-- [Threat model](security/threat-model.md)
-- [Design decisions](security/design-decisions.md)
-- [Security test plan](security/security-test-plan.md)
-- [MCP attack research](security/mcp-attack-research.md)
+<a id="report-a-vulnerability"></a>
 
-Review and checkpoint records (dated, kept as evidence; some describe the earlier read-only release):
+## Notificar una vulnerabilidad
 
-| Topic | Records |
+Usa la notificación privada de GitHub indicada en [SECURITY.md](../SECURITY.md). No publiques tokens, datos del appliance ni detalles de explotación en issues.
+
+<a id="detailed-records"></a>
+
+## Registros detallados
+
+Diseño y análisis de amenazas:
+
+- [Modelo de amenazas](security/threat-model.md)
+- [Decisiones de diseño](security/design-decisions.md)
+- [Plan de pruebas de seguridad](security/security-test-plan.md)
+- [Investigación de ataques MCP](security/mcp-attack-research.md)
+
+Revisiones y puntos de control fechados, conservados como evidencia; algunos describen la versión anterior de solo lectura:
+
+| Tema | Registros |
 |---|---|
-| Code audits | [server](security/code-audit-server.md), [client](security/code-audit-client.md), [final code review](security/final-code-review.md) |
-| Design reviews | [1](security/design-review.md), [2](security/design-review-round2.md), [3](security/design-review-round3.md), [4](security/design-review-round4.md), [5](security/design-review-round5.md) |
-| MCP defenses | [results](security/mcp-defense-results.md), [independent review](security/mcp-defense-independent-review.md), [corrections acceptance](security/mcp-corrections-acceptance.md), [adversarial results](security/adversarial-results.md) |
-| Patched runtime | [implementation](security/patched-runtime-implementation.md), [independent review](security/patched-runtime-independent-review.md), [lab checkpoint](security/patched-runtime-lab-checkpoint.md) |
-| Docker | [final review](security/docker-final-review.md), [volume review](security/docker-volume-review.md) |
-| Stable release gate | [final gate review](security/final-stable-gate-review.md), [capability review](security/first-stable-capability-review.md) |
-| Writes and 1.1.0 | [threat model](security/threat-model-writes.md), [test plan](security/security-test-plan-writes.md), [design review](security/design-review-writes.md), [client code review](security/code-review-writes-client.md), [adversarial results](security/adversarial-results-writes.md), [lab campaign](security/final-lab-campaign-1.1.0.md), [release pins](security/release-pins-1.1.0.md), [1.1.0 final gate review](security/final-gate-review-1.1.0.md) |
+| Auditorías de código | [servidor](security/code-audit-server.md), [cliente](security/code-audit-client.md), [revisión final](security/final-code-review.md) |
+| Revisiones de diseño | [1](security/design-review.md), [2](security/design-review-round2.md), [3](security/design-review-round3.md), [4](security/design-review-round4.md), [5](security/design-review-round5.md) |
+| Defensas MCP | [resultados](security/mcp-defense-results.md), [revisión independiente](security/mcp-defense-independent-review.md), [aceptación de correcciones](security/mcp-corrections-acceptance.md), [resultados adversariales](security/adversarial-results.md) |
+| Runtime corregido | [implementación](security/patched-runtime-implementation.md), [revisión independiente](security/patched-runtime-independent-review.md), [control de laboratorio](security/patched-runtime-lab-checkpoint.md) |
+| Docker | [revisión final](security/docker-final-review.md), [volúmenes](security/docker-volume-review.md) |
+| Revisión de versión estable | [revisión final](security/final-stable-gate-review.md), [capacidades](security/first-stable-capability-review.md) |
+| Escrituras y 1.1.0 | [amenazas](security/threat-model-writes.md), [plan de pruebas](security/security-test-plan-writes.md), [diseño](security/design-review-writes.md), [código del cliente](security/code-review-writes-client.md), [pruebas adversariales](security/adversarial-results-writes.md), [campaña de laboratorio](security/final-lab-campaign-1.1.0.md), [valores fijados](security/release-pins-1.1.0.md), [revisión final 1.1.0](security/final-gate-review-1.1.0.md) |
 
-Older release records: [docs/history](history/README.md).
+Registros anteriores: [historial](history/README.md). [Índice completo de auditorías](security/README.md).

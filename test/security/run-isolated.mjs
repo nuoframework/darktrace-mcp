@@ -1,5 +1,5 @@
 // No install, external networking, or edits to shared source/build artifacts.
-import { cpSync, existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync, symlinkSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -8,8 +8,7 @@ import { fileURLToPath } from 'node:url';
 const root=resolve(fileURLToPath(new URL('../../',import.meta.url)));
 const snapshot=mkdtempSync(join(tmpdir(),'darktrace-adversarial-'));
 for(const name of ['src','test','scripts','openapi','docs','examples']) cpSync(join(root,name),join(snapshot,name),{recursive:true,filter:p=>!p.includes('/test/security/evidence')});
-// README languages: README.md plus README.en.md or README.es.md, whichever the checkout carries.
-for(const name of ['package.json','tsconfig.json','tsconfig.generate.json','README.md','README.en.md','README.es.md']) if(existsSync(join(root,name))) cpSync(join(root,name),join(snapshot,name));
+for(const name of ['package.json','tsconfig.json','tsconfig.generate.json','README.md','README.en.md']) cpSync(join(root,name),join(snapshot,name));
 symlinkSync(join(root,'node_modules'),join(snapshot,'node_modules'),'dir');
 function hashes(dir,prefix='') {
   const out={};for(const e of readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name))) {

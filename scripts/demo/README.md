@@ -92,6 +92,6 @@ The retained [approval.mjs](approval.mjs) and [approval-host.cast](approval-host
 
 ## README table and badge maintenance
 
-The area table aggregates the current [tool reference](../../docs/tools.md): count unique tool names and operation rows per `##` area; list their profiles; count `yes`, `partial:` and `not lab-validated` in the Lab column. Totals are 50 tools / 77 operations and 45 full / 11 partial / 21 unvalidated operation rows. Do not interpret an area marker as complete validation of every argument or final write control.
+The area table aggregates the current [tool reference](../../docs/tools.md): count unique tool names and operation rows per `##` area; list their profiles; count `✓`, `◐` and `—` in the lab-evidence column. Totals are 50 tools / 77 operations and 53 full / 6 partial / 18 unvalidated operation rows. Do not interpret an area marker as complete validation of every argument or final write control.
 
 [Badge choices and pending OpenSSF status](../../docs/releases.md#openssf-badge-placeholders) document the verified Simple Icons slugs. npm's badge may fail before publication; both OpenSSF badges are explicit placeholders.

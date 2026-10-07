@@ -50,11 +50,11 @@ Proposed:
 
 **ES, line 43.** Current:
 
-> Estas vías de distribución de 1.1.0 estarán disponibles cuando se publique la versión; consulta el [estado y la instalación desde el código](../es/getting-started.md).
+> Estas vías de distribución de 1.1.0 estarán disponibles cuando se publique la versión; consulta el [estado y la instalación desde el código](../getting-started.md).
 
 Proposed:
 
-> Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](../es/getting-started.md#alternativa-compilar-desde-el-código-fuente).
+> Las tres vías ya distribuyen 1.1.0: npm (con procedencia firmada), el `.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y la imagen en ghcr. ¿Prefieres compilar desde el código? Consulta la [alternativa](../getting-started.md#alternativa-compilar-desde-el-código-fuente).
 
 **ES, line 150.** Current:
 
@@ -100,7 +100,7 @@ Proposed (replace heading, lead and the table's first column; keep the `.mcpb` a
 > npx -y @nuoframework/darktrace-mcp@1.1.0 setup
 > ```
 >
-> Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario y escribe la configuración de cada cliente con copia de seguridad. [Guía completa](../es/getting-started.md).
+> Elige `read` y después tus clientes. El asistente comprueba TLS y los tokens con una petición firmada, guarda los tokens en archivos de solo propietario y escribe la configuración de cada cliente con copia de seguridad. [Guía completa](../getting-started.md).
 >
 > **Otras vías.** Claude Desktop: descarga `darktrace-mcp-1.1.0.mcpb` de la [release v1.1.0](https://github.com/nuoframework/darktrace-mcp/releases/tag/v1.1.0) y ábrelo; los tokens van al llavero del sistema. Docker: véase el punto 3.
 
@@ -209,7 +209,7 @@ Proposed:
 
 **ES, line 69.** Current:
 
-> El asistente configura estos clientes; cada insignia enlaza a su guía (en inglés; [guía en español](../es/clients.md)). Los diálogos dependen del cliente y del protocolo.
+> El asistente configura estos clientes; cada insignia enlaza a su guía (en inglés; [guía en español](../clients.md)). Los diálogos dependen del cliente y del protocolo.
 
 Proposed:
 

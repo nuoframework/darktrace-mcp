@@ -1,16 +1,30 @@
 #!/usr/bin/env node
-// Builds docs/tools.md from src/api/catalogue.generated.json + src/api/tool-groups.json.
-// Usage: node scripts/generate-tools-doc.mjs          (write docs/tools.md)
-//        node scripts/generate-tools-doc.mjs --check  (exit 1 if docs/tools.md is stale)
-// Offline and read-only apart from docs/tools.md. Never contacts an appliance.
-import { readFileSync, writeFileSync } from 'node:fs';
+// Builds bilingual tool references from the catalogue, groups and code-owned summaries.
+// Usage: node scripts/generate-tools-doc.mjs [--lang es|en] [--check]
+// Default: Spanish at docs/tools.md; English: docs/en/tools.md. Offline only.
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 
 const root = new URL('../', import.meta.url);
 const read = path => JSON.parse(readFileSync(new URL(path, root), 'utf8'));
 const catalogue = read('src/api/catalogue.generated.json');
 const toolGroups = read('src/api/tool-groups.json');
-const target = new URL('docs/tools.md', root);
+// Read string literals through the TypeScript parser; never execute source text.
+const descriptionSource = ts.createSourceFile('descriptions.ts', readFileSync(new URL('src/tools/descriptions.ts', root), 'utf8'), ts.ScriptTarget.Latest, true);
+const summaries = new Map();
+function collectSummaries(node) {
+  if (ts.isVariableDeclaration(node) && node.name.getText(descriptionSource) === 'TOOL_SUMMARIES') {
+    const object = node.initializer?.arguments?.[0];
+    if (!object || !ts.isObjectLiteralExpression(object)) throw new Error('Expected literal TOOL_SUMMARIES');
+    for (const entry of object.properties) {
+      if (!ts.isPropertyAssignment(entry) || !ts.isStringLiteral(entry.initializer)) throw new Error('Expected literal tool summary');
+      summaries.set(entry.name.getText(descriptionSource).replace(/^['"]|['"]$/g, ''), entry.initializer.text);
+    }
+  }
+  ts.forEachChild(node, collectSummaries);
+}
+collectSummaries(descriptionSource);
 
 // Lab evidence comes only from the catalogue's `validatedOn` (Darktrace 7.1.0 lab, 2026-10-06).
 // `validatedOn` has no per-action scope (DR-W-12, still open), so the operations below are listed with
@@ -41,7 +55,7 @@ const NOT_AVAILABLE_REASON = {
   post_agemail_api_ep_api_v1_0_emails_uuid_action: 'Excluded from this release: `darktrace_email_action` is not registered in any profile. Signing and request schema are unvalidated and the lab token got HTTP 403. Re-enabling it needs a reviewed schema, a signing proof with an email-licensed token and a new design review.',
 };
 
-// One plain-language line per operation. Missing entries fall back to "METHOD path".
+// One plain-language line per operation. Missing translations fail generation.
 const DESCRIPTIONS = {
   get_status: 'System health and version of the appliance.',
   get_summarystatistics: 'Device counts, bandwidth and active response actions.',
@@ -157,14 +171,172 @@ export function profileOf(op) {
   if (RANK[declared] > RANK[p]) p = declared;
   return p;
 }
-const validated = op => (op.validatedOn ?? []).length > 0;
-const labCell = op => !validated(op)
-  ? (LAB_NOT_VALIDATED_NOTE[op.operationId] ? `not lab-validated: ${LAB_NOT_VALIDATED_NOTE[op.operationId]}` : 'not lab-validated')
-  : LAB_PARTIAL[op.operationId] ?? 'yes';
+const DESCRIPTIONS_ES = {
+  "get_status": "Estado del sistema y versión del appliance.",
+  "get_summarystatistics": "Número de dispositivos, ancho de banda y acciones de respuesta activas.",
+  "get_enums": "Valores de texto para códigos numéricos de las respuestas API.",
+  "get_filtertypes": "Filtros disponibles en el editor de modelos.",
+  "get_cves": "CVE de dispositivos OT (solo Darktrace/OT).",
+  "get_devices": "Lista dispositivos o consulta uno por `did`.",
+  "post_devices": "Cambia la etiqueta, prioridad o tipo de un dispositivo.",
+  "get_devicesearch": "Busca dispositivos con filtros.",
+  "get_devicesummary": "Contexto de un dispositivo obtenido de varias fuentes.",
+  "get_deviceinfo": "Datos de conexión de un dispositivo.",
+  "get_similardevices": "Dispositivos con comportamiento similar al indicado.",
+  "get_details": "Conexiones y eventos de un dispositivo o entidad, ordenados por tiempo.",
+  "get_endpointdetails": "Ubicación y conexiones de una IP o nombre de host externo.",
+  "get_network": "Conectividad entre dispositivos o subredes.",
+  "get_metricdata": "Serie temporal de métricas de un dispositivo.",
+  "get_modelbreaches": "Lista model breaches (alertas).",
+  "get_modelbreaches_pbid": "Consulta una alerta por `pbid`.",
+  "get_mbcomments": "Comentarios de las alertas.",
+  "get_modelbreaches_pbid_comments": "Comentarios de una alerta.",
+  "post_modelbreaches_pbid_comments": "Añade un comentario a una alerta.",
+  "post_modelbreaches_pbid_acknowledge": "Reconoce una alerta.",
+  "post_modelbreaches_pbid_unacknowledge": "Retira el reconocimiento de una alerta.",
+  "get_models": "Lista modelos.",
+  "get_models_pid": "Consulta un modelo por `pid`.",
+  "get_components": "Lista componentes de modelos.",
+  "get_components_cid": "Consulta un componente por `cid`.",
+  "get_metrics": "Lista las métricas disponibles.",
+  "get_metrics_mlid": "Consulta una métrica por `mlid`.",
+  "get_aianalyst_groups": "Lista incidentes (grupos) de AI Analyst.",
+  "get_aianalyst_incidentevents": "Lista eventos de incidentes de AI Analyst.",
+  "get_aianalyst_incidents": "Ruta antigua de incidentes, obsoleta.",
+  "get_aianalyst_investigations": "Lista investigaciones manuales de AI Analyst.",
+  "post_aianalyst_investigations": "Inicia una investigación manual de AI Analyst.",
+  "get_aianalyst_stats": "Estadísticas de AI Analyst.",
+  "get_aianalyst_incident_comments": "Comentarios de un evento de incidente AI Analyst.",
+  "post_aianalyst_incident_comments": "Añade un comentario a un evento de incidente AI Analyst.",
+  "post_aianalyst_acknowledge": "Reconoce eventos de incidentes AI Analyst.",
+  "post_aianalyst_unacknowledge": "Retira el reconocimiento de eventos de incidentes AI Analyst.",
+  "post_aianalyst_pin": "Fija eventos de incidentes AI Analyst.",
+  "post_aianalyst_unpin": "Desfija eventos de incidentes AI Analyst.",
+  "get_antigena": "Lista acciones de respuesta autónoma (Antigena).",
+  "get_antigena_summary": "Resumen de acciones de respuesta activas y pendientes.",
+  "post_antigena": "Activa, amplía, anula o reactiva una acción de respuesta.",
+  "post_antigena_manual": "Crea una acción de respuesta manual, por ejemplo bloquear una conexión.",
+  "get_tags": "Lista etiquetas.",
+  "get_tags_tid": "Consulta una etiqueta por `tid`.",
+  "post_tags": "Crea una etiqueta.",
+  "delete_tags_tid": "Borra una etiqueta.",
+  "get_tags_entities": "Etiquetas de un dispositivo o dispositivos con una etiqueta.",
+  "get_tags_tid_entities": "Dispositivos con una etiqueta concreta.",
+  "post_tags_entities": "Asigna una etiqueta a un dispositivo.",
+  "post_tags_tid_entities": "Asigna una etiqueta a un dispositivo mediante el ID de etiqueta.",
+  "delete_tags_entities": "Retira una etiqueta de un dispositivo.",
+  "delete_tags_tid_entities_teid": "Retira una asignación de etiqueta.",
+  "get_intelfeed": "Consulta Watched Domains (intel feed).",
+  "post_intelfeed": "Añade o retira entradas de Watched Domains.",
+  "get_subnets": "Lista subredes.",
+  "post_subnets": "Cambia ajustes de una subred.",
+  "get_pcaps": "Lista capturas de paquetes.",
+  "post_pcaps": "Solicita una captura de paquetes nueva.",
+  "get_pcaps_filename": "Descarga una captura en Base64, completa o sin contenido: por encima de unos 45 KB se rechaza con `output_limit_exceeded` (solo tamaño y SHA-256).",
+  "get_advancedsearch_api_search_query": "Consulta Advanced Search mediante GET.",
+  "post_advancedsearch_api_search": "Consulta Advanced Search mediante POST.",
+  "get_advancedsearch_api_analyze_field_analysis_query": "Análisis de campos de Advanced Search.",
+  "get_advancedsearch_api_graph_graphmode_interval_query": "Datos de gráficos de Advanced Search.",
+  "get_agemail_api_ep_api_v1_0_dash_action_summary": "Panel Email: resumen de acciones.",
+  "get_agemail_api_ep_api_v1_0_dash_dash_stats": "Panel Email: estadísticas.",
+  "get_agemail_api_ep_api_v1_0_dash_data_loss": "Panel Email: pérdida de datos.",
+  "get_agemail_api_ep_api_v1_0_dash_user_anomaly": "Panel Email: anomalías de usuario.",
+  "get_agemail_api_ep_api_v1_0_emails_uuid": "Consulta un correo, incluidos sus metadatos de contenido.",
+  "get_agemail_api_ep_api_v1_0_emails_uuid_download": "Tamaño y SHA-256 de un correo sin procesar; no devuelve contenido.",
+  "post_agemail_api_ep_api_v1_0_emails_search": "Busca correos.",
+  "post_agemail_api_ep_api_v1_0_emails_uuid_action": "Actúa sobre un correo (excluida de esta versión).",
+  "get_agemail_api_ep_api_v1_0_admin_decode_link": "Decodifica un enlace de correo reescrito.",
+  "get_agemail_api_ep_api_v1_0_resources_actions": "Datos de referencia Email: acciones.",
+  "get_agemail_api_ep_api_v1_0_resources_filters": "Datos de referencia Email: filtros.",
+  "get_agemail_api_ep_api_v1_0_resources_tags": "Datos de referencia Email: etiquetas.",
+  "get_agemail_api_ep_api_v1_0_system_audit_eventTypes": "Datos de referencia Email: tipos de evento de auditoría.",
+  "get_agemail_api_ep_api_v1_0_system_audit_events": "Eventos de auditoría Email."
+};
 
-export function render() {
+// Both languages render from the same keys and evidence metadata. No text replacement or fallback.
+const LAB_SCOPE = Object.freeze({ appliances: 2, version: '7.1.0', date: '2026-10-06', first: '1.1.0', gap: '1.1.1' });
+const MESSAGES = {
+  en: {
+    title: 'Tool reference', lead: 'Reference of operations, profiles and the precise scope of lab evidence.',
+    nav: '[README](../../README.en.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)',
+    generated: '> Built by `npm run docs:tools` from the API catalogue, tool groups and `src/tools/descriptions.ts`. Do not edit by hand. MCP summaries below reproduce the English text seen by the client; dynamic policy notes are added at runtime. Operation descriptions are localized for readers.',
+    inventory: ({tools, available, total, spec, excluded, deprecated}) => `**${tools} tools** cover **${available} executable operations** out of ${total} in the API inventory (Darktrace Threat Visualizer API ${spec}). The other ${excluded} are [not available](#not-available): ${excluded - deprecated} excluded (the email action) and ${deprecated} deprecated (\`GET /aianalyst/incidents\`).`,
+    evidence: ({validated, partial, email}, scope) => `**Lab evidence.** ${validated} operations have evidence from ${scope.appliances} distinct Darktrace ${scope.version} appliances (${scope.date}): lab A for ${scope.first}, lab B for the ${scope.gap} gap campaign. ${partial} operations have partial evidence; the **Lab evidence** column states its scope. The rest are *not lab-validated*: they follow API documentation but did not pass against a live appliance, including all ${email} Email reads (HTTP 403; a later service outage returned 503, see the [Email record](../security/lab-email-validation.md)). Some write evidence predates the final approval, rate-limit, breaker and audit controls, which have offline coverage. The [gap campaign](../security/lab-gap-campaign-${scope.gap}.md) re-ran critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and device, investigation, PCAP and tag writes under those controls.`,
+    profiles: 'Which profile do I need?', profileTable: '| Profile | What it unlocks | Operations |',
+    default: 'default', read: 'Normal reads', sensitive: 'Reads that can return raw traffic, email content or audit data',
+    write: 'Reversible or configuration changes. `dryRun:true` returns a preview',
+    critical: 'Actions that can block traffic or change detection. Call with `dryRun:true` for a preview, then repeat with `confirm:true` and its `previewId`; by default you also accept a server dialog. Without `confirm:true` the call is refused (`confirmation_required`)',
+    selection: 'Set profiles with `DARKTRACE_PROFILES`. `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. See [Configuration](configuration.md#profiles).',
+    columns: 'Columns: **Tier** is the risk class from the API inventory. **Lab evidence** states whether, and how far, the operation passed a real-appliance test.',
+    contents: 'Contents', unavailable: 'Not available', summaryLabel: 'Literal MCP summaries (English):',
+    table: '| Tool | Method and path | Tier | Profile | Lab evidence | What it does |', reasonsTable: '| Method and path | Reason |',
+    yes: '✓', unvalidated: 'not lab-validated',
+    legend: '**✓** full evidence · **◐** partial evidence · **—** not lab-validated. Read each note for the exact scope.',
+    grouping: 'Each tool groups variants of the same API, such as a list and detail by ID; therefore there are fewer tools than operations.',
+    areas: Object.fromEntries([...AREAS.map(([name]) => [name, name]), ['Other', 'Other']]),
+    partial: LAB_PARTIAL, notes: LAB_NOT_VALIDATED_NOTE, reasons: NOT_AVAILABLE_REASON, descriptions: DESCRIPTIONS,
+  },
+  es: {
+    title: 'Referencia de herramientas', lead: 'Referencia de operaciones, perfiles y alcance exacto de la evidencia de laboratorio.',
+    nav: '[README](../README.md) · [Configuración](configuration.md) · [Primeros pasos](getting-started.md)',
+    generated: '> Se genera con `npm run docs:tools` a partir del catálogo API, los grupos y `src/tools/descriptions.ts`. No edites esta página a mano. Los resúmenes MCP reproducen el texto inglés que ve el cliente; las notas dinámicas de política se añaden en ejecución. Las descripciones de operaciones se traducen para quien lee esta guía.',
+    inventory: ({tools, available, total, spec, excluded, deprecated}) => `**${tools} herramientas** cubren **${available} operaciones ejecutables** de las ${total} del inventario API (Darktrace Threat Visualizer API ${spec}). Las otras ${excluded} [no están disponibles](#no-disponibles): ${excluded - deprecated} excluida (la acción de correo) y ${deprecated} obsoleta (\`GET /aianalyst/incidents\`).`,
+    evidence: ({validated, partial, email}, scope) => `**Evidencia de laboratorio.** ${validated} operaciones tienen evidencia de ${scope.appliances} appliances distintos Darktrace ${scope.version} (${scope.date}): lab A para ${scope.first} y lab B para la campaña de huecos ${scope.gap}. En ${partial} operaciones es parcial; la columna **Evidencia de laboratorio** indica su alcance. El resto figura *sin validar en laboratorio*: sigue la documentación API, pero no superó la prueba con un appliance real, incluidas las ${email} lecturas Email (HTTP 403; una caída posterior del servicio devolvió 503, según el [registro Email](security/lab-email-validation.md)). Parte de la evidencia de escritura es anterior a los controles finales de aprobación, límites, bloqueo y auditoría, cubiertos por pruebas offline. La [campaña de huecos](security/lab-gap-campaign-${scope.gap}.md) repitió flujos críticos (Antigena, Antigena manual, intel feed, subredes y borrado de etiquetas) y escrituras de dispositivos, investigaciones, PCAP y etiquetas con esos controles.`,
+    profiles: 'Qué perfil necesitas', profileTable: '| Perfil | Qué permite | Operaciones |',
+    default: 'predeterminado', read: 'Lecturas habituales', sensitive: 'Lecturas que pueden devolver tráfico sin procesar, contenido de correo o auditoría',
+    write: 'Cambios reversibles o de configuración. `dryRun:true` devuelve una vista previa',
+    critical: 'Acciones que pueden bloquear tráfico o cambiar la detección. Usa `dryRun:true` para obtener una vista previa; repite con `confirm:true` y su `previewId`. Por defecto, también debes aceptar un diálogo del servidor. Sin `confirm:true`, se rechaza la llamada (`confirmation_required`)',
+    selection: 'Selecciona los perfiles con `DARKTRACE_PROFILES`. `all`, o una lista con `sensitive` y `write`, solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. Consulta [Configuración](configuration.md#perfiles).',
+    columns: 'Columnas: **Riesgo** es la categoría del inventario API. **Evidencia de laboratorio** indica si la operación pasó una prueba con un appliance real y hasta dónde llegó la validación.',
+    contents: 'Índice', unavailable: 'No disponibles', summaryLabel: 'Resúmenes literales MCP (inglés):',
+    table: '| Herramienta | Método y ruta | Riesgo | Perfil | Evidencia de laboratorio | Qué hace |', reasonsTable: '| Método y ruta | Motivo |',
+    yes: '✓', unvalidated: 'sin validar en laboratorio',
+    legend: '**✓** evidencia completa · **◐** evidencia parcial · **—** sin validar en laboratorio. Consulta cada nota para conocer el alcance exacto.',
+    grouping: 'Cada herramienta agrupa variantes de la misma API, como una lista y su detalle por ID; por eso hay menos herramientas que operaciones.',
+    areas: { 'System and reference data': 'Sistema y referencias', Devices: 'Dispositivos', 'Model breaches': 'Model breaches', 'Models and metrics': 'Modelos y métricas', 'AI Analyst': 'AI Analyst', 'Autonomous Response (Antigena)': 'Respuesta autónoma (Antigena)', Tags: 'Etiquetas', 'Intel feed and subnets': 'Intel feed y subredes', 'Packet captures': 'Capturas de paquetes', 'Advanced Search': 'Advanced Search', 'Darktrace/Email': 'Darktrace/Email', Other: 'Otros' },
+    partial: {
+      post_antigena_manual: 'parcial: solo se ejecutaron bloqueos manuales `connection`; `pol`, `gpol` y `quarantineOutgoing` devolvieron HTTP 400 en un dispositivo sensor cliente; no se ejecutaron `quarantine` ni `quarantineIncoming`',
+      post_subnets: 'parcial: solo se ejecutaron cambios de `label` y `uniqueHostnames`',
+      post_intelfeed: 'parcial: se ejecutaron `addentry`, `addlist`, `expiry` (caducó a tiempo) y `removeentry`; se aceptó `hostname:true` sin lectura posterior; no se ejecutaron `iagn` ni `removeall`',
+      ...Object.fromEntries(['get_models', 'get_components', 'get_enums'].map(id => [id, 'parcial: pasa con `responsedata`; el listado completo devuelve `response_limit_exceeded`'])),
+    },
+    notes: {
+      ...Object.fromEntries(['delete_tags_tid', 'delete_tags_tid_entities_teid', 'delete_tags_entities'].map(id => [id, 'se aplicó (lectura posterior confirmada), pero el gateway devuelve HTTP 502; se informa `write_outcome_unknown`'])),
+      get_cves: 'el appliance devuelve HTTP 500 (solo Darktrace/OT)',
+      get_filtertypes: 'el appliance redirige (HTTP 302); nunca se siguen redirecciones',
+    },
+    reasons: {
+      get_aianalyst_incidents: 'Obsoleta en Darktrace. Usa `darktrace_list_ai_analyst_incidents`.',
+      post_agemail_api_ep_api_v1_0_emails_uuid_action: 'Excluida de esta versión: `darktrace_email_action` no se registra en ningún perfil. La firma y el esquema de esta acción no están validados; el token de laboratorio recibió HTTP 403. Habilitarla requiere un esquema revisado, una prueba de firma con un token con licencia Email y una nueva revisión del diseño.',
+    },
+    descriptions: DESCRIPTIONS_ES,
+  },
+};
+
+function sameKeys(left, right, path) {
+  const a = Object.keys(left).sort(), b = Object.keys(right).sort();
+  if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`Translation keys differ: ${path}`);
+  for (const key of a) {
+    if (typeof left[key] !== typeof right[key]) throw new Error(`Translation type differs: ${path}.${key}`);
+    if (typeof left[key] === 'object') sameKeys(left[key], right[key], `${path}.${key}`);
+    else if (typeof left[key] === 'string' && (!left[key] || !right[key])) throw new Error(`Empty translation: ${path}.${key}`);
+  }
+}
+sameKeys(MESSAGES.en, MESSAGES.es, 'messages');
+function required(object, key) {
+  if (!Object.hasOwn(object, key) || !object[key]) throw new Error(`Missing documentation translation: ${key}`);
+  return object[key];
+}
+const slug = label => label.toLowerCase().replace(/[^\p{L}\p{N} -]/gu, '').replaceAll(' ', '-');
+const validated = op => (op.validatedOn ?? []).length > 0;
+function labCell(op, messages) {
+  if (!validated(op)) return '— ' + messages.unvalidated + (Object.hasOwn(LAB_NOT_VALIDATED_NOTE, op.operationId) ? `: ${required(messages.notes, op.operationId)}` : '');
+  return Object.hasOwn(LAB_PARTIAL, op.operationId) ? `◐ ${required(messages.partial, op.operationId)}` : messages.yes;
+}
+
+export function render(lang = 'es') {
+  const m = required(MESSAGES, lang);
   const ops = catalogue.operations.map(op => ({ ...op, tool: toolGroups[op.operationId] ?? op.tool ?? null }));
-  // Only `implemented` operations are callable; `blocked` (the email action) and `excluded` are not.
   const available = ops.filter(op => op.tool && op.status === 'implemented');
   const excluded = ops.filter(op => !available.includes(op));
   const byTool = new Map();
@@ -175,62 +347,62 @@ export function render() {
   const nPartial = available.filter(op => validated(op) && LAB_PARTIAL[op.operationId]).length;
   const nEmail = available.filter(op => op.pathTemplate.startsWith('/agemail/')).length;
   const deprecated = excluded.filter(op => op.status === 'excluded').length;
-
-  const out = [];
-  out.push('# Tool reference', '');
-  out.push('[README](../README.md) · [Configuration](configuration.md) · [Getting started](getting-started.md)', '');
-  out.push('> Generated by `npm run docs:tools` from `src/api/catalogue.generated.json` and `src/api/tool-groups.json`. Do not edit by hand. English only.', '');
-  out.push(`**${byTool.size} tools** cover **${available.length} executable operations** out of the ${ops.length} in the API inventory (Darktrace Threat Visualizer API ${catalogue.specVersion ?? '6.1'}). The other ${excluded.length} are [not available](#not-available): ${excluded.length - deprecated} excluded (the email action) and ${deprecated} deprecated (\`GET /aianalyst/incidents\`).`, '');
-  out.push(`**Lab evidence.** ${nValidated} operations have evidence from two Darktrace 7.1.0 lab appliances (2026-10-06). For ${nPartial} of them the evidence is partial, and the **Lab** column says what was covered. The rest are marked *not lab-validated*: they follow the API documentation but did not pass against a real appliance. This includes all ${nEmail} Darktrace/Email reads (the lab token got HTTP 403). Some write evidence predates the final write controls (approval, rate limits, breaker, audit chain), which are covered by offline tests. The [gap campaign](security/lab-gap-campaign-1.1.1.md) re-ran the critical flows (Antigena, manual Antigena, intel feed, subnets, tag deletion) and the device, investigation, PCAP and tag writes under those controls.`, '');
-  out.push('## Which profile do I need?', '');
-  out.push('| Profile | What it unlocks | Operations |', '|---|---|---:|');
-  out.push(`| \`read\` (default) | Normal reads | ${counts.read} |`);
-  out.push(`| \`sensitive\` | Reads that can return raw traffic, email content or audit data | ${counts.sensitive} |`);
-  out.push(`| \`write\` | Reversible or configuration changes. \`dryRun:true\` returns a preview | ${counts.write} |`);
-  out.push(`| \`critical\` | Actions that can block traffic or change detection. Call with \`dryRun:true\` for a preview, then repeat with \`confirm:true\` and its \`previewId\`; by default you also accept a server dialog. Without \`confirm:true\` the call is refused (\`confirmation_required\`) | ${counts.critical} |`, '');
-  out.push('Set profiles with `DARKTRACE_PROFILES`. `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. See [Configuration](configuration.md#profiles).', '');
-  out.push('Columns: **Tier** is the risk class from the API inventory. **Lab** shows whether, and how far, the operation passed a real-appliance test.', '');
-
+  const out = [`# ${m.title}`, '', lang === 'es' ? '**Español** · [English](en/tools.md)' : '[Español](../tools.md) · **English**', '', m.nav, '', m.lead, '', m.generated, ''];
+  out.push(m.inventory({ tools: byTool.size, available: available.length, total: ops.length, spec: catalogue.specVersion ?? '6.1', excluded: excluded.length, deprecated }), '');
+  out.push(m.grouping, '');
+  out.push(m.evidence({ validated: nValidated, partial: nPartial, email: nEmail }, LAB_SCOPE), '');
+  out.push(`## ${m.profiles}`, '', m.profileTable, '|---|---|---:|');
+  for (const profile of Object.keys(counts)) out.push(`| \`${profile}\`${profile === 'read' ? ` (${m.default})` : ''} | ${required(m, profile)} | ${counts[profile]} |`);
+  out.push('', m.selection, '', m.columns, '');
   const areas = new Map();
   for (const tool of [...byTool.keys()].sort()) {
     const area = areaOf(tool);
     if (!areas.has(area)) areas.set(area, []);
     areas.get(area).push(tool);
   }
-  const order = [...AREAS.map(([a]) => a), 'Other'];
-  out.push('## Contents', '');
-  for (const area of order) if (areas.has(area)) out.push(`- [${area}](#${area.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/ /g, '-')})`);
-  out.push('- [Not available](#not-available)', '');
-
+  const order = [...AREAS.map(([name]) => name), 'Other'].filter(area => areas.has(area));
+  out.push(`## ${m.contents}`, '');
+  for (const area of order) { const label = required(m.areas, area); out.push(`- [${label}](#${slug(label)})`); }
+  out.push(`- [${m.unavailable}](#${slug(m.unavailable)})`, '');
   for (const area of order) {
-    if (!areas.has(area)) continue;
-    out.push(`## ${area}`, '');
-    out.push('| Tool | Method and path | Tier | Profile | Lab | What it does |', '|---|---|---|---|---|---|');
+    out.push(`## ${required(m.areas, area)}`, '', m.summaryLabel, '');
+    for (const tool of areas.get(area)) {
+      if (!summaries.has(tool)) throw new Error(`Missing summary: ${tool}`);
+      out.push(`- **\`${tool}\`**: ${summaries.get(tool)}`);
+    }
+    out.push('', m.table, '|---|---|---|---|---|---|');
     for (const tool of areas.get(area)) {
       const list = byTool.get(tool).sort((a, b) => a.pathTemplate.localeCompare(b.pathTemplate) || a.method.localeCompare(b.method));
-      for (const op of list) {
-        const desc = DESCRIPTIONS[op.operationId] ?? `${op.method} ${op.pathTemplate}`;
-        out.push(`| \`${tool}\` | \`${op.method} ${op.pathTemplate}\` | ${op.tier} | \`${profileOf(op)}\` | ${labCell(op)} | ${desc} |`);
-      }
+      for (const op of list) out.push(`| \`${tool}\` | \`${op.method} ${op.pathTemplate}\` | ${op.tier} | \`${profileOf(op)}\` | ${labCell(op, m)} | ${required(m.descriptions, op.operationId)} |`);
     }
-    out.push('');
+    out.push('', m.legend, '');
   }
-  out.push('## Not available', '');
-  out.push('| Method and path | Reason |', '|---|---|');
-  for (const op of excluded) out.push(`| \`${op.method} ${op.pathTemplate}\` | ${NOT_AVAILABLE_REASON[op.operationId] ?? 'Not exposed.'} |`);
+  out.push(`## ${m.unavailable}`, '', m.reasonsTable, '|---|---|');
+  for (const op of excluded) out.push(`| \`${op.method} ${op.pathTemplate}\` | ${required(m.reasons, op.operationId)} |`);
   out.push('');
   return out.join('\n');
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const text = render();
-  if (process.argv.includes('--check')) {
+  const args = process.argv.slice(2);
+  let lang = 'es';
+  let check = false;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--check') check = true;
+    else if (args[i] === '--lang' && ['es', 'en'].includes(args[i + 1])) lang = args[++i];
+    else throw new Error('Usage: generate-tools-doc.mjs [--lang es|en] [--check]');
+  }
+  const path = lang === 'es' ? 'docs/tools.md' : 'docs/en/tools.md';
+  const target = new URL(path, root);
+  const text = render(lang);
+  if (check) {
     let current = '';
     try { current = readFileSync(target, 'utf8'); } catch { /* missing counts as stale */ }
-    if (current !== text) { console.error('docs/tools.md is stale: run npm run docs:tools'); process.exit(1); }
-    console.log('docs/tools.md is up to date');
+    if (current !== text) { console.error(`${path} is stale: run npm run docs:tools`); process.exit(1); }
+    console.log(`${path} is up to date`);
   } else {
+    mkdirSync(new URL('.', target), { recursive: true });
     writeFileSync(target, text);
-    console.log('wrote docs/tools.md');
+    console.log(`wrote ${path}`);
   }
 }

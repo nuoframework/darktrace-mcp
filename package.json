@@ -13,7 +13,7 @@
     "dist/src/**/*.js",
     "dist/src/**/*.json",
     "README.md",
-    "README.es.md",
+    "README.en.md",
     "LICENSE",
     "SECURITY.md",
     "npm-shrinkwrap.json"
@@ -26,14 +26,15 @@
     "generate": "tsc -p tsconfig.generate.json && node dist/scripts/generate-catalogue.js",
     "build": "node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run docs:check",
     "test": "npm run build && node --test dist/test/**/*.test.js",
     "start": "node dist/src/index.js",
     "test:security": "node test/security/run-isolated.mjs",
     "release:prepare": "node scripts/prepare-release.mjs",
     "release:verify": "node scripts/verify-release.mjs",
-    "docs:tools": "node scripts/generate-tools-doc.mjs",
-    "pack:mcpb": "node scripts/build-mcpb.mjs"
+    "docs:tools": "node scripts/generate-tools-doc.mjs --lang es && node scripts/generate-tools-doc.mjs --lang en",
+    "pack:mcpb": "node scripts/build-mcpb.mjs",
+    "docs:check": "node scripts/generate-tools-doc.mjs --lang es --check && node scripts/generate-tools-doc.mjs --lang en --check"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.3.0",

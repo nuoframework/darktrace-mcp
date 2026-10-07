@@ -72,7 +72,8 @@ function main(){
    assert.equal(r.status,0,r.stderr||r.error?.message);validateConfig(JSON.parse(r.stdout),name);tomlCount++;
   }
  }
- const docs=['README.md','README.es.md','docs/clients.md','docs/configuration.md','docs/docker.md','docs/getting-started.md','docs/es/getting-started.md','docs/releases.md'];
+ const guides=['clients','configuration','docker','getting-started','releases','plugin-distribution','troubleshooting','install','install-matrix','update'];
+ const docs=['README.md','README.en.md',...guides.flatMap(name=>['docs/'+name+'.md','docs/en/'+name+'.md'])];
  for(const name of docs)lintMarkdown(readFileSync(new URL('../'+name,import.meta.url),'utf8'),name);
  console.log(JSON.stringify({jsonExamples:jsonCount,tomlExamples:tomlCount,documents:docs.length,syntax:true,launchPolicy:true,commandsExecuted:false,networkProbe:false}));
 }

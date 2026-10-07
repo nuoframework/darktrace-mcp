@@ -1,104 +1,122 @@
-**English** · [Español](es/troubleshooting.md)
+# Solución de problemas
 
-# Troubleshooting
+**Español** · [English](en/troubleshooting.md)
 
-[README](../README.md) · [Getting started](getting-started.md) · [Configuration](configuration.md) · [Clients](clients.md)
+[README](../README.md) · [Primeros pasos](getting-started.md) · [Configuración](configuration.md) · [Clientes](clients.md)
 
-Start with these two commands. Use the same environment your client uses.
+Diagnostica problemas de configuración, autenticación, reloj, TLS y permisos.
+
+<a id="troubleshooting"></a>
+
+Empieza con estos dos comandos, con el mismo entorno que usa tu cliente.
 
 ```sh
 darktrace-mcp --check-config
 darktrace-mcp test
 ```
 
-`--check-config` finds local problems (URL, token files, profiles). `test` calls `GET /status` and finds network, TLS, clock and token problems. Error messages never include token values.
+`--check-config` detecta problemas locales (URL, archivos de token, perfiles). `test` llama a `GET /status` y detecta problemas de red, TLS, reloj y tokens. Los mensajes de error nunca incluyen los tokens.
 
-## Quick table
+<a id="quick-table"></a>
 
-| Symptom | Likely cause | Go to |
+## Tabla rápida
+
+| Síntoma | Causa probable | Ver |
 |---|---|---|
-| Client shows the server as failed or "disconnected" | Wrong Node or entrypoint path, or a config error | [Server does not start](#server-does-not-start) |
-| `401`, `403`, "authentication failed" | Wrong token, token lacks permission, or clock skew | [Authentication errors](#authentication-errors) |
-| Works for a while, then `401` | Clock drift | [Clock skew](#clock-skew) |
-| "unable to verify the first certificate", "self-signed certificate" | Private CA not trusted | [TLS and private CA](#tls-and-private-ca) |
-| "token file must be owned by…", "mode 0600" | Token file permissions | [Token file permissions](#token-file-permissions) |
-| "proxy environment is not supported" | Proxy variables in your environment | [Proxy variables are rejected](#proxy-variables-are-rejected) |
-| A tool you expect is missing | Its profile is not enabled | [A tool is missing](#a-tool-is-missing) |
-| Critical action refused with `confirmation_required` or `preview_required` | `confirm:true` or the `previewId` from a `dryRun:true` preview is missing | [Writes and critical actions](#writes-and-critical-actions) |
-| Startup error naming `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` or `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (or `sensitive` + `write`), or `DARKTRACE_CRITICAL_APPROVAL=host`, without its acknowledgement | [Server does not start](#server-does-not-start) |
-| "response too large" | Result exceeds the size limit | [Large results](#large-results) |
-| `FAIL bad_request` (HTTP 400) on `GET /status` from `test`, or `setup` stops with HTTP 400 | The appliance accepts only the other signature date format | Rerun `darktrace-mcp setup` (it probes both), or set `DARKTRACE_DATE_FORMAT=spaced` (or `compact`); see [signature date format](configuration.md#signature-date-format) |
+| El cliente muestra el servidor como fallido o "disconnected" | Ruta de Node o del entrypoint incorrecta, o error de configuración | [El servidor no arranca](#el-servidor-no-arranca) |
+| `401`, `403`, "authentication failed" | Token incorrecto, token sin permiso o reloj desfasado | [Errores de autenticación](#errores-de-autenticación) |
+| Funciona un rato y luego da `401` | Deriva del reloj | [Desfase de reloj](#desfase-de-reloj) |
+| "unable to verify the first certificate", "self-signed certificate" | CA privada no reconocida | [TLS y CA privada](#tls-y-ca-privada) |
+| "token file must be owned by…", "mode 0600" | Permisos de los archivos de token | [Permisos de los archivos de token](#permisos-de-los-archivos-de-token) |
+| "proxy environment is not supported" | Variables de proxy en tu entorno | [Se rechazan las variables de proxy](#se-rechazan-las-variables-de-proxy) |
+| Falta una herramienta | Su perfil no está activado | [Falta una herramienta](#falta-una-herramienta) |
+| Acción crítica rechazada con `confirmation_required` o `preview_required` | Falta `confirm:true` o el `previewId` de una vista previa con `dryRun:true` | [Escrituras y acciones críticas](#escrituras-y-acciones-críticas) |
+| Error de arranque que nombra `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE` o `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL` | `all` (o `sensitive` + `write`), o `DARKTRACE_CRITICAL_APPROVAL=host`, sin su confirmación | [El servidor no arranca](#el-servidor-no-arranca) |
+| "response too large" | El resultado supera el límite | [Resultados grandes](#resultados-grandes) |
+| `FAIL bad_request` (HTTP 400) en `GET /status` con `test`, o `setup` se detiene con HTTP 400 | El appliance solo acepta el otro formato de fecha de la firma | Vuelve a ejecutar `darktrace-mcp setup` (prueba ambos) o define `DARKTRACE_DATE_FORMAT=spaced` (o `compact`); ver [formato de fecha de la firma](configuration.md#formato-de-fecha-de-la-firma) |
 
-## Server does not start
+<a id="server-does-not-start"></a>
 
-1. Run the exact `command` and `args` from your client config in a terminal, adding `--check-config`.
-2. Use absolute paths. Desktop apps do not see your shell `PATH`, so `node` alone may fail. Get the full path with `node -p 'process.execPath'`.
-3. Make sure you built the project: `dist/src/index.js` must exist (`npm run build`).
-4. Check the JSON or TOML syntax. On Windows, backslashes in JSON must be doubled.
-5. Profile `all`, or any list with both `sensitive` and `write`, starts only with `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. `DARKTRACE_CRITICAL_APPROVAL=host` with `critical` starts only with `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. Add the variable to the client's `env` only after reading what it accepts ([profiles](configuration.md#profiles), [human approval](configuration.md#human-approval)).
-6. Look at the client's MCP log. Server messages go to stderr. A configuration problem prints one line such as `{"event":"startup_error","reason":"could not read private token file"}`; `reason` names the setting, never its value. Other startup failures print only the event.
+## El servidor no arranca
 
-A server that seems "idle" is normal: it waits for the client.
+1. Ejecuta en una terminal el `command` y los `args` exactos de la configuración de tu cliente, añadiendo `--check-config`.
+2. Usa rutas absolutas. Las aplicaciones de escritorio no ven el `PATH` de tu shell, así que `node` a secas puede fallar. Obtén la ruta completa con `node -p 'process.execPath'`.
+3. Asegúrate de haber compilado: `dist/src/index.js` debe existir (`npm run build`).
+4. Revisa la sintaxis JSON o TOML. En Windows, las barras invertidas en JSON se escriben dobles.
+5. El perfil `all`, o cualquier lista con `sensitive` y `write`, solo arranca con `DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true`. `DARKTRACE_CRITICAL_APPROVAL=host` con `critical` solo arranca con `DARKTRACE_ACKNOWLEDGE_HOST_APPROVAL=true`. Añade la variable al `env` del cliente solo después de leer lo que aceptas ([perfiles](configuration.md#perfiles), [aprobación humana](configuration.md#aprobación-humana)).
+6. Mira el log MCP del cliente. Los mensajes del servidor van a stderr. Un problema de configuración escribe una línea como `{"event":"startup_error","reason":"could not read private token file"}`; `reason` nombra el ajuste, nunca su valor. Otros fallos de arranque solo muestran el evento.
 
-## Authentication errors
+Que el servidor parezca "parado" es normal: espera al cliente.
 
-Darktrace signs each request with your private token and the current time.
+<a id="authentication-errors"></a>
 
-| Check | How |
+## Errores de autenticación
+
+Darktrace firma cada petición con tu token privado y la hora actual.
+
+| Comprobación | Cómo |
 |---|---|
-| Public and private tokens are not swapped | Open each file. The public token goes in `..._PUBLIC_TOKEN_FILE` |
-| No extra spaces or Windows line endings in the files | `od -c public-token \| tail -3` should end with the token, optionally `\n`, not `\r\n` |
-| Token has API permission for what you ask | Check the token in Darktrace System Config |
-| Clock is correct | See [clock skew](#clock-skew) |
-| Signing format | If `test` still fails, try `DARKTRACE_DATE_FORMAT=spaced` or `DARKTRACE_QUERY_SIGNATURE_ENCODING=encoded`, one at a time |
+| Los tokens público y privado no están intercambiados | Abre cada archivo. El público va en `..._PUBLIC_TOKEN_FILE` |
+| No hay espacios ni finales de línea de Windows | `od -c public-token \| tail -3` debe terminar en el token y, opcionalmente, `\n`, no `\r\n` |
+| El token tiene permiso de API para lo que pides | Revisa el token en System Config de Darktrace |
+| El reloj es correcto | Consulta [desfase de reloj](#desfase-de-reloj) |
+| Formato de firma | Si `test` sigue fallando, prueba `DARKTRACE_DATE_FORMAT=spaced` o `DARKTRACE_QUERY_SIGNATURE_ENCODING=encoded`, de uno en uno |
 
-## Clock skew
+<a id="clock-skew"></a>
 
-Darktrace rejects signatures when your clock differs from the appliance by more than a few minutes.
+## Desfase de reloj
+
+Darktrace rechaza firmas si tu reloj difiere del appliance más de unos minutos.
 
 ```sh
 date -u
 ```
 
-Compare with the appliance time. Turn on automatic time sync (NTP) on the machine that runs the server. In Docker, the container uses the host clock.
+Compárala con la hora del appliance. Activa la sincronización automática (NTP) en el equipo que ejecuta el servidor. En Docker, el contenedor usa el reloj del host.
 
-## TLS and private CA
+<a id="tls-and-private-ca"></a>
 
-TLS verification is always on and cannot be turned off. If your appliance uses a certificate from a private CA:
+## TLS y CA privada
+
+La verificación TLS está siempre activa y no se puede desactivar. Si tu appliance usa un certificado de una CA privada:
 
 ```sh
-export NODE_EXTRA_CA_CERTS=/absolute/path/to/company-ca.pem
+export NODE_EXTRA_CA_CERTS=/ruta/absoluta/a/ca-empresa.pem
 darktrace-mcp test
 ```
 
-In a client config, add `NODE_EXTRA_CA_CERTS` to the `env` block. In Docker, mount the PEM file read-only and point `NODE_EXTRA_CA_CERTS` at the path inside the container.
+En la configuración de un cliente, añade `NODE_EXTRA_CA_CERTS` al bloque `env`. En Docker, monta el PEM en solo lectura y apunta `NODE_EXTRA_CA_CERTS` a su ruta dentro del contenedor.
 
-Also check that the URL hostname matches the certificate, and that the certificate has not expired.
+Comprueba también que el nombre de la URL coincide con el certificado y que no ha caducado.
 
-## Token file permissions
+<a id="token-file-permissions"></a>
 
-The server refuses token files that others could read.
+## Permisos de los archivos de token
+
+El servidor rechaza archivos de token que otros puedan leer.
 
 ```sh
 ls -l /absolute/private/darktrace/
 chmod 600 /absolute/private/darktrace/public-token /absolute/private/darktrace/private-token
 ```
 
-| Message mentions | Fix |
+| El mensaje menciona | Solución |
 |---|---|
-| mode | `chmod 600 <file>` |
-| owner | The file must belong to the user that runs the server. In Docker, to UID 1000 or the `--user` you set |
-| symlink | Point the variable at the real file, not a link |
-| size | One token per file, under 4 KiB |
-| relative path | Use an absolute path |
+| mode | `chmod 600 <archivo>` |
+| owner | El archivo debe ser del usuario que ejecuta el servidor. En Docker, del UID 1000 o del `--user` que indiques |
+| symlink | Apunta la variable al archivo real, no a un enlace |
+| size | Un token por archivo, menos de 4 KiB |
+| relative path | Usa una ruta absoluta |
 
-**Windows.** Native Windows file permissions cannot be checked the same way, so the server may refuse the files. Run the server inside WSL and use Linux paths there.
+**Windows.** En Windows nativo los permisos no se pueden comprobar igual, así que el servidor puede rechazar los archivos. Ejecuta el servidor dentro de WSL con rutas de Linux.
 
-**Docker Desktop.** On macOS and Windows, bind-mounted files show as owned by root inside the container, so `could not read ... token file` appears even with correct host permissions. Add `-e DARKTRACE_TOKEN_FILE_OWNER=root-or-current` to the `docker run` arguments (see [Docker guide](docker.md)) and run `--check-config` in the container. Never loosen the mode.
+**Docker Desktop.** En macOS y Windows los archivos montados aparecen como propiedad de root dentro del contenedor, así que verás `could not read ... token file` aunque los permisos en el host sean correctos. Añade `-e DARKTRACE_TOKEN_FILE_OWNER=root-or-current` a los argumentos de `docker run` (consulta la [guía de Docker](docker.md), en inglés) y ejecuta `--check-config` en el contenedor. Nunca relajes los permisos.
 
-## Proxy variables are rejected
+<a id="proxy-variables-are-rejected"></a>
 
-The server talks directly to the appliance and stops if it sees proxy settings: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (any case) or `NODE_USE_ENV_PROXY`. Remove them for this server only:
+## Se rechazan las variables de proxy
+
+El servidor se conecta directamente al appliance y se detiene si ve configuración de proxy: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (en cualquier forma) o `NODE_USE_ENV_PROXY`. Quítalas solo para este servidor:
 
 ```sh
 env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u NO_PROXY \
@@ -107,32 +125,40 @@ env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u NO_PROXY \
   darktrace-mcp --check-config
 ```
 
-If your network only allows traffic through a proxy, ask your network team for a direct route to the appliance. Do not change your system-wide proxy policy.
+Si tu red solo permite salir por un proxy, pide a tu equipo de red una ruta directa al appliance. No cambies la política de proxy de todo el sistema.
 
-## A tool is missing
+<a id="a-tool-is-missing"></a>
 
-Tools appear only when their profile is on. Check `DARKTRACE_PROFILES` in the client config, then restart the client.
+## Falta una herramienta
 
-| Missing tools | Add profile |
+Las herramientas solo aparecen si su perfil está activado. Revisa `DARKTRACE_PROFILES` en la configuración del cliente y reinícialo.
+
+| Herramientas que faltan | Añade el perfil |
 |---|---|
-| Advanced Search, email content, PCAP download, email audit | `sensitive` |
-| Acknowledge, comment, pin, tags, PCAP request, investigations | `write` |
-| Antigena actions, intel feed, subnet changes, delete tag | `critical` |
+| Advanced Search, contenido de correo, descarga de PCAP, auditoría de correo | `sensitive` |
+| Reconocer, comentar, fijar, etiquetas, solicitar PCAP, investigaciones | `write` |
+| Acciones de Antigena, intel feed, cambios de subredes, borrar etiqueta | `critical` |
 
-The Darktrace/Email action (`darktrace_email_action`) is excluded from this release and never appears. The deprecated `GET /aianalyst/incidents` is never available. Use `darktrace_list_ai_analyst_incidents`.
+La acción de Darktrace/Email (`darktrace_email_action`) queda excluida de esta versión y nunca aparece. El endpoint obsoleto `GET /aianalyst/incidents` nunca está disponible. Usa `darktrace_list_ai_analyst_incidents`.
 
-## Writes and critical actions
+<a id="writes-and-critical-actions"></a>
 
-- **Preview first.** Add `dryRun:true` to any write to see what would happen. Without it, an ordinary write runs (by default after your client's own permission prompt).
-- **Critical actions** need three steps: a `dryRun:true` preview that returns a `previewId` (valid 5 minutes, once); the same call repeated with `confirm:true` and that `previewId`; and, by default, your acceptance in the server's dialog. A call without `confirm:true` is refused with `confirmation_required`, and one without a `previewId` with `preview_required` (an expired, used or mismatched one gives `preview_expired`, `preview_used` or `preview_invalid`).
-- **All writes refused after failures.** Three failed or unknown writes in a row stop all writes until the server restarts. Reads keep working. On some appliances DELETE answers 502 after applying the change, which counts as unknown.
-- **Timeout or disconnect during a write.** The result is unknown. Check in Darktrace whether it happened before trying again. Writes are never retried automatically.
-- **Darktrace returns 403 on a write.** Your token lacks that permission. Profiles cannot override token permissions.
+## Escrituras y acciones críticas
 
-## Large results
+- **Primero la vista previa.** Añade `dryRun:true` a cualquier escritura para ver qué pasaría. Sin él, una escritura normal se ejecuta (por defecto, tras el aviso de permisos de tu cliente).
+- **Las acciones críticas** necesitan tres pasos: una vista previa con `dryRun:true` que devuelve un `previewId` (válido 5 minutos, una vez); la misma llamada repetida con `confirm:true` y ese `previewId`; y, por defecto, tu aceptación en el diálogo del servidor. Una llamada sin `confirm:true` se rechaza con `confirmation_required`, y una sin `previewId` con `preview_required` (uno caducado, usado o que no coincide da `preview_expired`, `preview_used` o `preview_invalid`).
+- **Todas las escrituras rechazadas tras fallos.** Tres escrituras fallidas o de resultado desconocido seguidas detienen todas las escrituras hasta reiniciar el servidor. Las lecturas siguen funcionando. En algunos appliances, DELETE responde 502 después de aplicar el cambio, y eso cuenta como desconocido.
+- **Tiempo agotado o desconexión durante una escritura.** El resultado es desconocido. Comprueba en Darktrace si se aplicó antes de repetir. Las escrituras nunca se reintentan solas.
+- **Darktrace devuelve 403 en una escritura.** Tu token no tiene ese permiso. Los perfiles no pueden saltarse los permisos del token.
 
-Responses over 2 MiB and tool output over 60,000 characters are refused. Narrow the request: shorter time range, a specific device, fewer fields.
+<a id="large-results"></a>
 
-## Still stuck
+## Resultados grandes
 
-Collect the output of `darktrace-mcp --check-config` and `darktrace-mcp --version`, remove any internal hostnames, and open an issue in the repository. Never share tokens or raw appliance data. Security problems: see [SECURITY.md](../SECURITY.md).
+Se rechazan respuestas de más de 2 MiB y salidas de más de 60.000 caracteres. Acota la petición: menos tiempo, un dispositivo concreto, menos campos.
+
+<a id="still-stuck"></a>
+
+## Si sigues atascado
+
+Recoge la salida de `darktrace-mcp --check-config` y `darktrace-mcp --version`, elimina nombres de host internos y abre una issue en el repositorio. Nunca compartas tokens ni datos del appliance. Problemas de seguridad: consulta [SECURITY.md](../SECURITY.md).
