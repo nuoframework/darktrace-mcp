@@ -51,6 +51,12 @@ Servidor MCP no oficial para Darktrace (Darktrace MCP server) que conecta la **D
 
 Para desinstalar: `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`. Muestra el plan y pide confirmación; `--dry-run` solo lo muestra y `--docker` incluye la imagen fijada.
 
+## Actualizar
+
+**En `main`, llega en 1.1.3; no está en npm 1.1.2.** Desde un [checkout compilado](docs/update.md), ejecuta `node dist/src/index.js update`.
+
+Con Node, verifica el registro npm fijo, las firmas y la procedencia cuando se anuncie, el `--check-config` de la nueva copia con tus ajustes y una petición firmada antes de mover las entradas. Conserva la versión anterior para `update --rollback`; `update --check` muestra versiones y notas, y `test` avisa de nuevas versiones. El servidor nunca busca actualizaciones. La [guía de actualización](docs/update.md) cubre plugins, `.mcpb`, Docker, desinstalación y límites. La actualización añade **22 pruebas: 311 funcionales y 1.150 subcasos de seguridad** ([evidencia](docs/security/release-pins-1.1.3.md)).
+
 ## Cómo funciona
 
 ```mermaid
@@ -183,33 +189,27 @@ Paquete npm: **`@nuoframework/darktrace-mcp`**; el nombre sin ámbito no es este
 
 ### Investigar model breaches de Darktrace con IA
 
-Consulta alertas, comentarios y contexto de dispositivos para priorizar una investigación SOC.
-Empieza con `read` y la [referencia de herramientas](docs/tools.md#model-breaches).
+Consulta alertas, comentarios y contexto de dispositivos para priorizar una investigación SOC. Empieza con `read` y la [referencia de herramientas](docs/tools.md#model-breaches).
 
 ### Bloquear una conexión con Antigena desde Claude con aprobación humana
 
-En Claude Code, previsualiza un bloqueo de conexión con Antigena / RESPOND; el aislamiento total no está validado.
-Usa `write,critical` y revisa la [aprobación humana](docs/configuration.md#aprobación-humana).
+En Claude Code, previsualiza un bloqueo de conexión con Antigena / RESPOND; el aislamiento total no está validado. Usa `write,critical` y revisa la [aprobación humana](docs/configuration.md#aprobación-humana).
 
 ### Consultar Advanced Search de Darktrace en lenguaje natural
 
-Pide a tu cliente que traduzca una pregunta de investigación a una consulta acotada de tráfico.
-Activa `sensitive` y consulta los [límites de Advanced Search](docs/tools.md#advanced-search).
+Pide a tu cliente que traduzca una pregunta de investigación a una consulta acotada de tráfico. Activa `sensitive` y consulta los [límites de Advanced Search](docs/tools.md#advanced-search).
 
 ### Automatizar triaje de AI Analyst
 
-Resume incidentes y eventos para priorizar el triaje; añadir comentarios requiere `write`.
-Consulta las [operaciones de AI Analyst](docs/tools.md#ai-analyst) y previsualiza los cambios.
+Resume incidentes y eventos para priorizar el triaje; añadir comentarios requiere `write`. Consulta las [operaciones de AI Analyst](docs/tools.md#ai-analyst) y previsualiza los cambios.
 
 ### Integrar Darktrace en Cursor, VS Code y Codex
 
-Conecta tu cliente con el asistente o una configuración manual de rutas y tokens privados.
-Sigue la [guía por cliente](docs/clients.md) y distingue 1.1.2 de las novedades de 1.1.3.
+Conecta tu cliente con el asistente o una configuración manual de rutas y tokens privados. Sigue la [guía por cliente](docs/clients.md) y distingue 1.1.2 de las novedades de 1.1.3.
 
 ### Servidor MCP local y seguro para SOC
 
-Ejecuta por stdio, limita los perfiles y revisa qué datos llegan al proveedor de tu cliente.
-Consulta el [modelo de seguridad y sus límites](docs/security.md) antes de usar producción.
+Ejecuta por stdio, limita los perfiles y revisa qué datos llegan al proveedor de tu cliente. Consulta el [modelo de seguridad y sus límites](docs/security.md) antes de usar producción.
 
 ## Contribuir, soporte y licencia
 

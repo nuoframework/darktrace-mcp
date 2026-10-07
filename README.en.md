@@ -51,6 +51,12 @@ An unofficial Darktrace MCP server connecting the **Darktrace Threat Visualizer 
 
 To uninstall: `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall`. It shows the plan and asks for confirmation; `--dry-run` only displays it and `--docker` includes the pinned image.
 
+## Update
+
+**On `main`, arriving in 1.1.3; not in npm 1.1.2.** From a [built checkout](docs/en/update.md), run `node dist/src/index.js update`.
+
+With Node, verifies the fixed npm registry, signatures and provenance when announced, the new copy's `--check-config` with your settings and one signed request before moving entries. Keeps the previous version for `update --rollback`; `update --check` shows versions and release notes, and `test` reports newer versions. The server never checks for updates. The [update guide](docs/en/update.md) covers plugins, `.mcpb`, Docker, uninstall and limitations. The update feature adds **22 tests: 311 functional tests and 1,150 security subcases** ([evidence](docs/security/release-pins-1.1.3.md)).
+
 ## How it works
 
 ```mermaid
@@ -183,33 +189,27 @@ npm package: **`@nuoframework/darktrace-mcp`**; the unscoped name is not this pr
 
 ### Investigate Darktrace model breaches with AI
 
-Query alerts, comments and device context to prioritize a SOC investigation.
-Start with `read` and the [tool reference](docs/en/tools.md#model-breaches).
+Query alerts, comments and device context to prioritize a SOC investigation. Start with `read` and the [tool reference](docs/en/tools.md#model-breaches).
 
 ### Block a connection with Antigena from Claude with human approval
 
-In Claude Code, preview an Antigena / RESPOND connection block; full device isolation is not validated.
-Use `write,critical` and review [human approval](docs/en/configuration.md#human-approval).
+In Claude Code, preview an Antigena / RESPOND connection block; full device isolation is not validated. Use `write,critical` and review [human approval](docs/en/configuration.md#human-approval).
 
 ### Query Darktrace Advanced Search in natural language
 
-Ask your client to translate an investigation question into a bounded traffic query.
-Enable `sensitive` and read the [Advanced Search limits](docs/en/tools.md#advanced-search).
+Ask your client to translate an investigation question into a bounded traffic query. Enable `sensitive` and read the [Advanced Search limits](docs/en/tools.md#advanced-search).
 
 ### Automate AI Analyst triage
 
-Summarize incidents and events for triage; adding comments requires `write`.
-See the [AI Analyst operations](docs/en/tools.md#ai-analyst) and preview changes.
+Summarize incidents and events for triage; adding comments requires `write`. See the [AI Analyst operations](docs/en/tools.md#ai-analyst) and preview changes.
 
 ### Integrate Darktrace with Cursor, VS Code and Codex
 
-Connect your client using the wizard or manual configuration with private token files and absolute paths.
-Follow the [client guide](docs/en/clients.md) and distinguish 1.1.2 from upcoming 1.1.3 features.
+Connect your client using the wizard or manual configuration with private token files and absolute paths. Follow the [client guide](docs/en/clients.md) and distinguish 1.1.2 from upcoming 1.1.3 features.
 
 ### A secure local MCP server for SOC teams
 
-Run over stdio, limit profiles and review which data reaches your client's provider.
-Read the [security model and its limits](docs/en/security.md) before production use.
+Run over stdio, limit profiles and review which data reaches your client's provider. Read the [security model and its limits](docs/en/security.md) before production use.
 
 ## Contributing, support and license
 

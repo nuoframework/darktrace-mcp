@@ -4,7 +4,7 @@
 
 Revisión propia y cierre de los hallazgos independientes de la documentación española predeterminada y su espejo inglés.
 
-Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `20293c0`, que incluye #20 (release 1.1.2), #21 (roles de revisión), #22 (plugin 1.1.2) y #18 (instalación). [Respuesta individual a los 27 hallazgos](https://github.com/nuoframework/darktrace-mcp/pull/19#issuecomment-6025877913). No es una nueva validación contra appliances ni una aprobación de despliegue.
+Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `a57d38a`, que incluye #20 (release 1.1.2), #21 (roles de revisión), #22 (plugin 1.1.2), #18 (instalación) y #23 (actualizaciones). [Respuesta individual a los 27 hallazgos](https://github.com/nuoframework/darktrace-mcp/pull/19#issuecomment-6025877913). No es una nueva validación contra appliances ni una aprobación de despliegue.
 
 ## Petición del propietario
 
@@ -14,12 +14,12 @@ Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `2
 | Sencillo y fácil | Tres pasos, un comando inicial, tabla y botones opcionales en un desplegable; 220 líneas por README |
 | Detallado | Herramientas y operaciones por área, cobertura completa/parcial/sin validar, límites PCAP y resultados DELETE desconocidos; fuentes enlazadas |
 | Profesional | Español de España con «tú», condición no oficial y sin afiliación, banner B, insignias, procedencia de marca y GIF conservados |
-| Español primero | `README.md` español, `README.en.md` inglés; once pares de guías manuales y referencia generada en `docs/en/`; movimientos mediante `git mv`, sin duplicados `*.es.md` |
+| Español primero | `README.md` español, `README.en.md` inglés; doce pares de guías manuales y referencia generada en `docs/en/`; movimientos mediante `git mv`, sin duplicados `*.es.md` |
 | Presentación | H1 primero, selector de idioma, navegación y resumen; anclas inglesas conservadas para enlaces entrantes |
 | Diagramas | Arquitectura, secuencia crítica con reversión condicionada y perfiles ramificados; tres Mermaid por idioma renderizados |
 | Email | 14 operaciones inventariadas, 13 lecturas sensibles ejecutables y acción excluida; cero validación en vivo, 403 y posterior caída 503 fechada |
 | Matrices | Clientes × sistema × instalación, runtime/firma y aprobación; 21 clientes documentados, con los 13 adaptadores de 1.1.3 identificados por fila |
-| Versiones | Ejemplos y botones fijados a la 1.1.2 publicada; las novedades de #18 están en `main` y llegan en 1.1.3 |
+| Versiones | Ejemplos y botones fijados a la 1.1.2 publicada; las novedades de #18 y #23 están en `main` y llegan en 1.1.3 |
 | Paridad | Tablas y bloques de ejemplos coinciden entre idiomas; las 77 filas generadas conservan nombre, método/ruta, riesgo y perfil |
 | Auditorías | Idioma inglés y resultados históricos conservados; índice español de todos los registros. #21 se hereda sin rehacer la redacción de atribuciones |
 | Política de seguridad | Resumen español de notificación privada; compromisos originales de respuesta en inglés intactos; enlaces ingleses y estado de distribución corregidos |
@@ -44,7 +44,7 @@ Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `2
 | Cifras históricas 230 / 1.150 | [Valores fijados 1.1.0](../security/release-pins-1.1.0.md), enlazados junto a la cifra; no se presentan como resultados actuales |
 | Plazos de notificación | [SECURITY.md](../../SECURITY.md): acuse privado en 14 días y corrección en un máximo de 60 desde confirmación salvo acuerdo; texto original preservado |
 
-## Validación final
+## Validación anterior a #23
 
 - `npm test`: **289 pruebas correctas, cero fallos, cero omisiones**.
 - `npm run test:security`: **1.150 subcasos, 1.147 correctos, cero fallos y 3 omisiones esperadas de bits de permisos en macOS**. Origen de producción: `38f2cef20454cb122cc879a2819f307e882b6d4b1275c9643206ced1e97db0c1`. Registro de esta ejecución conservado fuera del repositorio.
@@ -55,7 +55,7 @@ Creada el 2026-10-06; actualizada el 2026-10-07. Base final: `origin/main` en `2
 - `node scripts/install-badges.mjs --write`: ambos README ya actualizados a 1.1.2. El auxiliar reconoce el selector de idioma y el título español ampliado. Las pruebas de botones también pasan.
 - Seis diagramas renderizados con Mermaid CLI 11; la secuencia española se inspeccionó visualmente. Se comprobó que los diagramas finales coinciden con las entradas renderizadas.
 - `python3 scripts/demo/verify.py`: tres GIF y sus enlaces correctos. Los README cumplen el máximo de 220 líneas.
-- Once pares manuales y la referencia generada: mismo número de filas de tablas y bloques de ejemplos, H1 primero y marcadores ingleses correctos.
+- Doce pares manuales y la referencia generada: mismo número de filas de tablas y bloques de ejemplos, H1 primero y marcadores ingleses correctos.
 - `npm pack --dry-run --ignore-scripts --json`: ambos README nuevos incluidos, sin el antiguo nombre español. No equivale a una preparación completa de release.
 - `git diff --check`: correcto. Sin cambios propios en `src/`, `.github/` ni `claude-plugin/`.
 
@@ -67,7 +67,7 @@ El empaquetado, la vinculación al origen, los ejemplos y la validación de demo
 
 Con autorización expresa del propietario se actualizaron las referencias a README y su comprobación de presentación en los ejecutores aislados, el comprobador y fixture de distribución, los avisos en inglés y las pruebas de botones. No se debilitaron ni eliminaron aserciones. Las dos versiones siguen comprobándose.
 
-Los 27 hallazgos tienen respuesta individual en la PR. El punto 15 se resolvió por separado en #21 por decisión del propietario; los demás se incorporan aquí. Los registros de 1.1.0/1.1.1 conservan sus fechas y hashes; las funciones de `main` previstas para 1.1.3 no se atribuyen al paquete 1.1.2. La fusión queda a cargo del propietario, sin fusión automática.
+Los 27 hallazgos tienen respuesta individual en la PR. El punto 15 se resolvió por separado en #21 por decisión del propietario; los demás se incorporan aquí. Los registros de 1.1.0/1.1.1 conservan sus fechas y hashes; las funciones de `main` previstas para 1.1.3 no se atribuyen al paquete 1.1.2. El propietario controla la fusión; tras la aprobación activó la fusión automática y autorizó el rebase sobre #23.
 
 ## Claridad de la tabla de capacidades
 
@@ -88,3 +88,14 @@ Aplicados en ambos README: comando completo de Cursor para 1.1.2 (#28), aviso li
 Se conservan las 220 líneas por README agrupando insignias y etiquetas HTML, sin reducir contenido ni compactar los diagramas. Los tres enlaces de instalación y sus cargas codificadas permanecen idénticos. La comprobación HTTP de la entrada del Registry devuelve 404 («Server not found»); el enlace solicitado no se presenta como prueba de publicación.
 
 Validación de esta segunda pasada: 289 pruebas funcionales correctas; seguridad, 1.147 correctas, cero fallos y las tres omisiones esperadas de permisos macOS; lint y referencias generadas, ejemplos, enlaces locales (1.365 comprobados, cero rotos), GIF y seis renderizados Mermaid correctos. La API de renderizado Markdown de GitHub conserva el aviso literal como párrafo independiente en negrita y el comando completo de Cursor dentro del desplegable en ambos idiomas.
+
+
+## Rebase sobre #23 e integración de actualización
+
+Se conserva el código, CLI help, tests, workflow y evidencia de #23 sin cambios propios. El registro técnico `threat-model-updates.md` sigue en inglés y aparece en el índice español. `docs/update.md` pasa a español con traducción completa de los diez pasos, siete controles, modos, reversión, rutas por cliente, archivos, códigos de salida y solución de problemas; `docs/en/update.md` conserva íntegramente el contenido inglés de #23 con navegación adaptada. Se mantienen las anclas inglesas del original.
+
+Los README incorporan «Actualizar» / «Update», con 22 pruebas nuevas, 311 funcionales y 1.150 subcasos de seguridad, enlazados a los valores fijados de #23. Siguen en 220 líneas y conservan los seis diagramas y todos los avisos de la revisión. Las notas de actualización por cliente, la tabla de rutas y la ampliación de `uninstall` están en ambos idiomas. El validador de ejemplos incluye ahora las dos guías de actualización.
+
+Corrección de alcance de los ejemplos heredados: npm 1.1.2 no incluye `update`. La guía distingue `main` y la futura 1.1.3; usa `node dist/src/index.js update` desde un checkout compilado hasta la publicación, sin presentar `@1.1.2 update` como ejecutable. La procedencia se verifica cuando el registro la anuncia; se preservan los límites de identidad del workflow, imagen Docker, fallo entre clientes y modo `npx-latest` sin verificación.
+
+Validación tras el rebase: `npm test`, 311/311; `npm run test:security`, 1.147 correctas, cero fallos y tres omisiones esperadas macOS (1.150 total). Dos ejecuciones previas encontraron tiempos de espera de arranque en casos distintos; la ejecución final pasó completa sin cambiar límites ni aserciones. Registros conservados fuera del repositorio. Generación ES/EN, lint, 9 ejemplos JSON y 1 TOML en 22 documentos correctos; 1.462 enlaces locales, cero rotos. Paridad de títulos, tablas y bloques en todos los pares. Los seis diagramas y las cargas codificadas de instalación coinciden con la versión anterior ya renderizada; el render Markdown de GitHub conserva la nueva sección y sus enlaces.

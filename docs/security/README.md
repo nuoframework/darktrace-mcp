@@ -70,6 +70,7 @@ Los documentos originales se conservan **en inglés**, con sus fechas, alcance y
 | [security-test-plan-writes.md](security-test-plan-writes.md) | Plan de pruebas de seguridad para escrituras. |
 | [security-test-plan.md](security-test-plan.md) | Plan de pruebas de seguridad inicial. |
 | [supply-chain-checks.md](supply-chain-checks.md) | Controles de dependencias, análisis estático y cadena de suministro. |
+| [threat-model-updates.md](threat-model-updates.md) | Amenazas, controles y límites de actualización, reversión y modo siempre actualizado. |
 | [threat-model-writes.md](threat-model-writes.md) | Modelo de amenazas de escrituras y acciones críticas. |
 | [threat-model.md](threat-model.md) | Modelo de amenazas inicial y fronteras de confianza. |
 | [validated-consultations-docker-checkpoint.md](validated-consultations-docker-checkpoint.md) | Control Docker de las consultas validadas. |

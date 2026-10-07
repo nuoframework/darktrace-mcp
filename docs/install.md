@@ -81,13 +81,21 @@ La versión de los botones procede de `package.json`: después de compilar, `nod
 
 Windows nativo no permite demostrar que un token sea privado mediante la API de archivos de Node; el servidor rechaza esos archivos. Alternativas nativas sin ese compromiso: `.mcpb` de Claude Desktop (llavero), botón VS Code o enlace `config vscode` (almacén secreto), Docker Desktop, o WSL con el comando Linux. En otros clientes, `setup --inline-tokens-windows` escribe los valores en su configuración solo tras aceptación explícita. [Análisis y seguimiento](install-matrix.md#windows-native).
 
-## Comprobar y desinstalar
+<a id="comprobar-y-desinstalar"></a>
+
+## Comprobar, actualizar y desinstalar
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 test
 npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
-`test` hace un `GET /status` firmado e indica qué corregir. `uninstall` muestra un plan, pregunta una vez y borra entradas `darktrace` de los clientes admitidos por la versión instalada (con copias de seguridad), tokens y copias fijas. [Solución de problemas](troubleshooting.md).
+**Actualización en `main`, prevista para 1.1.3.** npm 1.1.2 no incluye `update` ni los avisos de actualización. Desde el [checkout compilado](update.md), ejecuta:
+
+```sh
+node dist/src/index.js update
+```
+
+`test` hace un `GET /status` firmado e indica qué corregir; en 1.1.3 también avisa si hay una versión más nueva. `update` verifica la última release (firmas del registro y procedencia cuando se anuncie, el `--check-config` de la nueva copia y una petición firmada) y solo entonces mueve todas las entradas, conservando la versión anterior para `update --rollback`; `update --check` solo informa. `uninstall` muestra un plan, pregunta una vez y borra entradas `darktrace` de los clientes admitidos por la versión instalada (con copias de seguridad), tokens y todas las copias fijas. [Guía de actualización](update.md) · [Solución de problemas](troubleshooting.md).
 
 El asistente usa ámbito de usuario. Antes de confiar en un archivo `.mcp.json` de proyecto, revisa sus comandos y variables: se ejecutan para quienes confían en ese repositorio.
