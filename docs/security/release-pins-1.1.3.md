@@ -75,3 +75,29 @@ The three macOS security skips are the existing setgid-mode cases. The Linux row
 - `src/cli/clients.ts`, `src/cli/entry.ts`, `src/cli/help.ts`, `src/cli/install.ts`, `src/cli/main.ts`, `src/cli/online.ts`, `src/cli/registry.ts` (new), `src/cli/setup.ts`, `src/cli/state.ts`, `src/cli/uninstall.ts`, `src/cli/update.ts` (new)
 - `test/cli/docker-setup.test.ts`, `test/cli/npx-install.test.ts`, `test/cli/sensitive-write.test.ts`, `test/cli/setup.test.ts`, `test/cli/update.test.ts` (new)
 - `test/security/evidence/2026-10-06T22-24-39-371Z.json`
+
+## Branch `nuoframework/review-update` (independent update-path review)
+
+This change is based on the PR #23 merge commit `a57d38a`. The package version remains `1.1.2`; no tag, publication or release was performed. It updates only installer source and update tests, plus the security report, release pins, CI assertions and the security receipt. These pins supersede the `feat/update-command` values above.
+
+### Pin recomputation
+
+Ran `npm run lint`, `npm run typecheck`, `npm test` and `npm run test:security` after the final source change. The production source binding covers `src/`; the runtime aggregate is SHA-256 of `JSON.stringify(runtimeHashes)` and was recomputed from `dist/src` with the CI function.
+
+Receipt: [2026-10-07T08-07-32-433Z.json](../../test/security/evidence/2026-10-07T08-07-32-433Z.json), SHA-256 `6395f725a91f0f0626aba029c2f48c7661fa23391d6a73c352b4faa6f0cb872f`. It records `receiptComplete:true`, build and test status 0, 1150 security subcases, 105 runtime files and source tree SHA-256 `f45fd82a3e068510236fae90c04e29cc7e37a359b24502f0c1a84f8a829b4564`. The measured runtime aggregate is `4e26a2fcdf3d8edb7b7954348d1dc15e3003f24ca1e6c869e97ca096f375e25a`; direct `dist/src` hashing matches the receipt.
+
+### CI pins (PR #23 baseline → independently reviewed tree)
+
+| Pin | Old → new | Locations |
+|---|---|---|
+| Functional tests / Linux passes | 311 → **315** | `.github/workflows/ci.yml` |
+| Security tests / Linux passes / receipt subcases | 1150 → 1150 (unchanged) | `.github/workflows/ci.yml` |
+| Production source tree SHA-256 | `05e326f5e96fb94a750d20c3caccb3bd7cea3da99401a002b616cc9373965b99` → **`f45fd82a3e068510236fae90c04e29cc7e37a359b24502f0c1a84f8a829b4564`** | `.github/workflows/ci.yml` |
+| Runtime files | 105 → **105** (unchanged) | `.github/workflows/ci.yml` assertion and `byte-binding.json` |
+| Runtime aggregate SHA-256 | `5493a69ac9014aa2f2a0f89b947b9c5119ae5531f596f32736bf7417e9dfea14` → **`4e26a2fcdf3d8edb7b7954348d1dc15e3003f24ca1e6c869e97ca096f375e25a`** | `.github/workflows/ci.yml` |
+| Full-API fixture SHA-256 | `86083b272bb9456f193427d9f4432817ae3b5e2a3ff8a30fcc68c72c25b66fb6` (unchanged) | `.github/workflows/ci.yml`, `scripts/verify-release.mjs` |
+| First-stable fixture SHA-256 | `6ddda2054c9c708d0516a90b7811eb0aba565016403953dace89d47bc89d213c` (unchanged) | `.github/workflows/ci.yml` |
+
+Four functional tests were added to `test/cli/update.test.ts` (release-note/deprecation sanitization, concurrent update exclusion, rollback-state integrity and GitHub fetch refusal under the TLS bypass environment). Existing update cases now also exercise hostile npm configuration/TLS environment, a tarball or lockfile integrity mismatch, missing required provenance, wrong repository/workflow identity, subject-digest and Rekor failures, partial-write recovery, an already-present stale Docker tag, and mismatch between the pulled image digest and the GitHub release record.
+
+Local results on macOS arm64 (Node 24.14.1, npm 11.11.0): functional **315 / 315 / 0 / 0**; security **1150 / 1147 / 0 / 3**. The three security skips are the existing setgid-mode cases. `node --test dist/test/cli/update.test.js` passed 26 / 26. The updated workflow pins will be checked by CI on the next run.

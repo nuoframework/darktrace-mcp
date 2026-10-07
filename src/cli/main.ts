@@ -136,7 +136,7 @@ export function defaultCliIo(): CliIo {
       // npm (update) and the new copy's --check-config: a working directory, a controlled environment, a longer timeout.
       exec: (command, args, options) => {
         const r = spawnSync(command, [...args], {
-          encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: options?.timeoutMs ?? 60_000, shell: false, maxBuffer: 16 * 1024 * 1024,
+          encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: options?.timeoutMs ?? 60_000, shell: false, maxBuffer: options?.maxBufferBytes ?? 16 * 1024 * 1024,
           ...(options?.cwd ? { cwd: options.cwd } : {}), ...(options?.env ? { env: options.env } : {}),
         });
         return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };

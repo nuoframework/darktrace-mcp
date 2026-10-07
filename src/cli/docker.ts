@@ -152,7 +152,7 @@ export function inspectImage(ctx: Pick<CliContext, 'run' | 'runDocker'>, dockerP
   // Prefer the digest of the requested repository (the default ghcr.io one), then the reference itself, then any.
   const repository = ref.name ?? IMAGE_REPOSITORY;
   const digest = (ref.kind === 'digest' && digests.includes(ref.value) ? ref.value : undefined) ??
-    digests.find((d) => d.slice(0, d.indexOf('@')) === repository) ?? digests[0];
+    digests.find((d) => d.slice(0, d.indexOf('@')) === repository);
   return { reference: ref.value, id, ...(digest === undefined ? {} : { digest }) };
 }
 
