@@ -51,6 +51,14 @@ export interface InstallSettings {
   readonly acknowledgeSensitiveWrite?: boolean;
   /** Signature date format the appliance accepts; emitted as DARKTRACE_DATE_FORMAT when known. */
   readonly dateFormat?: DateFormat;
+  /**
+   * Node runtime launcher. `node` (default) starts `nodePath entryPath`. `npx-latest` starts
+   * `npx -y @nuoframework/darktrace-mcp@latest`: the newest published release at every client start, fetched from
+   * the registry without the verification `update` performs. Chosen explicitly in `setup` (update mode 2).
+   */
+  readonly launcher?: 'node' | 'npx-latest';
+  /** Absolute `npx` path for the `npx-latest` launcher; a bare `npx` when it is not on PATH at setup time. */
+  readonly npxPath?: string;
 }
 
 export interface ServerEntry {
@@ -140,11 +148,9 @@ export function buildServerEntry(s: InstallSettings, inlineTokens?: { publicToke
       ? { DARKTRACE_PUBLIC_TOKEN: '<public token>', DARKTRACE_PRIVATE_TOKEN: '<private token>' }
       : { DARKTRACE_PUBLIC_TOKEN: inlineTokens.publicToken, DARKTRACE_PRIVATE_TOKEN: inlineTokens.privateToken })
     : { DARKTRACE_PUBLIC_TOKEN_FILE: s.publicTokenFile, DARKTRACE_PRIVATE_TOKEN_FILE: s.privateTokenFile };
-  return {
-    command: s.nodePath,
-    args: [s.entryPath],
-    env: { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles, ...formatEnv, ...ackEnv },
-  };
+  const env = { DARKTRACE_URL: s.url, ...tokenEnv, DARKTRACE_PROFILES: s.profiles, ...formatEnv, ...ackEnv };
+  if (s.launcher === 'npx-latest') return { command: s.npxPath ?? 'npx', args: ['-y', `${PACKAGE_NAME}@latest`], env };
+  return { command: s.nodePath, args: [s.entryPath], env };
 }
 
 /** Default entrypoint: dist/src/index.js next to this compiled module (dist/src/cli/entry.js). */

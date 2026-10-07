@@ -175,7 +175,7 @@ test('the URL prompt never suggests a saved appliance address', async () => {
   mkdirSync(join(box.home, '.config/darktrace-mcp'), { recursive: true });
   writeFileSync(join(box.home, '.config/darktrace-mcp/setup.json'),
     JSON.stringify({ version: 1, url: 'https://saved-host.example.internal', profiles: 'read', runtime: 'node', tokenMode: 'file' }));
-  const prompter = recorder(['', 'https://dt.example.com', '1', PUBLIC, PRIVATE, '1', 'none']);
+  const prompter = recorder(['', 'https://dt.example.com', '1', PUBLIC, PRIVATE, '1', '1', 'none']);
   const { out, io: setupIo } = io(box, prompter, stdinFrom(''));
   assert.equal(await runSetup({ dryRun: true, yes: false, tokensFromStdin: false, inlineTokens: false }, setupIo), 0, out.text());
   assert.equal(prompter.questions[0], 'Darktrace appliance URL (https://...): ');

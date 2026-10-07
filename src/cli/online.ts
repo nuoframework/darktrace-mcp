@@ -4,12 +4,15 @@ import { loadConfig } from '../config/load.js';
 import { ConfigValidationError, type DateFormat } from '../config/schema.js';
 import { createHttpClient } from '../client/httpClient.js';
 import { DarktraceApiError, type ApiErrorKind } from '../client/errors.js';
-import { readSavedSetup, tokenPaths } from './state.js';
+import { readSavedSetup, tokenPaths, type SavedSetup } from './state.js';
 import type { CliContext } from './clients.js';
 import { buildServerEntry } from './entry.js';
 import { findOnPath } from './fsutil.js';
-import { dockerDetail, dockerInstallHelp } from './docker.js';
+import { IMAGE_REPOSITORY, dockerDetail, dockerInstallHelp } from './docker.js';
+import { PACKAGE_NAME, isPackageVersion } from './install.js';
+import { compareVersions, resolveVersion } from './registry.js';
 import { createUi, type Ui } from './ui.js';
+import { VERSION } from '../server/createServer.js';
 
 const STATUS_OPERATION = Object.freeze({ operationId: 'get_status', method: 'GET', pathTemplate: '/status' } as const);
 
@@ -140,12 +143,31 @@ export function describeProbeFailure(o: Exclude<ProbeOutcome, { ok: true }>): st
 const failLine = (o: Exclude<ProbeOutcome, { ok: true }>): string => (o.kind === 'unknown' ? 'FAIL: the request could not be completed.' : `FAIL ${describeProbeFailure(o)}`);
 
 export interface OnlineTestOptions { readonly uid?: number; readonly gid?: number; readonly ui?: Ui }
-type OnlineContext = Pick<CliContext, 'home' | 'env' | 'probeStatus'> & Partial<Pick<CliContext, 'run' | 'runDocker' | 'platform'>>;
+type OnlineContext = Pick<CliContext, 'home' | 'env' | 'probeStatus'> & Partial<Pick<CliContext, 'run' | 'runDocker' | 'exec' | 'platform'>>;
 
 /**
- * Docker runtime saved by setup: run the image's offline `--check-config` with exactly the client entry's mounts, user and
- * hardening flags, but `--network=none`. This proves the container can read the token files. Returns an exit code on
- * failure, undefined when it passed or does not apply. The signed GET /status that follows runs from this host.
+ * Run an image's offline `--check-config` with exactly the client entry's mounts, user and hardening flags, but
+ * `--network=none`. This proves the container can read the token files. Shared by `test` (the saved image) and
+ * `update` (the freshly pulled image before any client entry changes). `detail` carries docker's first output line.
+ */
+export function containerCheckConfig(ctx: Pick<CliContext, 'home' | 'env'> & Partial<Pick<CliContext, 'run' | 'runDocker'>>, saved: SavedSetup, image: string,
+  options: { readonly uid: number; readonly gid: number; readonly platform: NodeJS.Platform; readonly dockerPath: string }): { ok: boolean; detail: string } {
+  const entry = buildServerEntry({
+    url: saved.url, profiles: saved.profiles, runtime: 'docker', tokenMode: 'file', ...tokenPaths(ctx), nodePath: '', entryPath: '',
+    dockerPath: options.dockerPath, image, uid: options.uid, gid: options.gid, hostPlatform: options.platform,
+    acknowledgeSensitiveWrite: saved.acknowledgeSensitiveWrite === true, ...(saved.dateFormat ? { dateFormat: saved.dateFormat } : {}),
+  });
+  const args = entry.args.map((a) => (a === '--network=bridge' ? '--network=none' : a));
+  const run = ctx.runDocker ?? ((command: string, argv: readonly string[]) => (ctx.run as CliContext['run'])(command, argv));
+  const result = run(entry.command, [...args, '--check-config']);
+  let ok: boolean;
+  try { ok = result.status === 0 && (JSON.parse(result.stdout.trim()) as { ok?: unknown }).ok === true; } catch { ok = false; }
+  return { ok, detail: dockerDetail(result) };
+}
+
+/**
+ * Docker runtime saved by setup: the container `--check-config` above. Returns an exit code on failure, undefined when
+ * it passed or does not apply. The signed GET /status that follows runs from this host.
  */
 function containerCheck(ctx: OnlineContext, out: Writable, options: OnlineTestOptions): number | undefined {
   if (['DARKTRACE_URL', 'DARKTRACE_BASE_URL', 'DARKTRACE_CONFIG_FILE'].some((k) => ctx.env[k] !== undefined)) return undefined;
@@ -158,18 +180,9 @@ function containerCheck(ctx: OnlineContext, out: Writable, options: OnlineTestOp
     out.write('FAIL the docker runtime needs a regular (non-root) POSIX user.\n');
     return 1;
   }
-  const entry = buildServerEntry({
-    url: saved.url, profiles: saved.profiles, runtime: 'docker', tokenMode: 'file', ...tokenPaths(ctx), nodePath: '', entryPath: '',
-    dockerPath, image: saved.image, uid: options.uid, gid: options.gid, hostPlatform: platform,
-    acknowledgeSensitiveWrite: saved.acknowledgeSensitiveWrite === true, ...(saved.dateFormat ? { dateFormat: saved.dateFormat } : {}),
-  });
-  const args = entry.args.map((a) => (a === '--network=bridge' ? '--network=none' : a));
-  const run = ctx.runDocker ?? ((command: string, argv: readonly string[]) => (ctx.run as CliContext['run'])(command, argv));
-  const result = run(entry.command, [...args, '--check-config']);
-  let ok: boolean;
-  try { ok = result.status === 0 && (JSON.parse(result.stdout.trim()) as { ok?: unknown }).ok === true; } catch { ok = false; }
-  if (!ok) {
-    out.write(`FAIL container --check-config with image ${saved.image}${dockerDetail(result)}. ` +
+  const check = containerCheckConfig(ctx, saved, saved.image, { uid: options.uid, gid: options.gid, platform, dockerPath });
+  if (!check.ok) {
+    out.write(`FAIL container --check-config with image ${saved.image}${check.detail}. ` +
       'Check that the image is present (`docker image inspect`), that the token files are owner-only (0600) and rerun `darktrace-mcp setup`.\n');
     return 1;
   }
@@ -177,6 +190,35 @@ function containerCheck(ctx: OnlineContext, out: Writable, options: OnlineTestOp
     'The signed GET /status below runs from this host with the same URL and token files.\n');
   return undefined;
 }
+
+/**
+ * One line for `test` / `doctor --online` after the appliance answered: the newest published version when it is newer
+ * than the installed one. Only here, never at server start; silent when npm or the registry is unavailable.
+ */
+export function updateAvailableLine(ctx: OnlineContext): string | undefined {
+  if (ctx.run === undefined) return undefined;
+  const saved = readSavedSetup(ctx);
+  if (saved?.updateMode === 'npx-latest') return undefined;
+  const installed = installedVersionOf(saved);
+  try {
+    // A short timeout: this is a courtesy line after the real check, never something `test` should wait for.
+    const latest = resolveVersion({ run: ctx.run, env: ctx.env, ...(ctx.exec ? { exec: ctx.exec } : {}), ...(ctx.platform ? { platform: ctx.platform } : {}) }, 'latest', 10_000);
+    if (compareVersions(latest.version, installed) <= 0) return undefined;
+    return `Update available: ${installed} -> ${latest.version}. Run: npx -y ${PACKAGE_NAME}@${latest.version} update   (release notes: darktrace-mcp update --check)`;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Version the client entries start when setup or update recorded it, or when the docker reference is a release tag. */
+export function recordedVersion(saved: SavedSetup | undefined): string | undefined {
+  if (saved?.installedVersion !== undefined) return saved.installedVersion;
+  const tag = saved?.imageReference !== undefined && saved.imageReference.startsWith(`${IMAGE_REPOSITORY}:`) ? saved.imageReference.slice(IMAGE_REPOSITORY.length + 1) : undefined;
+  return tag !== undefined && isPackageVersion(tag) ? tag : undefined;
+}
+
+/** `recordedVersion`, falling back to this CLI's version (what `test` compares against the registry). */
+export const installedVersionOf = (saved: SavedSetup | undefined): string => recordedVersion(saved) ?? VERSION;
 
 /**
  * One signed GET /status through the production client. When the appliance answers HTTP 400 and no date format was
@@ -196,6 +238,8 @@ export async function runOnlineTest(ctx: OnlineContext, out: Writable, options: 
   try { first = await prober(env); } finally { spinner.stop(); }
   if (first.ok) {
     out.write(good(`${okLine(first)}. URL, TLS and tokens are valid.\n`));
+    const update = updateAvailableLine(ctx);
+    if (update !== undefined) out.write(`${update}\n`);
     out.write(`Next: restart your AI client and ask: "list my Darktrace devices".\n`);
     return 0;
   }
@@ -226,6 +270,8 @@ export async function runOnlineTest(ctx: OnlineContext, out: Writable, options: 
   if (retry.ok) {
     out.write(good(`${okLine(retry)} using date format ${other}; set DARKTRACE_DATE_FORMAT=${other} in your client configuration ` +
       '(`darktrace-mcp setup` records it for you). URL, TLS and tokens are valid.\n'));
+    const update = updateAvailableLine(ctx);
+    if (update !== undefined) out.write(`${update}\n`);
     return 0;
   }
   out.write(bad(`${failLine(retry)}\n`));

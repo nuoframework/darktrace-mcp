@@ -9,13 +9,16 @@ import {
   normalizeProfiles, normalizeUrl, validateImage, vscodeInstallLink, vscodeInstallPayload, type InstallSettings, type Runtime,
 } from './entry.js';
 import { findOnPath, InstallerFileError } from './fsutil.js';
-import { existingFixedCopyEntry, isTransientInstall } from './install.js';
+import { existingFixedCopyEntry, isPackageVersion, isTransientInstall } from './install.js';
 import { PromptAbortedError } from './prompt.js';
 import { printResults, runSetup } from './setup.js';
-import { purgeSetup, readSavedSetup, tokenPaths } from './state.js';
+import { isUpdateMode, purgeSetup, readSavedSetup, tokenPaths, type UpdateMode } from './state.js';
 import { isDateFormat, runOnlineTest } from './online.js';
+import { fetchTextBounded } from './registry.js';
 import { runUninstall } from './uninstall.js';
+import { runUpdate } from './update.js';
 import { createUi, detectUi, type Ui } from './ui.js';
+import { VERSION } from '../server/createServer.js';
 import type { DateFormat } from '../config/schema.js';
 
 export class UsageError extends Error {
@@ -24,11 +27,13 @@ export class UsageError extends Error {
 
 interface Parsed { readonly command: string; readonly positional: string[]; readonly flags: Map<string, string[]> }
 
-const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image', '--date-format']);
-const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online', '--offline', '--pull', '--all', '--keep-copies', '--docker']);
+const VALUE_FLAGS = new Set(['--client', '--url', '--profiles', '--runtime', '--image', '--date-format', '--update-mode', '--version']);
+const BOOLEAN_FLAGS = new Set(['--dry-run', '--yes', '-y', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write', '--purge', '--insiders', '--online', '--offline', '--pull', '--all', '--keep-copies', '--docker',
+  '--check', '--rollback', '--allow-downgrade', '--json']);
 const ALLOWED: Readonly<Record<string, readonly string[]>> = {
   setup: ['--dry-run', '--yes', '-y', '--client', '--url', '--profiles', '--runtime', '--image', '--pull', '--tokens-from-stdin', '--inline-tokens-windows', '--acknowledge-sensitive-write',
-    '--date-format', '--offline'],
+    '--date-format', '--offline', '--update-mode'],
+  update: ['--check', '--rollback', '--version', '--allow-downgrade', '--dry-run', '--yes', '-y', '--json'],
   config: ['--url', '--profiles', '--runtime', '--image', '--insiders', '--acknowledge-sensitive-write', '--date-format'],
   remove: ['--client', '--dry-run', '--yes', '-y', '--purge', '--all', '--keep-copies', '--docker'],
   uninstall: ['--dry-run', '--yes', '-y', '--keep-copies', '--docker'],
@@ -85,6 +90,13 @@ function runtimeFlag(p: Parsed): Runtime | undefined {
   return value;
 }
 
+function updateModeFlag(p: Parsed): UpdateMode | undefined {
+  const value = one(p, '--update-mode');
+  if (value === undefined) return undefined;
+  if (!isUpdateMode(value)) throw new UsageError('--update-mode must be pinned or npx-latest');
+  return value;
+}
+
 function dateFormatFlag(p: Parsed): DateFormat | undefined {
   const value = one(p, '--date-format');
   if (value === undefined) return undefined;
@@ -121,6 +133,15 @@ export function defaultCliIo(): CliIo {
         });
         return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
       },
+      // npm (update) and the new copy's --check-config: a working directory, a controlled environment, a longer timeout.
+      exec: (command, args, options) => {
+        const r = spawnSync(command, [...args], {
+          encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: options?.timeoutMs ?? 60_000, shell: false, maxBuffer: 16 * 1024 * 1024,
+          ...(options?.cwd ? { cwd: options.cwd } : {}), ...(options?.env ? { env: options.env } : {}),
+        });
+        return { status: r.status, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
+      },
+      fetchText: (url) => fetchTextBounded(url, `darktrace-mcp-cli/${VERSION}`),
     },
     stdin: process.stdin, stdout: process.stdout, stderr: process.stderr, execPath: process.execPath,
     entryPath: defaultEntryPath(import.meta.url),
@@ -147,6 +168,7 @@ function configCommand(p: Parsed, io: CliIo): number {
     io.stderr.write(`${SENSITIVE_WRITE_NOTICE}\n`);
     throw new UsageError(`profiles "${profiles}" need --acknowledge-sensitive-write after reading the notice above (or use read-write / read-sensitive)`);
   }
+  const npxLatest = runtime === 'node' && saved?.updateMode === 'npx-latest';
   const settings: InstallSettings = {
     url: one(p, '--url') !== undefined ? normalizeUrl(one(p, '--url') as string) : saved?.url ?? 'https://darktrace.example.internal',
     profiles,
@@ -157,7 +179,9 @@ function configCommand(p: Parsed, io: CliIo): number {
     tokenMode: io.ctx.platform === 'win32' && runtime === 'node' ? 'inline' : 'file',
     ...tokenPaths(io.ctx),
     nodePath: io.execPath,
-    entryPath: fixedEntry ?? io.entryPath,
+    // Pinned entries start the path setup recorded (or this copy); npx-latest setups keep their launcher.
+    entryPath: (runtime === 'node' ? saved?.entryPath : undefined) ?? fixedEntry ?? io.entryPath,
+    ...(npxLatest ? { launcher: 'npx-latest' as const, npxPath: findOnPath('npx', io.ctx.env, io.ctx.platform) ?? 'npx' } : {}),
     ...(runtime === 'docker' ? {
       dockerPath: findOnPath('docker', io.ctx.env, io.ctx.platform) ?? '/absolute/path/to/docker',
       image: imageFlag !== undefined ? validateImage(imageFlag) : saved?.image ?? 'REPLACE_WITH_IMAGE_ID_FROM_DARKTRACE_MCP_SETUP',
@@ -168,7 +192,8 @@ function configCommand(p: Parsed, io: CliIo): number {
   const out = io.stdout;
   out.write(`# ${clientLabel(client)} — darktrace MCP server (no secrets below)\n`);
   if (saved === undefined && one(p, '--url') === undefined) out.write('# No saved setup: replace the placeholder URL, and create the token files (see `darktrace-mcp setup`).\n');
-  if (transient && fixedEntry === undefined) out.write('# Running from the npx cache: the path below is temporary. Run `darktrace-mcp setup` once to install a fixed copy.\n');
+  if (transient && fixedEntry === undefined && saved?.entryPath === undefined && !npxLatest) out.write('# Running from the npx cache: the path below is temporary. Run `darktrace-mcp setup` once to install a fixed copy.\n');
+  if (npxLatest) out.write('# Update mode "always latest" (saved by setup): the launcher fetches the newest release at every start.\n');
   if (needsSensitiveWriteAck(profiles)) out.write(SENSITIVE_WRITE_NOTICE.split('\n').map((line) => `# ${line}\n`).join('') + '# Acknowledged: the entry sets DARKTRACE_ACKNOWLEDGE_SENSITIVE_WRITE=true.\n');
   if (runtime === 'docker') {
     if (imageFlag === undefined && saved?.image !== undefined) {
@@ -233,7 +258,18 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
           profiles: one(p, '--profiles'), runtime: runtimeFlag(p), image: one(p, '--image'), pull: bool(p, '--pull'),
           tokensFromStdin: bool(p, '--tokens-from-stdin'), inlineTokens: bool(p, '--inline-tokens-windows'),
           acknowledgeSensitiveWrite: bool(p, '--acknowledge-sensitive-write'),
-          dateFormat: dateFormatFlag(p), offline: bool(p, '--offline'),
+          dateFormat: dateFormatFlag(p), offline: bool(p, '--offline'), updateMode: updateModeFlag(p),
+        }, io);
+      }
+      case 'update': {
+        if (p.positional.length > 0) throw new UsageError('update takes no positional arguments');
+        if (bool(p, '--check') && bool(p, '--rollback')) throw new UsageError('--check and --rollback are exclusive');
+        if (bool(p, '--json') && !bool(p, '--yes', '-y') && !bool(p, '--check') && !bool(p, '--dry-run')) throw new UsageError('--json needs --yes (or --check / --dry-run): no question can be asked on a JSON stream');
+        const version = one(p, '--version');
+        if (version !== undefined && !isPackageVersion(version)) throw new UsageError('--version must be an exact version such as 1.2.3');
+        return await runUpdate({
+          check: bool(p, '--check'), rollback: bool(p, '--rollback'), version, allowDowngrade: bool(p, '--allow-downgrade'),
+          dryRun: bool(p, '--dry-run'), yes: bool(p, '--yes', '-y'), json: bool(p, '--json'),
         }, io);
       }
       case 'config': return configCommand(p, io);
@@ -260,7 +296,8 @@ export async function runCli(argv: readonly string[], io: CliIo = defaultCliIo()
     if (error instanceof UsageError) { io.stderr.write(ui.fail(`Usage error: ${error.message}. Run --help.\n`) + `Next: darktrace-mcp --help lists every option of "${command}".\n`); return 2; }
     if (error instanceof PromptAbortedError) { io.stderr.write(ui.fail(`Setup error: ${error.message}\n`) + 'Next: rerun `darktrace-mcp setup` in an interactive terminal, or pass --yes with --url and --tokens-from-stdin.\n'); return 1; }
     if (error instanceof SetupInputError || error instanceof InstallerFileError) {
-      io.stderr.write(ui.fail(`Setup error: ${error.message}\n`) + `Next: fix the item above and rerun \`darktrace-mcp ${command}\` (add --dry-run to preview without writing).\n`); return 1;
+      const label = command === 'update' ? 'Update error' : 'Setup error';
+      io.stderr.write(ui.fail(`${label}: ${error.message}\n`) + `Next: fix the item above and rerun \`darktrace-mcp ${command}\` (add --dry-run to preview without writing).\n`); return 1;
     }
     const code = typeof (error as NodeJS.ErrnoException)?.code === 'string' ? ` (${(error as NodeJS.ErrnoException).code})` : '';
     io.stderr.write(ui.fail(`Unexpected installer error${code}; no secret was printed.\n`) + `Next: rerun \`darktrace-mcp ${command} --dry-run\` to inspect the planned changes, then report the error code.\n`);

@@ -71,11 +71,12 @@ npx -y @nuoframework/darktrace-mcp@1.1.2 setup --client cursor
 
 Native Windows cannot prove that a token file is owner-only (Node has no file-ACL API), so the server refuses token files there. These paths work natively without that trade-off: the Claude Desktop `.mcpb` (OS keychain), the VS Code badge or `config vscode` link (secret storage), Docker Desktop, or WSL with the Linux command. For any other client, `setup --inline-tokens-windows` writes the token values into that client's file after an explicit consent notice. The analysis and the follow-up are in the [install matrix](install-matrix.md#windows-native).
 
-## Check and remove
+## Check, update and remove
 
 ```sh
 npx -y @nuoframework/darktrace-mcp@1.1.2 test
+npx -y @nuoframework/darktrace-mcp@1.1.2 update
 npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall
 ```
 
-`test` performs one signed `GET /status` and says exactly what to fix. `uninstall` shows a plan, asks once, removes the `darktrace` entry from every client (backups kept), the stored tokens and the fixed copies. [Troubleshooting](troubleshooting.md).
+`test` performs one signed `GET /status` and says exactly what to fix (and mentions a newer version when one exists). `update` verifies the newest release (registry signatures and provenance, the new copy's `--check-config`, one signed request) and only then moves every client entry to it, keeping the previous version for `update --rollback`; `update --check` only reports. `uninstall` shows a plan, asks once, removes the `darktrace` entry from every client (backups kept), the stored tokens and every fixed copy. [Update guide](update.md) · [Troubleshooting](troubleshooting.md).

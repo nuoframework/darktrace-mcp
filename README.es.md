@@ -57,11 +57,20 @@ Investiga tu appliance Darktrace desde tu cliente MCP. Empieza en modo lectura y
 | Goose, LM Studio, Antigravity | `setup --client goose` / `lmstudio` / `antigravity` |
 | JetBrains Junie / AI Assistant | `setup --client junie`; AI Assistant: `config jetbrains` y pega en Settings \| Tools \| AI Assistant \| MCP |
 | Docker | `setup --runtime docker` descarga `ghcr.io/nuoframework/darktrace-mcp:1.1.2` (digest del índice publicado `sha256:fa261c2f7423fa79c66b0b5ddf74d6d8bb53b59a64608dda869959b43900d9ee`) y fija el ID de imagen local ([guía Docker (EN)](docs/docker.md)) |
+| Actualizar | `npx -y @nuoframework/darktrace-mcp@1.1.2 update` verifica la última versión y mueve todas las entradas; `update --rollback` vuelve atrás ([guía, EN](docs/update.md)) |
 | Desinstalar | `npx -y @nuoframework/darktrace-mcp@1.1.2 uninstall` quita todas las entradas (con copias de seguridad), los tokens y las copias fijas |
 
 Windows, fragmentos manuales, `test`, cuándo fijar la versión y qué hacen los botones: [página de instalación (EN)](docs/install.md) · [matriz (EN)](docs/install-matrix.md).
 
 </details>
+
+## Actualizar
+
+```sh
+npx -y @nuoframework/darktrace-mcp@1.1.2 update
+```
+
+Mueve todas las entradas de cliente a la última versión publicada solo después de verificarla: registro npm fijo, firmas del registro y atestación de procedencia (`npm audit signatures`), el `--check-config` de la copia nueva con tu configuración guardada y una petición firmada al appliance. La versión anterior se conserva para `update --rollback`; `update --check` muestra instalada frente a última con las notas de la versión, y `test` avisa cuando existe una más nueva. El servidor nunca comprueba actualizaciones por sí mismo. La [guía de actualización (EN)](docs/update.md) cubre los plugins (`claude plugin update darktrace-mcp@darktrace-mcp`, `codex plugin marketplace upgrade darktrace-mcp`), el `.mcpb`, Docker y `uninstall`.
 
 ## Mira cómo funciona
 

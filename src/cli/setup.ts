@@ -8,11 +8,11 @@ import {
 } from './entry.js';
 import { findOnPath, lstatOrUndefined } from './fsutil.js';
 import {
-  checkDockerDaemon, defaultImageReference, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ImageReference, type ResolvedImage,
+  IMAGE_REPOSITORY, checkDockerDaemon, defaultImageReference, dockerInstallHelp, inspectImage, parseImageReference, pullImage, type ImageReference, type ResolvedImage,
 } from './docker.js';
-import { entryOrigin, installFixedCopy, isTransientInstall, type EntryOrigin } from './install.js';
+import { describeEntry, entryOrigin, installFixedCopy, isPackageVersion, isTransientInstall, type EntryOrigin } from './install.js';
 import { createLinePrompter, createTtyPrompter, readStdinLines, type Prompter } from './prompt.js';
-import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles } from './state.js';
+import { readSavedSetup, setupDir, tokenFilesUsable, tokenPaths, writeSavedSetup, writeTokenFiles, type UpdateMode } from './state.js';
 import { describeProbeFailure, probeDateFormat, probeStatus, type DateFormatProbe } from './online.js';
 import { createUi, modeText, type Ui } from './ui.js';
 import { VERSION } from '../server/createServer.js';
@@ -38,6 +38,8 @@ export interface SetupArgs {
   readonly dateFormat?: DateFormat;
   /** Skip the appliance probe (no network at install time); the date format defaults to the saved one or compact. */
   readonly offline?: boolean;
+  /** How releases reach the clients: `pinned` (default, moved by `update`) or `npx-latest` launchers. Node runtime only. */
+  readonly updateMode?: UpdateMode;
 }
 
 export interface SetupIo {
@@ -181,6 +183,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       runtime = await askUntilValid(prompter, `Choice [${runtime === 'docker' ? 2 : 1}]: `, runtime === 'docker' ? '2' : '1',
         (v) => { if (v === '1' || v === 'node') return 'node' as const; if (v === '2' || v === 'docker') return 'docker' as const; throw new SetupInputError('choose 1 or 2'); }, io);
     }
+    if (args.updateMode === 'npx-latest' && runtime === 'docker') throw new SetupInputError('--update-mode npx-latest applies to the node runtime only; docker entries are always pinned to one image ID');
     let image: string | undefined;
     let dockerPath: string | undefined;
     let resolved: ResolvedImage | undefined;
@@ -222,9 +225,11 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       if (resolved !== undefined) write(io, describeImage(resolved));
     } else write(io, ui.ok(`Runtime: node, ${NODE_RUNTIME_LABEL[entryOrigin(io.entryPath, ctx)]} (${io.execPath}).\n`));
 
-    // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path.
+    // 2b. Bootstrapped through npx: register a fixed copy, never the transient cache path (pinned mode; decided in step 4 when interactive).
     let entryPath = io.entryPath;
-    if (runtime === 'node' && isTransientInstall(io.entryPath, ctx)) {
+    let updateMode: UpdateMode = args.updateMode ?? (runtime === 'node' ? saved?.updateMode : undefined) ?? 'pinned';
+    const transient = runtime === 'node' && isTransientInstall(io.entryPath, ctx);
+    if (transient && updateMode === 'pinned' && (args.updateMode !== undefined || !interactive)) {
       const copy = installFixedCopy(io.entryPath, ctx, args.dryRun);
       const verb = copy.status === 'copied' ? 'Installed a fixed copy of the package in'
         : copy.status === 'reused' ? 'Reusing the fixed copy in' : 'Would install a fixed copy of the package in';
@@ -292,6 +297,28 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     }
     write(io, ui.ok(`Profiles: ${profiles}${acknowledgeSensitiveWrite ? ' (risk acknowledged)' : ''}.\n`));
 
+    // 5d. Update mode (node runtime). Pinned entries move only through `update`; npx-latest entries fetch the newest
+    // release at every client start, without the verification and rollback that `update` provides.
+    if (runtime === 'node' && args.updateMode === undefined && interactive && prompter) {
+      write(io, 'Updates: how should new releases reach your clients?\n' +
+        `  1) pinned: stay on ${describeEntry(io.entryPath)?.version ?? 'this version'} until you run \`darktrace-mcp update\` (verified download, --check, --rollback)  [recommended]\n` +
+        '  2) always latest: entries start `npx -y @nuoframework/darktrace-mcp@latest` (newest release at every start; unverified, needs network each start)\n');
+      updateMode = await askUntilValid(prompter, `Choice [${updateMode === 'npx-latest' ? 2 : 1}]: `, updateMode === 'npx-latest' ? '2' : '1',
+        (v) => { if (v === '1' || v === 'pinned') return 'pinned' as const; if (v === '2' || v === 'npx-latest' || v === 'latest') return 'npx-latest' as const; throw new SetupInputError('choose 1 or 2'); }, io);
+      if (updateMode === 'pinned' && transient) {
+        const copy = installFixedCopy(io.entryPath, ctx, args.dryRun);
+        const verb = copy.status === 'copied' ? 'Installed a fixed copy of the package in' : copy.status === 'reused' ? 'Reusing the fixed copy in' : 'Would install a fixed copy of the package in';
+        write(io, ui.ok(`${verb} ${copy.dir}.\n`));
+        entryPath = copy.entryPath;
+      }
+    }
+    const npxPath = runtime === 'node' && updateMode === 'npx-latest' ? findOnPath('npx', ctx.env, ctx.platform) ?? 'npx' : undefined;
+    if (runtime === 'node') {
+      write(io, ui.ok(updateMode === 'npx-latest'
+        ? `Update mode: always latest (entries start ${npxPath} -y @nuoframework/darktrace-mcp@latest; no fixed copy; run setup again to pin).\n`
+        : 'Update mode: pinned (move the entries later with `darktrace-mcp update`; `update --check` shows what is new).\n'));
+    }
+
     if (tokenMode === 'inline' && tokens === undefined) throw new SetupInputError('tokens are required');
 
     // 5c. Signature date format. Appliances differ (some reject compact with HTTP 400), and the server never switches
@@ -319,6 +346,16 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
     const settings: InstallSettings = {
       url, profiles, runtime, tokenMode, ...files, nodePath: io.execPath, entryPath, acknowledgeSensitiveWrite, dateFormat,
       ...(runtime === 'docker' ? { dockerPath, image, uid: io.uid, gid: io.gid, hostPlatform: ctx.platform } : {}),
+      ...(npxPath !== undefined ? { launcher: 'npx-latest' as const, npxPath } : {}),
+    };
+    // What `update` needs later: the version the entries start and, for node, the exact entry path.
+    const installedVersion = runtime === 'docker'
+      ? (resolved?.reference.startsWith(`${IMAGE_REPOSITORY}:`) ? resolved.reference.slice(IMAGE_REPOSITORY.length + 1) : undefined)
+      : describeEntry(entryPath)?.version;
+    const installRecord = {
+      ...(runtime === 'node' && updateMode === 'npx-latest' ? { updateMode } : {}),
+      ...(installedVersion !== undefined && isPackageVersion(installedVersion) ? { installedVersion } : {}),
+      ...(runtime === 'node' && updateMode === 'pinned' ? { entryPath } : {}),
     };
     const entry = buildServerEntry(settings, tokenMode === 'inline' ? tokens : undefined);
     const displayEntry = buildServerEntry(settings);
@@ -331,7 +368,7 @@ export async function runSetup(args: SetupArgs, io: SetupIo): Promise<number> {
       if (tokens && tokenMode === 'file') writeTokenFiles(ctx, tokens.publicToken, tokens.privateToken);
       writeSavedSetup(ctx, { version: 1, url, profiles, runtime, tokenMode, ...(image ? { image } : {}),
         ...(resolved ? { imageReference: resolved.reference, ...(resolved.digest ? { imageDigest: resolved.digest } : {}) } : {}),
-        ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}), dateFormat });
+        ...(acknowledgeSensitiveWrite ? { acknowledgeSensitiveWrite: true as const } : {}), dateFormat, ...installRecord });
       write(io, ui.ok(`Saved settings in ${setupDir(ctx)}${tokens && tokenMode === 'file' ? ' (token files are owner-only, mode 0600)' : ''}.\n`));
     }
 
