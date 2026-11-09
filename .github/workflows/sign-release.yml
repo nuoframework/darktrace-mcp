@@ -25,7 +25,7 @@ jobs:
       contents: write # upload the signature bundles as release assets
       id-token: write # Sigstore keyless signing with this workflow's identity
     steps:
-      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
       - name: Download the release assets and verify them against SHA256SUMS
         env:
           GH_TOKEN: ${{ github.token }}
